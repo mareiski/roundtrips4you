@@ -21,7 +21,7 @@
             return {
                 countries: [
                     {
-                        title: 'Italien',
+                        title: 'Italien', 
                         imageUrl: 'venice.jpg',
                         link: 'roundtripdetails.html'
                     },
