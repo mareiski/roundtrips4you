@@ -242,6 +242,16 @@ font-awesome-icon {
   .header-page-link {
     display: none !important;
   }
+  footer {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+  footer .right-footer-col {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
 }
 @media only screen and (min-width: 0px) and (max-width: 719px) {
   .center-col img {

@@ -242,6 +242,16 @@ font-awesome-icon {
   .header-page-link {
     display: none !important;
   }
+  footer {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+  footer .right-footer-col {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
 }
 @media only screen and (min-width: 0px) and (max-width: 719px) {
   .center-col img {
@@ -303,6 +313,7 @@ font-awesome-icon {
   background-color: white;
   display: flex;
   justify-content: center;
+  text-align: center;
 }
 .box-seperator-placholder {
   height: 110px;
@@ -364,18 +375,6 @@ font-awesome-icon {
   background-position: center;
   background-size: cover;
 }
-@media only screen and (min-width: 720px) and (max-width: 959px), only screen and (min-width: 0px) and (max-width: 719px) {
-  .card-container {
-    flex-wrap: wrap;
-    padding: 10px 0 30px 0;
-  }
-  .card-container .card-wrap {
-    justify-content: center !important;
-  }
-  .card-container .card-wrap .card {
-    margin-bottom: 30px;
-  }
-}
 .section-img {
   background: url('../assets/venice.jpg') center fixed;
   background-size: cover;
@@ -396,4 +395,22 @@ font-awesome-icon {
   margin-bottom: 100px;
   padding: 0 10% 0 10%;
   font-size: 30px;
+}
+@media only screen and (min-width: 720px) and (max-width: 959px), only screen and (min-width: 0px) and (max-width: 719px) {
+  .card-container {
+    flex-wrap: wrap;
+    padding: 10px 0 30px 0;
+  }
+  .card-container .card-wrap {
+    justify-content: center !important;
+  }
+  .card-container .card-wrap .card {
+    margin-bottom: 30px;
+  }
+  #MainImgPlacholder .main-qoute {
+    font-size: 30px;
+  }
+  .section-img-placeholder {
+    font-size: 20px;
+  }
 }
