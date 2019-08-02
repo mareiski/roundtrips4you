@@ -194,7 +194,7 @@ font-awesome-icon {
   stroke-dashoffset: -83px;
 }
 #Header .bottom-row {
-  height: 120px;
+  height: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -217,7 +217,10 @@ font-awesome-icon {
 #Header.active {
   height: 200px;
 }
-#Header.active .mobile-header-page-link {
+#Header.active .bottom-row {
+  height: 120px;
+}
+#Header.active .bottom-row .mobile-header-page-link {
   opacity: 1;
 }
 #HeaderPlaceholder {
@@ -246,6 +249,9 @@ font-awesome-icon {
     flex-direction: column;
     text-align: center;
     align-items: center;
+  }
+  footer .left-footer-col {
+    width: auto;
   }
   footer .right-footer-col {
     flex-direction: column;

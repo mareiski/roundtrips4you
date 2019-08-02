@@ -36,6 +36,7 @@
     <Content Include="src\assets\gebeco.png" />
     <Content Include="src\assets\travel-background.jpg" />
     <Content Include="src\pages\about\App.vue" />
+    <Content Include="src\pages\home\App.vue" />
     <Content Include="src\pages\roundtripDetails\App.vue" />
     <Content Include="src\pages\roundtrips\App.vue" />
     <Content Include="src\styles\home.css" />
@@ -70,7 +71,6 @@
     <Content Include="public\favicon.ico" />
     <Content Include="public\index.html" />
     <Content Include="public\textLogo.png" />
-    <Content Include="src\pages\home\App.vue" />
     <Content Include="package.json" />
     <Content Include="README.md" />
     <Content Include="src\assets\goldenGate.jpg" />
@@ -120,9 +120,6 @@
     <Compile Include="src\pages\home\main.js" />
     <Compile Include="src\pages\roundtripDetails\main.js" />
     <Compile Include="src\pages\roundtrips\main.js" />
-    <Compile Include="vue.config.js">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />

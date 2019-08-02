@@ -1,6 +1,6 @@
 <template>
     <div class="roundtrips">
-        <h2>{{country}}: {{roundtrips.length}} Rundreisen gefunden</h2>
+        <h2 class="topic">{{country}}: {{roundtrips.length}} Rundreisen gefunden</h2>
         <div id="CardBackgroundImg"></div>
         <div id="RoundtripCardBackgroundImgPlaceholder">
             <div class="roundtrip-card-container" v-for="roundtrip in roundtrips" :key="roundtrip">
@@ -69,6 +69,20 @@
                     },
                     {
                         id: '1',
+                        title: 'Venedig entdecken',
+                        category: 'einblick',
+                        imageUrl: 'venice.jpg',
+                        stars: 5,
+                        location: 'Italien',
+                        days: '10',
+                        hotels: '5',
+                        description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
+                        tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
+                        advertiser: 'gebeco',
+                        price: '330'
+                    },
+                     {
+                        id: '3',
                         title: 'Venedig entdecken',
                         category: 'einblick',
                         imageUrl: 'venice.jpg',

@@ -5,11 +5,22 @@
     align-content: center;
     align-items: center;
 
+    .topic {
+        background-color: white;
+        padding: 20px 0 20px 0;
+        margin: 0;
+        position: absolute;
+        width: 100%;
+        left: 0;
+        top: 80px;
+    }
+
     #CardBackgroundImg {
         background: url('../assets/travel-background.jpg') fixed center;
         width: 100%;
         height: 100vh;
-        position: absolute;
+        position: fixed;
+        top: 0;
         left: 0;
         background-size: cover;
         z-index: -2;
@@ -18,10 +29,12 @@
 
     #CardBackgroundImgPlaceholder, #RoundtripCardBackgroundImgPlaceholder {
         width: 100%;
-        height: 100vh;
+        min-height: 100vh;
         z-index: -1;
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 72px;
 
         .country-card-container {
             width: 470px;
@@ -84,6 +97,7 @@
                 transition: 0.6s;
                 background-color: white;
                 justify-content: space-between;
+               
 
                 &:hover {
                     transform: scale(1.03);
@@ -181,6 +195,45 @@
     }
 
     #RoundtripCardBackgroundImgPlaceholder {
-        flex-direction:column;
+        flex-direction: column;
     }
+}
+
+@media @tablet, @mobile {
+    .roundtrip-card {
+        flex-direction: column;
+        align-items: center;
+        height: auto !important;
+
+        & > div {
+            width: 100% !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        .card-center-col {
+            .card-bottom-row {
+                flex-wrap:wrap;
+                justify-content:center;
+
+                .card-tag {
+                    margin:5px !important;
+                }
+            }
+        }
+
+        .card-right-col {
+            padding-top: 20px;
+            display: flex !important;
+            flex-direction: row !important;
+
+            .card-row {
+                padding-right: 10px;
+            }
+        }
+    }
+
+    .roundtrip-card-container {
+        height:auto !important;
+    }   
 }

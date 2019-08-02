@@ -194,7 +194,7 @@ font-awesome-icon {
   stroke-dashoffset: -83px;
 }
 #Header .bottom-row {
-  height: 120px;
+  height: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -217,7 +217,10 @@ font-awesome-icon {
 #Header.active {
   height: 200px;
 }
-#Header.active .mobile-header-page-link {
+#Header.active .bottom-row {
+  height: 120px;
+}
+#Header.active .bottom-row .mobile-header-page-link {
   opacity: 1;
 }
 #HeaderPlaceholder {
@@ -247,6 +250,9 @@ font-awesome-icon {
     text-align: center;
     align-items: center;
   }
+  footer .left-footer-col {
+    width: auto;
+  }
   footer .right-footer-col {
     flex-direction: column;
     text-align: center;
@@ -263,11 +269,21 @@ font-awesome-icon {
   align-content: center;
   align-items: center;
 }
+.roundtrips .topic {
+  background-color: white;
+  padding: 20px 0 20px 0;
+  margin: 0;
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 80px;
+}
 .roundtrips #CardBackgroundImg {
   background: url('../assets/travel-background.jpg') fixed center;
   width: 100%;
   height: 100vh;
-  position: absolute;
+  position: fixed;
+  top: 0;
   left: 0;
   background-size: cover;
   z-index: -2;
@@ -276,10 +292,12 @@ font-awesome-icon {
 .roundtrips #CardBackgroundImgPlaceholder,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   z-index: -1;
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 72px;
 }
 .roundtrips #CardBackgroundImgPlaceholder .country-card-container,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .country-card-container {
@@ -465,4 +483,34 @@ font-awesome-icon {
 }
 .roundtrips #RoundtripCardBackgroundImgPlaceholder {
   flex-direction: column;
+}
+@media only screen and (min-width: 720px) and (max-width: 959px), only screen and (min-width: 0px) and (max-width: 719px) {
+  .roundtrip-card {
+    flex-direction: column;
+    align-items: center;
+    height: auto !important;
+  }
+  .roundtrip-card > div {
+    width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  .roundtrip-card .card-center-col .card-bottom-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .roundtrip-card .card-center-col .card-bottom-row .card-tag {
+    margin: 5px !important;
+  }
+  .roundtrip-card .card-right-col {
+    padding-top: 20px;
+    display: flex !important;
+    flex-direction: row !important;
+  }
+  .roundtrip-card .card-right-col .card-row {
+    padding-right: 10px;
+  }
+  .roundtrip-card-container {
+    height: auto !important;
+  }
 }

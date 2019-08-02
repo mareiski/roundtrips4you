@@ -1,6 +1,6 @@
 <template>
     <div class="roundtrips">
-        <h2>Alle Rundreisen auf einen Blick</h2>
+        <h2 class="topic">Alle Rundreisen auf einen Blick</h2>
         <div id="CardBackgroundImg"></div>
         <div id="CardBackgroundImgPlaceholder">
             <div class="country-card-container" v-for="country in countries" :key="country">
