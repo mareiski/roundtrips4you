@@ -47,7 +47,18 @@
 </style>
 <script>
     export default {
-        name: 'Home',
+        data() {
+            return {
+                colors: [
+                    'primary',
+                    'secondary',
+                    'yellow darken-2',
+                    'red',
+                    'orange',
+                ]
+            }
+        },
+        name: 'Home'
     };
 </script>
 

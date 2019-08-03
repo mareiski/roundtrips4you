@@ -62,7 +62,7 @@
                         location: 'Italien',
                         days: '10',
                         hotels: '5',
-                        description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
+                        description: 'Entdecke Venedig auf einer der schï¿½nsten Routen Italiens.',
                         tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
                         advertiser: 'gebeco',
                         price: '330'
@@ -76,7 +76,7 @@
                         location: 'Italien',
                         days: '10',
                         hotels: '5',
-                        description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
+                        description: 'Entdecke Venedig auf einer der schï¿½nsten Routen Italiens.',
                         tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
                         advertiser: 'gebeco',
                         price: '330'
@@ -90,7 +90,7 @@
                         location: 'Italien',
                         days: '10',
                         hotels: '5',
-                        description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
+                        description: 'Entdecke Venedig auf einer der schï¿½nsten Routen Italiens.',
                         tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
                         advertiser: 'gebeco',
                         price: '330'
