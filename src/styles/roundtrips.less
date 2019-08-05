@@ -76,117 +76,216 @@
             }
         }
 
-
-
-        .roundtrip-card-container {
+        .filter-container {
+            width: 20%;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            align-items: center;
-            height: 280px;
-            margin-bottom: 10px;
-            padding-top: 20px;
+            justify-content: flex-start;
+            height: 100%;
 
-            .roundtrip-card {
-                width: 90%;
-                max-width: 1200px;
-                height: 230px;
-                display: flex;
+
+            .fliter-card {
+                height: 100%;
                 padding: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
                 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-                transition: 0.6s;
+                margin-bottom: 20px;
                 background-color: white;
-                justify-content: space-between;
-               
 
-                &:hover {
-                    transform: scale(1.03);
+                *:not(a) {
+                    margin: 0 0 10px 0;
                 }
 
-                .card-left-col {
-                    width: 250px;
-                    display: flex;
-                    justify-content: center;
-                    flex-direction: column;
-
-                    .card-image {
-                        height: 230px;
-                        width: 230px;
-                        background-position: center;
-                        background-size: cover;
-                    }
+                input, select {
+                    font-size: 20px;
                 }
 
-                .card-center-col {
-                    width: 60%;
-                    display: flex;
-                    flex-direction: column;
+                h2 {
                     text-align: left;
-                    align-items: flex-start;
-                    justify-content: space-between;
-
-                    .card-row, .card-bottom-row {
-                        display: flex;
-
-                        * {
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
-                            padding-right: 5px;
-                        }
-
-                        .star {
-                            color: gold;
-                        }
-
-                        .marker {
-                            padding-left: 10px;
-                        }
-
-                        .card-tag, .card-category {
-                            color: white;
-                            background-color: @primary-gray;
-                            border-radius: 20px;
-                            padding: 2px 5px 2px 5px;
-                            height: 25px;
-                            margin: auto;
-                            margin-right: 5px;
-                        }
-
-                        .card-category {
-                            text-transform: capitalize;
-                        }
-
-                        .card-days, .card-hotels {
-                            font-family: @primary-number-font;
-                        }
-                    }
+                    color: @primary-orange;
                 }
 
-                .card-right-col {
-                    width: 13%;
+                a {
+                    border-color: @primary-orange;
+                    background-color: transparent;
+                    color: @primary-orange;
+                    font-size: 20px;
+                }
+
+                select {
+                    -moz-appearance: none;
+                    -webkit-appearance: none;
+                    appearance: none;
+                    border: solid @primary-gray 1px;
+                    width: 100%;
+                    height: 40px;
+                    padding-left: 10px;
+                    color: black;
+                    font-size: 16px;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    position: relative;
+
+                    &::-ms-expand {
+                        display: none;
+                    }
+
+                    &:focus::-ms-value {
+                        background-color: transparent;
+                    }
+
+                    &::selection {
+                        background: transparent;
+                    }
+
+                    &::-moz-selection {
+                        background: transparent;
+                    }
+
+                    optgroup {
+                        font-weight: normal;
+
+                        option {
+                            color: black;
+
+                            &:hover {
+                                background-color: @primary-gray;
+                            }
+                        }
+                    }
+
+
+
+                    &::before {
+                        font-family: fontello;
+                        content: "\f107";
+                        font-size: 20px;
+                        position: absolute;
+                        right: 15px;
+                        top: 10px;
+                        color: black;
+                    }
+                }
+            }
+        }
+
+        .roundtrip-cards-container {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+
+            .roundtrip-card-container {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                align-items: center;
+                height: 280px;
+                margin-bottom: 10px;
+                padding-top: 20px;
+
+                .roundtrip-card {
+                    width: 90%;
+                    max-width: 1200px;
+                    height: 230px;
                     display: flex;
-                    flex-direction: column;
+                    padding: 20px;
+                    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+                    transition: 0.6s;
+                    background-color: white;
                     justify-content: space-between;
 
-                    .card-row, .card-bottom-row {
-                        align-items: flex-end;
-                        text-align: right;
+
+                    &:hover {
+                        transform: scale(1.03);
                     }
 
-                    .advertiser-logo {
-                        height: 50px;
+                    .card-left-col {
+                        width: 250px;
+                        display: flex;
+                        justify-content: center;
+                        flex-direction: column;
+
+                        .card-image {
+                            height: 230px;
+                            width: 230px;
+                            background-position: center;
+                            background-size: cover;
+                        }
                     }
 
-                    .price-button {
-                        border-color: @primary-orange;
-                        color: @primary-orange;
-                        background-color: white;
-                        font-family: @primary-number-font;
+                    .card-center-col {
+                        width: 60%;
+                        display: flex;
+                        flex-direction: column;
+                        text-align: left;
+                        align-items: flex-start;
+                        justify-content: space-between;
 
-                        span {
-                            font-size: 18px;
-                            padding: 0 2px 0 2px;
+                        .card-row, .card-bottom-row {
+                            display: flex;
+
+                            * {
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                padding-right: 5px;
+                            }
+
+                            .star {
+                                color: gold;
+                            }
+
+                            .marker {
+                                padding-left: 10px;
+                            }
+
+                            .card-tag, .card-category {
+                                color: white;
+                                background-color: @primary-gray;
+                                border-radius: 20px;
+                                padding: 2px 5px 2px 5px;
+                                height: 25px;
+                                margin: auto;
+                                margin-right: 5px;
+                            }
+
+                            .card-category {
+                                text-transform: capitalize;
+                            }
+
+                            .card-days, .card-hotels {
+                                font-family: @primary-number-font;
+                            }
+                        }
+                    }
+
+                    .card-right-col {
+                        width: 13%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+
+                        .card-row, .card-bottom-row {
+                            align-items: flex-end;
+                            text-align: right;
+                        }
+
+                        .advertiser-logo {
+                            height: 50px;
+                        }
+
+                        .price-button {
+                            border-color: @primary-orange;
+                            color: @primary-orange;
+                            background-color: white;
+                            font-family: @primary-number-font;
+
+                            span {
+                                font-size: 18px;
+                                padding: 0 2px 0 2px;
+                            }
                         }
                     }
                 }
@@ -195,7 +294,7 @@
     }
 
     #RoundtripCardBackgroundImgPlaceholder {
-        flex-direction: column;
+        flex-wrap: nowrap;
     }
 }
 
@@ -213,11 +312,11 @@
 
         .card-center-col {
             .card-bottom-row {
-                flex-wrap:wrap;
-                justify-content:center;
+                flex-wrap: wrap;
+                justify-content: center;
 
                 .card-tag {
-                    margin:5px !important;
+                    margin: 5px !important;
                 }
             }
         }
@@ -234,6 +333,6 @@
     }
 
     .roundtrip-card-container {
-        height:auto !important;
-    }   
+        height: auto !important;
+    }
 }

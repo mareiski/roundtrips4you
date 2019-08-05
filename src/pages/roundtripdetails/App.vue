@@ -3,40 +3,68 @@
         <h2 class="topic">{{country}}: {{roundtrips.length}} Rundreisen gefunden</h2>
         <div id="CardBackgroundImg"></div>
         <div id="RoundtripCardBackgroundImgPlaceholder">
-            <div class="roundtrip-card-container" v-for="roundtrip in roundtrips" :key="roundtrip">
-                <div class="roundtrip-card">
-                    <div class="card-left-col">
-                        <div class="card-image" :style="{ backgroundImage: 'url('+ require('@/assets/' + roundtrip.imageUrl) +')' }"></div>
-                    </div>
-                    <div class="card-center-col">
-                        <div class="card-row">
-                            <span class="card-category">{{roundtrip.category}}</span>
-                            <h2 class="country-title">{{roundtrip.title}}</h2>
+            <div class="filter-container">
+                <div class="fliter-card">
+                    <h2>Suche</h2>
+                    <select id="country-select" name="country">
+                        <optgroup label="Europa">
+                            <option value="italy">Italien</option>
+                            <option value="spain">Spanien</option>
+                        </optgroup>
+                        <optgroup label="Asien">
+                            <option value="thailand">Thailand</option>
+                            <option value="bali">Bali</option>
+                        </optgroup>
+                    </select>
+                    <input />
+                    <input />
+                    <a class="button">Suchen</a>
+                </div>
+                <div class="fliter-card">
+                    <h2>Filter</h2>
+                    <input />
+                    <input />
+                    <input />
+                    <a class="button">Suchen</a>
+                </div>
+
+            </div>
+            <div class="roundtrip-cards-container">
+                <div class="roundtrip-card-container" v-for="roundtrip in roundtrips" :key="roundtrip">
+                    <div class="roundtrip-card">
+                        <div class="card-left-col">
+                            <div class="card-image" :style="{ backgroundImage: 'url('+ require('@/assets/' + roundtrip.imageUrl) +')' }"></div>
                         </div>
-                        <div class="card-row">
-                            <font-awesome-icon class="star" v-for="n in roundtrip.stars" :key="n" icon="star" />
-                            <font-awesome-icon class="marker" icon="map-marker-alt" />
-                            <span class="country-title">{{country}}</span>
+                        <div class="card-center-col">
+                            <div class="card-row">
+                                <span class="card-category">{{roundtrip.category}}</span>
+                                <h2 class="country-title">{{roundtrip.title}}</h2>
+                            </div>
+                            <div class="card-row">
+                                <font-awesome-icon class="star" v-for="n in roundtrip.stars" :key="n" icon="star" />
+                                <font-awesome-icon class="marker" icon="map-marker-alt" />
+                                <span class="country-title">{{country}}</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-days">{{roundtrip.days}} Tage,</span>
+                                <span class="card-hotels">{{roundtrip.hotels}} Hotels</span>
+                            </div>
+                            <div class="card-row">
+                                <p class="card-description">{{roundtrip.description}}</p>
+                            </div>
+                            <div class="card-bottom-row">
+                                <span class="card-tag">{{roundtrip.tags[0]}}</span>
+                                <span class="card-tag">{{roundtrip.tags[1]}}</span>
+                                <span class="card-tag">{{roundtrip.tags[2]}}</span>
+                            </div>
                         </div>
-                        <div class="card-row">
-                            <span class="card-days">{{roundtrip.days}} Tage,</span>
-                            <span class="card-hotels">{{roundtrip.hotels}} Hotels</span>
-                        </div>
-                        <div class="card-row">
-                            <p class="card-description">{{roundtrip.description}}</p>
-                        </div>
-                        <div class="card-bottom-row">
-                            <span class="card-tag">{{roundtrip.tags[0]}}</span>
-                            <span class="card-tag">{{roundtrip.tags[1]}}</span>
-                            <span class="card-tag">{{roundtrip.tags[2]}}</span>
-                        </div>
-                    </div>
-                    <div class="card-right-col">
-                        <div class="card-row">
-                            <img class="advertiser-logo" :src="require('@/assets/' + roundtrip.advertiser + '.png')"/>
-                        </div>
-                        <div class="card-bottom-row">
-                            <a class="button price-button"><span>&euro;</span>{{roundtrip.price}}<span>p.P.</span></a>
+                        <div class="card-right-col">
+                            <div class="card-row">
+                                <img class="advertiser-logo" :src="require('@/assets/' + roundtrip.advertiser + '.png')" />
+                            </div>
+                            <div class="card-bottom-row">
+                                <a class="button price-button"><span>&euro;</span>{{roundtrip.price}}<span>p.P.</span></a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,7 +109,7 @@
                         advertiser: 'gebeco',
                         price: '330'
                     },
-                     {
+                    {
                         id: '3',
                         title: 'Venedig entdecken',
                         category: 'einblick',

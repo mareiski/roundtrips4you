@@ -4,6 +4,9 @@
 /*global colors*/
 /*global media queries*/
 /*primary styles*/
+* {
+  outline: none;
+}
 body {
   color: #707070;
   font-family: Segoe UI;
@@ -343,8 +346,108 @@ font-awesome-icon {
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .country-card-container .country-card .button:hover {
   transform: none;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container {
+.roundtrips #CardBackgroundImgPlaceholder .filter-container,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container {
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card {
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin-bottom: 20px;
+  background-color: white;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card *:not(a),
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card *:not(a) {
+  margin: 0 0 10px 0;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card input,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card input,
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select {
+  font-size: 20px;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card h2,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card h2 {
+  text-align: left;
+  color: #D56026;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card a,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card a {
+  border-color: #D56026;
+  background-color: transparent;
+  color: #D56026;
+  font-size: 20px;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border: solid #707070 1px;
+  width: 100%;
+  height: 40px;
+  padding-left: 10px;
+  color: black;
+  font-size: 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::-ms-expand,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::-ms-expand {
+  display: none;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select:focus::-ms-value,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select:focus::-ms-value {
+  background-color: transparent;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::selection,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::selection {
+  background: transparent;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::-moz-selection,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::-moz-selection {
+  background: transparent;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup {
+  font-weight: normal;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option {
+  color: black;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option:hover,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option:hover {
+  background-color: #707070;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::before,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::before {
+  font-family: fontello;
+  content: "\f107";
+  font-size: 20px;
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  color: black;
+}
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+}
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -353,8 +456,8 @@ font-awesome-icon {
   margin-bottom: 10px;
   padding-top: 20px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card {
   width: 90%;
   max-width: 1200px;
   height: 230px;
@@ -365,26 +468,26 @@ font-awesome-icon {
   background-color: white;
   justify-content: space-between;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card:hover,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card:hover {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card:hover,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card:hover {
   transform: scale(1.03);
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-left-col,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-left-col {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-left-col,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-left-col {
   width: 250px;
   display: flex;
   justify-content: center;
   flex-direction: column;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-left-col .card-image,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-left-col .card-image {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-left-col .card-image,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-left-col .card-image {
   height: 230px;
   width: 230px;
   background-position: center;
   background-size: cover;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col {
   width: 60%;
   display: flex;
   flex-direction: column;
@@ -392,41 +495,41 @@ font-awesome-icon {
   align-items: flex-start;
   justify-content: space-between;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row {
   display: flex;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row *,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row * {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row *,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row * {
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-right: 5px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star {
   color: gold;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker {
   padding-left: 10px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-tag,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-tag,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-tag,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-tag,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category {
   color: white;
   background-color: #707070;
   border-radius: 20px;
@@ -435,54 +538,54 @@ font-awesome-icon {
   margin: auto;
   margin-right: 5px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-category,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-category {
   text-transform: capitalize;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-days,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-days,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-days,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-days,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-hotels,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-hotels,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-hotels,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-hotels {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-days,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-days,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-days,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-days,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-hotels,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-hotels,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-hotels,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .card-hotels {
   font-family: Raleway;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col {
   width: 13%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .card-row,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .card-row,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .card-bottom-row,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .card-bottom-row {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .card-row,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .card-row,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .card-bottom-row,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .card-bottom-row {
   align-items: flex-end;
   text-align: right;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .advertiser-logo,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .advertiser-logo {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .advertiser-logo,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .advertiser-logo {
   height: 50px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .price-button,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .price-button {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .price-button,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .price-button {
   border-color: #D56026;
   color: #D56026;
   background-color: white;
   font-family: Raleway;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .price-button span,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-card-container .roundtrip-card .card-right-col .price-button span {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .price-button span,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-right-col .price-button span {
   font-size: 18px;
   padding: 0 2px 0 2px;
 }
 .roundtrips #RoundtripCardBackgroundImgPlaceholder {
-  flex-direction: column;
+  flex-wrap: nowrap;
 }
 @media only screen and (min-width: 720px) and (max-width: 959px), only screen and (min-width: 0px) and (max-width: 719px) {
   .roundtrip-card {

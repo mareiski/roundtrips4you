@@ -4,7 +4,7 @@
         <div id="MainImgOverlay">
         </div>
         <div id="MainImgPlacholder">
-            <h1 class="main-qoute">Die gr&ouml;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h1>
+            <h1 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h1>
             <span class="quote-author">Kurt Tucholsky</span>
             <input placeholder="Finde jetzt dein Traumziel..." class="main-search-bar" type="search" />
         </div>

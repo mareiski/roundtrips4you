@@ -4,6 +4,9 @@
 /*global colors*/
 /*global media queries*/
 /*primary styles*/
+* {
+  outline: none;
+}
 body {
   color: #707070;
   font-family: Segoe UI;
