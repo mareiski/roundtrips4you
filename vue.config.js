@@ -25,5 +25,46 @@
             title: 'Über',
             chunks: ['chunk-vendors', 'chunk-common', 'about']
         }
-    }
+    },
+
+    pluginOptions: {
+      quasar: {
+        rtlSupport: true,
+        treeShake: true
+      }
+    },
+
+    transpileDependencies: [
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/,
+      /[\\\/]node_modules[\\\/]quasar[\\\/]/
+    ]
 }

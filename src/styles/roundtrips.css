@@ -272,6 +272,9 @@ font-awesome-icon {
   align-content: center;
   align-items: center;
 }
+.roundtrips h2 {
+  font-size: 30px;
+}
 .roundtrips .topic {
   background-color: white;
   padding: 20px 0 20px 0;
@@ -353,6 +356,7 @@ font-awesome-icon {
   flex-direction: column;
   justify-content: flex-start;
   height: 100%;
+  padding-top: 20px;
 }
 .roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card {
@@ -387,58 +391,83 @@ font-awesome-icon {
   color: #D56026;
   font-size: 20px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select {
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  appearance: none;
-  border: solid #707070 1px;
-  width: 100%;
-  height: 40px;
-  padding-left: 10px;
-  color: black;
-  font-size: 16px;
-  border-radius: 3px;
-  cursor: pointer;
-  position: relative;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::-ms-expand,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::-ms-expand {
-  display: none;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select:focus::-ms-value,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select:focus::-ms-value {
-  background-color: transparent;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::selection,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::selection {
-  background: transparent;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::-moz-selection,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::-moz-selection {
-  background: transparent;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup {
-  font-weight: normal;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option {
-  color: black;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option:hover,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select optgroup option:hover {
-  background-color: #707070;
-}
-.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card select::before,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card select::before {
-  font-family: fontello;
-  content: "\f107";
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container {
   font-size: 20px;
-  position: absolute;
-  right: 15px;
-  top: 10px;
-  color: black;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  border: solid 1px #707070;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown {
+  border-radius: 2px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  cursor: pointer;
+  margin-bottom: auto;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown.active,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown.active {
+  color: #707070;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown.active svg,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown.active svg {
+  transform: rotate(180deg);
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown span,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown span {
+  margin: 0;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown svg,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container .dropdown svg {
+  margin: auto;
+  margin-right: 0;
+  transform: rotate(0);
+  transition: 0.5s;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl {
+  max-height: 0;
+  padding: 0;
+  border-top: solid 1px #707070;
+  margin-bottom: 0;
+  transition: 0.7s;
+  opacity: 0;
+  overflow: hidden;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl *,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl * {
+  list-style-type: none;
+  color: #707070;
+  cursor: pointer;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl.active,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl.active {
+  max-height: 500px;
+  opacity: 1;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li {
+  font-size: 18px;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li div,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li div {
+  border: none;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li ul,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li ul {
+  max-height: 0px;
+  opacity: 0;
+  transition: 0.7s;
+}
+.roundtrips #CardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li ul.active,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .filter-container .fliter-card .destination-dropdown-container #ContinentUl li ul.active {
+  display: block;
+  max-height: 500px;
+  opacity: 1;
 }
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container {
@@ -500,6 +529,7 @@ font-awesome-icon {
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row {
   display: flex;
+  height: 50px;
 }
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row *,
@@ -510,17 +540,24 @@ font-awesome-icon {
   justify-content: center;
   padding-right: 5px;
 }
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .star,
-.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star,
-.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .star {
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .stars,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .stars,
+.roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .stars,
+.roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .stars {
   color: gold;
+  margin: auto;
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  padding-left: 5px;
 }
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .marker,
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-bottom-row .marker {
   padding-left: 10px;
+  width: 50px;
+  margin: auto;
 }
 .roundtrips #CardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
 .roundtrips #RoundtripCardBackgroundImgPlaceholder .roundtrip-cards-container .roundtrip-card-container .roundtrip-card .card-center-col .card-row .card-tag,
@@ -584,9 +621,6 @@ font-awesome-icon {
   font-size: 18px;
   padding: 0 2px 0 2px;
 }
-.roundtrips #RoundtripCardBackgroundImgPlaceholder {
-  flex-wrap: nowrap;
-}
 @media only screen and (min-width: 720px) and (max-width: 959px), only screen and (min-width: 0px) and (max-width: 719px) {
   .roundtrip-card {
     flex-direction: column;
@@ -613,7 +647,13 @@ font-awesome-icon {
   .roundtrip-card .card-right-col .card-row {
     padding-right: 10px;
   }
-  .roundtrip-card-container {
+  .filter-container {
+    width: 100% !important;
+  }
+  .roundtrip-cards-container {
+    width: 100% !important;
+  }
+  .roundtrip-cards-container .roundtrip-card-container {
     height: auto !important;
   }
 }

@@ -58,7 +58,10 @@
                 ]
             }
         },
-        name: 'Home'
+        name: 'Home',
+        mounted: function () {
+            document.body.removeClass("preload");
+        }
     };
 </script>
 
