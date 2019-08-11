@@ -1,68 +1,38 @@
 {
   "name": "roundtrips4you",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.0.1",
   "description": "roundtrips4you",
-  "author": {
-    "name": "Marco Reisinger"
-  },
+  "productName": "roundtrips4you",
+  "cordovaId": "",
+  "author": "Marco Reisinger",
+  "private": true,
   "scripts": {
+    "lint": "eslint --ext .js,.vue src",
+    "test": "echo \"No test specified\" && exit 0",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.19",
-    "@fortawesome/free-solid-svg-icons": "^5.9.0",
-    "@fortawesome/vue-fontawesome": "^0.1.6",
     "@quasar/extras": "^1.0.0",
-    "quasar": "^1.0.0",
-    "vue": "2.5.17",
-    "vue-resource": "^1.5.1",
-    "vue-router": "^3.0.7"
+    "quasar": "^1.0.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "3.0.4",
-    "@vue/cli-plugin-eslint": "3.0.4",
-    "@vue/cli-service": "3.0.4",
-    "babel-plugin-transform-imports": "1.5.0",
-    "eslint": "5.6.0",
-    "eslint-plugin-vue": "4.7.1",
+    "@quasar/app": "^1.0.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.10.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-vue": "^5.0.0",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
-    "node-sass": "^4.12.0",
-    "postcss-rtl": "^1.2.3",
-    "sass": "^1.17.4",
-    "sass-loader": "^7.1.0",
-    "stylus": "^0.54.5",
-    "stylus-loader": "^3.0.2",
-    "vue-cli-plugin-quasar": "^1.0.0",
-    "vue-cli-plugin-vuetify": "^0.6.1",
-    "vue-template-compiler": "2.5.17",
-    "webpack": "^4.39.1"
+    "prettier": "^1.12.0"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+  "engines": {
+    "node": ">= 8.9.0",
+    "npm": ">= 5.6.0",
+    "yarn": ">= 1.6.0"
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
+    "last 1 version, not dead, ie >= 11"
   ]
 }
