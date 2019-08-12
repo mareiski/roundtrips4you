@@ -45,7 +45,8 @@ module.exports = function (ctx) {
         'QPopupProxy',
         'QRange',
         'QExpansionItem',
-        'QSelect'
+        'QSelect',
+        'QRating'
       ],
 
       directives: [

@@ -8,56 +8,65 @@
           <h2>Suche</h2>
           <q-input
             filled
-            v-model="input"
+            v-model="countryInput"
             mask="text"
           >
-            <template v-slot:append>
-              <q-popup-proxy :breakpoint="600">
-                <q-list
-                  bordered
-                  class="rounded-borders"
+            <q-popup-proxy
+              ref="regionProxy"
+              :breakpoint="600"
+            >
+              <q-list
+                bordered
+                class="rounded-borders"
+              >
+                <q-expansion-item
+                  expand-separator
+                  label="Europa"
+                  group="regionGroup"
                 >
-                  <q-expansion-item
-                    expand-separator
-                    label="Europa"
+                  <q-list
+                    bordered
+                    separator
                   >
-                    <q-list
-                      bordered
-                      separator
+                    <q-item
+                      clickable
+                      v-ripple
+                      v-model="countryInput"
+                      @click="() => $refs.regionProxy.hide()"
                     >
-                      <q-item
-                        clickable
-                        v-ripple
-                      >
-                        <q-item-section>Deutschland</q-item-section>
-                      </q-item>
-                      <q-item
-                        clickable
-                        v-ripple
-                      >
-                        <q-item-section>Italien</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-expansion-item>
-                  <q-expansion-item
-                    expand-separator
-                    label="Asien"
+                      <q-item-section>Deutschland</q-item-section>
+                    </q-item>
+                    <q-item
+                      clickable
+                      v-model="countryInput"
+                      @click="() => $refs.regionProxy.hide()"
+                      v-ripple
+                    >
+                      <q-item-section>Italien</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-expansion-item>
+                <q-expansion-item
+                  expand-separator
+                  label="Asien"
+                  group="regionGroup"
+                  v-model="countryInput"
+                >
+                  <q-list
+                    bordered
+                    separator
                   >
-                    <q-list
-                      bordered
-                      separator
+                    <q-item
+                      clickable
+                      v-ripple
+                      @click="() => $refs.regionProxy.hide()"
                     >
-                      <q-item
-                        clickable
-                        v-ripple
-                      >
-                        <q-item-section>Vietnam</q-item-section>
-                      </q-item>
-                    </q-list>
-                  </q-expansion-item>
-                </q-list>
-              </q-popup-proxy>
-            </template>
+                      <q-item-section>Vietnam</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-expansion-item>
+              </q-list>
+            </q-popup-proxy>
           </q-input>
           <q-input
             filled
@@ -65,21 +74,21 @@
             mask="date"
             :rules="['date']"
           >
+            <q-popup-proxy
+              ref="qDateProxy"
+              transition-show="scale"
+              transition-hide="scale"
+            >
+              <q-date
+                v-model="date"
+                @input="() => $refs.qDateProxy.hide()"
+              />
+            </q-popup-proxy>
             <template v-slot:prepend>
               <q-icon
                 name="event"
                 class="cursor-pointer"
               >
-                <q-popup-proxy
-                  ref="qDateProxy"
-                  transition-show="scale"
-                  transition-hide="scale"
-                >
-                  <q-date
-                    v-model="date"
-                    @input="() => $refs.qDateProxy.hide()"
-                  />
-                </q-popup-proxy>
               </q-icon>
             </template>
           </q-input>
@@ -190,6 +199,7 @@ export default {
       date: '2018/11/03',
       country: 'Italien',
       model: null,
+      countryInput: null,
       options: [
         '< 5 Tage', '5-8 Tage', '9-11 Tage', '12-15 Tage', '> 15 Tage'
       ],
