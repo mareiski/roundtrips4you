@@ -6,68 +6,57 @@
       <div class="filter-container">
         <div class="fliter-card">
           <h2>Suche</h2>
-          <q-input
-            filled
-            v-model="countryInput"
-            mask="text"
+          <q-list
+            bordered
+            class="rounded-borders"
           >
-            <q-popup-proxy
-              ref="regionProxy"
-              :breakpoint="600"
+            <q-expansion-item
+              expand-separator
+              label="Europa"
+              group="regionGroup"
             >
               <q-list
                 bordered
-                class="rounded-borders"
+                separator
               >
-                <q-expansion-item
-                  expand-separator
-                  label="Europa"
-                  group="regionGroup"
-                >
-                  <q-list
-                    bordered
-                    separator
-                  >
-                    <q-item
-                      clickable
-                      v-ripple
-                      v-model="countryInput"
-                      @click="() => $refs.regionProxy.hide()"
-                    >
-                      <q-item-section>Deutschland</q-item-section>
-                    </q-item>
-                    <q-item
-                      clickable
-                      v-model="countryInput"
-                      @click="() => $refs.regionProxy.hide()"
-                      v-ripple
-                    >
-                      <q-item-section>Italien</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-expansion-item>
-                <q-expansion-item
-                  expand-separator
-                  label="Asien"
-                  group="regionGroup"
+                <q-item
+                  clickable
+                  v-ripple
                   v-model="countryInput"
+                  @click="() => $refs.regionProxy.hide()"
                 >
-                  <q-list
-                    bordered
-                    separator
-                  >
-                    <q-item
-                      clickable
-                      v-ripple
-                      @click="() => $refs.regionProxy.hide()"
-                    >
-                      <q-item-section>Vietnam</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-expansion-item>
+                  <q-item-section>Deutschland</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-model="countryInput"
+                  @click="() => $refs.regionProxy.hide()"
+                  v-ripple
+                >
+                  <q-item-section>Italien</q-item-section>
+                </q-item>
               </q-list>
-            </q-popup-proxy>
-          </q-input>
+            </q-expansion-item>
+            <q-expansion-item
+              expand-separator
+              label="Asien"
+              group="regionGroup"
+              v-model="countryInput"
+            >
+              <q-list
+                bordered
+                separator
+              >
+                <q-item
+                  clickable
+                  v-ripple
+                  @click="() => $refs.regionProxy.hide()"
+                >
+                  <q-item-section>Vietnam</q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+          </q-list>
           <q-input
             filled
             v-model="date"
@@ -137,7 +126,7 @@
             <div class="card-left-col">
               <div
                 class="card-image"
-                :style="{ backgroundImage: 'url('+ require('../assets/' + roundtrip.imageUrl) +')' }"
+                :style="{ backgroundImage: 'url('+ require('../statics/' + roundtrip.imageUrl) +')' }"
               ></div>
             </div>
             <div class="card-center-col">
@@ -176,7 +165,7 @@
               <div class="card-row">
                 <img
                   class="advertiser-logo"
-                  :src="require('../assets/' + roundtrip.advertiser + '.png')"
+                  :src="require('../statics/' + roundtrip.advertiser + '.png')"
                 />
               </div>
               <div class="card-bottom-row">

@@ -11,7 +11,7 @@
         >
           <div
             class="country-card"
-            :style="{ backgroundImage: 'url('+ require('../assets/' + country.imageUrl) +')' }"
+            :style="{ backgroundImage: 'url('+ require('../statics/' + country.imageUrl) +')' }"
           >
             <h2 class="country-title">{{country.title}}</h2>
             <router-link
