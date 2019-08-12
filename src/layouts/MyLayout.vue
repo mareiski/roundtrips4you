@@ -4,12 +4,12 @@
       <div class="top-row">
         <div class="left-col">
           <a href="/">
-            <img src="statics/logo.png" />
+            <img src="../statics/logo.png" />
           </a>
         </div>
         <div class="center-col">
           <a href="/">
-            <img src="statics/textLogo.png" />
+            <img src="../statics/textLogo.png" />
           </a>
         </div>
         <div class="right-col">
@@ -70,7 +70,7 @@
     <footer>
       <div class="left-footer-col">
         <a href="/">
-          <img src="assets/logo.png" />
+          <img src="../statics/logo.png" />
         </a>
       </div>
       <div class="right-footer-col">
