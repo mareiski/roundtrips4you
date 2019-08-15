@@ -1,7 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import auth from '../firebaseInit'
 
 import routes from './routes'
+
+require('../firebaseInit.js')
 
 Vue.use(VueRouter)
 
@@ -11,7 +14,7 @@ Vue.use(VueRouter)
  */
 
 export default function (/* { store, ssrContext } */) {
-  const Router = new VueRouter({
+  const router = new VueRouter({
     scrollBehavior: () => ({ x: 0, y: 0 }),
     routes,
 
@@ -22,5 +25,15 @@ export default function (/* { store, ssrContext } */) {
     base: process.env.VUE_ROUTER_BASE
   })
 
-  return Router
+  router.beforeEach((to, from, next) => {
+    let currentUser = auth.user()
+    let requireAuth = to.matched.some(record => record.meta.requireAuth)
+    let guestOnly = to.matched.some(record => record.meta.guestOnly)
+
+    if (requireAuth && !currentUser) next('login')
+    else if (guestOnly && currentUser) next('profil')
+    else next()
+  })
+
+  return router
 }

@@ -6,62 +6,79 @@
       <div class="filter-container">
         <div class="fliter-card">
           <h2>Suche</h2>
-          <q-list
-            bordered
-            class="rounded-borders"
+          <q-expansion-item
+            icon="explore"
+            expand-separator
+            :label="country"
+            ref="expansionItem"
+            class="input-item"
           >
-            <q-expansion-item
-              expand-separator
-              label="Europa"
-              group="regionGroup"
+            <q-list
+              bordered
+              class="rounded-borders"
             >
-              <q-list
-                bordered
-                separator
+              <q-expansion-item
+                expand-separator
+                label="Europa"
+                group="regionGroup"
               >
-                <q-item
-                  clickable
-                  v-ripple
-                  v-model="countryInput"
-                  @click="() => $refs.regionProxy.hide()"
+                <q-list
+                  bordered
+                  separator
                 >
-                  <q-item-section>Deutschland</q-item-section>
-                </q-item>
-                <q-item
-                  clickable
-                  v-model="countryInput"
-                  @click="() => $refs.regionProxy.hide()"
-                  v-ripple
-                >
-                  <q-item-section>Italien</q-item-section>
-                </q-item>
-              </q-list>
-            </q-expansion-item>
-            <q-expansion-item
-              expand-separator
-              label="Asien"
-              group="regionGroup"
-              v-model="countryInput"
-            >
-              <q-list
-                bordered
-                separator
+                  <q-item
+                    clickable
+                    v-ripple
+                    @click="() => $refs.expansionItem.label = this.$root.$el.getElementsByClassName('q-item-section')[0].innerHTML"
+                  >
+                    <q-item-section
+                      class="q-item-section"
+                      @click="() =>  $refs.expansionItem.hide()"
+                      ref="iconSection"
+                    >Deutschland</q-item-section>
+                  </q-item>
+                  <q-item
+                    clickable
+                    @click="() => $refs.expansionItem.label = this.$root.$el.getElementsByClassName('q-item-section')[1].innerHTML"
+                    v-ripple
+                  >
+                    <q-item-section
+                      class="q-item-section"
+                      @click="() =>  $refs.expansionItem.hide()"
+                    >Italien</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-expansion-item>
+              <q-expansion-item
+                expand-separator
+                label="Asien"
+                group="regionGroup"
+                v-model="countryInput"
               >
-                <q-item
-                  clickable
-                  v-ripple
-                  @click="() => $refs.regionProxy.hide()"
+                <q-list
+                  bordered
+                  separator
                 >
-                  <q-item-section>Vietnam</q-item-section>
-                </q-item>
-              </q-list>
-            </q-expansion-item>
-          </q-list>
+                  <q-item
+                    clickable
+                    v-ripple
+                    @click="() => $refs.expansionItem.label = this.$root.$el.getElementsByClassName('q-item-section')[2].innerHTML"
+                  >
+                    <q-item-section
+                      class="q-item-section"
+                      @click="() =>  $refs.expansionItem.hide()"
+                    >Vietnam</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-expansion-item>
+            </q-list>
+          </q-expansion-item>
           <q-input
             filled
             v-model="date"
             mask="date"
             :rules="['date']"
+            class="input-item"
           >
             <q-popup-proxy
               ref="qDateProxy"
@@ -70,6 +87,8 @@
             >
               <q-date
                 v-model="date"
+                today-btn
+                :options="dateOptions"
                 @input="() => $refs.qDateProxy.hide()"
               />
             </q-popup-proxy>
@@ -87,6 +106,7 @@
             :options="options"
             label="Zeitraum"
             clearable
+            class="input-item"
           >
             <template v-slot:prepend>
               <q-icon name="access_time" />
@@ -97,24 +117,188 @@
         </div>
         <div class="fliter-card">
           <h2>Filter</h2>
-          <p>
-            Preis ab {{ step.min }} € bis {{ step.max }} €
-          </p>
-          <q-range
-            v-model="step"
-            :min="0"
-            :max="45"
-            :step="5"
-            :left-label-value="step.min + ' €'"
-            :right-label-value="step.max + ' €'"
-            label
-            color="deep-orange"
-          />
-          <input />
-          <input />
+          <q-list
+            bordered
+            class="rounded-borders"
+          >
+            <q-expansion-item
+              label="Preis pro Person"
+              class="filter-expansion"
+              default-opened
+            >
+              <q-range
+                v-model="step"
+                :min="0"
+                :max="330"
+                :step="10"
+                :left-label-value="step.min + ' €'"
+                :right-label-value="step.max + ' €'"
+                label
+                color="deep-orange"
+              />
+              <p>
+                Preis ab {{ step.min }} € bis {{ step.max }} €
+              </p>
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Reiseart
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Art deiner Reise
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                v-for="kind in tripKind"
+                :key="kind"
+                :label="kind"
+                v-model="filteredTripKinds"
+                :val="kind"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Reisemerkmal
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Merkmale deiner Reise
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                v-for="attr in roundtripAttr"
+                :key="attr"
+                :label="attr"
+                v-model="filteredRoundtripAttr"
+                :val="attr"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Reisekategorie
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Kategorie der Reise
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                v-for="category in roundtripCategories"
+                :key="category"
+                :label="category"
+                v-model="filteredRoundtripCategory"
+                :val="category"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Region
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Region in der deine Reise stattfindet
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Sehenswürdigkeiten
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Sehenswürdigkeiten auf deiner Reise
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+            <q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Veranstalter
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Der Veranstalter für deine Reise
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+              <q-checkbox
+                label="Gruppenreise"
+                v-model="orange"
+                color="dark-orange"
+              />
+            </q-expansion-item>
+          </q-list>
           <a class="button">Suchen</a>
         </div>
-
       </div>
       <div class="roundtrip-cards-container">
         <div
@@ -182,20 +366,30 @@
 @import "../css/roundtrips.less";
 </style>
 <script>
+import { date } from 'quasar'
+let timeStamp = Date.now()
+let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
+
 export default {
   data () {
     return {
-      date: '2018/11/03',
+      date: formattedDate,
       country: 'Italien',
       model: null,
-      countryInput: null,
+      orange: false,
       options: [
         '< 5 Tage', '5-8 Tage', '9-11 Tage', '12-15 Tage', '> 15 Tage'
       ],
       step: {
-        min: 10,
-        max: 20
+        min: 0,
+        max: 330
       },
+      filteredRoundtripAttr: [],
+      roundtripAttr: ['inklusive Flug', 'kleine Reisegruppe'],
+      filteredTripKinds: [],
+      tripKind: ['Gruppenreise'],
+      roundtripCategories: ['einblick'],
+      filteredRoundtripCategory: [],
       roundtrips: [
         {
           id: '0',
@@ -206,7 +400,7 @@ export default {
           location: 'Italien',
           days: '10',
           hotels: '5',
-          description: 'Entdecke Venedig auf einer der sch�nsten Routen Italiens.',
+          description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
           tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
           advertiser: 'gebeco',
           price: '330'
@@ -220,7 +414,7 @@ export default {
           location: 'Italien',
           days: '10',
           hotels: '5',
-          description: 'Entdecke Venedig auf einer der sch�nsten Routen Italiens.',
+          description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
           tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
           advertiser: 'gebeco',
           price: '330'
@@ -234,7 +428,7 @@ export default {
           location: 'Italien',
           days: '10',
           hotels: '5',
-          description: 'Entdecke Venedig auf einer der sch�nsten Routen Italiens.',
+          description: 'Entdecke Venedig auf einer der schönsten Routen Italiens.',
           tags: ['Gruppenreise', 'inklusive Flug', 'kleine Reisegruppe'],
           advertiser: 'gebeco',
           price: '330'
@@ -242,7 +436,12 @@ export default {
       ]
     }
   },
-  name: 'roundtripdetails'
+  name: 'roundtripdetails',
+  methods: {
+    dateOptions (date) {
+      return date >= formattedDate
+    }
+  }
 }
 </script>
 

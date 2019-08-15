@@ -25,6 +25,7 @@
             class="header-page-link"
             to="/ueber"
           >über uns</router-link>
+          <button @click="logout">Logout</button>
           <div id="BurgerMenu">
             <svg
               class="ham hamRotate ham7"
@@ -62,6 +63,7 @@
           class="mobile-header-page-link"
           to="/ueber"
         >über uns</router-link>
+        <button @click="logout">Logout</button>
       </div>
     </div>
     <q-page-container>
@@ -112,8 +114,21 @@
 </template>
 
 <script>
+import firebase from '../firebaseInit'
+
 export default {
-  name: 'MyLayout'
+  name: 'MyLayout',
+  methods: {
+    logout: function () {
+      if (firebase.auth().currentUser !== null) {
+        firebase.auth.logout()
+        alert('You succesfully logged out')
+        this.$router.replace('/')
+      } else {
+        alert('You are not logged in')
+      }
+    }
+  }
 }
 </script>
 
