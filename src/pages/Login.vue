@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import auth from '../firebaseInit'
+import { auth } from '../firebaseInit'
 
 export default {
   name: 'login',

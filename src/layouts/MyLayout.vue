@@ -25,7 +25,44 @@
             class="header-page-link"
             to="/ueber"
           >über uns</router-link>
-          <button @click="logout">Logout</button>
+          <q-avatar
+            size="50px"
+            style="width: 50px; margin-top:5px;"
+            :style="user ? null : 'font-size:60px;'"
+            :icon="user ? null : 'account_circle'"
+            @click="user ? null : $router.push('login')"
+          >
+            <img
+              v-if="user"
+              :src="user.photoURL"
+            >
+            <q-menu v-if="user">
+              <q-list style="min-width: 100px">
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section>
+                    <router-link to="/profil">Profil</router-link>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section>
+                    <router-link to="/meine-rundreisen">Meine Rundreisen</router-link>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                >
+                  <q-item-section @click="logOut">Logout</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-avatar>
           <div id="BurgerMenu">
             <svg
               class="ham hamRotate ham7"
@@ -63,7 +100,6 @@
           class="mobile-header-page-link"
           to="/ueber"
         >über uns</router-link>
-        <button @click="logout">Logout</button>
       </div>
     </div>
     <q-page-container>
@@ -114,19 +150,18 @@
 </template>
 
 <script>
-import firebase from '../firebaseInit'
+import { auth } from '../firebaseInit'
 
 export default {
   name: 'MyLayout',
+  computed: {
+    user () {
+      return this.$store.getters['user/user']
+    }
+  },
   methods: {
-    logout: function () {
-      if (firebase.auth().currentUser !== null) {
-        firebase.auth.logout()
-        alert('You succesfully logged out')
-        this.$router.replace('/')
-      } else {
-        alert('You are not logged in')
-      }
+    logOut () {
+      auth.logout()
     }
   }
 }

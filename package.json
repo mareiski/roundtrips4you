@@ -14,9 +14,10 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
-    "firebase": "^6.3.5",
+    "firebase": "^6.4.0",
     "firebaseui": "^4.1.0",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "vuefire": "^2.0.0-alpha.24"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",

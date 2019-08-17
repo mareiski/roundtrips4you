@@ -6,6 +6,7 @@ module.exports = function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     boot: [
+      'initialMain'
     ],
 
     css: [
@@ -48,11 +49,16 @@ module.exports = function (ctx) {
         'QSelect',
         'QRating',
         'QCheckbox',
-        'QTooltip'
+        'QTooltip',
+        'QAvatar',
+        'QMenu',
+        'QInnerLoading',
+        'QSpinner'
       ],
 
       directives: [
-        'Ripple'
+        'Ripple',
+        'ClosePopup'
       ],
 
       // Quasar plugins

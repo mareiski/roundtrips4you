@@ -1,8 +1,11 @@
 import Vue from 'vue'
 import firebase from 'firebase'
 import * as firebaseui from 'firebaseui'
+import { firestorePlugin } from 'vuefire'
 
 Vue.config.productionTip = false
+
+Vue.use(firestorePlugin)
 
 const config = {
   apiKey: 'AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
@@ -14,32 +17,35 @@ const config = {
   appId: '1:295257024914:web:11432138a1faf186'
 }
 
+let db = null
+
 const auth = {
   context: null,
   uiConfig: null,
   ui: null,
 
-  init (context) {
+  init (context, store, router) {
     this.context = context
 
     firebase.initializeApp(config)
     this.uiConfig = {
-      signInSuccessUrl: 'user',
+      signInSuccessUrl: '/#/profil',
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID
       ]
     }
+    db = firebase.firestore()
     this.ui = new firebaseui.auth.AuthUI(firebase.auth())
 
     firebase.auth().onAuthStateChanged((user) => {
-      this.context.$store.dispatch('user/setCurrentUser')
+      store.dispatch('user/setCurrentUser')
 
       let requireAuth = this.context.$route.matched.some(record => record.meta.requireAuth)
       let guestOnly = this.context.$route.matched.some(record => record.meta.guestOnly)
 
-      if (requireAuth && !user) this.context.$router.push('login')
-      else if (guestOnly && user) this.context.$router.push('user')
+      if (requireAuth && !user) router.push('login')
+      else if (guestOnly && user) router.push('profil')
     })
   },
   authForm (container) {
@@ -53,4 +59,4 @@ const auth = {
   }
 }
 
-export default auth
+export { auth, db }

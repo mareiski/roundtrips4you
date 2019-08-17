@@ -13,6 +13,7 @@
 
 * {
     outline: none;
+    box-sizing: unset;
 }
 
 body {
@@ -63,6 +64,7 @@ footer {
 }
 
 a {
+    color: @primary-gray;
     cursor: pointer;
     text-decoration: none;
 
@@ -92,6 +94,10 @@ button, .button {
 
 font-awesome-icon {
     margin: auto;
+}
+
+h2 {
+    line-height: normal;
 }
 
 /*Header*/
@@ -288,8 +294,20 @@ font-awesome-icon {
     }
 }
 
+.q-page-container {
+    margin-top:80px;
+}
+
 .active {
     color: @primary-orange;
+}
+
+.q-avatar {
+    cursor: pointer;
+
+    a {
+        white-space: nowrap;
+    }
 }
 
 @media @tablet, @mobile {
