@@ -1,6 +1,6 @@
 <template>
   <div class="roundtrips">
-    <h2 class="topic">{{country}}: {{roundtrips.length}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
+    <h2 class="topic">{{selectedCountry}}: {{roundtrips.length}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
     <div id="CardBackgroundImg"></div>
     <div id="RoundtripCardBackgroundImgPlaceholder">
       <div class="filter-container">
@@ -111,8 +111,10 @@
               <q-icon name="access_time" />
             </template>
           </q-select>
-          <a class="button">Suchen</a>
-
+          <a
+            class="button"
+            @click="loadRoundtrips()"
+          >Suchen</a>
         </div>
         <div class="fliter-card">
           <h2>Filter</h2>
@@ -162,6 +164,7 @@
                 v-model="filteredTripKinds"
                 :val="kind"
                 color="dark-orange"
+                @click="filterRoundtrips()"
               />
             </q-expansion-item>
             <q-expansion-item
@@ -187,6 +190,7 @@
                 v-model="filteredRoundtripAttr"
                 :val="attr"
                 color="dark-orange"
+                @click="filterRoundtrips()"
               />
             </q-expansion-item>
             <q-expansion-item
@@ -209,9 +213,10 @@
                 v-for="category in roundtripCategories"
                 :key="category"
                 :label="category"
-                v-model="filteredRoundtripCategory"
+                v-model="filteredRoundtripCategories"
                 :val="category"
                 color="dark-orange"
+                @click="filterRoundtrips()"
               />
             </q-expansion-item>
             <q-expansion-item
@@ -296,7 +301,6 @@
               />
             </q-expansion-item>
           </q-list>
-          <a class="button">Suchen</a>
         </div>
       </div>
       <div
@@ -341,8 +345,8 @@
                 <span class="country-title">{{roundtrip.Location}}</span>
               </div>
               <div class="card-row">
-                <span class="card-days">{{roundtrip.Days}} Tage,</span>
-                <span class="card-hotels">{{roundtrip.Hotels}} Hotels</span>
+                <span class="card-days">{{roundtrip.Days}} Tag{{roundtrip.Days==1?null:'e'}},</span>
+                <span class="card-hotels">{{roundtrip.Hotels}} Hotel{{roundtrip.Hotels==1?null:'s'}}</span>
               </div>
               <div class="card-row">
                 <p class="card-description">{{roundtrip.Description}}</p>
@@ -355,10 +359,11 @@
             </div>
             <div class="card-right-col">
               <div class="card-row">
-                <img class="advertiser-logo" />
+                <img :src="getCurrentUserImage()">
               </div>
               <div class="card-bottom-row">
-                <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
+                <a class="button details-button">Details</a>
+                <!--<a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>-->
               </div>
             </div>
           </div>
@@ -380,11 +385,16 @@ Vue.use(firestorePlugin)
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
 
+let roundtripArr = []
+let roundtripCount = 0
+let userImages = []
+
 export default {
   data () {
     return {
       date: formattedDate,
       country: 'Italien',
+      selectedCountry: '',
       model: null,
       orange: false,
       visible: false,
@@ -399,10 +409,11 @@ export default {
       filteredRoundtripAttr: [],
       roundtripAttr: [],
       filteredTripKinds: [],
-      tripKind: ['Gruppenreise'],
+      tripKind: [],
       roundtripCategories: ['einblick'],
-      filteredRoundtripCategory: [],
-      roundtrips: []
+      filteredRoundtripCategories: [],
+      roundtrips: [],
+      roundtripImages: []
     }
   },
   name: 'roundtripdetails',
@@ -410,7 +421,41 @@ export default {
     dateOptions (date) {
       return date >= formattedDate
     },
+    filterRoundtrips () {
+      roundtripArr.forEach((roundtrip) => {
+        if (!this.filteredRoundtripAttr.includes(roundtrip.Tags[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Tags[2])) this.removeRoundtrip(roundtrip)
+        if (!this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
+        if (!this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
+      })
+    },
+    removeRoundtrip (roundtrip) {
+      roundtripArr.splice(roundtripArr.indexOf(roundtrip), 1)
+    },
+    getCurrentUserImage () {
+      let image = userImages[roundtripCount]
+      roundtripCount++
+      console.log(image)
+      return (image)
+    },
+    loadUserImage (UserId) {
+      let users = []
+      let userRef = db.collection('User')
+        .where('UserUID', '==', UserId)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            users.push(doc.data())
+          })
+        })
+      users.forEach((user) => {
+        console.log(user)
+        console.log(user.Reputation)
+      })
+      return (users.UserImage)
+    },
     loadRoundtrips () {
+      this.selectedCountry = this.country
       this.visible = true
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('Roundtrips')
@@ -420,21 +465,34 @@ export default {
         .limit(20)
       roundtripsRef.get()
         .then(snapshot => {
-          let roundtripArr = []
-
           snapshot.forEach(doc => {
             roundtripArr.push(doc.data())
           })
+
           this.roundtrips = roundtripArr
 
           // load filter
+          let price = 0
+          let tripKind = []
           let roundtripAttr = []
-          roundtripArr.forEach(roundtrip => {
+          let category = []
+
+          // read all posible values for filter
+          roundtripArr.forEach((roundtrip) => {
+            if (price < roundtrip.Price) price = roundtrip.Price
+            if (!tripKind.includes(roundtrip.Tags[0])) tripKind.push(roundtrip.Tags[0])
             if (!roundtripAttr.includes(roundtrip.Tags[1])) roundtripAttr.push(roundtrip.Tags[1])
             if (!roundtripAttr.includes(roundtrip.Tags[2])) roundtripAttr.push(roundtrip.Tags[2])
+            if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
+
+            // load userImages
+            userImages.push(this.loadUserImage(roundtrip.UserId))
           })
 
-          this.roundtripAttr = roundtripArr
+          this.step.max = price
+
+          this.tripKind = tripKind
+          this.roundtripAttr = roundtripAttr
 
           this.visible = false
           this.showSimulatedReturnData = true
@@ -446,11 +504,6 @@ export default {
   },
   created () {
     this.loadRoundtrips()
-  },
-  watch: {
-    'country': function (value, mutation) {
-      this.loadRoundtrips()
-    }
   }
 }
 

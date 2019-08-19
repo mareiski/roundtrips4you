@@ -33,6 +33,14 @@ const routes = [
         meta: {
           requireAuth: true
         }
+      },
+      {
+        path: 'meine-rundreisen',
+        component: () => import('pages/MyRoundtrips.vue')
+      },
+      {
+        path: 'rundreise-bearbeiten',
+        component: () => import('pages/EditRoundtrips.vue')
       }
     ]
   }

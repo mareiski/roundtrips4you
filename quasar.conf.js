@@ -53,7 +53,12 @@ module.exports = function (ctx) {
         'QAvatar',
         'QMenu',
         'QInnerLoading',
-        'QSpinner'
+        'QSpinner',
+        'QTimeline',
+        'QTimelineEntry',
+        'QEditor',
+        'QPopupEdit',
+        'QDialog'
       ],
 
       directives: [

@@ -41,17 +41,19 @@
                 <q-item
                   clickable
                   v-close-popup
+                  @click="$router.push('profil')"
                 >
                   <q-item-section>
-                    <router-link to="/profil">Profil</router-link>
+                    Profil
                   </q-item-section>
                 </q-item>
                 <q-item
                   clickable
                   v-close-popup
+                  @click="$router.push('meine-rundreisen')"
                 >
                   <q-item-section>
-                    <router-link to="/meine-rundreisen">Meine Rundreisen</router-link>
+                    Meine Rundreisen
                   </q-item-section>
                 </q-item>
                 <q-item
