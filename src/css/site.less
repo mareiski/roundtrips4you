@@ -11,7 +11,7 @@
 
 /*primary styles*/
 
-* {
+*:not('.q-toggle__thumb-container') {
     outline: none;
     box-sizing: unset;
 }
@@ -80,10 +80,6 @@ button, .button {
     font-size: 25px;
     padding: 5px 10px 5px 10px;
     transition: 0.4s;
-
-    &.q-btn:hover {
-        color:@primary-gray !important;
-    }
 
     &:hover {
         transform: scale(1.1);

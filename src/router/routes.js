@@ -9,11 +9,15 @@ const routes = [
         component: () => import('pages/Index.vue')
       },
       {
+        path: 'rundreisen-übersicht',
+        component: () => import('pages/RoundtripOverview.vue')
+      },
+      {
         path: 'rundreisen',
         component: () => import('pages/Roundtrips.vue')
       },
       {
-        path: 'rundreisen-details',
+        path: 'rundreisen-details/:id',
         component: () => import('pages/roundtripDetails.vue')
       },
       {
@@ -36,7 +40,10 @@ const routes = [
       },
       {
         path: 'meine-rundreisen',
-        component: () => import('pages/MyRoundtrips.vue')
+        component: () => import('pages/MyRoundtrips.vue'),
+        meta: {
+          requireAuth: true
+        }
       },
       {
         path: 'rundreise-bearbeiten',

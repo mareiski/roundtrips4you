@@ -58,7 +58,13 @@ module.exports = function (ctx) {
         'QTimelineEntry',
         'QEditor',
         'QPopupEdit',
-        'QDialog'
+        'QDialog',
+        'QForm',
+        'QToggle',
+        'QCard',
+        'QCardSection',
+        'QSpinnerPuff',
+        'QUploader'
       ],
 
       directives: [
@@ -76,7 +82,7 @@ module.exports = function (ctx) {
 
     build: {
       scopeHoisting: true,
-      // vueRouterMode: 'history',
+      vueRouterMode: 'history',
       // vueCompiler: true,
       // gzip: true,
       // analyze: true,

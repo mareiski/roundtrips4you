@@ -19,7 +19,7 @@
           >home</router-link>
           <router-link
             class="header-page-link"
-            to="/rundreisen"
+            to="/rundreisen-übersicht"
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
