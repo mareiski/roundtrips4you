@@ -46,7 +46,7 @@ const routes = [
         }
       },
       {
-        path: 'rundreise-bearbeiten',
+        path: 'rundreise-bearbeiten/:id',
         component: () => import('pages/EditRoundtrips.vue')
       }
     ]

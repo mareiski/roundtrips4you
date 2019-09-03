@@ -30,7 +30,7 @@
             style="width: 50px; margin-top:5px;"
             :style="user ? null : 'font-size:60px;'"
             :icon="user ? null : 'account_circle'"
-            @click="user ? null : $router.push('login')"
+            @click="user ? null : $router.push('/login')"
           >
             <img
               v-if="user"
@@ -41,7 +41,7 @@
                 <q-item
                   clickable
                   v-close-popup
-                  @click="$router.push('profil')"
+                  @click="$router.push('/profil')"
                 >
                   <q-item-section>
                     Profil
@@ -50,7 +50,7 @@
                 <q-item
                   clickable
                   v-close-popup
-                  @click="$router.push('meine-rundreisen')"
+                  @click="$router.push('/meine-rundreisen')"
                 >
                   <q-item-section>
                     Meine Rundreisen

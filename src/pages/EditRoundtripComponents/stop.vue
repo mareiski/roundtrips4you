@@ -3,24 +3,27 @@
     :subtitle="date"
     :icon="icon"
   >
-    <h6 class="q-timeline__title">{{title}}
+    <h6 class="q-timeline__title">{{titleInput}}
       <q-popup-edit
-        v-model="title"
+        v-model="titleInput"
         v-if="editor"
+        @save="saveData('Title', titleInput)"
       >
         <q-input
-          v-model="title"
+          v-model="titleInput"
           dense
           autofocus
-          counter
         />
       </q-popup-edit>
     </h6>
     <div>
-      <div v-html="editorPlaceholder"></div>
-      <q-popup-edit v-if="editor">
+      <div v-html="descriptionInput"></div>
+      <q-popup-edit
+        v-if="editor"
+        @hide="saveData('Description', descriptionInput)"
+      >
         <q-editor
-          v-model="editorPlaceholder"
+          v-model="descriptionInput"
           min-height="5rem"
           @keyup.enter.stop
           :toolbar="editorToolbar"
@@ -31,9 +34,21 @@
   </q-timeline-entry>
 </template>
 <script>
+import { db } from '../../firebaseInit'
+
 export default {
+  props: {
+    title: String,
+    date: String,
+    icon: String,
+    editorPlaceholder: String,
+    editor: Boolean,
+    docId: String
+  },
   data () {
     return {
+      titleInput: this.title,
+      descriptionInput: this.editorPlaceholder,
       editorFonts: {
         arial: 'Arial',
         arial_black: 'Arial Black',
@@ -111,12 +126,19 @@ export default {
       ]
     }
   },
-  props: {
-    title: String,
-    date: String,
-    icon: String,
-    editorPlaceholder: String,
-    editor: Boolean
+  methods: {
+    saveData (field, value) {
+      console.log(this.docId)
+      if (field === 'Title') {
+        db.collection('RoundtripDetails').doc(this.docId).update({
+          'Title': value
+        })
+      } else if (field === 'Description') {
+        db.collection('RoundtripDetails').doc(this.docId).update({
+          'Description': value
+        })
+      }
+    }
   }
 }
 </script>

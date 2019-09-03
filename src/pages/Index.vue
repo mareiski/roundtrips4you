@@ -7,11 +7,25 @@
       <div id="MainImgPlacholder">
         <h1 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h1>
         <span class="quote-author">Kurt Tucholsky</span>
-        <input
-          placeholder="Finde jetzt dein Traumziel..."
+        <q-select
+          filled
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="0"
+          label="Finde jetzt deine Traumreise..."
+          :options="countryOptions"
+          @filter="filterFn"
           class="main-search-bar"
-          type="search"
-        />
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                Keine Ergebnisse
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </div>
       <div class="box-seperator">
         <h2>Entdecke dein Traumziel mit einer Rundreise die zu dir passt!</h2>
@@ -57,11 +71,25 @@
 </style>
 
 <script>
+const stringOptions = [
+  'Deutschland', 'Italien', 'Vietnam'
+]
+
 export default {
   name: 'PageIndex',
   data () {
     return {
-      date: '2019/02/01'
+      date: '2019/02/01',
+      country: 'Finde jetzt deine Traumreise...',
+      countryOptions: stringOptions
+    }
+  },
+  methods: {
+    filterFn (val, update, abort) {
+      update(() => {
+        const needle = val.toLowerCase()
+        this.countryOptions = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
     }
   }
 }

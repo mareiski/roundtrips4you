@@ -15,6 +15,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "express-throttle-bandwidth": "^1.0.1",
+    "file": "^0.2.2",
     "firebase": "^6.4.0",
     "firebaseui": "^4.1.0",
     "formidable": "^1.2.1",

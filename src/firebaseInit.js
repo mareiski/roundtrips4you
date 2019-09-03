@@ -12,12 +12,13 @@ const config = {
   authDomain: 'roundtrips4you.firebaseapp.com',
   databaseURL: 'https://roundtrips4you.firebaseio.com',
   projectId: 'roundtrips4you',
-  storageBucket: '',
+  storageBucket: 'gs://roundtrips4you.appspot.com',
   messagingSenderId: '295257024914',
   appId: '1:295257024914:web:11432138a1faf186'
 }
 
 let db = null
+let storage = null
 
 const auth = {
   context: null,
@@ -36,6 +37,7 @@ const auth = {
       ]
     }
     db = firebase.firestore()
+    storage = firebase.storage()
     this.ui = new firebaseui.auth.AuthUI(firebase.auth())
 
     firebase.auth().onAuthStateChanged((user) => {
@@ -59,4 +61,4 @@ const auth = {
   }
 }
 
-export { auth, db }
+export { auth, db, storage }

@@ -7,7 +7,7 @@
     >
       <q-item
         clickable
-        @click="$router.push('rundreise-bearbeiten')"
+        @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
         v-ripple
         v-for="roundtrip in roundtrips"
         :key="roundtrip"
@@ -18,10 +18,11 @@
           top
         >
           <q-avatar
-            icon="location_on"
             color="primary"
             text-color="white"
-          />
+          >
+            <img :src="roundtrip.TitleImg">
+          </q-avatar>
         </q-item-section>
 
         <q-item-section>
@@ -55,12 +56,13 @@
 @import "../css/my-roundtrips.less";
 </style>
 <script>
-import { db, auth } from '../firebaseInit'
+import { db, auth, storage } from '../firebaseInit'
 import { date } from 'quasar'
 
 let uid = auth.user().uid
 let createdAtDatesArr = []
 let roundtripCount = 0
+let roundtripDocIds = []
 
 export default {
   name: 'myRoundtrips',
@@ -80,6 +82,7 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             roundtripArr.push(doc.data())
+            roundtripDocIds.push(doc.id)
           })
         })
       roundtripArr.forEach((roundtrip) => {
@@ -91,10 +94,23 @@ export default {
       let returnValue = createdAtDatesArr[roundtripCount]
       roundtripCount++
       return returnValue
+    },
+    loadTitleImgs () {
+      const context = this
+      let urlCount = 0
+      roundtripDocIds.forEach((docId) => {
+        var fileRef = storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg')
+        fileRef.getDownloadURL().then(function (url) {
+          context.roundtrips[urlCount].TitleImg = url
+          console.log(url)
+          urlCount++
+        })
+      })
     }
   },
   created () {
     this.getUserRoundtrips()
+    this.loadTitleImgs()
   }
 }
 </script>

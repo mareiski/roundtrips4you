@@ -318,6 +318,9 @@
             color="primary"
           />
         </q-inner-loading>
+        <div v-if="errorOccurred">
+          <h3>Es ist ein Fehler aufgetreten!</h3>
+        </div>
         <div
           class="roundtrip-card-container"
           v-for="roundtrip in roundtrips"
@@ -327,7 +330,7 @@
             <div class="card-left-col">
               <div
                 class="card-image"
-                :style="{ backgroundImage: 'url('+ require('../statics/' + roundtrip.ImageUrl) +')' }"
+                :style="{ backgroundImage: 'url(' + roundtrip.TitleImg + ')' }"
               ></div>
             </div>
             <div class="card-center-col">
@@ -350,7 +353,7 @@
                 <span class="country-title">{{roundtrip.Location}}</span>
               </div>
               <div class="card-row">
-                <span class="card-days">{{roundtrip.Days}} Tag{{roundtrip.Days==1?null:'e'}},</span>
+                <span class="card-days">{{roundtrip.Days}},</span>
                 <span class="card-hotels">{{roundtrip.Hotels}} Hotel{{roundtrip.Hotels==1?null:'s'}}</span>
               </div>
               <div class="card-row">
@@ -385,7 +388,7 @@
 </style>
 <script>
 import { date } from 'quasar'
-import { db } from '../firebaseInit'
+import { db, storage } from '../firebaseInit'
 import Vue from 'vue'
 import { firestorePlugin } from 'vuefire'
 Vue.use(firestorePlugin)
@@ -394,8 +397,8 @@ let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
 
 let roundtripArr = []
-let roundtripCount = 0
 let userImages = []
+let roundtripDocIds = []
 
 export default {
   data () {
@@ -421,10 +424,15 @@ export default {
       roundtripCategories: ['einblick'],
       filteredRoundtripCategories: [],
       roundtrips: [],
-      roundtripImages: []
+      error: false
     }
   },
   name: 'Roundtrips',
+  computed: {
+    errorOccurred () {
+      return this.error
+    }
+  },
   methods: {
     dateOptions (date) {
       return date >= formattedDate
@@ -438,11 +446,10 @@ export default {
     },
     removeRoundtrip (roundtrip) {
       roundtripArr.splice(roundtripArr.indexOf(roundtrip), 1)
+      this.roundtrips = roundtripArr
     },
     getCurrentUserImage () {
-      let image = userImages[roundtripCount]
-      roundtripCount++
-      console.log(image)
+      let image = userImages[0]
       return (image)
     },
     loadUserImage (UserId) {
@@ -462,6 +469,16 @@ export default {
       })
       return (users.UserImage)
     },
+    loadTitleImgs (roundtripArr) {
+      let urlCount = 0
+      roundtripDocIds.forEach((docId) => {
+        var fileRef = storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg')
+        fileRef.getDownloadURL().then(function (url) {
+          roundtripArr[urlCount].TitleImg = url
+          urlCount++
+        })
+      })
+    },
     loadRoundtrips () {
       this.selectedCountry = this.country
       this.visible = true
@@ -476,8 +493,9 @@ export default {
           roundtripArr = []
           snapshot.forEach(doc => {
             roundtripArr.push(doc.data())
+            roundtripDocIds.push(doc.id)
           })
-
+          this.loadTitleImgs(roundtripArr)
           this.roundtrips = roundtripArr
 
           // load filter
@@ -508,6 +526,7 @@ export default {
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
+          this.error = true
         })
     }
   },
