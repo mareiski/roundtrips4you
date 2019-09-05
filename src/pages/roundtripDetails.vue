@@ -81,12 +81,13 @@ export default {
     },
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
-        .where('RTId', '==', Number(RTId))
+        .where('RTId', '==', RTId)
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
           roundtrip = []
           snapshot.forEach(doc => {
+            console.log(doc.data())
             roundtrip.push(doc.data())
             roundtripDocId = doc.id
           })

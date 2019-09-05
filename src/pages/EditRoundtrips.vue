@@ -216,6 +216,20 @@
         </div>
       </q-list>
     </q-form>
+    <div class="row">
+      <q-btn
+        :loading="deleting"
+        label="Löschen"
+        class="q-mt-md"
+        color="primary"
+        text-color="white"
+        @click="deleteRoundtrip()"
+      >
+        <template v-slot:loading>
+          <q-spinner-puff />
+        </template>
+      </q-btn>
+    </div>
   </div>
 </template>
 <style lang="less">
@@ -318,6 +332,27 @@ export default {
         Title
       })
     },
+    deleteRoundtrip () {
+      if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
+      const context = this
+      db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
+        context.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'fas fa-check-circle',
+          message: 'Rundreise wurde gelöscht'
+        })
+        context.$router.push('/meine-rundreisen')
+      }).catch(function (error) {
+        console.log(error)
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'fas fa-exclamation-triangle',
+          message: 'Die Rundreise konnte nicht gelöscht werden'
+        })
+      })
+    },
     onSaveRoundtrip () {
       this.submitting = true
       // const ImageGalery = ['venice.png']
@@ -351,7 +386,7 @@ export default {
     },
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
-        .where('RTId', '==', Number(RTId))
+        .where('RTId', '==', RTId)
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
