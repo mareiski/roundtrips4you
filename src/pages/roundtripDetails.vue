@@ -87,7 +87,6 @@ export default {
         .then(snapshot => {
           roundtrip = []
           snapshot.forEach(doc => {
-            console.log(doc.data())
             roundtrip.push(doc.data())
             roundtripDocId = doc.id
           })

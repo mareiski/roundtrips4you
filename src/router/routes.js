@@ -13,7 +13,7 @@ const routes = [
         component: () => import('pages/RoundtripOverview.vue')
       },
       {
-        path: 'rundreisen',
+        path: 'rundreisen/:country',
         component: () => import('pages/Roundtrips.vue')
       },
       {
@@ -29,7 +29,10 @@ const routes = [
       },
       {
         path: 'registrieren',
-        component: () => import('pages/Register.vue')
+        component: () => import('pages/Register.vue'),
+        meta: {
+          guestOnly: true
+        }
       },
       {
         path: 'profil',
@@ -47,7 +50,10 @@ const routes = [
       },
       {
         path: 'rundreise-bearbeiten/:id',
-        component: () => import('pages/EditRoundtrips.vue')
+        component: () => import('pages/EditRoundtrips.vue'),
+        meta: {
+          requireAuth: true
+        }
       }
     ]
   }

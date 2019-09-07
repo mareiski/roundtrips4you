@@ -69,7 +69,7 @@
           </q-select>
           <a
             class="button"
-            @click="loadRoundtrips()"
+            @click="$router.push('/rundreisen/' + country); loadRoundtrips()"
           >Suchen</a>
         </div>
         <div class="fliter-card">
@@ -276,11 +276,10 @@
         >
           <div class="roundtrip-card">
             <div class="card-left-col">
-              <div
+              <q-img
                 class="card-image"
-                ref="imageTest"
-                :style="{ backgroundImage: 'url(' + TitleImgs[index] + ')' }"
-              ></div>
+                :src="TitleImgs[index]"
+              ></q-img>
             </div>
             <div class="card-center-col">
               <div class="card-row">
@@ -316,7 +315,7 @@
             </div>
             <div class="card-right-col">
               <div class="card-row">
-                <img :src="userImages[index]">
+                <q-img :src="userImages[index]"></q-img>
               </div>
               <div class="card-bottom-row">
                 <router-link
@@ -358,7 +357,7 @@ export default {
   data () {
     return {
       date: formattedDate,
-      country: 'Italien',
+      country: this.$route.params.country,
       selectedCountry: '',
       dayModel: null,
       orange: false,
@@ -420,13 +419,10 @@ export default {
           else console.log('nothing')
         }
       })
-      console.log(this.filterRoundtripArr)
       this.roundtrips = []
       this.roundtrips = this.roundtrips.concat(this.filterRoundtripArr)
-      console.log(this.roundtrips)
     },
     removeRoundtrip (roundtrip) {
-      console.log('remove')
       this.filterRoundtripArr.splice(this.filterRoundtripArr.indexOf(roundtrip), 1)
     },
     loadUserImage (UserId) {
@@ -442,14 +438,16 @@ export default {
           })
         })
     },
-    loadTitleImgs (roundtripArr) {
+    loadTitleImgs () {
       var context = this
-      roundtripDocIds.forEach((docId) => {
-        var fileRef = storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg')
-        fileRef.getDownloadURL().then(function (url) {
-          context.TitleImgs.push(url)
+
+      for (let i = 0; i < roundtripDocIds.length; i++) {
+        storage.ref().child('Images/Roundtrips/' + roundtripDocIds[i] + '/Title/titleImg').getDownloadURL().then(function (url) {
+          console.log(url)
+          console.log(i)
+          context.TitleImgs.splice(i, 0, url)
         })
-      })
+      }
     },
     loadRoundtrips () {
       this.selectedCountry = this.country
@@ -478,9 +476,8 @@ export default {
             originalRoundtripArr.push(doc.data())
             roundtripDocIds.push(doc.id)
           })
-          this.loadTitleImgs(roundtripArr)
           this.roundtrips = roundtripArr
-          console.log(originalRoundtripArr)
+          this.loadTitleImgs()
 
           // load filter
           let price = 0

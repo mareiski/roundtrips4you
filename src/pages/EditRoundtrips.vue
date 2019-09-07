@@ -182,10 +182,10 @@
           hide-upload-btn
           @added="fileAdded($event, 'title')"
         />
-        <img
+        <q-img
           style="width:50px;"
           :src="titleImgUrl"
-        >
+        ></q-img>
         <q-uploader
           url=""
           label="Weitere Bilder hochladen"
@@ -194,12 +194,12 @@
           hide-upload-btn
           @added="fileAdded($event, 'galery')"
         />
-        <img
+        <q-img
           style="width:50px;"
           v-for="url in galeryImgUrls"
           :key="url"
           :src="url"
-        >
+        ></q-img>
         <div class="row justify-end">
           <q-btn
             type="submit"

@@ -45,7 +45,7 @@
             size="50px"
             style="width: 50px; margin-left:5px;"
           >
-            <img :src="user.photoURL">
+            <q-img :src="user.photoURL"></q-img>
           </q-avatar>
         </div>
         <div class="row justify-end">

@@ -16,7 +16,7 @@
             <h2 class="country-title">{{country.title}}</h2>
             <router-link
               class="button"
-              :to="country.link"
+              :to="'/rundreisen/' + country.title"
             >Zu den Rundreisen</router-link>
           </div>
         </div>
@@ -34,33 +34,27 @@ export default {
       countries: [
         {
           title: 'Italien',
-          imageUrl: 'venice.jpg',
-          link: 'rundreisen'
+          imageUrl: 'venice.jpg'
         },
         {
           title: 'Vietnam',
-          imageUrl: 'vietnam.jpg',
-          link: 'rundreisen'
+          imageUrl: 'vietnam.jpg'
         },
         {
           title: 'USA',
-          imageUrl: 'goldenGate.jpg',
-          link: 'rundreisen'
+          imageUrl: 'goldenGate.jpg'
         },
         {
           title: 'Italien',
-          imageUrl: 'venice.jpg',
-          link: 'rundreisen'
+          imageUrl: 'venice.jpg'
         },
         {
           title: 'Vietnam',
-          imageUrl: 'vietnam.jpg',
-          link: 'rundreisen'
+          imageUrl: 'vietnam.jpg'
         },
         {
           title: 'USA',
-          imageUrl: 'goldenGate.jpg',
-          link: 'rundreisen'
+          imageUrl: 'goldenGate.jpg'
         }
       ]
     }

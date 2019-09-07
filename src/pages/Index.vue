@@ -13,9 +13,11 @@
           hide-selected
           fill-input
           input-debounce="0"
+          v-model="searchLocation"
           label="Finde jetzt deine Traumreise..."
           :options="countryOptions"
           @filter="filterFn"
+          @input="$router.push('/rundreisen/' + searchLocation)"
           class="main-search-bar"
         >
           <template v-slot:no-option>
@@ -80,8 +82,8 @@ export default {
   data () {
     return {
       date: '2019/02/01',
-      country: 'Finde jetzt deine Traumreise...',
-      countryOptions: stringOptions
+      countryOptions: stringOptions,
+      searchLocation: ''
     }
   },
   methods: {

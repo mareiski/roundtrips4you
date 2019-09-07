@@ -223,7 +223,7 @@ export default {
 
             var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
             fileRef.getDownloadURL().then(function (url) {
-              context.TitleImgs.push(url)
+              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
             })
           })
         })
@@ -241,6 +241,9 @@ export default {
   },
   created () {
     this.getUserRoundtrips()
+  },
+  beforeCreate () {
+    auth.init(this, this.$store, this.$router)
   }
 }
 </script>
