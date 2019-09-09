@@ -1,3 +1,4 @@
+@import "site.less";
 .edit-roundtrips {
     .q-timeline__dot {
         box-sizing: border-box;
@@ -15,9 +16,48 @@
         }
     }
 
+    .stop-container {
+        display: flex;
+        justify-content: space-between;
+
+        .q-icon {
+            font-size:20px;
+
+            &:hover {
+                color:@primary-orange;
+            }
+        }
+    }
+
     .q-card__section form > div {
         padding: 10px 20%;
         display: flex;
         justify-content: center;
+    }
+
+    form > .q-list > div {
+       padding-bottom:30px;
+    }
+
+    .galeryImgUploaderContainer {
+        display: flex;
+        
+        &>.uploader {
+            margin-right: 20px;
+        }
+    }
+
+     .uploader {
+        width:150px;
+        height:150px;
+        border:solid #d5d5d5 1px;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-image: url('https://www.ultimatesource.toys/wp-content/uploads/2013/11/dummy-image-landscape-1-150x150.jpg');
+        background-position: center;
+        background-size: cover;
     }
 }

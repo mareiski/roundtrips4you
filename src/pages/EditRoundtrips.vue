@@ -18,14 +18,14 @@
 
       <div class="stop-list">
         <Stop
-          v-for="stop in stops"
+          v-for="(stop, index) in stops"
           :key="stop"
           :title="stop.Title"
           :date="stop.InitDate"
           :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
           :editor-placeholder="stop.Description"
           :editor="true"
-          :doc-id="getDocId()"
+          :doc-id="documentIds[index]"
         ></Stop>
       </div>
     </q-timeline>
@@ -139,7 +139,7 @@
           </q-tooltip>
         </q-toggle>
         <q-select
-          filled
+          outlined
           v-model="country"
           use-input
           hide-selected
@@ -162,11 +162,12 @@
         </q-select>
         <q-select
           outlined
-          v-model="time"
-          :options="timeOptions"
-          label="Zeitraum"
+          v-model="category"
+          :options="categoryOptions"
+          label="Kategorie"
           lazy-rules
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Zeitraum']"
+          use-input
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
           clearable
           class="input-item"
         >
@@ -174,32 +175,102 @@
             <q-icon name="access_time" />
           </template>
         </q-select>
-        <q-uploader
-          url=""
-          label="Titelbild hochladen"
-          accept=".jpg, image/*"
-          style="max-width: 300px"
-          hide-upload-btn
-          @added="fileAdded($event, 'title')"
+        <div class="flex">
+          <q-rating
+            class="stars"
+            v-model="stars"
+            size="15px"
+            color="gold"
+            style="margin-right:10px;"
+          />
+          <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
+        </div>
+        <q-input
+          v-model="descriptionInput"
+          outlined
+          autogrow
+          lazy-rules
+          label="Kurze Beschreibung"
+          :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
+          val => val.length > 10 && val.length < 150 || 'Bitte gib eine Beschreibung zwischen 10 und 150 Zeichen an' ]"
         />
-        <q-img
-          style="width:50px;"
-          :src="titleImgUrl"
-        ></q-img>
+        <q-input
+          v-model="tag1"
+          label="Reiseart"
+          outlined
+          autofocus
+          lazy-rules
+          :rules="[val => val !== null && val !== '' || 'Bitte gib eine Reiseart an']"
+        />
+        <q-input
+          v-model="tag2"
+          label="Reisemerkmal 1"
+          outlined
+          autofocus
+          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
+        />
+        <q-input
+          v-model="tag3"
+          label="Reisemerkmal 2"
+          outlined
+          autofocus
+          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
+        />
+        <div>
+          <div
+            class="uploader"
+            :style="{ backgroundImage: 'url('+ titleImgUrl +')' }"
+          >
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              @click="() => $refs.titleUpload.pickFiles()"
+            ></q-btn>
+          </div>
+          <q-uploader
+            url=""
+            label="Titelbild hochladen"
+            accept=".jpg, image/*"
+            style="max-width: 300px; display:none;"
+            hide-upload-btn
+            ref="titleUpload"
+            @added="fileAdded($event, 'title')"
+          />
+        </div>
         <q-uploader
           url=""
           label="Weitere Bilder hochladen"
           multiple
-          style="max-width: 300px"
+          style="max-width: 300px; display:none;"
           hide-upload-btn
+          ref="galeryUpload"
           @added="fileAdded($event, 'galery')"
         />
-        <q-img
-          style="width:50px;"
-          v-for="url in galeryImgUrls"
-          :key="url"
-          :src="url"
-        ></q-img>
+        <div class="galeryImgUploaderContainer">
+          <div
+            class="uploader"
+            v-for="(url, index) in galeryImgUrls"
+            :key="url"
+            :style="{ backgroundImage: 'url('+ url +')' }"
+          >
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              style="transform:rotate(45deg)"
+              @click="removeFile(index)"
+            ></q-btn>
+          </div>
+          <div class="uploader">
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              @click="() => $refs.galeryUpload.pickFiles()"
+            ></q-btn>
+          </div>
+        </div>
         <div class="row justify-end">
           <q-btn
             type="submit"
@@ -216,20 +287,52 @@
         </div>
       </q-list>
     </q-form>
-    <div class="row">
+    <h4>Danger Zone</h4>
+    <q-list
+      bordered
+      class="rounded-borders"
+      style="padding:10px; border-color:red;"
+    >
+      <p style="font-size:18px;">Diese Rundreise und alle enthaltenen Inhalte löschen</p>
       <q-btn
         :loading="deleting"
         label="Löschen"
         class="q-mt-md"
         color="primary"
         text-color="white"
-        @click="deleteRoundtrip()"
+        @click="deleteDialog = true;"
       >
         <template v-slot:loading>
           <q-spinner-puff />
         </template>
       </q-btn>
-    </div>
+      <q-dialog
+        persistent
+        v-model="deleteDialog"
+      >
+        <q-card>
+          <q-card-section class="row items-center">
+            <span class="q-ml-sm">Willst du wirklich diese Rundreise und alle enthaltenen Inhalte löschen. Dies kann nichtmehr rückgängig gemacht werden.</span>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="Abbrechen"
+              color="primary"
+              v-close-popup
+            />
+            <q-btn
+              flat
+              label="Rundreise Löschen"
+              @click="deleteRoundtrip()"
+              color="primary"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </q-list>
   </div>
 </template>
 <style lang="less">
@@ -256,7 +359,6 @@ let BookingComLink = '',
 
 let details = []
 let documentIds = []
-let docNum = 0
 let roundtrip = []
 let roundtripDocId = ''
 let galeryImgId = 0
@@ -266,16 +368,15 @@ const stringOptions = [
 ]
 
 export default {
+  name: 'EditRoundtrips',
   components: {
     Stop
   },
   data () {
     return {
       options: ['Stop', 'Hotel'],
-      timeOptions: [
-        '< 5 Tage', '5-8 Tage', '9-11 Tage', '12-15 Tage', '> 15 Tage'
-      ],
-      time: null,
+      category: null,
+      categoryOptions: ['Kategorie1', 'Kategorie2'],
       selectedOption: null,
       date: formattedDate,
       addButtonActive: false,
@@ -284,11 +385,18 @@ export default {
       title: '',
       country: '',
       submitting: false,
+      deleting: false,
       countryOptions: stringOptions,
       stops: [],
       documentIds: [],
       titleImgUrl: null,
-      galeryImgUrls: []
+      galeryImgUrls: [],
+      stars: 3,
+      descriptionInput: null,
+      tag1: null,
+      tag2: null,
+      tag3: null,
+      deleteDialog: false
     }
   },
   methods: {
@@ -300,7 +408,7 @@ export default {
       this.addButtonActive = false
 
       this.addStop(this.date, this.selectedOption)
-      this.stops.push({ Title: 'Titel', InitDate: this.date, HotelStop: this.selectedOption === 'Hotel', Description: 'Beschreibung' })
+      this.loadRoundtripDetails(this.$route.params.id)
 
       this.$q.notify({
         color: 'green-4',
@@ -308,11 +416,6 @@ export default {
         icon: 'fas fa-check-circle',
         message: 'Eintrag wurde erstellt'
       })
-    },
-    getDocId () {
-      const returnVal = documentIds[docNum]
-      docNum++
-      return returnVal
     },
     addStop (DateString, HotelStop) {
       RTId = this.$route.params.id
@@ -331,6 +434,34 @@ export default {
         RTId,
         Title
       })
+
+      let daysString = ''
+      let days = 1
+      if (this.stops.length > 1) {
+        let initDates = []
+
+        this.stops.forEach(stop => {
+          if (!initDates.includes(new Date(stop.InitDate))) initDates.push(new Date(stop.InitDate))
+        })
+
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+      this.saveData('Days', daysString)
     },
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
@@ -355,12 +486,13 @@ export default {
     },
     onSaveRoundtrip () {
       this.submitting = true
-      // const ImageGalery = ['venice.png']
 
       if (this.saveData('Public', this.publish) &&
-        this.saveData('Location', this.country) && this.saveData('Days', this.time)) {
-        // this.saveData('ImageGalery', ImageGalery)
-
+        this.saveData('Location', this.country) &&
+        this.saveData('Category', this.category) &&
+        this.saveData('Stars', this.stars) &&
+        this.saveData('Description', this.descriptionInput) &&
+        this.saveData('Tags', [this.tag1, this.tag2, this.tag3])) {
         this.submitting = false
         this.$q.notify({
           color: 'green-4',
@@ -398,7 +530,12 @@ export default {
           this.title = roundtrip[0].Title
           this.publish = roundtrip[0].Public
           this.country = roundtrip[0].Location
-          this.time = roundtrip[0].Days
+          this.stars = roundtrip[0].Stars
+          this.category = roundtrip[0].Category
+          this.descriptionInput = roundtrip[0].Description
+          this.tag1 = roundtrip[0].Tags[0]
+          this.tag2 = roundtrip[0].Tags[1]
+          this.tag3 = roundtrip[0].Tags[2]
 
           this.loadInitImgs()
         })
@@ -451,23 +588,9 @@ export default {
       console.log(roundtripDocId)
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
       try {
-        if (field === 'Title') {
-          db.collection('Roundtrips').doc(roundtripDocId).update({
-            'Title': value
-          })
-        } else if (field === 'Public') {
-          db.collection('Roundtrips').doc(roundtripDocId).update({
-            'Public': value
-          })
-        } else if (field === 'Location') {
-          db.collection('Roundtrips').doc(roundtripDocId).update({
-            'Location': value
-          })
-        } else if (field === 'Days') {
-          db.collection('Roundtrips').doc(roundtripDocId).update({
-            'Days': value
-          })
-        }
+        db.collection('Roundtrips').doc(roundtripDocId).update({
+          ['' + field]: value
+        })
       } catch (error) {
         console.log(error)
         return false
@@ -481,9 +604,12 @@ export default {
     },
     fileAdded: function (event, kind) {
       let files = event
+      let context = this
       Array.from(Array(files.length).keys()).map(x => {
-        this.upload(files[x], kind, x)
+        this.upload(files[x], kind, x + context.galeryImgUrls.length)
       })
+      this.$refs.titleUpload.reset()
+      this.$refs.galeryUpload.reset()
     },
     upload (file, kind, count) {
       let kindPath = 'Title/titleImg'
@@ -520,12 +646,29 @@ export default {
           console.log(itemRef)
           fileRef = storage.ref().child(itemRef.fullPath)
           context.galeryImgUrls = []
-          fileRef.getDownloadURL().then(function (url) {
+          fileRef.getDownloadURL().then(function (url, index) {
             context.galeryImgUrls.push(url)
           })
         })
       }).catch(function (error) {
         console.log(error)
+      })
+    },
+    removeFile (index) {
+      let galeryImgNameArr = this.galeryImgUrls[index].split('Galery%2F')
+      let galeryImgName = galeryImgNameArr[1]
+      galeryImgName = galeryImgName.substring(0, galeryImgName.indexOf('?alt'))
+
+      const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery/' + galeryImgName)
+      let context = this
+      fileRef.delete().then(function (snapshot) {
+        context.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'fas fa-check-circle',
+          message: 'Bild wurde erfolgreich gelöscht'
+        })
+        context.galeryImgUrls.splice(index, 1)
       })
     }
   },

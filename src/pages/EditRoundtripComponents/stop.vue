@@ -3,19 +3,27 @@
     :subtitle="date"
     :icon="icon"
   >
-    <h6 class="q-timeline__title">{{titleInput}}
-      <q-popup-edit
-        v-model="titleInput"
-        v-if="editor"
-        @save="saveData('Title', titleInput)"
-      >
-        <q-input
+    <div class="stop-container">
+      <h6 class="q-timeline__title">{{titleInput}}
+        <q-popup-edit
           v-model="titleInput"
-          dense
-          autofocus
-        />
-      </q-popup-edit>
-    </h6>
+          v-if="editor"
+          @save="saveData('Title', titleInput)"
+        >
+          <q-input
+            v-model="titleInput"
+            dense
+            autofocus
+          />
+        </q-popup-edit>
+      </h6>
+      <q-icon
+        v-if="editor"
+        name="delete"
+        class="cursor-pointer"
+        @click="deleteEntry()"
+      ></q-icon>
+    </div>
     <div>
       <div v-html="descriptionInput"></div>
       <q-popup-edit
@@ -129,15 +137,42 @@ export default {
   methods: {
     saveData (field, value) {
       console.log(this.docId)
-      if (field === 'Title') {
-        db.collection('RoundtripDetails').doc(this.docId).update({
-          'Title': value
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        ['' + field]: value
+      })
+    },
+    deleteEntry () {
+      if (this.docId === null || this.docId === '' || this.docId === 'undefined') return false
+      console.log(this.docId)
+      const context = this
+      db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
+        context.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'fas fa-check-circle',
+          message: 'Eintrag wurde gelöscht'
         })
-      } else if (field === 'Description') {
-        db.collection('RoundtripDetails').doc(this.docId).update({
-          'Description': value
+        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id)
+      }).catch(function (error) {
+        console.log(error)
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'fas fa-exclamation-triangle',
+          message: 'Der Eintrag konnte nicht gelöscht werden'
         })
+      })
+    },
+    getParent (name) {
+      let p = this.$parent
+      while (typeof p !== 'undefined') {
+        if (p.$options.name === name) {
+          return p
+        } else {
+          p = p.$parent
+        }
       }
+      return false
     }
   }
 }

@@ -63,6 +63,7 @@ module.exports = function (ctx) {
         'QToggle',
         'QCard',
         'QCardSection',
+        'QCardActions',
         'QSpinnerPuff',
         'QUploader',
         'QCarousel',
