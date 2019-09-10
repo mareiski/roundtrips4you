@@ -9,7 +9,7 @@
         clickable
         @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
         v-ripple
-        v-for="(roundtrip, index) in roundtrips"
+        v-for="roundtrip in roundtrips"
         :key="roundtrip"
       >
         <q-item-section
@@ -20,7 +20,7 @@
             color="primary"
             text-color="white"
           >
-            <img :src="TitleImgs[index]">
+            <img :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
           </q-avatar>
         </q-item-section>
 
@@ -147,7 +147,8 @@ export default {
       addExpanded: false,
       addButtonActive: false,
       selectedOption: null,
-      countryOptions: ['Deutschland', 'Italien', 'Vietnam']
+      countryOptions: ['Deutschland', 'Italien', 'Vietnam'],
+      RTIds: []
     }
   },
   methods: {
@@ -223,7 +224,8 @@ export default {
 
             var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
             fileRef.getDownloadURL().then(function (url) {
-              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
+              context.TitleImgs.push(url)
+              context.RTIds.push(doc.data().RTId)
             })
           })
         })
@@ -241,9 +243,6 @@ export default {
   },
   created () {
     this.getUserRoundtrips()
-  },
-  beforeCreate () {
-    auth.init(this, this.$store, this.$router)
   }
 }
 </script>

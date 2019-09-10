@@ -30,7 +30,8 @@
         opacity: 0.35;
     }
 
-    #CardBackgroundImgPlaceholder, #RoundtripCardBackgroundImgPlaceholder {
+    #CardBackgroundImgPlaceholder,
+    #RoundtripCardBackgroundImgPlaceholder {
         width: 100%;
         min-height: 100vh;
         z-index: -1;
@@ -68,7 +69,8 @@
                     text-transform: uppercase;
                 }
 
-                button, .button {
+                button,
+                .button {
                     font-size: 22px;
                     margin-bottom: 20px;
 
@@ -88,7 +90,7 @@
             padding-top: 20px;
 
 
-            .fliter-card {
+            .filter-card {
                 height: 100%;
                 padding: 20px;
                 display: flex;
@@ -98,11 +100,13 @@
                 margin-bottom: 20px;
                 background-color: white;
 
-                &>*:not(a) {
-                    margin: 0 0 10px 0;
+
+                &>div {
+                    padding: 0 0 10px 0;
                 }
 
-                input, select {
+                input,
+                select {
                     font-size: 20px;
                 }
 
@@ -116,36 +120,37 @@
                     background-color: transparent;
                     color: @primary-orange;
                     font-size: 20px;
+                    margin-top: 10px;
                 }
 
                 .input-item {
-                   font-size: 20px;
-                   border-radius: 4px;
-                  
-                   &::before {
-                       border: 1px solid rgba(0,0,0,0.24);
+                    font-size: 20px;
+                    border-radius: 4px;
+
+                    &::before {
+                        border: 1px solid rgba(0, 0, 0, 0.24);
                     }
                 }
 
                 .filter-expansion {
-                 font-size: 18px;
-                 
+                    font-size: 18px;
 
-                .q-item {
-                   background-color: #999;
-                   color:white;
 
-                   .material-icons {
-                       color:white;
-                   }
+                    .q-item {
+                        background-color: #999;
+                        color: white;
+
+                        .material-icons {
+                            color: white;
+                        }
+                    }
+
+                    .q-expansion-item__content {
+                        display: flex;
+                        flex-direction: column;
+                        padding: 0 15px 0 10px
+                    }
                 }
-
-                .q-expansion-item__content {
-                  display: flex;
-                  flex-direction: column;
-                  padding: 0 10px 0 10px
-                }
-            }
             }
         }
 
@@ -202,7 +207,8 @@
                         align-items: flex-start;
                         justify-content: space-between;
 
-                        .card-row, .card-bottom-row {
+                        .card-row,
+                        .card-bottom-row {
                             display: flex;
                             height: 50px;
 
@@ -228,7 +234,8 @@
                                 margin: auto;
                             }
 
-                            .card-tag, .card-category {
+                            .card-tag,
+                            .card-category {
                                 color: white;
                                 background-color: @primary-gray;
                                 border-radius: 20px;
@@ -242,7 +249,8 @@
                                 text-transform: capitalize;
                             }
 
-                            .card-days, .card-hotels {
+                            .card-days,
+                            .card-hotels {
                                 font-family: @primary-number-font;
                             }
                         }
@@ -254,7 +262,8 @@
                         flex-direction: column;
                         justify-content: space-between;
 
-                        .card-row, .card-bottom-row {
+                        .card-row,
+                        .card-bottom-row {
                             align-items: flex-end;
                             text-align: right;
                         }
@@ -281,13 +290,14 @@
     }
 }
 
-@media @tablet, @mobile {
+@media @tablet,
+@mobile {
     .roundtrip-card {
         flex-direction: column;
         align-items: center;
         height: auto !important;
 
-        & > div {
+        &>div {
             width: 100% !important;
             justify-content: center !important;
             align-items: center !important;
@@ -329,10 +339,10 @@
 }
 
 .q-inner-loading {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding-top:117px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 117px;
 }
 
 .country-card-container {

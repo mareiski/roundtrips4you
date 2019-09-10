@@ -4,10 +4,10 @@
     <div id="CardBackgroundImg"></div>
     <div id="RoundtripCardBackgroundImgPlaceholder">
       <div class="filter-container">
-        <div class="fliter-card">
+        <div class="filter-card">
           <h2>Suche</h2>
           <q-select
-            filled
+            outlined
             v-model="country"
             use-input
             hide-selected
@@ -18,7 +18,6 @@
             @filter="filterFn"
             lazy-rules
             :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-            style="width: 250px; padding-bottom: 32px"
           >
             <template v-slot:no-option>
               <q-item>
@@ -29,7 +28,7 @@
             </template>
           </q-select>
           <q-input
-            filled
+            outlined
             v-model="date"
             mask="date"
             :rules="['date']"
@@ -72,7 +71,7 @@
             @click="$router.push('/rundreisen/' + country); loadRoundtrips()"
           >Suchen</a>
         </div>
-        <div class="fliter-card">
+        <div class="filter-card">
           <h2>Filter</h2>
           <q-list
             bordered
@@ -86,12 +85,13 @@
               <q-range
                 v-model="step"
                 :min="0"
-                :max="330"
+                :max="maxPrice"
                 :step="10"
                 :left-label-value="step.min + ' €'"
                 :right-label-value="step.max + ' €'"
                 label
                 color="deep-orange"
+                @input="filterRoundtrips()"
               />
               <p>
                 Preis ab {{ step.min }} € bis {{ step.max }} €
@@ -175,7 +175,7 @@
                 @input="filterRoundtrips()"
               />
             </q-expansion-item>
-            <q-expansion-item
+            <!-- <q-expansion-item
               class="filter-expansion"
               default-opened
             >
@@ -255,7 +255,7 @@
                 v-model="orange"
                 color="dark-orange"
               />
-            </q-expansion-item>
+            </q-expansion-item>-->
           </q-list>
         </div>
       </div>
@@ -278,7 +278,7 @@
             <div class="card-left-col">
               <q-img
                 class="card-image"
-                :src="TitleImgs[index]"
+                :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
               ></q-img>
             </div>
             <div class="card-center-col">
@@ -345,7 +345,6 @@ let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
 
 let roundtripArr = []
-let roundtripDocIds = []
 
 const stringOptions = [
   'Deutschland', 'Italien', 'Vietnam'
@@ -380,7 +379,9 @@ export default {
       countryOptions: stringOptions,
       filterRoundtripArr: [],
       TitleImgs: [],
-      userImages: []
+      RTIds: [],
+      userImages: [],
+      maxPrice: 0
     }
   },
   name: 'Roundtrips',
@@ -398,24 +399,25 @@ export default {
       this.filterRoundtripArr = []
       this.filterRoundtripArr = this.filterRoundtripArr.concat(originalRoundtripArr)
       originalRoundtripArr.forEach((roundtrip) => {
-        console.log(!this.filteredRoundtripCategories.includes(roundtrip.Category))
-
         let attrLeng = this.filteredRoundtripAttr.length
         if (attrLeng > 0) {
           if (attrLeng === 1) {
             if (!this.filteredRoundtripAttr.includes(roundtrip.Tags[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Tags[2])) this.removeRoundtrip(roundtrip)
             else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
+            else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           } else if (attrLeng > 1) {
             if (!this.filteredRoundtripAttr.includes(roundtrip.Tags[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Tags[2])) this.removeRoundtrip(roundtrip)
             else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
+            else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           }
         } else {
           if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
           else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
+          else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
           else console.log('nothing')
         }
       })
@@ -438,16 +440,13 @@ export default {
           })
         })
     },
-    loadTitleImgs () {
-      var context = this
-
-      for (let i = 0; i < roundtripDocIds.length; i++) {
-        storage.ref().child('Images/Roundtrips/' + roundtripDocIds[i] + '/Title/titleImg').getDownloadURL().then(function (url) {
-          console.log(url)
-          console.log(i)
-          context.TitleImgs.splice(i, 0, url)
-        })
-      }
+    loadTitleImg (docId, RTId) {
+      let context = this
+      storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg').getDownloadURL().then(function (url) {
+        console.log(url)
+        context.TitleImgs.push(url)
+        context.RTIds.push(RTId)
+      })
     },
     loadRoundtrips () {
       this.selectedCountry = this.country
@@ -455,7 +454,6 @@ export default {
       this.showSimulatedReturnData = false
       roundtripArr = []
       originalRoundtripArr.length = 0
-      roundtripDocIds = []
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', '==', this.country)
         .where('Public', '==', true)
@@ -474,10 +472,9 @@ export default {
           snapshot.forEach(doc => {
             roundtripArr.push(doc.data())
             originalRoundtripArr.push(doc.data())
-            roundtripDocIds.push(doc.id)
+            this.loadTitleImg(doc.id, doc.data().RTId)
           })
           this.roundtrips = roundtripArr
-          this.loadTitleImgs()
 
           // load filter
           let price = 0
@@ -498,6 +495,7 @@ export default {
           })
 
           this.step.max = price
+          this.maxPrice = price
 
           this.tripKind = tripKind
           this.roundtripAttr = roundtripAttr

@@ -198,7 +198,6 @@
           v-model="tag1"
           label="Reiseart"
           outlined
-          autofocus
           lazy-rules
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Reiseart an']"
         />
@@ -206,14 +205,12 @@
           v-model="tag2"
           label="Reisemerkmal 1"
           outlined
-          autofocus
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
         />
         <q-input
           v-model="tag3"
           label="Reisemerkmal 2"
           outlined
-          autofocus
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
         />
         <div>
