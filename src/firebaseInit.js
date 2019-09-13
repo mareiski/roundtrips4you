@@ -30,7 +30,7 @@ const auth = {
 
     firebase.initializeApp(config)
     this.uiConfig = {
-      signInSuccessUrl: '/#/profil',
+      signInSuccessUrl: '/#/meine-rundreisen',
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID
@@ -47,7 +47,7 @@ const auth = {
       let guestOnly = this.context.$route.matched.some(record => record.meta.guestOnly)
 
       if (requireAuth && !user) router.push('login')
-      else if (guestOnly && user) router.push('profil')
+      else if (guestOnly && user) router.push('meine-rundreisen')
     })
   },
   authForm (container) {
@@ -56,8 +56,13 @@ const auth = {
   user () {
     return this.context ? firebase.auth().currentUser : null
   },
-  logout () {
-    firebase.auth().signOut()
+  logout (router) {
+    firebase.auth().signOut().then(
+      router.push('/')
+    )
+  },
+  authRef () {
+    return firebase.auth()
   }
 }
 

@@ -1,10 +1,29 @@
 <template>
   <div class="my-roundtrips">
+    <h3>Meine Rundreisen</h3>
     <q-list
       bordered
       padding
       class="rounded-borders"
     >
+      <q-item v-if="showNoRoundtripsText">
+        <q-item-section
+          avatar
+          top
+        >
+          <q-avatar
+            color="primary"
+            text-color="white"
+            font-size="30px"
+            icon="info"
+          >
+          </q-avatar>
+        </q-item-section>
+        <q-item-section side>
+          <q-item-label lines="2">Du hast leider noch keine Rundreisen erstellt. <br>
+            Klicke einfach auf den Button unten um deine erste Rundreise zu erstellen.</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item
         clickable
         @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
@@ -20,7 +39,10 @@
             color="primary"
             text-color="white"
           >
-            <img :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
+            <img
+              :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
+              @error="imageUrlAlt($event)"
+            >
           </q-avatar>
         </q-item-section>
 
@@ -95,6 +117,7 @@
                 v-model="selectedOption"
                 :options="countryOptions"
                 label="Land"
+                new-value-mode
                 clearable
                 class="input-item"
                 lazy-rules
@@ -131,7 +154,7 @@
 import { db, auth, storage } from '../firebaseInit'
 import { date } from 'quasar'
 
-let uid = auth.user().uid
+let uid = null
 let createdAtDatesArr = []
 let roundtripCount = 0
 let roundtripDocIds = []
@@ -148,13 +171,15 @@ export default {
       addButtonActive: false,
       selectedOption: null,
       countryOptions: ['Deutschland', 'Italien', 'Vietnam'],
-      RTIds: []
+      RTIds: [],
+      showNoRoundtripsText: false
     }
   },
   methods: {
     onAddRoundtrip () {
       this.addExpanded = false
       this.addButtonActive = false
+      this.showNoRoundtripsText = false
 
       if (this.addRoundtrip(this.title, this.selectedOption)) {
         this.$q.notify({
@@ -208,10 +233,14 @@ export default {
       }
       return true
     },
+    imageUrlAlt (event) {
+      event.target.src = './statics/dummy-image-landscape-1-150x150.jpg'
+    },
     getUserRoundtrips () {
       roundtripArr = []
       roundtripDocIds = []
       var context = this
+      let showNoRoundtripsText = false
       let roundtripsRef = db.collection('Roundtrips')
         .where('UserId', '==', uid)
         .orderBy('createdAt')
@@ -226,14 +255,25 @@ export default {
             fileRef.getDownloadURL().then(function (url) {
               context.TitleImgs.push(url)
               context.RTIds.push(doc.data().RTId)
+            }).catch(function (error) {
+              console.log(error)
+              context.TitleImgs.push('./statics/dummy-image-landscape-1-150x150.jpg')
             })
           })
+        }).catch(function (error) {
+          console.log(error)
         })
+
+      console.log(this.TitleImgs)
+      context.TitleImgs.push('./statics/dummy-image-landscape-1-150x150.jpg')
+
       roundtripArr.forEach((roundtrip) => {
         createdAtDatesArr.push(date.formatDate(roundtrip.createdAt, 'YYYY/MM/DD'))
+        showNoRoundtripsText = true
       })
 
       this.roundtrips = roundtripArr
+      this.showNoRoundtripsText = showNoRoundtripsText
     },
     getCreatedAtDate () {
       let returnValue = createdAtDatesArr[roundtripCount]
@@ -242,7 +282,10 @@ export default {
     }
   },
   created () {
-    this.getUserRoundtrips()
+    auth.authRef().onAuthStateChanged((user) => {
+      uid = auth.user().uid
+      this.getUserRoundtrips()
+    })
   }
 }
 </script>

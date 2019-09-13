@@ -14,6 +14,7 @@
           fill-input
           input-debounce="0"
           v-model="searchLocation"
+          hide-dropdown-icon
           label="Finde jetzt deine Traumreise..."
           :options="countryOptions"
           @filter="filterFn"
@@ -26,6 +27,9 @@
                 Keine Ergebnisse
               </q-item-section>
             </q-item>
+          </template>
+          <template v-slot:append>
+            <q-icon name="search" />
           </template>
         </q-select>
       </div>

@@ -31,7 +31,7 @@ export default {
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password).then(
         (user) => {
           alert('Registration was succesfull')
-          this.$router.replace('/')
+          this.$router.replace('/meine-rundreisen')
         },
         (err) => {
           alert('Oops. ' + err.message)

@@ -337,9 +337,6 @@
 <script>
 import { date } from 'quasar'
 import { db, storage } from '../firebaseInit'
-import Vue from 'vue'
-import { firestorePlugin } from 'vuefire'
-Vue.use(firestorePlugin)
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')

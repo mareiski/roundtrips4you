@@ -163,8 +163,21 @@ export default {
   },
   methods: {
     logOut () {
-      auth.logout()
+      auth.logout(this.$router)
     }
+  },
+  created () {
+    auth.authRef().onAuthStateChanged((user) => {
+      this.$router.beforeEach((to, from, next) => {
+        let loggedIn = auth.user()
+        let requireAuth = to.matched.some(record => record.meta.requireAuth)
+        let guestOnly = to.matched.some(record => record.meta.guestOnly)
+
+        if (requireAuth && !loggedIn) next('login')
+        else if (guestOnly && loggedIn) next('meine-rundreisen')
+        else next()
+      })
+    })
   }
 }
 </script>

@@ -309,7 +309,7 @@
       >
         <q-card>
           <q-card-section class="row items-center">
-            <span class="q-ml-sm">Willst du wirklich diese Rundreise und alle enthaltenen Inhalte löschen. Dies kann nichtmehr rückgängig gemacht werden.</span>
+            <span class="q-ml-sm">Willst du wirklich diese Rundreise und alle enthaltenen Inhalte löschen ? Dies kann nicht mehr rückgängig gemacht werden.</span>
           </q-card-section>
 
           <q-card-actions align="right">
@@ -338,7 +338,7 @@
 <script>
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
-import { db, storage } from '../firebaseInit'
+import { auth, db, storage } from '../firebaseInit'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
@@ -667,12 +667,45 @@ export default {
         })
         context.galeryImgUrls.splice(index, 1)
       })
+    },
+    hasDisplayPermission (RTId, userId) {
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('RTId', '==', RTId)
+        .where('UserId', '==', userId)
+        .limit(1)
+      roundtripsRef.get()
+        .then(snapshot => {
+          return Number(snapshot.size) === 1
+        })
     }
   },
   created () {
-    const RTId = this.$route.params.id
-    this.loadRoundtripDetails(RTId)
-    this.loadSingleRoundtrip(RTId)
+    auth.authRef().onAuthStateChanged((user) => {
+      const RTId = this.$route.params.id
+      let hasDisplayPermission = false
+
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('RTId', '==', RTId)
+        .where('UserId', '==', auth.user().uid)
+        .limit(1)
+      roundtripsRef.get()
+        .then(snapshot => {
+          hasDisplayPermission = Number(snapshot.size) === 1
+
+          if (hasDisplayPermission) {
+            this.loadRoundtripDetails(RTId)
+            this.loadSingleRoundtrip(RTId)
+          } else {
+            this.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'fas fa-exclamation-triangle',
+              message: 'Du hast leider keine Berechtigung diese Rundreise zu bearbeiten'
+            })
+            this.$router.push('/meine-rundreisen')
+          }
+        })
+    })
   }
 }
 </script>
