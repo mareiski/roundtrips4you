@@ -26,6 +26,7 @@
           :editor-placeholder="stop.Description"
           :editor="true"
           :doc-id="documentIds[index]"
+          :stars="tempStars"
         ></Stop>
       </div>
     </q-timeline>
@@ -57,26 +58,36 @@
           <q-card-section>
             <q-form
               @submit="onAddEntry"
-              class="q-gutter-md"
+              class="q-gutter-md addEntryForm"
             >
               <q-input
                 filled
                 v-model="date"
-                mask="date"
                 lazy-rules
-                :rules="['date']"
+                :rules="[val => val !== null && val !== '' || 'Bitte gib ein Datum an']"
+                style="width:300px"
                 class="input-item"
               >
                 <q-popup-proxy
                   ref="qDateProxy"
                   transition-show="scale"
                   transition-hide="scale"
+                  @hide="() => [showDateEntry = true, showTimeEntry = false]"
                 >
                   <q-date
                     v-model="date"
                     today-btn
+                    mask="DD.MM.YYYY HH:mm"
+                    v-if="showDateEntry"
                     :options="dateOptions"
-                    @input="() => $refs.qDateProxy.hide()"
+                    @input="() => [showTimeEntry = true, showDateEntry = false]"
+                  />
+                  <q-time
+                    v-model="date"
+                    mask="DD.MM.YYYY HH:mm"
+                    v-if="showTimeEntry"
+                    @input="() => [showDateEntry = true, showTimeEntry = false, $refs.qDateProxy.hide()]"
+                    format24h
                   />
                 </q-popup-proxy>
                 <template v-slot:prepend>
@@ -96,11 +107,25 @@
                 class="input-item"
                 lazy-rules
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
+                style="width:300px"
               >
                 <template v-slot:prepend>
                   <q-icon name="list" />
                 </template>
               </q-select>
+              <div
+                v-if="selectedOption === 'Hotel'"
+                class="flex"
+              >
+                <q-rating
+                  class="stars"
+                  v-model="tempStars"
+                  size="15px"
+                  color="gold"
+                  style="margin-right:10px;"
+                />
+                <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
+              </div>
               <div>
                 <q-btn
                   round
@@ -150,7 +175,7 @@
           @filter="filterFn"
           lazy-rules
           :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-          style="width: 250px; padding-bottom: 32px"
+          style="padding-bottom: 32px"
         >
           <template v-slot:no-option>
             <q-item>
@@ -213,15 +238,72 @@
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
         />
-        <div>
-          <div
-            class="uploader"
-            :style="{ backgroundImage: 'url('+ titleImgUrl +')' }"
+        <q-item-label>Angebotszeitraum</q-item-label>
+        <q-input
+          outlined
+          v-model="dateSchedule1"
+          label="von"
+          class="input-item rounded-borders"
+        >
+          <q-popup-proxy
+            ref="qDateProxy1"
+            transition-show="scale"
+            transition-hide="scale"
           >
+            <q-date
+              v-model="dateSchedule1"
+              today-btn
+              mask="DD.MM.YYYY"
+              :options="dateOptions"
+              @input="() => [$refs.qDateProxy1.hide(), dateSchedule2 = dateSchedule1]"
+            />
+          </q-popup-proxy>
+          <template v-slot:prepend>
+            <q-icon
+              name="event"
+              class="cursor-pointer"
+            >
+            </q-icon>
+          </template>
+        </q-input>
+        <q-input
+          outlined
+          v-model="dateSchedule2"
+          label="bis"
+          class="input-item rounded-borders"
+        >
+          <q-popup-proxy
+            ref="qDateProxy2"
+            transition-show="scale"
+            transition-hide="scale"
+          >
+            <q-date
+              v-model="dateSchedule2"
+              today-btn
+              mask="DD.MM.YYYY"
+              :options="scheduleDateOptions"
+              @input="() => $refs.qDateProxy2.hide()"
+            />
+          </q-popup-proxy>
+          <template v-slot:prepend>
+            <q-icon
+              name="event"
+              class="cursor-pointer"
+            >
+            </q-icon>
+          </template>
+        </q-input>
+        <div>
+          <div class="uploader">
+            <q-img
+              style="height:100%;"
+              :src="titleImgUrl"
+            ></q-img>
             <q-btn
               round
               color="primary"
               icon="add"
+              style="position: absolute;"
               @click="() => $refs.titleUpload.pickFiles()"
             ></q-btn>
           </div>
@@ -249,23 +331,40 @@
             class="uploader"
             v-for="(url, index) in galeryImgUrls"
             :key="url"
-            :style="{ backgroundImage: 'url('+ url +')' }"
           >
+            <q-img
+              style="height:100%;"
+              :src="url"
+            ></q-img>
             <q-btn
               round
               color="primary"
               icon="add"
-              style="transform:rotate(45deg)"
+              style="transform:rotate(45deg); position: absolute;"
               @click="removeFile(index)"
-            ></q-btn>
+            >
+            </q-btn>
           </div>
           <div class="uploader">
             <q-btn
               round
               color="primary"
               icon="add"
+              :disable="visible"
               @click="() => $refs.galeryUpload.pickFiles()"
-            ></q-btn>
+              style="position:relative;"
+            >
+              <q-inner-loading
+                :showing="visible"
+                style="border-radius:50%"
+              >
+                <q-spinner
+                  size="42px"
+                  color="primary"
+                >
+                </q-spinner>
+              </q-inner-loading>
+            </q-btn>
           </div>
         </div>
         <div class="row justify-end">
@@ -278,7 +377,7 @@
             text-color="white"
           >
             <template v-slot:loading>
-              <q-spinner-puff />
+              <q-spinner />
             </template>
           </q-btn>
         </div>
@@ -300,7 +399,7 @@
         @click="deleteDialog = true;"
       >
         <template v-slot:loading>
-          <q-spinner-puff />
+          <q-spinner />
         </template>
       </q-btn>
       <q-dialog
@@ -341,7 +440,8 @@ import Stop from '../pages/EditRoundtripComponents/stop'
 import { auth, db, storage } from '../firebaseInit'
 
 let timeStamp = Date.now()
-let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
+let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
+let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 // stop parameters
 let BookingComLink = '',
@@ -389,16 +489,36 @@ export default {
       titleImgUrl: null,
       galeryImgUrls: [],
       stars: 3,
+      tempStars: 3,
       descriptionInput: null,
       tag1: null,
       tag2: null,
       tag3: null,
-      deleteDialog: false
+      deleteDialog: false,
+      showDateEntry: true,
+      showTimeEntry: false,
+      dateSchedule1: formattedScheduleDate,
+      dateSchedule2: formattedScheduleDate,
+      visible: false
     }
   },
   methods: {
     dateOptions (date) {
-      return date >= formattedDate
+      const dateTimeParts = formattedDate.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const timeParts = dateTimeParts[1].split(':')
+      const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      const currentDate = new Date(date)
+
+      return currentDate >= compareDate
+    },
+    scheduleDateOptions (date) {
+      const dateTimeParts = this.dateSchedule1.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      const currentDate = new Date(date)
+
+      return currentDate > compareDate
     },
     onAddEntry () {
       this.addExpanded = false
@@ -416,8 +536,15 @@ export default {
     },
     addStop (DateString, HotelStop) {
       RTId = this.$route.params.id
-      const InitDate = new Date(DateString)
+
+      const dateTimeParts = DateString.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const timeParts = dateTimeParts[1].split(':')
+
+      let InitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
       HotelStop = HotelStop === 'Hotel'
+
       db.collection('RoundtripDetails').add({
         BookingComLink,
         DateDistance,
@@ -548,7 +675,6 @@ export default {
     },
     loadRoundtripDetails (RTId) {
       this.selectedCountry = this.country
-      this.visible = true
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')
         .where('RTId', '==', RTId)
@@ -567,7 +693,7 @@ export default {
           // get dates
           details.forEach((detail) => {
             const initDate = new Date(detail.InitDate.seconds * 1000)
-            detail.InitDate = date.formatDate(initDate, 'YYYY/MM/DD')
+            detail.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
           })
           this.stops = details
         })
@@ -603,18 +729,20 @@ export default {
       let files = event
       let context = this
       Array.from(Array(files.length).keys()).map(x => {
-        this.upload(files[x], kind, x + context.galeryImgUrls.length)
+        this.upload(files[x], kind, x + context.galeryImgUrls.length, x === files.length - 1)
       })
       this.$refs.titleUpload.reset()
       this.$refs.galeryUpload.reset()
     },
-    upload (file, kind, count) {
+    upload (file, kind, count, lastItem) {
+      this.visible = true
       let kindPath = 'Title/titleImg'
       const context = this
       if (kind === 'galery') {
         kindPath = 'Galery/galeryImg' + count
       }
       const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/' + kindPath)
+
       fileRef.put(file).then(function (snapshot) {
         context.$q.notify({
           color: 'green-4',
@@ -622,6 +750,7 @@ export default {
           icon: 'fas fa-check-circle',
           message: 'Bild wurde erfolgreich hochgeladen'
         })
+        if (lastItem) context.visible = false
         fileRef.getDownloadURL().then(function (url) {
           if (kind === 'galery') {
             context.galeryImgUrls.push(url)

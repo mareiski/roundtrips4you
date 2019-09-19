@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import firebase from 'firebase'
-import * as firebaseui from 'firebaseui'
 import { firestorePlugin } from 'vuefire'
 
 Vue.config.productionTip = false
@@ -38,7 +37,6 @@ const auth = {
     }
     db = firebase.firestore()
     storage = firebase.storage()
-    this.ui = new firebaseui.auth.AuthUI(firebase.auth())
 
     firebase.auth().onAuthStateChanged((user) => {
       store.dispatch('user/setCurrentUser')
@@ -49,9 +47,6 @@ const auth = {
       if (requireAuth && !user) router.push('login')
       else if (guestOnly && user) router.push('meine-rundreisen')
     })
-  },
-  authForm (container) {
-    this.ui.start(container, this.uiConfig)
   },
   user () {
     return this.context ? firebase.auth().currentUser : null

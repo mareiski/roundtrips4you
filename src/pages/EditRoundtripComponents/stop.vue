@@ -17,6 +17,13 @@
           />
         </q-popup-edit>
       </h6>
+      <q-rating
+        class="stars"
+        v-model="stars"
+        size="15px"
+        color="gold"
+        readonly
+      />
       <q-icon
         v-if="editor"
         name="delete"
@@ -51,7 +58,8 @@ export default {
     icon: String,
     editorPlaceholder: String,
     editor: Boolean,
-    docId: String
+    docId: String,
+    stars: Number
   },
   data () {
     return {

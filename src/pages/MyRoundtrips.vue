@@ -43,6 +43,7 @@
               :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
               @error="imageUrlAlt($event)"
             >
+            <img src="../statics/dummy-image-landscape-1-150x150.jpg">
           </q-avatar>
         </q-item-section>
 
@@ -203,7 +204,7 @@ export default {
           Price: 0,
           Public: false,
           RTId: 3445340985430,
-          Stars: 0,
+          Stars: 3,
           Tags: ['Tag1', 'Tag2', 'Tag3'],
           Title: Title,
           UserId: this.$store.getters['user/user'].uid,
@@ -217,6 +218,19 @@ export default {
             snapshot.forEach(doc => {
               db.collection('Roundtrips').doc(doc.id).update({
                 'RTId': doc.id
+              })
+              db.collection('RoundtripDetails').add({
+                BookingComLink: '',
+                DateDistance: '',
+                Description: '',
+                ExpediaLink: '',
+                GeneralLink: '',
+                HotelStop: true,
+                ImageUrl: '',
+                InitDate: new Date(timeStamp),
+                Price: 0,
+                RTId: doc.id,
+                Title: 'Titel des 1. Stopps'
               })
               this.getUserRoundtrips()
             })
@@ -234,7 +248,7 @@ export default {
       return true
     },
     imageUrlAlt (event) {
-      event.target.src = './statics/dummy-image-landscape-1-150x150.jpg'
+      event.target.src = '../statics/dummy-image-landscape-1-150x150.jpg'
     },
     getUserRoundtrips () {
       roundtripArr = []
@@ -257,15 +271,12 @@ export default {
               context.RTIds.push(doc.data().RTId)
             }).catch(function (error) {
               console.log(error)
-              context.TitleImgs.push('./statics/dummy-image-landscape-1-150x150.jpg')
+              context.TitleImgs.push('../statics/dummy-image-landscape-1-150x150.jpg')
             })
           })
         }).catch(function (error) {
           console.log(error)
         })
-
-      console.log(this.TitleImgs)
-      context.TitleImgs.push('./statics/dummy-image-landscape-1-150x150.jpg')
 
       roundtripArr.forEach((roundtrip) => {
         createdAtDatesArr.push(date.formatDate(roundtrip.createdAt, 'YYYY/MM/DD'))

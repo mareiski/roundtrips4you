@@ -65,7 +65,7 @@
             text-color="white"
           >
             <template v-slot:loading>
-              <q-spinner-puff />
+              <q-spinner />
             </template>
           </q-btn>
         </div>
@@ -136,7 +136,7 @@
                 text-color="white"
               >
                 <template v-slot:loading>
-                  <q-spinner-puff />
+                  <q-spinner />
                 </template>
               </q-btn>
             </div>
@@ -160,7 +160,7 @@
         @click="deleteDialog = true;"
       >
         <template v-slot:loading>
-          <q-spinner-puff />
+          <q-spinner />
         </template>
       </q-btn>
       <q-dialog

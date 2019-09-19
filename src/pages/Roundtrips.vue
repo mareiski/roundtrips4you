@@ -30,8 +30,7 @@
           <q-input
             outlined
             v-model="date"
-            mask="date"
-            :rules="['date']"
+            label="Zeitraum"
             class="input-item rounded-borders"
           >
             <q-popup-proxy
@@ -42,6 +41,7 @@
               <q-date
                 v-model="date"
                 today-btn
+                mask="DD.MM.YYYY"
                 :options="dateOptions"
                 @input="() => $refs.qDateProxy.hide()"
               />
@@ -58,7 +58,7 @@
             outlined
             v-model="dayModel"
             :options="dayOptions"
-            label="Zeitraum"
+            label="Reisedauer"
             clearable
             class="input-item"
           >
@@ -339,7 +339,7 @@ import { date } from 'quasar'
 import { db, storage } from '../firebaseInit'
 
 let timeStamp = Date.now()
-let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
+let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 let roundtripArr = []
 
@@ -390,7 +390,12 @@ export default {
       })
     },
     dateOptions (date) {
-      return date >= formattedDate
+      const dateTimeParts = formattedDate.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      const currentDate = new Date(date)
+
+      return currentDate >= compareDate
     },
     filterRoundtrips () {
       this.filterRoundtripArr = []

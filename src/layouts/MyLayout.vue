@@ -153,6 +153,7 @@
 
 <script>
 import { auth } from '../firebaseInit'
+import { Loading } from 'quasar'
 
 export default {
   name: 'MyLayout',
@@ -166,6 +167,9 @@ export default {
       auth.logout(this.$router)
     }
   },
+  beforeCreate () {
+    Loading.show()
+  },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
@@ -177,6 +181,7 @@ export default {
         else if (guestOnly && loggedIn) next('meine-rundreisen')
         else next()
       })
+      Loading.hide()
     })
   }
 }

@@ -64,12 +64,13 @@ module.exports = function (ctx) {
         'QCard',
         'QCardSection',
         'QCardActions',
-        'QSpinnerPuff',
         'QUploader',
         'QCarousel',
         'QCarouselControl',
         'QCarouselSlide',
-        'QImg'
+        'QImg',
+        'QTime',
+        'Loading'
       ],
 
       directives: [
