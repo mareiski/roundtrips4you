@@ -294,10 +294,11 @@
                   color="gold"
                   readonly
                 />
-                <font-awesome-icon
+                <q-icon
+                  name="location_on"
                   class="marker"
-                  icon="map-marker-alt"
-                />
+                >
+                </q-icon>
                 <span class="country-title">{{roundtrip.Location}}</span>
               </div>
               <div class="card-row">
@@ -308,13 +309,14 @@
                 <p class="card-description">{{roundtrip.Description}}</p>
               </div>
               <div class="card-bottom-row">
-                <span class="card-tag">{{roundtrip.Tags[0]}}</span>
-                <span class="card-tag">{{roundtrip.Tags[1]}}</span>
-                <span class="card-tag">{{roundtrip.Tags[2]}}</span>
+                <q-chip size="10px">{{roundtrip.Tags[0]}}</q-chip>
+                <q-chip size="10px">{{roundtrip.Tags[1]}}</q-chip>
+                <q-chip size="10px">{{roundtrip.Tags[2]}}</q-chip>
               </div>
             </div>
             <div class="card-right-col">
               <div class="card-row">
+                <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
                 <q-img :src="userImages[index]"></q-img>
               </div>
               <div class="card-bottom-row">

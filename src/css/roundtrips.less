@@ -206,6 +206,7 @@
                         text-align: left;
                         align-items: flex-start;
                         justify-content: space-between;
+                        padding-left: 10px;
 
                         .card-row,
                         .card-bottom-row {
@@ -234,7 +235,6 @@
                                 margin: auto;
                             }
 
-                            .card-tag,
                             .card-category {
                                 color: white;
                                 background-color: @primary-gray;
@@ -272,7 +272,8 @@
                             height: 50px;
                         }
 
-                        .details-button {
+                        .details-button,
+                        .price-button {
                             border-color: @primary-orange;
                             color: @primary-orange;
                             background-color: white;
@@ -282,6 +283,10 @@
                                 font-size: 18px;
                                 padding: 0 2px 0 2px;
                             }
+                        }
+
+                        .price-button {
+                            border: none;
                         }
                     }
                 }
@@ -308,9 +313,6 @@
                 flex-wrap: wrap;
                 justify-content: center;
 
-                .card-tag {
-                    margin: 5px !important;
-                }
             }
         }
 

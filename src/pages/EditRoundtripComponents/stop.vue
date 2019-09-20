@@ -4,26 +4,34 @@
     :icon="icon"
   >
     <div class="stop-container">
-      <h6 class="q-timeline__title">{{titleInput}}
-        <q-popup-edit
-          v-model="titleInput"
-          v-if="editor"
-          @save="saveData('Title', titleInput)"
-        >
-          <q-input
+      <div class="flex">
+        <h6 class="q-timeline__title">{{titleInput}}
+          <q-popup-edit
             v-model="titleInput"
+            v-if="editor"
+            @save="saveData('Title', titleInput)"
+          >
+            <q-input
+              v-model="titleInput"
+              dense
+              autofocus
+            />
+          </q-popup-edit>
+        </h6>
+        <div
+          v-if="generalLink.length > 0"
+          @mouseover="generalLinkText = 'Hotel link'"
+          @mouseleave="generalLinkText = ''"
+        >
+          <q-chip
+            icon="link"
+            size="1px"
             dense
-            autofocus
-          />
-        </q-popup-edit>
-      </h6>
-      <q-rating
-        class="stars"
-        v-model="stars"
-        size="15px"
-        color="gold"
-        readonly
-      />
+            clickable
+            @click="openInNewTab(generalLink)"
+          >{{generalLinkText}}</q-chip>
+        </div>
+      </div>
       <q-icon
         v-if="editor"
         name="delete"
@@ -59,12 +67,13 @@ export default {
     editorPlaceholder: String,
     editor: Boolean,
     docId: String,
-    stars: Number
+    generalLink: String
   },
   data () {
     return {
       titleInput: this.title,
       descriptionInput: this.editorPlaceholder,
+      generalLinkText: '',
       editorFonts: {
         arial: 'Arial',
         arial_black: 'Arial Black',
@@ -170,6 +179,9 @@ export default {
           message: 'Der Eintrag konnte nicht gelöscht werden'
         })
       })
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     },
     getParent (name) {
       let p = this.$parent

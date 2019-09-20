@@ -70,7 +70,8 @@ module.exports = function (ctx) {
         'QCarouselSlide',
         'QImg',
         'QTime',
-        'Loading'
+        'Loading',
+        'QChip'
       ],
 
       directives: [

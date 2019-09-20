@@ -26,7 +26,7 @@
           :editor-placeholder="stop.Description"
           :editor="true"
           :doc-id="documentIds[index]"
-          :stars="tempStars"
+          :general-link="stop.GeneralLink"
         ></Stop>
       </div>
     </q-timeline>
@@ -103,7 +103,6 @@
                 v-model="selectedOption"
                 :options="options"
                 label="Eintrag"
-                clearable
                 class="input-item"
                 lazy-rules
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
@@ -113,7 +112,23 @@
                   <q-icon name="list" />
                 </template>
               </q-select>
-              <div
+              <div v-if="selectedOption === 'Hotel'">
+                <q-input
+                  v-model="generalTempLink"
+                  lazy-rules
+                  ref="urlInput"
+                  type="url"
+                  style="width:300px;"
+                  :rules="[val => urlReg.test(val)|| 'Bitte gib einen richtigen Link an']"
+                  label="Hotel link"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="link" />
+                  </template>
+                </q-input>
+              </div>
+              <!--<div
                 v-if="selectedOption === 'Hotel'"
                 class="flex"
               >
@@ -125,7 +140,7 @@
                   style="margin-right:10px;"
                 />
                 <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
-              </div>
+              </div>-->
               <div>
                 <q-btn
                   round
@@ -157,7 +172,7 @@
         <q-toggle
           v-model="publish"
           label="Rundreise veröffentlichen"
-          icon="publish"
+          icon="share"
         >
           <q-tooltip>
             Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen.
@@ -499,7 +514,9 @@ export default {
       showTimeEntry: false,
       dateSchedule1: formattedScheduleDate,
       dateSchedule2: formattedScheduleDate,
-      visible: false
+      visible: false,
+      urlReg: /^(http:\/\/|https:\/\/)/,
+      generalTempLink: ''
     }
   },
   methods: {
@@ -542,6 +559,10 @@ export default {
       const timeParts = dateTimeParts[1].split(':')
 
       let InitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      GeneralLink = this.generalTempLink
+      this.generalTempLink = null
+      if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
 
       HotelStop = HotelStop === 'Hotel'
 

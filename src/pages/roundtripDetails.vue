@@ -33,6 +33,7 @@
           :date="date"
           :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
           :editor-placeholder="stop.Description"
+          :general-link="stop.GeneralLink"
         ></Stop>
       </div>
     </q-timeline>
