@@ -281,7 +281,14 @@
             <q-icon name="turned_in" />
           </template></q-input>
         <q-item-label>Angebotszeitraum</q-item-label>
+        <q-toggle
+          v-model="wholeYearOffer"
+          label="Ganzes Jahr"
+          icon="event"
+        >
+        </q-toggle>
         <q-input
+          :disable="wholeYearOffer"
           outlined
           v-model="OfferStartPeriod"
           label="von"
@@ -309,6 +316,7 @@
           </template>
         </q-input>
         <q-input
+          :disable="wholeYearOffer"
           outlined
           v-model="OfferEndPeriod"
           label="bis"
@@ -800,7 +808,8 @@ export default {
       urlReg: /^(http:\/\/|https:\/\/)/,
       generalTempLink: '',
       price: 0,
-      location: null
+      location: null,
+      wholeYearOffer: false
     }
   },
   methods: {
@@ -825,15 +834,24 @@ export default {
       this.addExpanded = false
       this.addButtonActive = false
 
-      this.addStop(this.date, this.selectedOption)
-      this.loadRoundtripDetails(this.$route.params.id)
+      try {
+        this.addStop(this.date, this.selectedOption)
+        this.loadRoundtripDetails(this.$route.params.id)
 
-      this.$q.notify({
-        color: 'green-4',
-        textColor: 'white',
-        icon: 'fas fa-check-circle',
-        message: 'Eintrag wurde erstellt'
-      })
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'fas fa-check-circle',
+          message: 'Eintrag wurde erstellt'
+        })
+      } catch (e) {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'fas fa-exclamation-triangle',
+          message: 'Der Eintrag konnte erstellt werden'
+        })
+      }
     },
     addStop (DateString, HotelStop) {
       RTId = this.$route.params.id
@@ -854,6 +872,8 @@ export default {
       this.location = null
       if (typeof this.$refs.locationInput !== 'undefined') this.$refs.locationInput.resetValidation()
 
+      let context = this
+
       db.collection('RoundtripDetails').add({
         BookingComLink,
         DateDistance,
@@ -867,35 +887,45 @@ export default {
         RTId,
         Title,
         Location
-      })
-
-      let daysString = ''
-      let days = 1
-      if (this.stops.length > 1) {
+      }).then(function () {
+        let daysString = ''
+        let days = 1
         let initDates = []
 
-        this.stops.forEach(stop => {
-          if (!initDates.includes(new Date(stop.InitDate))) initDates.push(new Date(stop.InitDate))
+        context.stops.forEach(stop => {
+          let dateTimeParts = stop.InitDate.split(' ')
+          console.log(dateTimeParts)
+          let dateParts = dateTimeParts[0].split('.')
+          let timeParts = dateTimeParts[1].split(':')
+          let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+          console.log(initDate)
+
+          if (!initDates.includes(initDate)) initDates.push(initDate)
         })
 
-        let maxDate = new Date(Math.max.apply(null, initDates))
-        let minDate = new Date(Math.min.apply(null, initDates))
+        if (initDates.length > 0) {
+          let maxDate = new Date(Math.max.apply(null, initDates))
+          let minDate = new Date(Math.min.apply(null, initDates))
 
-        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
-      }
+          days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+        }
 
-      if (days < 5) {
-        daysString = '< 5 Tage'
-      } else if (days >= 5 && days <= 8) {
-        daysString = '5-8 Tage'
-      } else if (days >= 9 && days <= 11) {
-        daysString = '9-11 Tage'
-      } else if (days >= 12 && days <= 15) {
-        daysString = '12-15 Tage'
-      } else if (days > 15) {
-        daysString = '> 15 Tage'
-      }
-      this.saveData('Days', daysString)
+        if (days < 5) {
+          daysString = '< 5 Tage'
+        } else if (days >= 5 && days <= 8) {
+          daysString = '5-8 Tage'
+        } else if (days >= 9 && days <= 11) {
+          daysString = '9-11 Tage'
+        } else if (days >= 12 && days <= 15) {
+          daysString = '12-15 Tage'
+        } else if (days > 15) {
+          daysString = '> 15 Tage'
+        }
+        if (daysString.length > 0) {
+          context.saveData('Days', daysString)
+        }
+      })
     },
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
@@ -1017,6 +1047,7 @@ export default {
       roundtripsRef.get()
         .then(snapshot => {
           details = []
+          documentIds = []
           snapshot.forEach(doc => {
             details.push(doc.data())
             documentIds.push(doc.id)
@@ -1164,7 +1195,7 @@ export default {
               color: 'red-5',
               textColor: 'white',
               icon: 'fas fa-exclamation-triangle',
-              message: 'Du hast leider keine Berechtigung diese Rundreise zu bearbeiten'
+              message: 'Ooops da ist leider etwas schiefgelaufen'
             })
             this.$router.push('/meine-rundreisen')
           }

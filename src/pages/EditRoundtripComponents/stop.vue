@@ -19,7 +19,7 @@
           </q-popup-edit>
         </h6>
         <div
-          v-if="generalLink.length > 0"
+          v-if="generalLink != null && generalLink.length > 0"
           @mouseover="generalLinkText = 'Hotel link'"
           @mouseleave="generalLinkText = ''"
         >
@@ -166,7 +166,15 @@ export default {
       })
     },
     deleteEntry () {
-      if (this.docId === null || this.docId === '' || this.docId === 'undefined') return false
+      if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'fas fa-exclamation-triangle',
+          message: 'Der Eintrag konnte nicht gelöscht werden'
+        })
+        return false
+      }
       console.log(this.docId)
       const context = this
       db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
