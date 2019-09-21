@@ -1,19 +1,21 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
-    <h3>Reiseverlauf</h3>
+    <h3>{{title}}
+      <q-popup-edit
+        v-model="title"
+        @save="saveData('Title', title)"
+      >
+        <q-input
+          v-model="title"
+          dense
+          autofocus
+        />
+      </q-popup-edit>
+    </h3>
     <q-timeline color="secondary">
       <q-timeline-entry heading>
-        {{title}}
-        <q-popup-edit
-          v-model="title"
-          @save="saveData('Title', title)"
-        >
-          <q-input
-            v-model="title"
-            dense
-            autofocus
-          />
-        </q-popup-edit>
+        Reiseverlauf
+
       </q-timeline-entry>
 
       <div class="stop-list">
@@ -27,6 +29,7 @@
           :editor="true"
           :doc-id="documentIds[index]"
           :general-link="stop.GeneralLink"
+          :location="stop.Location"
         ></Stop>
       </div>
     </q-timeline>
@@ -112,6 +115,18 @@
                   <q-icon name="list" />
                 </template>
               </q-select>
+              <q-input
+                v-model="location"
+                outlined
+                lazy-rules
+                label="Ort"
+                ref="locationInput"
+                style="width:300px"
+                :rules="[val => val !== null && val !== '' || 'Bitte gib einen Ort an']"
+              > <template v-slot:prepend>
+                  <q-icon name="location_on" />
+                </template>
+              </q-input>
               <div v-if="selectedOption === 'Hotel'">
                 <q-input
                   v-model="generalTempLink"
@@ -192,6 +207,9 @@
           :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
           style="padding-bottom: 32px"
         >
+          <template v-slot:prepend>
+            <q-icon name="explore" />
+          </template>
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
@@ -233,30 +251,39 @@
           label="Kurze Beschreibung"
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
           val => val.length > 10 && val.length < 150 || 'Bitte gib eine Beschreibung zwischen 10 und 150 Zeichen an' ]"
-        />
+        > <template v-slot:prepend>
+            <q-icon name="subject" />
+          </template>
+        </q-input>
         <q-input
           v-model="tag1"
           label="Reiseart"
           outlined
           lazy-rules
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Reiseart an']"
-        />
+        > <template v-slot:prepend>
+            <q-icon name="commute" />
+          </template></q-input>
         <q-input
           v-model="tag2"
           label="Reisemerkmal 1"
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
-        />
+        > <template v-slot:prepend>
+            <q-icon name="turned_in" />
+          </template></q-input>
         <q-input
           v-model="tag3"
           label="Reisemerkmal 2"
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
-        />
+        > <template v-slot:prepend>
+            <q-icon name="turned_in" />
+          </template></q-input>
         <q-item-label>Angebotszeitraum</q-item-label>
         <q-input
           outlined
-          v-model="dateSchedule1"
+          v-model="OfferStartPeriod"
           label="von"
           class="input-item rounded-borders"
         >
@@ -266,11 +293,11 @@
             transition-hide="scale"
           >
             <q-date
-              v-model="dateSchedule1"
+              v-model="OfferStartPeriod"
               today-btn
               mask="DD.MM.YYYY"
               :options="dateOptions"
-              @input="() => [$refs.qDateProxy1.hide(), dateSchedule2 = dateSchedule1]"
+              @input="() => [$refs.qDateProxy1.hide(), OfferEndPeriod = OfferStartPeriod]"
             />
           </q-popup-proxy>
           <template v-slot:prepend>
@@ -283,7 +310,7 @@
         </q-input>
         <q-input
           outlined
-          v-model="dateSchedule2"
+          v-model="OfferEndPeriod"
           label="bis"
           class="input-item rounded-borders"
         >
@@ -293,7 +320,7 @@
             transition-hide="scale"
           >
             <q-date
-              v-model="dateSchedule2"
+              v-model="OfferEndPeriod"
               today-btn
               mask="DD.MM.YYYY"
               :options="scheduleDateOptions"
@@ -305,6 +332,17 @@
               name="event"
               class="cursor-pointer"
             >
+            </q-icon>
+          </template>
+        </q-input>
+        <q-input
+          v-model="price"
+          label="Preis"
+          type="number"
+          outlined
+          :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
+        ><template v-slot:prepend>
+            <q-icon name="euro">
             </q-icon>
           </template>
         </q-input>
@@ -467,7 +505,8 @@ let BookingComLink = '',
   ImageUrl = '',
   Price = 0,
   RTId = 0,
-  Title = 'Titel'
+  Title = 'Titel',
+  Location = ''
 
 let details = []
 let documentIds = []
@@ -476,7 +515,250 @@ let roundtripDocId = ''
 let galeryImgId = 0
 
 const stringOptions = [
-  'Deutschland', 'Italien', 'Vietnam'
+  'Deutschland',
+  'Österreich',
+  'Schweiz',
+  'Luxemburg',
+  'Afghanistan',
+  'Ägypten',
+  'Åland',
+  'Albanien',
+  'Algerien',
+  'Amerikanisch-Samoa',
+  'Andorra',
+  'Angola',
+  'Anguilla',
+  'Antarktis',
+  'Antigua/Barbuda',
+  'Äquatorialguinea',
+  'Argentinien',
+  'Armenien',
+  'Aruba',
+  'Aserbaidschan',
+  'Äthiopien',
+  'Australien',
+  'Bahamas',
+  'Bahrain',
+  'Bangladesh',
+  'Barbados',
+  'Belgien',
+  'Belize',
+  'Benin',
+  'Bermuda',
+  'Bhutan',
+  'Bolivien',
+  'Bosnien/Herzegowina',
+  'Botsuana',
+  'Bouvetinsel',
+  'Brasilien',
+  'Brunei Darussalam',
+  'Bulgarien',
+  'Burkina Faso',
+  'Burundi',
+  'Cabo Verde',
+  'Chile',
+  'China',
+  'Cookinseln',
+  'Costa Rica',
+  'Cuba',
+  'Dominica',
+  'Dominikanische Republik',
+  'Dschibuti',
+  'Dänemark',
+  'Ecuador',
+  'El Salvador',
+  'Elfenbeinküste',
+  'Eritrea',
+  'Estland',
+  'Falklandinseln',
+  'Fidschi',
+  'Finnland',
+  'Frankreich',
+  'Französisch-Guayana',
+  'Französisch-Polynesien',
+  'Französische Südpolarterritorien',
+  'Färöer',
+  'Gabun',
+  'Gambia',
+  'Georgien',
+  'Ghana',
+  'Gibraltar',
+  'Grenada',
+  'Griechenland',
+  'Großbritannien',
+  'Grönland',
+  'Guadeloupe',
+  'Guam',
+  'Guatemala',
+  'Guernsey',
+  'Guinea-Bissau',
+  'Guinea',
+  'Guyana',
+  'Haiti',
+  'Heard und McDonaldinseln',
+  'Honduras',
+  'Hong Kong',
+  'Indien',
+  'Indonesien',
+  'Irak',
+  'Iran',
+  'Irland',
+  'Island',
+  'Isle Of Man',
+  'Israel',
+  'Italien',
+  'Jamaika',
+  'Japan',
+  'Jemen',
+  'Jersey',
+  'Jordanien',
+  'Jungferninseln, Amerikanische',
+  'Jungferninseln, Britische',
+  'Kaimaninseln',
+  'Kambodscha',
+  'Kamerun',
+  'Kanada',
+  'Kasachstan',
+  'Kenia',
+  'Kirgisistan',
+  'Kiribati',
+  'Kokosinseln',
+  'Kolumbien',
+  'Komoren',
+  'Kongo',
+  'Kroatien',
+  'Kuwait',
+  'Laos',
+  'Lesotho',
+  'Lettland',
+  'Libanon',
+  'Liberia',
+  'Libyen',
+  'Liechtenstein',
+  'Litauen',
+  'Macao',
+  'Madagaskar',
+  'Malawi',
+  'Malaysia',
+  'Maldiven',
+  'Mali',
+  'Malta',
+  'Marshallinseln',
+  'Martinique',
+  'Mauretanien',
+  'Mauritius',
+  'Mayotte',
+  'Mazedonien',
+  'Mexiko',
+  'Mikronesien',
+  'Moldawien',
+  'Monaco',
+  'Mongolei',
+  'Montenegro',
+  'Montserrat',
+  'Morokko',
+  'Mosambik',
+  'Myanmar',
+  'Namibia',
+  'Nauru',
+  'Nepal',
+  'Neukaledonien',
+  'Neuseeland',
+  'Nicaragua',
+  'Niederlande',
+  'Niederländische Antillen',
+  'Nigeria',
+  'Niger',
+  'Niue',
+  'Nordkorea',
+  'Norfolkinsel',
+  'Norwegen',
+  'Nördliche Marianen',
+  'Oman',
+  'Pakistan',
+  'Palau',
+  'Palestina',
+  'Panama',
+  'Papua-Neuguinea',
+  'Paraguay',
+  'Peru',
+  'Philippinen',
+  'Pitcairninseln',
+  'Polen',
+  'Portugal',
+  'Puerto Rico',
+  'Qatar',
+  'Ruanda',
+  'Rumänien',
+  'Russland',
+  'Réunion',
+  'Salomonen',
+  'Sambia',
+  'Samoa',
+  'San Marino',
+  'Saudi-Arabien',
+  'Schweden',
+  'Senegal',
+  'Serbien',
+  'Seychellen',
+  'Sierra Leone',
+  'Simbabwe',
+  'Singapur',
+  'Slowakische Republik',
+  'Slowenien',
+  'Somalia',
+  'Spanien',
+  'Sri Lanka',
+  'St. Barthélemy',
+  'St. Helena',
+  'St. Kitts/Nevis',
+  'St. Lucia',
+  'St. Martin',
+  'St. Pierre/Miquelon',
+  'St. Vincent/Die Grenadinen',
+  'Sudan',
+  'Surinam',
+  'Svalbard/Jan Mayen',
+  'Swasiland',
+  'Syrien',
+  'São Tomé/Príncipe',
+  'Südafrika',
+  'Südgeorgien/Südlichen Sandwichinseln',
+  'Südkorea',
+  'Tadschikistan',
+  'Taiwan',
+  'Tansania',
+  'Thailand',
+  'Timor-Leste',
+  'Togo',
+  'Tokelau',
+  'Tonga',
+  'Trinidad und Tobago',
+  'Tschad',
+  'Tschechoslowakei',
+  'Tunisien',
+  'Turkmenistan',
+  'Turks- und Caicosinseln',
+  'Tuvalu',
+  'Türkei',
+  'Uganda',
+  'Ukraine',
+  'Ungarn',
+  'United States Minor Islands',
+  'Uruguay',
+  'USA',
+  'Usbekistan',
+  'Vanuatu',
+  'Vatikanstadt',
+  'Venezuela',
+  'Vereinigte Arabische Emirate',
+  'Vietnam',
+  'Wallis/Futuna',
+  'Weihnachtsinsel',
+  'Weißrussland',
+  'Westsahara',
+  'Zentralafrikanische Republik',
+  'Zypern'
 ]
 
 export default {
@@ -512,11 +794,13 @@ export default {
       deleteDialog: false,
       showDateEntry: true,
       showTimeEntry: false,
-      dateSchedule1: formattedScheduleDate,
-      dateSchedule2: formattedScheduleDate,
+      OfferStartPeriod: formattedScheduleDate,
+      OfferEndPeriod: formattedScheduleDate,
       visible: false,
       urlReg: /^(http:\/\/|https:\/\/)/,
-      generalTempLink: ''
+      generalTempLink: '',
+      price: 0,
+      location: null
     }
   },
   methods: {
@@ -530,7 +814,7 @@ export default {
       return currentDate >= compareDate
     },
     scheduleDateOptions (date) {
-      const dateTimeParts = this.dateSchedule1.split(' ')
+      const dateTimeParts = this.OfferStartPeriod.split(' ')
       const dateParts = dateTimeParts[0].split('.')
       const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
       const currentDate = new Date(date)
@@ -566,6 +850,10 @@ export default {
 
       HotelStop = HotelStop === 'Hotel'
 
+      Location = this.location
+      this.location = null
+      if (typeof this.$refs.locationInput !== 'undefined') this.$refs.locationInput.resetValidation()
+
       db.collection('RoundtripDetails').add({
         BookingComLink,
         DateDistance,
@@ -577,7 +865,8 @@ export default {
         InitDate,
         Price,
         RTId,
-        Title
+        Title,
+        Location
       })
 
       let daysString = ''
@@ -611,6 +900,15 @@ export default {
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
       const context = this
+      let roundtripsRef = db.collection('RoundtripDetails')
+        .where('RTId', '==', roundtripDocId)
+      roundtripsRef.get()
+        .then(snapshot => {
+          details = []
+          snapshot.forEach(doc => {
+            db.collection('RoundtripDetails').doc(doc.id).delete()
+          })
+        })
       db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
         context.$q.notify({
           color: 'green-4',
@@ -632,12 +930,21 @@ export default {
     onSaveRoundtrip () {
       this.submitting = true
 
+      let dateParts = this.OfferStartPeriod.split('.')
+      let offerStartPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+      dateParts = this.OfferEndPeriod.split('.')
+      let offerEndPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
       if (this.saveData('Public', this.publish) &&
         this.saveData('Location', this.country) &&
         this.saveData('Category', this.category) &&
         this.saveData('Stars', this.stars) &&
         this.saveData('Description', this.descriptionInput) &&
-        this.saveData('Tags', [this.tag1, this.tag2, this.tag3])) {
+        this.saveData('Tags', [this.tag1, this.tag2, this.tag3]) &&
+        this.saveData('OfferStartPeriod', offerStartPeriod) &&
+        this.saveData('OfferEndPeriod', offerEndPeriod) &&
+        this.saveData('Price', this.price)) {
         this.submitting = false
         this.$q.notify({
           color: 'green-4',
@@ -681,6 +988,13 @@ export default {
           this.tag1 = roundtrip[0].Tags[0]
           this.tag2 = roundtrip[0].Tags[1]
           this.tag3 = roundtrip[0].Tags[2]
+          this.price = roundtrip[0].Price
+
+          let retrievedDate = new Date(roundtrip[0].OfferEndPeriod.seconds * 1000)
+          this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+
+          retrievedDate = new Date(roundtrip[0].OfferStartPeriod.seconds * 1000)
+          this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
           this.loadInitImgs()
         })

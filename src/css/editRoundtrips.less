@@ -1,6 +1,8 @@
 @import "site.less";
 
 .edit-roundtrips {
+    padding-top: 10px;
+
     .q-timeline__dot {
         box-sizing: border-box;
     }
@@ -31,11 +33,6 @@
             &:hover {
                 color: @primary-orange;
             }
-
-            &.q-chip__icon {
-                font-size: 18px;
-                margin: 0;
-            }
         }
     }
 
@@ -61,6 +58,35 @@
 
         &>.uploader {
             margin-right: 20px;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.q-chip__icon {
+    font-size: 18px;
+    margin: 0 !important;
+}
+
+.roundtrip-details {
+    .q-carousel {
+        position: absolute;
+        width: 100%;
+        top: 0;
+        z-index: -1;
+        left: 0;
+    }
+
+    .carousel-placeholder {
+        height: 410px;
+        top: 0;
+
+        h3 {
+            padding-left: 10%;
+            padding-top: 40px;
+            color: white;
+            font-size: 60px;
+            line-height: 1.1;
         }
     }
 }

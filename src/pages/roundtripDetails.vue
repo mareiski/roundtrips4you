@@ -1,14 +1,12 @@
 <template>
   <div class="roundtrip-details q-px-lg q-pb-md">
-    <h3>{{roundtrip[0].Title}}</h3>
+
     <q-carousel
       animated
       v-model="slide"
       navigation
       infinite
       autoplay
-      transition-prev="slide-right"
-      transition-next="slide-left"
       swipeable
       control-color="white"
       padding
@@ -21,6 +19,9 @@
         :img-src="url"
       />
     </q-carousel>
+    <div class="carousel-placeholder">
+      <h3>{{roundtrip[0].Title}}</h3>
+    </div>
     <q-timeline color="secondary">
       <q-timeline-entry heading>
         Reiseverlauf
@@ -34,6 +35,7 @@
           :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
           :editor-placeholder="stop.Description"
           :general-link="stop.GeneralLink"
+          :location="stop.Location"
         ></Stop>
       </div>
     </q-timeline>
@@ -51,7 +53,7 @@ let details = []
 let roundtrip = []
 
 let timeStamp = Date.now()
-let formattedDate = date.formatDate(timeStamp, 'YYYY/MM/DD')
+let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
 
 let roundtripDocId = null
 
@@ -104,6 +106,7 @@ export default {
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')
         .where('RTId', '==', RTId)
+        .orderBy('InitDate')
       roundtripsRef.get()
         .then(snapshot => {
           details = []
@@ -115,8 +118,9 @@ export default {
           // get dates
           details.forEach((detail) => {
             const initDate = new Date(detail.InitDate.seconds * 1000)
-            this.date = date.formatDate(initDate, 'YYYY/MM/DD')
+            this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
           })
+          this.stops = details
         })
         .catch(err => {
           console.log('Error getting Roundtripdetails', err)

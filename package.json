@@ -13,11 +13,13 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@google/maps": "^1.0.1",
     "@quasar/extras": "^1.0.0",
     "express-throttle-bandwidth": "^1.0.1",
     "file": "^0.2.2",
     "firebase": "^6.4.0",
     "formidable": "^1.2.1",
+    "http2": "^3.3.7",
     "quasar": "^1.0.0",
     "vuefire": "^2.0.0-alpha.24"
   },

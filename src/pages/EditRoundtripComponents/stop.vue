@@ -40,6 +40,12 @@
       ></q-icon>
     </div>
     <div>
+      <q-chip
+        icon="location_on"
+        size="3px"
+      >{{location}}</q-chip>
+    </div>
+    <div>
       <div v-html="descriptionInput"></div>
       <q-popup-edit
         v-if="editor"
@@ -67,7 +73,8 @@ export default {
     editorPlaceholder: String,
     editor: Boolean,
     docId: String,
-    generalLink: String
+    generalLink: String,
+    location: String
   },
   data () {
     return {

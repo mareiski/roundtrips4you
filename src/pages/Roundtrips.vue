@@ -19,6 +19,9 @@
             lazy-rules
             :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
           >
+            <template v-slot:prepend>
+              <q-icon name="explore" />
+            </template>
             <template v-slot:no-option>
               <q-item>
                 <q-item-section class="text-grey">
@@ -29,7 +32,7 @@
           </q-select>
           <q-input
             outlined
-            v-model="date"
+            v-model="OfferPeriod"
             label="Zeitraum"
             class="input-item rounded-borders"
           >
@@ -39,7 +42,7 @@
               transition-hide="scale"
             >
               <q-date
-                v-model="date"
+                v-model="OfferPeriod"
                 today-btn
                 mask="DD.MM.YYYY"
                 :options="dateOptions"
@@ -346,7 +349,250 @@ let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 let roundtripArr = []
 
 const stringOptions = [
-  'Deutschland', 'Italien', 'Vietnam'
+  'Deutschland',
+  'Österreich',
+  'Schweiz',
+  'Luxemburg',
+  'Afghanistan',
+  'Ägypten',
+  'Åland',
+  'Albanien',
+  'Algerien',
+  'Amerikanisch-Samoa',
+  'Andorra',
+  'Angola',
+  'Anguilla',
+  'Antarktis',
+  'Antigua/Barbuda',
+  'Äquatorialguinea',
+  'Argentinien',
+  'Armenien',
+  'Aruba',
+  'Aserbaidschan',
+  'Äthiopien',
+  'Australien',
+  'Bahamas',
+  'Bahrain',
+  'Bangladesh',
+  'Barbados',
+  'Belgien',
+  'Belize',
+  'Benin',
+  'Bermuda',
+  'Bhutan',
+  'Bolivien',
+  'Bosnien/Herzegowina',
+  'Botsuana',
+  'Bouvetinsel',
+  'Brasilien',
+  'Brunei Darussalam',
+  'Bulgarien',
+  'Burkina Faso',
+  'Burundi',
+  'Cabo Verde',
+  'Chile',
+  'China',
+  'Cookinseln',
+  'Costa Rica',
+  'Cuba',
+  'Dominica',
+  'Dominikanische Republik',
+  'Dschibuti',
+  'Dänemark',
+  'Ecuador',
+  'El Salvador',
+  'Elfenbeinküste',
+  'Eritrea',
+  'Estland',
+  'Falklandinseln',
+  'Fidschi',
+  'Finnland',
+  'Frankreich',
+  'Französisch-Guayana',
+  'Französisch-Polynesien',
+  'Französische Südpolarterritorien',
+  'Färöer',
+  'Gabun',
+  'Gambia',
+  'Georgien',
+  'Ghana',
+  'Gibraltar',
+  'Grenada',
+  'Griechenland',
+  'Großbritannien',
+  'Grönland',
+  'Guadeloupe',
+  'Guam',
+  'Guatemala',
+  'Guernsey',
+  'Guinea-Bissau',
+  'Guinea',
+  'Guyana',
+  'Haiti',
+  'Heard und McDonaldinseln',
+  'Honduras',
+  'Hong Kong',
+  'Indien',
+  'Indonesien',
+  'Irak',
+  'Iran',
+  'Irland',
+  'Island',
+  'Isle Of Man',
+  'Israel',
+  'Italien',
+  'Jamaika',
+  'Japan',
+  'Jemen',
+  'Jersey',
+  'Jordanien',
+  'Jungferninseln, Amerikanische',
+  'Jungferninseln, Britische',
+  'Kaimaninseln',
+  'Kambodscha',
+  'Kamerun',
+  'Kanada',
+  'Kasachstan',
+  'Kenia',
+  'Kirgisistan',
+  'Kiribati',
+  'Kokosinseln',
+  'Kolumbien',
+  'Komoren',
+  'Kongo',
+  'Kroatien',
+  'Kuwait',
+  'Laos',
+  'Lesotho',
+  'Lettland',
+  'Libanon',
+  'Liberia',
+  'Libyen',
+  'Liechtenstein',
+  'Litauen',
+  'Macao',
+  'Madagaskar',
+  'Malawi',
+  'Malaysia',
+  'Maldiven',
+  'Mali',
+  'Malta',
+  'Marshallinseln',
+  'Martinique',
+  'Mauretanien',
+  'Mauritius',
+  'Mayotte',
+  'Mazedonien',
+  'Mexiko',
+  'Mikronesien',
+  'Moldawien',
+  'Monaco',
+  'Mongolei',
+  'Montenegro',
+  'Montserrat',
+  'Morokko',
+  'Mosambik',
+  'Myanmar',
+  'Namibia',
+  'Nauru',
+  'Nepal',
+  'Neukaledonien',
+  'Neuseeland',
+  'Nicaragua',
+  'Niederlande',
+  'Niederländische Antillen',
+  'Nigeria',
+  'Niger',
+  'Niue',
+  'Nordkorea',
+  'Norfolkinsel',
+  'Norwegen',
+  'Nördliche Marianen',
+  'Oman',
+  'Pakistan',
+  'Palau',
+  'Palestina',
+  'Panama',
+  'Papua-Neuguinea',
+  'Paraguay',
+  'Peru',
+  'Philippinen',
+  'Pitcairninseln',
+  'Polen',
+  'Portugal',
+  'Puerto Rico',
+  'Qatar',
+  'Ruanda',
+  'Rumänien',
+  'Russland',
+  'Réunion',
+  'Salomonen',
+  'Sambia',
+  'Samoa',
+  'San Marino',
+  'Saudi-Arabien',
+  'Schweden',
+  'Senegal',
+  'Serbien',
+  'Seychellen',
+  'Sierra Leone',
+  'Simbabwe',
+  'Singapur',
+  'Slowakische Republik',
+  'Slowenien',
+  'Somalia',
+  'Spanien',
+  'Sri Lanka',
+  'St. Barthélemy',
+  'St. Helena',
+  'St. Kitts/Nevis',
+  'St. Lucia',
+  'St. Martin',
+  'St. Pierre/Miquelon',
+  'St. Vincent/Die Grenadinen',
+  'Sudan',
+  'Surinam',
+  'Svalbard/Jan Mayen',
+  'Swasiland',
+  'Syrien',
+  'São Tomé/Príncipe',
+  'Südafrika',
+  'Südgeorgien/Südlichen Sandwichinseln',
+  'Südkorea',
+  'Tadschikistan',
+  'Taiwan',
+  'Tansania',
+  'Thailand',
+  'Timor-Leste',
+  'Togo',
+  'Tokelau',
+  'Tonga',
+  'Trinidad und Tobago',
+  'Tschad',
+  'Tschechoslowakei',
+  'Tunisien',
+  'Turkmenistan',
+  'Turks- und Caicosinseln',
+  'Tuvalu',
+  'Türkei',
+  'Uganda',
+  'Ukraine',
+  'Ungarn',
+  'United States Minor Islands',
+  'Uruguay',
+  'USA',
+  'Usbekistan',
+  'Vanuatu',
+  'Vatikanstadt',
+  'Venezuela',
+  'Vereinigte Arabische Emirate',
+  'Vietnam',
+  'Wallis/Futuna',
+  'Weihnachtsinsel',
+  'Weißrussland',
+  'Westsahara',
+  'Zentralafrikanische Republik',
+  'Zypern'
 ]
 
 const originalRoundtripArr = []
@@ -354,7 +600,7 @@ const originalRoundtripArr = []
 export default {
   data () {
     return {
-      date: formattedDate,
+      OfferPeriod: formattedDate,
       country: this.$route.params.country,
       selectedCountry: '',
       dayModel: null,
@@ -440,6 +686,7 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             users.push(doc.data())
+            console.log(users[0].UserImage)
             return users[0].UserImage
           })
         })
@@ -458,6 +705,10 @@ export default {
       this.showSimulatedReturnData = false
       roundtripArr = []
       originalRoundtripArr.length = 0
+
+      let dateParts = this.OfferPeriod.split('.')
+      let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
+
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', '==', this.country)
         .where('Public', '==', true)
@@ -471,12 +722,15 @@ export default {
           .orderBy('createdAt')
           .limit(20)
       }
+
       roundtripsRef.get()
         .then(snapshot => {
           snapshot.forEach(doc => {
-            roundtripArr.push(doc.data())
-            originalRoundtripArr.push(doc.data())
-            this.loadTitleImg(doc.id, doc.data().RTId)
+            if (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime()) {
+              roundtripArr.push(doc.data())
+              originalRoundtripArr.push(doc.data())
+              this.loadTitleImg(doc.id, doc.data().RTId)
+            }
           })
           this.roundtrips = roundtripArr
 

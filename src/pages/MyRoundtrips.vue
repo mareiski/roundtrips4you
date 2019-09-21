@@ -199,7 +199,6 @@ export default {
           Days: '< 5 Tage',
           Description: 'Kurze Beschreibung deiner Rundreise',
           Hotels: '1',
-          ImageGalery: [],
           Location: Location,
           Price: 0,
           Public: false,
