@@ -894,12 +894,9 @@ export default {
 
         context.stops.forEach(stop => {
           let dateTimeParts = stop.InitDate.split(' ')
-          console.log(dateTimeParts)
           let dateParts = dateTimeParts[0].split('.')
           let timeParts = dateTimeParts[1].split(':')
           let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-          console.log(initDate)
 
           if (!initDates.includes(initDate)) initDates.push(initDate)
         })
