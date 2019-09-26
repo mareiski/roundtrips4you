@@ -20,7 +20,12 @@
     "firebase": "^6.4.0",
     "formidable": "^1.2.1",
     "http2": "^3.3.7",
+    "leaflet": "^1.5.1",
+    "leaflet-geosearch": "^2.7.0",
+    "leaflet-routing-machine": "^3.2.12",
     "quasar": "^1.0.0",
+    "vue2-leaflet": "^2.2.1",
+    "vue2-leaflet-geosearch": "^1.0.6",
     "vuefire": "^2.0.0-alpha.24"
   },
   "devDependencies": {

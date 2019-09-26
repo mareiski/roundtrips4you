@@ -73,15 +73,28 @@
         position: absolute;
         width: 100%;
         top: 0;
-        z-index: -1;
         left: 0;
+        height: 60vh;
+        min-height: 400px;
+
+        .q-btn {
+            display: none;
+        }
+
+        &:hover {
+            .q-btn {
+                display: block;
+            }
+        }
     }
 
     .carousel-placeholder {
-        height: 410px;
+        min-height: 410px;
+        height: 60vh;
         top: 0;
 
         h3 {
+            position: absolute;
             padding-left: 10%;
             padding-top: 40px;
             color: white;

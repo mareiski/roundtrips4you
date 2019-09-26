@@ -71,7 +71,14 @@ module.exports = function (ctx) {
         'QImg',
         'QTime',
         'Loading',
-        'QChip'
+        'QChip',
+        'QTabs',
+        'QTab',
+        'QRouteTab',
+        'QTabPanels',
+        'QTabPanel',
+        'QSeparator',
+        'QChatMessage'
       ],
 
       directives: [

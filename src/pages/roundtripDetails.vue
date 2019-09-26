@@ -1,6 +1,5 @@
 <template>
   <div class="roundtrip-details q-px-lg q-pb-md">
-
     <q-carousel
       animated
       v-model="slide"
@@ -22,23 +21,81 @@
     <div class="carousel-placeholder">
       <h3>{{roundtrip[0].Title}}</h3>
     </div>
-    <q-timeline color="secondary">
-      <q-timeline-entry heading>
-        Reiseverlauf
-      </q-timeline-entry>
-      <div class="stop-list">
-        <Stop
-          v-for="stop in stops"
-          :key="stop"
-          :title="stop.Title"
-          :date="date"
-          :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
-          :editor-placeholder="stop.Description"
-          :general-link="stop.GeneralLink"
-          :location="stop.Location"
-        ></Stop>
-      </div>
-    </q-timeline>
+    <q-tabs
+      v-model="tab"
+      dense
+      class="text-grey"
+      active-color="primary"
+      indicator-color="primary"
+      align="justify"
+      narrow-indicator
+      style="padding-top:20px;"
+    >
+      <q-tab
+        name="overview"
+        label="Übersicht"
+      />
+      <q-tab
+        name="card"
+        label="Karte"
+      />
+      <q-tab
+        name="ratings"
+        label="Bewertungen"
+      />
+    </q-tabs>
+
+    <q-separator />
+
+    <q-tab-panels
+      v-model="tab"
+      animated
+    >
+      <q-tab-panel name="overview">
+        <q-timeline color="secondary">
+          <q-timeline-entry heading>
+            Reiseverlauf
+          </q-timeline-entry>
+          <div class="stop-list">
+            <Stop
+              v-for="(stop, index) in stops"
+              :key="stop"
+              :title="stop.Title"
+              :date="dates[index]"
+              :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
+              :editor-placeholder="stop.Description"
+              :general-link="stop.GeneralLink"
+              :location="stop.Location.label.split(',')[0]"
+            ></Stop>
+          </div>
+        </q-timeline>
+      </q-tab-panel>
+
+      <q-tab-panel name="card">
+        <Map :stops="stops"></Map>
+      </q-tab-panel>
+
+      <q-tab-panel name="ratings">
+        <div class="text-h6">Bewertungen</div>
+        <div class="q-pa-md row justify-center">
+          <div style="width: 100%; max-width: 400px">
+            <q-chat-message label="Sunday, 19th" />
+            <q-chat-message
+              name="me"
+              avatar="https://cdn.quasar.dev/img/avatar4.jpg"
+              :text="['hey, how are you?']"
+              sent
+            />
+            <q-chat-message
+              name="Jane"
+              avatar="https://cdn.quasar.dev/img/avatar3.jpg"
+              :text="[`doing fine, how r you?`]"
+            />
+          </div>
+        </div>
+      </q-tab-panel>
+    </q-tab-panels>
+
   </div>
 </template>
 <style lang="less">
@@ -48,12 +105,10 @@
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'
+import Map from '../pages/Map/Map'
 
 let details = []
 let roundtrip = []
-
-let timeStamp = Date.now()
-let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
 
 let roundtripDocId = null
 
@@ -63,16 +118,18 @@ const stringOptions = [
 
 export default {
   components: {
-    Stop
+    Stop,
+    Map
   },
   data () {
     return {
-      date: formattedDate,
+      dates: [],
       countryOptions: stringOptions,
       stops: [],
       roundtrip: [],
       slide: null,
-      galeryImgUrls: []
+      galeryImgUrls: [],
+      tab: 'overview'
     }
   },
   methods: {
@@ -100,7 +157,7 @@ export default {
           console.log('Error getting Roundtrip', err)
         })
     },
-    loadRoundtripDetails (RTId) {
+    loadRoundtripDetails (RTId, retrievedDate) {
       this.selectedCountry = this.country
       this.visible = true
       this.showSimulatedReturnData = false
@@ -115,10 +172,24 @@ export default {
           })
           this.stops = details
 
+          let initDates = []
           // get dates
-          details.forEach((detail) => {
-            const initDate = new Date(detail.InitDate.seconds * 1000)
-            this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+          details.forEach((detail, index) => {
+            initDates.splice(index, 0, new Date(detail.InitDate.seconds * 1000))
+            if (index > 0) {
+              const date1 = initDates[index - 1]
+              const date2 = initDates[index]
+              const diffTime = new Date(date2 - date1).getTime()
+
+              console.log(diffTime)
+              const returnDate = date.formatDate(new Date(retrievedDate + diffTime), 'DD.MM.YYYY HH:mm')
+
+              console.log(new Date(retrievedDate + diffTime))
+
+              this.dates.splice(index, 0, returnDate)
+            } else {
+              this.dates.splice(index, 0, date.formatDate(new Date(retrievedDate), 'DD.MM.YYYY HH:mm'))
+            }
           })
           this.stops = details
         })
@@ -145,8 +216,16 @@ export default {
     }
   },
   created () {
-    const RTId = this.$route.params.id
-    this.loadRoundtripDetails(RTId)
+    const params = this.$route.params.id
+    let RTId = params
+    let userDate = null
+
+    if (params.includes('&')) {
+      RTId = params.split('&')[0]
+      userDate = params.split('&')[1]
+    }
+
+    this.loadRoundtripDetails(RTId, parseInt(userDate))
     this.loadSingleRoundtrip(RTId)
   }
 }

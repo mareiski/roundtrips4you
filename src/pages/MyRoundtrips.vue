@@ -200,12 +200,15 @@ export default {
           Description: 'Kurze Beschreibung deiner Rundreise',
           Hotels: '1',
           Location: Location,
-          Price: 0,
+          Price: 100,
           Public: false,
           RTId: 3445340985430,
           Stars: 3,
           Tags: ['Tag1', 'Tag2', 'Tag3'],
           Title: Title,
+          OfferEndPeriod: timeStamp,
+          OfferStartPeriod: timeStamp,
+          OfferWholeYear: true,
           UserId: this.$store.getters['user/user'].uid,
           createdAt: new Date(timeStamp)
         })
@@ -229,7 +232,7 @@ export default {
                 InitDate: new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
-                Title: 'Titel des 1. Stopps'
+                Title: 'Titel des 1. Hotels'
               })
               this.getUserRoundtrips()
             })

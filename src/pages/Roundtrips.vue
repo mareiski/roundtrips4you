@@ -274,7 +274,7 @@
         </q-inner-loading>
         <div
           class="roundtrip-card-container"
-          v-for="(roundtrip, index) in roundtrips"
+          v-for="(roundtrip) in roundtrips"
           :key="roundtrip"
         >
           <div class="roundtrip-card">
@@ -320,12 +320,12 @@
             <div class="card-right-col">
               <div class="card-row">
                 <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
-                <q-img :src="userImages[index]"></q-img>
+                <!--<q-img :src="userImages[index]"></q-img>-->
               </div>
               <div class="card-bottom-row">
                 <router-link
                   class="button details-button"
-                  :to="{ path: '/rundreisen-details/' + roundtrip.RTId}"
+                  :to="{ path: '/rundreisen-details/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
                 >Details</router-link>
                 <!--<a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>-->
               </div>
@@ -726,7 +726,7 @@ export default {
       roundtripsRef.get()
         .then(snapshot => {
           snapshot.forEach(doc => {
-            if (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime()) {
+            if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
               roundtripArr.push(doc.data())
               originalRoundtripArr.push(doc.data())
               this.loadTitleImg(doc.id, doc.data().RTId)
@@ -749,7 +749,7 @@ export default {
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
 
             // load userImages
-            this.userImages.push(this.loadUserImage(roundtrip.UserId))
+            // this.userImages.push(this.loadUserImage(roundtrip.UserId))
           })
 
           this.step.max = price
@@ -771,6 +771,10 @@ export default {
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
         })
+    },
+    getParamsDate (dateString) {
+      let dateParts = dateString.split('.')
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00').getTime()
     }
   },
   created () {

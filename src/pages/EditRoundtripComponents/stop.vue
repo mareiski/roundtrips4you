@@ -1,8 +1,5 @@
 <template>
-  <q-timeline-entry
-    :subtitle="date"
-    :icon="icon"
-  >
+  <q-timeline-entry :icon="icon">
     <div class="stop-container">
       <div class="flex">
         <h6 class="q-timeline__title">{{titleInput}}
@@ -60,6 +57,32 @@
         />
       </q-popup-edit>
     </div>
+    <template v-slot:subtitle>
+      <span class="q-timeline__title">{{date}}
+        <q-popup-proxy
+          v-if="editor"
+          ref="qDateProxy"
+          transition-show="scale"
+          transition-hide="scale"
+          @hide="() => [showDateEntry = true, showTimeEntry = false, saveDate(date)]"
+        >
+          <q-date
+            v-model="date"
+            today-btn
+            mask="DD.MM.YYYY HH:mm"
+            v-if="showDateEntry"
+            @input="() => [showTimeEntry = true, showDateEntry = false]"
+          />
+          <q-time
+            v-model="date"
+            mask="DD.MM.YYYY HH:mm"
+            v-if="showTimeEntry"
+            @input="() => [showDateEntry = true, showTimeEntry = false, $refs.qDateProxy.hide()]"
+            format24h
+          />
+        </q-popup-proxy>
+      </span>
+    </template>
   </q-timeline-entry>
 </template>
 <script>
@@ -81,6 +104,8 @@ export default {
       titleInput: this.title,
       descriptionInput: this.editorPlaceholder,
       generalLinkText: '',
+      showDateEntry: true,
+      showTimeEntry: false,
       editorFonts: {
         arial: 'Arial',
         arial_black: 'Arial Black',
@@ -159,6 +184,16 @@ export default {
     }
   },
   methods: {
+    saveDate (value) {
+      let dateTimeParts = value.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        'InitDate': initDate
+      })
+    },
     saveData (field, value) {
       console.log(this.docId)
       db.collection('RoundtripDetails').doc(this.docId).update({

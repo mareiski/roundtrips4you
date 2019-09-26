@@ -29,7 +29,7 @@
           :editor="true"
           :doc-id="documentIds[index]"
           :general-link="stop.GeneralLink"
-          :location="stop.Location"
+          :location="stop.Location.label.split(',')[0]"
         ></Stop>
       </div>
     </q-timeline>
@@ -115,18 +115,7 @@
                   <q-icon name="list" />
                 </template>
               </q-select>
-              <q-input
-                v-model="location"
-                outlined
-                lazy-rules
-                label="Ort"
-                ref="locationInput"
-                style="width:300px"
-                :rules="[val => val !== null && val !== '' || 'Bitte gib einen Ort an']"
-              > <template v-slot:prepend>
-                  <q-icon name="location_on" />
-                </template>
-              </q-input>
+              <CitySearch @update="updateLocation($event)"></CitySearch>
               <div v-if="selectedOption === 'Hotel'">
                 <q-input
                   v-model="generalTempLink"
@@ -498,6 +487,7 @@
 <script>
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
+import CitySearch from '../pages/Map/CitySearch'
 import { auth, db, storage } from '../firebaseInit'
 
 let timeStamp = Date.now()
@@ -514,7 +504,7 @@ let BookingComLink = '',
   Price = 0,
   RTId = 0,
   Title = 'Titel',
-  Location = ''
+  Location = {}
 
 let details = []
 let documentIds = []
@@ -772,7 +762,8 @@ const stringOptions = [
 export default {
   name: 'EditRoundtrips',
   components: {
-    Stop
+    Stop,
+    CitySearch
   },
   data () {
     return {
@@ -808,7 +799,7 @@ export default {
       urlReg: /^(http:\/\/|https:\/\/)/,
       generalTempLink: '',
       price: 0,
-      location: null,
+      location: {},
       wholeYearOffer: false
     }
   },
@@ -845,11 +836,12 @@ export default {
           message: 'Eintrag wurde erstellt'
         })
       } catch (e) {
+        console.log(e)
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
           icon: 'fas fa-exclamation-triangle',
-          message: 'Der Eintrag konnte erstellt werden'
+          message: 'Der Eintrag konnte nicht erstellt werden'
         })
       }
     },
@@ -868,9 +860,9 @@ export default {
 
       HotelStop = HotelStop === 'Hotel'
 
+      console.log(this.location)
       Location = this.location
-      this.location = null
-      if (typeof this.$refs.locationInput !== 'undefined') this.$refs.locationInput.resetValidation()
+      this.location = {}
 
       let context = this
 
@@ -891,6 +883,7 @@ export default {
         let daysString = ''
         let days = 1
         let initDates = []
+        let hotelCount = 0
 
         context.stops.forEach(stop => {
           let dateTimeParts = stop.InitDate.split(' ')
@@ -899,6 +892,7 @@ export default {
           let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
           if (!initDates.includes(initDate)) initDates.push(initDate)
+          if (stop.HotelStop) hotelCount++
         })
 
         if (initDates.length > 0) {
@@ -922,6 +916,7 @@ export default {
         if (daysString.length > 0) {
           context.saveData('Days', daysString)
         }
+        context.saveData('Hotels', hotelCount)
       })
     },
     deleteRoundtrip () {
@@ -971,7 +966,8 @@ export default {
         this.saveData('Tags', [this.tag1, this.tag2, this.tag3]) &&
         this.saveData('OfferStartPeriod', offerStartPeriod) &&
         this.saveData('OfferEndPeriod', offerEndPeriod) &&
-        this.saveData('Price', this.price)) {
+        this.saveData('Price', this.price) &&
+        this.saveData('OfferWholeYear', this.wholeYearOffer)) {
         this.submitting = false
         this.$q.notify({
           color: 'green-4',
@@ -1016,6 +1012,7 @@ export default {
           this.tag2 = roundtrip[0].Tags[1]
           this.tag3 = roundtrip[0].Tags[2]
           this.price = roundtrip[0].Price
+          this.wholeYearOffer = roundtrip[0].OfferWholeYear
 
           let retrievedDate = new Date(roundtrip[0].OfferEndPeriod.seconds * 1000)
           this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
@@ -1035,6 +1032,15 @@ export default {
           })
         })
     },
+    updateLocation (event) {
+      if (event !== null) {
+        this.location = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
+    },
     loadRoundtripDetails (RTId) {
       this.selectedCountry = this.country
       this.showSimulatedReturnData = false
@@ -1053,11 +1059,47 @@ export default {
           console.log(documentIds)
           this.documentIds = documentIds
 
+          let daysString = ''
+          let days = 1
+          let initDates = []
+          let hotelCount = 0
+
           // get dates
-          details.forEach((detail) => {
-            const initDate = new Date(detail.InitDate.seconds * 1000)
-            detail.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+          details.forEach((stop) => {
+            const initDate = new Date(stop.InitDate.seconds * 1000)
+            stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+
+            if (stop.HotelStop) hotelCount++
+
+            if (!initDates.includes(initDate)) initDates.push(initDate)
+            if (stop.HotelStop) hotelCount++
           })
+
+          if (initDates.length > 0) {
+            let maxDate = new Date(Math.max.apply(null, initDates))
+            let minDate = new Date(Math.min.apply(null, initDates))
+
+            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+          }
+
+          if (days < 5) {
+            daysString = '< 5 Tage'
+          } else if (days >= 5 && days <= 8) {
+            daysString = '5-8 Tage'
+          } else if (days >= 9 && days <= 11) {
+            daysString = '9-11 Tage'
+          } else if (days >= 12 && days <= 15) {
+            daysString = '12-15 Tage'
+          } else if (days > 15) {
+            daysString = '> 15 Tage'
+          }
+
+          // save days and hotels
+          if (daysString.length > 0) {
+            this.saveData('Days', daysString)
+          }
+          this.saveData('Hotels', hotelCount)
+
           this.stops = details
         })
         .catch(err => {
@@ -1173,6 +1215,7 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
+      if (auth.user() === null) this.$router.push('/login')
       const RTId = this.$route.params.id
       let hasDisplayPermission = false
 
