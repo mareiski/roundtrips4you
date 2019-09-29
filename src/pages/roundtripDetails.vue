@@ -39,10 +39,10 @@
         name="card"
         label="Karte"
       />
-      <q-tab
+      <!--<q-tab
         name="ratings"
         label="Bewertungen"
-      />
+      />-->
     </q-tabs>
 
     <q-separator />

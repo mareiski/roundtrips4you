@@ -23,7 +23,7 @@
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
-            to="/ueber"
+            to="/über"
           >über uns</router-link>
           <q-avatar
             size="50px"
@@ -96,11 +96,11 @@
         >home</router-link>
         <router-link
           class="mobile-header-page-link"
-          to="/rundreisen"
+          to="/rundreisen-übersicht"
         >rundreisen</router-link>
         <router-link
           class="mobile-header-page-link"
-          to="/ueber"
+          to="/über"
         >über uns</router-link>
       </div>
     </div>
@@ -126,7 +126,7 @@
           >rundreisen</router-link>
           <router-link
             class="footer-link"
-            to="/ueber"
+            to="/über"
           >über uns</router-link>
         </div>
         <div class="footer-infos">

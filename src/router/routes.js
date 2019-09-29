@@ -49,6 +49,10 @@ const routes = [
         }
       },
       {
+        path: 'über',
+        component: () => import('pages/Über.vue')
+      },
+      {
         path: 'rundreise-bearbeiten/:id',
         component: () => import('pages/EditRoundtrips.vue'),
         meta: {
