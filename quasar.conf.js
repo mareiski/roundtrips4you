@@ -112,11 +112,15 @@ module.exports = function (ctx) {
             formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
         })
+        // copy _redirects file
         const CopyWebpackPlugin = require('copy-webpack-plugin')
         cfg.plugins.push(
-          new CopyWebpackPlugin(
-            [{ context: `${__dirname}/src/statics/rootFiles`, from: `*.*` }]
-          )
+          new CopyWebpackPlugin([
+            {
+              from: 'src/_redirects',
+              to: cfg.output.path
+            }
+          ])
         )
       }
     },
