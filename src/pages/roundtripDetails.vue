@@ -84,8 +84,15 @@
               name="me"
               avatar="https://cdn.quasar.dev/img/avatar4.jpg"
               :text="['hey, how are you?']"
-              sent
-            />
+            >
+              <q-rating
+                class="stars"
+                v-model="tempStars"
+                size="15px"
+                color="gold"
+                style="margin-right:10px;"
+              />
+            </q-chat-message>
             <q-chat-message
               name="Jane"
               avatar="https://cdn.quasar.dev/img/avatar3.jpg"
@@ -112,10 +119,6 @@ let roundtrip = []
 
 let roundtripDocId = null
 
-const stringOptions = [
-  'Deutschland', 'Italien', 'Vietnam'
-]
-
 export default {
   components: {
     Stop,
@@ -124,7 +127,6 @@ export default {
   data () {
     return {
       dates: [],
-      countryOptions: stringOptions,
       stops: [],
       roundtrip: [],
       slide: null,
@@ -133,12 +135,6 @@ export default {
     }
   },
   methods: {
-    filterFn (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    },
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
@@ -175,20 +171,27 @@ export default {
           let initDates = []
           // get dates
           details.forEach((detail, index) => {
-            initDates.splice(index, 0, new Date(detail.InitDate.seconds * 1000))
+            const initDate = new Date(detail.InitDate.seconds * 1000)
+            initDates.splice(index, 0, initDate)
+
+            retrievedDate = new Date(retrievedDate)
+            retrievedDate.setMinutes(initDate.getMinutes())
+            retrievedDate.setHours(initDate.getHours())
+
+            console.log('receivedDate' + retrievedDate)
+
             if (index > 0) {
               const date1 = initDates[index - 1]
               const date2 = initDates[index]
               const diffTime = new Date(date2 - date1).getTime()
 
-              console.log(diffTime)
-              const returnDate = date.formatDate(new Date(retrievedDate + diffTime), 'DD.MM.YYYY HH:mm')
+              const addedTime = retrievedDate.setTime(retrievedDate.getTime() + diffTime)
 
-              console.log(new Date(retrievedDate + diffTime))
+              const returnDate = date.formatDate(new Date(addedTime), 'DD.MM.YYYY HH:mm')
 
               this.dates.splice(index, 0, returnDate)
             } else {
-              this.dates.splice(index, 0, date.formatDate(new Date(retrievedDate), 'DD.MM.YYYY HH:mm'))
+              this.dates.splice(index, 0, date.formatDate(retrievedDate, 'DD.MM.YYYY HH:mm'))
             }
           })
           this.stops = details
@@ -205,7 +208,6 @@ export default {
           fileRef = storage.ref().child(itemRef.fullPath)
           context.galeryImgUrls = []
           fileRef.getDownloadURL().then(function (url) {
-            console.log(context.galeryImgUrls)
             context.galeryImgUrls.push(url)
             if (context.galeryImgUrls.length === 1) context.slide = url
           })

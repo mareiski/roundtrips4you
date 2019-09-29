@@ -78,7 +78,8 @@ module.exports = function (ctx) {
         'QTabPanels',
         'QTabPanel',
         'QSeparator',
-        'QChatMessage'
+        'QChatMessage',
+        'QPagination'
       ],
 
       directives: [
@@ -111,6 +112,12 @@ module.exports = function (ctx) {
             formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
         })
+        const CopyWebpackPlugin = require('copy-webpack-plugin')
+        cfg.plugins.push(
+          new CopyWebpackPlugin(
+            [{ context: `${__dirname}/src/statics/rootFiles`, from: `*.*` }]
+          )
+        )
       }
     },
 

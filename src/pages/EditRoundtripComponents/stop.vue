@@ -213,6 +213,7 @@ export default {
       console.log(this.docId)
       const context = this
       db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
+        context.getParent('EditRoundtrips').saveRoundtripDaysAndHotels()
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',

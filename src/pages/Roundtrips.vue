@@ -1,6 +1,26 @@
 <template>
   <div class="roundtrips">
-    <h2 class="topic">{{selectedCountry}}: {{roundtrips.length}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
+    <div class="topic flex justify-center">
+      <div style="display: flex;
+    flex-direction: column;
+    justify-content: center;">
+        <router-link to="/rundreisen-übersicht">zurück zu allen Rundreisen</router-link>
+      </div>
+      <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
+      <q-select
+        outlined
+        v-model="sort"
+        input-debounce="0"
+        :options="sortOptions"
+        label="Land auswählen"
+        style="padding:0 10px 0 0"
+        @input="sortRoundtrips($event)"
+      >
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-select>
+    </div>
     <div id="CardBackgroundImg"></div>
     <div id="RoundtripCardBackgroundImgPlaceholder">
       <div class="filter-container">
@@ -71,7 +91,7 @@
           </q-select>
           <a
             class="button"
-            @click="$router.push('/rundreisen/' + country); loadRoundtrips()"
+            @click="$router.push('/rundreisen/' + country); loadRoundtrips(); getRTCount()"
           >Suchen</a>
         </div>
         <div class="filter-card">
@@ -332,6 +352,18 @@
             </div>
           </div>
         </div>
+        <div class="flex justify-center">
+          <q-pagination
+            v-if="paginationMax > 1"
+            v-model="currentPage"
+            color="primary"
+            :max="paginationMax"
+            :max-pages="6"
+            :boundary-numbers="true"
+            @input="loadRoundtrips()"
+          >
+          </q-pagination>
+        </div>
       </div>
     </div>
   </div>
@@ -342,260 +374,15 @@
 <script>
 import { date } from 'quasar'
 import { db, storage } from '../firebaseInit'
+import { countries } from '../countries'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 let roundtripArr = []
 
-const stringOptions = [
-  'Deutschland',
-  'Österreich',
-  'Schweiz',
-  'Luxemburg',
-  'Afghanistan',
-  'Ägypten',
-  'Åland',
-  'Albanien',
-  'Algerien',
-  'Amerikanisch-Samoa',
-  'Andorra',
-  'Angola',
-  'Anguilla',
-  'Antarktis',
-  'Antigua/Barbuda',
-  'Äquatorialguinea',
-  'Argentinien',
-  'Armenien',
-  'Aruba',
-  'Aserbaidschan',
-  'Äthiopien',
-  'Australien',
-  'Bahamas',
-  'Bahrain',
-  'Bangladesh',
-  'Barbados',
-  'Belgien',
-  'Belize',
-  'Benin',
-  'Bermuda',
-  'Bhutan',
-  'Bolivien',
-  'Bosnien/Herzegowina',
-  'Botsuana',
-  'Bouvetinsel',
-  'Brasilien',
-  'Brunei Darussalam',
-  'Bulgarien',
-  'Burkina Faso',
-  'Burundi',
-  'Cabo Verde',
-  'Chile',
-  'China',
-  'Cookinseln',
-  'Costa Rica',
-  'Cuba',
-  'Dominica',
-  'Dominikanische Republik',
-  'Dschibuti',
-  'Dänemark',
-  'Ecuador',
-  'El Salvador',
-  'Elfenbeinküste',
-  'Eritrea',
-  'Estland',
-  'Falklandinseln',
-  'Fidschi',
-  'Finnland',
-  'Frankreich',
-  'Französisch-Guayana',
-  'Französisch-Polynesien',
-  'Französische Südpolarterritorien',
-  'Färöer',
-  'Gabun',
-  'Gambia',
-  'Georgien',
-  'Ghana',
-  'Gibraltar',
-  'Grenada',
-  'Griechenland',
-  'Großbritannien',
-  'Grönland',
-  'Guadeloupe',
-  'Guam',
-  'Guatemala',
-  'Guernsey',
-  'Guinea-Bissau',
-  'Guinea',
-  'Guyana',
-  'Haiti',
-  'Heard und McDonaldinseln',
-  'Honduras',
-  'Hong Kong',
-  'Indien',
-  'Indonesien',
-  'Irak',
-  'Iran',
-  'Irland',
-  'Island',
-  'Isle Of Man',
-  'Israel',
-  'Italien',
-  'Jamaika',
-  'Japan',
-  'Jemen',
-  'Jersey',
-  'Jordanien',
-  'Jungferninseln, Amerikanische',
-  'Jungferninseln, Britische',
-  'Kaimaninseln',
-  'Kambodscha',
-  'Kamerun',
-  'Kanada',
-  'Kasachstan',
-  'Kenia',
-  'Kirgisistan',
-  'Kiribati',
-  'Kokosinseln',
-  'Kolumbien',
-  'Komoren',
-  'Kongo',
-  'Kroatien',
-  'Kuwait',
-  'Laos',
-  'Lesotho',
-  'Lettland',
-  'Libanon',
-  'Liberia',
-  'Libyen',
-  'Liechtenstein',
-  'Litauen',
-  'Macao',
-  'Madagaskar',
-  'Malawi',
-  'Malaysia',
-  'Maldiven',
-  'Mali',
-  'Malta',
-  'Marshallinseln',
-  'Martinique',
-  'Mauretanien',
-  'Mauritius',
-  'Mayotte',
-  'Mazedonien',
-  'Mexiko',
-  'Mikronesien',
-  'Moldawien',
-  'Monaco',
-  'Mongolei',
-  'Montenegro',
-  'Montserrat',
-  'Morokko',
-  'Mosambik',
-  'Myanmar',
-  'Namibia',
-  'Nauru',
-  'Nepal',
-  'Neukaledonien',
-  'Neuseeland',
-  'Nicaragua',
-  'Niederlande',
-  'Niederländische Antillen',
-  'Nigeria',
-  'Niger',
-  'Niue',
-  'Nordkorea',
-  'Norfolkinsel',
-  'Norwegen',
-  'Nördliche Marianen',
-  'Oman',
-  'Pakistan',
-  'Palau',
-  'Palestina',
-  'Panama',
-  'Papua-Neuguinea',
-  'Paraguay',
-  'Peru',
-  'Philippinen',
-  'Pitcairninseln',
-  'Polen',
-  'Portugal',
-  'Puerto Rico',
-  'Qatar',
-  'Ruanda',
-  'Rumänien',
-  'Russland',
-  'Réunion',
-  'Salomonen',
-  'Sambia',
-  'Samoa',
-  'San Marino',
-  'Saudi-Arabien',
-  'Schweden',
-  'Senegal',
-  'Serbien',
-  'Seychellen',
-  'Sierra Leone',
-  'Simbabwe',
-  'Singapur',
-  'Slowakische Republik',
-  'Slowenien',
-  'Somalia',
-  'Spanien',
-  'Sri Lanka',
-  'St. Barthélemy',
-  'St. Helena',
-  'St. Kitts/Nevis',
-  'St. Lucia',
-  'St. Martin',
-  'St. Pierre/Miquelon',
-  'St. Vincent/Die Grenadinen',
-  'Sudan',
-  'Surinam',
-  'Svalbard/Jan Mayen',
-  'Swasiland',
-  'Syrien',
-  'São Tomé/Príncipe',
-  'Südafrika',
-  'Südgeorgien/Südlichen Sandwichinseln',
-  'Südkorea',
-  'Tadschikistan',
-  'Taiwan',
-  'Tansania',
-  'Thailand',
-  'Timor-Leste',
-  'Togo',
-  'Tokelau',
-  'Tonga',
-  'Trinidad und Tobago',
-  'Tschad',
-  'Tschechoslowakei',
-  'Tunisien',
-  'Turkmenistan',
-  'Turks- und Caicosinseln',
-  'Tuvalu',
-  'Türkei',
-  'Uganda',
-  'Ukraine',
-  'Ungarn',
-  'United States Minor Islands',
-  'Uruguay',
-  'USA',
-  'Usbekistan',
-  'Vanuatu',
-  'Vatikanstadt',
-  'Venezuela',
-  'Vereinigte Arabische Emirate',
-  'Vietnam',
-  'Wallis/Futuna',
-  'Weihnachtsinsel',
-  'Weißrussland',
-  'Westsahara',
-  'Zentralafrikanische Republik',
-  'Zypern'
-]
-
 const originalRoundtripArr = []
+let createdAts = []
 
 export default {
   data () {
@@ -621,12 +408,20 @@ export default {
       roundtripCategories: [],
       filteredRoundtripCategories: [],
       roundtrips: [],
-      countryOptions: stringOptions,
+      countryOptions: countries,
       filterRoundtripArr: [],
       TitleImgs: [],
       RTIds: [],
       userImages: [],
-      maxPrice: 0
+      maxPrice: 0,
+      currentPage: 1,
+      paginationMax: 1,
+      roundtripCount: 0,
+      sort: 'Erstellungsdatum',
+      sortOptions: [
+        'Preis aufsteigend', 'Preis absteigend', 'Hotelbewertung aufsteigend', 'Hotelbewertung absteigend', 'Erstellungsdatum'
+      ]
+      // 'Reisedauer aufsteigend', 'Reisedauer absteigend' missing in sort opt
     }
   },
   name: 'Roundtrips',
@@ -634,7 +429,7 @@ export default {
     filterFn (val, update, abort) {
       update(() => {
         const needle = val.toLowerCase()
-        this.countryOptions = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
     dateOptions (date) {
@@ -709,16 +504,22 @@ export default {
       let dateParts = this.OfferPeriod.split('.')
       let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
 
+      let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
+      if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
+      console.log(searchCreatedAt)
+
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', '==', this.country)
         .where('Public', '==', true)
         .orderBy('createdAt')
+        .startAt(searchCreatedAt)
         .limit(20)
       if (this.dayModel !== null && this.dayModel.length > 0) {
         roundtripsRef = db.collection('Roundtrips')
           .where('Location', '==', this.country)
           .where('Public', '==', true)
           .where('Days', '==', this.dayModel)
+          .startAt(searchCreatedAt)
           .orderBy('createdAt')
           .limit(20)
       }
@@ -775,10 +576,55 @@ export default {
     getParamsDate (dateString) {
       let dateParts = dateString.split('.')
       return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00').getTime()
+    },
+    getRTCount () {
+      const counterRef = db.collection('Roundtrips')
+        .where('Location', '==', this.country)
+        .where('Public', '==', true)
+        .orderBy('createdAt')
+
+      this.roundtripCount = 0
+
+      counterRef.get().then(snapshot => {
+        this.paginationMax = Math.ceil(snapshot.docs.length / 20)
+        snapshot.forEach(doc => {
+          this.roundtripCount++
+          createdAts.push(doc.data().createdAt)
+        })
+      })
+    },
+    sortRoundtrips (value) {
+      switch (value) {
+        case 'Preis aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Price) - parseFloat(b.Price))
+          break
+        case 'Preis absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Price) - parseFloat(a.Price))
+          break
+        case 'Hotelbewertung aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Stars) - parseFloat(b.Stars))
+          break
+        case 'Hotelbewertung absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Stars) - parseFloat(a.Stars))
+          break
+        case 'Reisedauer aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Days) - parseFloat(b.Days))
+          break
+        case 'Reisedauer absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Days) - parseFloat(a.Days))
+          break
+        case 'Erstellungsdatum':
+          console.log(originalRoundtripArr)
+          this.roundtrips = []
+          this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
+          console.log(this.roundtrips)
+          break
+      }
     }
   },
   created () {
     this.loadRoundtrips()
+    this.getRTCount()
   }
 }
 

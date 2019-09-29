@@ -77,16 +77,14 @@
 </style>
 
 <script>
-const stringOptions = [
-  'Deutschland', 'Italien', 'Vietnam'
-]
+import { countries } from '../countries'
 
 export default {
   name: 'PageIndex',
   data () {
     return {
       date: '2019/02/01',
-      countryOptions: stringOptions,
+      countryOptions: countries,
       searchLocation: ''
     }
   },
@@ -94,7 +92,7 @@ export default {
     filterFn (val, update, abort) {
       update(() => {
         const needle = val.toLowerCase()
-        this.countryOptions = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     }
   }

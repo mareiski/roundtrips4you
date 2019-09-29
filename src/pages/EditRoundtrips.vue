@@ -489,6 +489,7 @@ import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import CitySearch from '../pages/Map/CitySearch'
 import { auth, db, storage } from '../firebaseInit'
+import { countries } from '../countries'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -512,253 +513,6 @@ let roundtrip = []
 let roundtripDocId = ''
 let galeryImgId = 0
 
-const stringOptions = [
-  'Deutschland',
-  'Österreich',
-  'Schweiz',
-  'Luxemburg',
-  'Afghanistan',
-  'Ägypten',
-  'Åland',
-  'Albanien',
-  'Algerien',
-  'Amerikanisch-Samoa',
-  'Andorra',
-  'Angola',
-  'Anguilla',
-  'Antarktis',
-  'Antigua/Barbuda',
-  'Äquatorialguinea',
-  'Argentinien',
-  'Armenien',
-  'Aruba',
-  'Aserbaidschan',
-  'Äthiopien',
-  'Australien',
-  'Bahamas',
-  'Bahrain',
-  'Bangladesh',
-  'Barbados',
-  'Belgien',
-  'Belize',
-  'Benin',
-  'Bermuda',
-  'Bhutan',
-  'Bolivien',
-  'Bosnien/Herzegowina',
-  'Botsuana',
-  'Bouvetinsel',
-  'Brasilien',
-  'Brunei Darussalam',
-  'Bulgarien',
-  'Burkina Faso',
-  'Burundi',
-  'Cabo Verde',
-  'Chile',
-  'China',
-  'Cookinseln',
-  'Costa Rica',
-  'Cuba',
-  'Dominica',
-  'Dominikanische Republik',
-  'Dschibuti',
-  'Dänemark',
-  'Ecuador',
-  'El Salvador',
-  'Elfenbeinküste',
-  'Eritrea',
-  'Estland',
-  'Falklandinseln',
-  'Fidschi',
-  'Finnland',
-  'Frankreich',
-  'Französisch-Guayana',
-  'Französisch-Polynesien',
-  'Französische Südpolarterritorien',
-  'Färöer',
-  'Gabun',
-  'Gambia',
-  'Georgien',
-  'Ghana',
-  'Gibraltar',
-  'Grenada',
-  'Griechenland',
-  'Großbritannien',
-  'Grönland',
-  'Guadeloupe',
-  'Guam',
-  'Guatemala',
-  'Guernsey',
-  'Guinea-Bissau',
-  'Guinea',
-  'Guyana',
-  'Haiti',
-  'Heard und McDonaldinseln',
-  'Honduras',
-  'Hong Kong',
-  'Indien',
-  'Indonesien',
-  'Irak',
-  'Iran',
-  'Irland',
-  'Island',
-  'Isle Of Man',
-  'Israel',
-  'Italien',
-  'Jamaika',
-  'Japan',
-  'Jemen',
-  'Jersey',
-  'Jordanien',
-  'Jungferninseln, Amerikanische',
-  'Jungferninseln, Britische',
-  'Kaimaninseln',
-  'Kambodscha',
-  'Kamerun',
-  'Kanada',
-  'Kasachstan',
-  'Kenia',
-  'Kirgisistan',
-  'Kiribati',
-  'Kokosinseln',
-  'Kolumbien',
-  'Komoren',
-  'Kongo',
-  'Kroatien',
-  'Kuwait',
-  'Laos',
-  'Lesotho',
-  'Lettland',
-  'Libanon',
-  'Liberia',
-  'Libyen',
-  'Liechtenstein',
-  'Litauen',
-  'Macao',
-  'Madagaskar',
-  'Malawi',
-  'Malaysia',
-  'Maldiven',
-  'Mali',
-  'Malta',
-  'Marshallinseln',
-  'Martinique',
-  'Mauretanien',
-  'Mauritius',
-  'Mayotte',
-  'Mazedonien',
-  'Mexiko',
-  'Mikronesien',
-  'Moldawien',
-  'Monaco',
-  'Mongolei',
-  'Montenegro',
-  'Montserrat',
-  'Morokko',
-  'Mosambik',
-  'Myanmar',
-  'Namibia',
-  'Nauru',
-  'Nepal',
-  'Neukaledonien',
-  'Neuseeland',
-  'Nicaragua',
-  'Niederlande',
-  'Niederländische Antillen',
-  'Nigeria',
-  'Niger',
-  'Niue',
-  'Nordkorea',
-  'Norfolkinsel',
-  'Norwegen',
-  'Nördliche Marianen',
-  'Oman',
-  'Pakistan',
-  'Palau',
-  'Palestina',
-  'Panama',
-  'Papua-Neuguinea',
-  'Paraguay',
-  'Peru',
-  'Philippinen',
-  'Pitcairninseln',
-  'Polen',
-  'Portugal',
-  'Puerto Rico',
-  'Qatar',
-  'Ruanda',
-  'Rumänien',
-  'Russland',
-  'Réunion',
-  'Salomonen',
-  'Sambia',
-  'Samoa',
-  'San Marino',
-  'Saudi-Arabien',
-  'Schweden',
-  'Senegal',
-  'Serbien',
-  'Seychellen',
-  'Sierra Leone',
-  'Simbabwe',
-  'Singapur',
-  'Slowakische Republik',
-  'Slowenien',
-  'Somalia',
-  'Spanien',
-  'Sri Lanka',
-  'St. Barthélemy',
-  'St. Helena',
-  'St. Kitts/Nevis',
-  'St. Lucia',
-  'St. Martin',
-  'St. Pierre/Miquelon',
-  'St. Vincent/Die Grenadinen',
-  'Sudan',
-  'Surinam',
-  'Svalbard/Jan Mayen',
-  'Swasiland',
-  'Syrien',
-  'São Tomé/Príncipe',
-  'Südafrika',
-  'Südgeorgien/Südlichen Sandwichinseln',
-  'Südkorea',
-  'Tadschikistan',
-  'Taiwan',
-  'Tansania',
-  'Thailand',
-  'Timor-Leste',
-  'Togo',
-  'Tokelau',
-  'Tonga',
-  'Trinidad und Tobago',
-  'Tschad',
-  'Tschechoslowakei',
-  'Tunisien',
-  'Turkmenistan',
-  'Turks- und Caicosinseln',
-  'Tuvalu',
-  'Türkei',
-  'Uganda',
-  'Ukraine',
-  'Ungarn',
-  'United States Minor Islands',
-  'Uruguay',
-  'USA',
-  'Usbekistan',
-  'Vanuatu',
-  'Vatikanstadt',
-  'Venezuela',
-  'Vereinigte Arabische Emirate',
-  'Vietnam',
-  'Wallis/Futuna',
-  'Weihnachtsinsel',
-  'Weißrussland',
-  'Westsahara',
-  'Zentralafrikanische Republik',
-  'Zypern'
-]
-
 export default {
   name: 'EditRoundtrips',
   components: {
@@ -779,7 +533,7 @@ export default {
       country: '',
       submitting: false,
       deleting: false,
-      countryOptions: stringOptions,
+      countryOptions: countries,
       stops: [],
       documentIds: [],
       titleImgUrl: null,
@@ -880,44 +634,50 @@ export default {
         Title,
         Location
       }).then(function () {
-        let daysString = ''
-        let days = 1
-        let initDates = []
-        let hotelCount = 0
-
-        context.stops.forEach(stop => {
-          let dateTimeParts = stop.InitDate.split(' ')
-          let dateParts = dateTimeParts[0].split('.')
-          let timeParts = dateTimeParts[1].split(':')
-          let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-          if (!initDates.includes(initDate)) initDates.push(initDate)
-          if (stop.HotelStop) hotelCount++
-        })
-
-        if (initDates.length > 0) {
-          let maxDate = new Date(Math.max.apply(null, initDates))
-          let minDate = new Date(Math.min.apply(null, initDates))
-
-          days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
-        }
-
-        if (days < 5) {
-          daysString = '< 5 Tage'
-        } else if (days >= 5 && days <= 8) {
-          daysString = '5-8 Tage'
-        } else if (days >= 9 && days <= 11) {
-          daysString = '9-11 Tage'
-        } else if (days >= 12 && days <= 15) {
-          daysString = '12-15 Tage'
-        } else if (days > 15) {
-          daysString = '> 15 Tage'
-        }
-        if (daysString.length > 0) {
-          context.saveData('Days', daysString)
-        }
-        context.saveData('Hotels', hotelCount)
+        context.saveRoundtripDaysAndHotels()
       })
+    },
+    saveRoundtripDaysAndHotels () {
+      let daysString = ''
+      let days = 1
+      let initDates = []
+      let hotelCount = 0
+
+      this.stops.forEach(stop => {
+        let dateTimeParts = stop.InitDate.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        let timeParts = dateTimeParts[1].split(':')
+        let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+        if (!initDates.includes(initDate)) initDates.push(initDate)
+        if (stop.HotelStop) hotelCount++
+      })
+
+      if (initDates.length > 0) {
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      if (isNaN(days)) days = 1
+      if (isNaN(hotelCount)) hotelCount = 0
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+      if (daysString.length > 0) {
+        this.saveData('Days', daysString)
+      }
+      this.saveData('Hotels', hotelCount)
     },
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
@@ -988,7 +748,7 @@ export default {
     filterFn (val, update, abort) {
       update(() => {
         const needle = val.toLowerCase()
-        this.countryOptions = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
     loadSingleRoundtrip (RTId) {

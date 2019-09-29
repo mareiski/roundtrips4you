@@ -108,6 +108,7 @@
                 :rules="[val => val !== null && val !== '' || 'Bitte gib einen Titel an']"
                 label="Titel"
                 outlined
+                style="margin:auto; margin-top:20px;"
               >
                 <template v-slot:prepend>
                   <q-icon name="title" />
@@ -123,6 +124,7 @@
                 class="input-item"
                 lazy-rules
                 use-input
+                style="margin:auto; margin-top:10px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
               >
                 <template v-slot:prepend>
@@ -206,8 +208,8 @@ export default {
           Stars: 3,
           Tags: ['Tag1', 'Tag2', 'Tag3'],
           Title: Title,
-          OfferEndPeriod: timeStamp,
-          OfferStartPeriod: timeStamp,
+          OfferEndPeriod: new Date(timeStamp),
+          OfferStartPeriod: new Date(timeStamp),
           OfferWholeYear: true,
           UserId: this.$store.getters['user/user'].uid,
           createdAt: new Date(timeStamp)
@@ -232,7 +234,12 @@ export default {
                 InitDate: new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
-                Title: 'Titel des 1. Hotels'
+                Title: 'Titel des 1. Hotels',
+                Location: {
+                  lng: 40.785091,
+                  lat: -73.968285,
+                  label: 'Manhattan'
+                }
               })
               this.getUserRoundtrips()
             })
