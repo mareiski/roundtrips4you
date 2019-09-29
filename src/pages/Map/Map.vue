@@ -21,7 +21,7 @@
   </div>
 </template>
 <style lang="css" scoped>
-@import "http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css";
+@import "https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css";
 </style>
 <script>
 import * as L from 'leaflet'
