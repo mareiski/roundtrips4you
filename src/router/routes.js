@@ -53,6 +53,17 @@ const routes = [
         component: () => import('pages/Über.vue')
       },
       {
+        path: 'impressum',
+        component: () => import('pages/Impressum.vue')
+      }, {
+        path: 'datenschutz',
+        component: () => import('pages/Datenschutz.vue')
+      },
+      {
+        path: 'haftungsausschluss',
+        component: () => import('pages/Haftungsausschluss.vue')
+      },
+      {
         path: 'rundreise-bearbeiten/:id',
         component: () => import('pages/EditRoundtrips.vue'),
         meta: {

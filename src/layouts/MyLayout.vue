@@ -119,23 +119,30 @@
           <router-link
             class="footer-link"
             to="/"
-          >home</router-link>
+          >Home</router-link>
           <router-link
             class="footer-link"
-            to="/rundreisen"
-          >rundreisen</router-link>
+            to="/rundreisen-übersicht"
+          >Rundreisen</router-link>
           <router-link
             class="footer-link"
             to="/über"
-          >über uns</router-link>
+          >Über uns</router-link>
         </div>
         <div class="footer-infos">
           <h3 class="footer-title">Infos</h3>
-          <a class="footer-link">Impressum</a>
-          <a class="footer-link">Haftungsauschluss</a>
-          <a class="footer-link">Datenschutz</a>
-          <a class="footer-link">AGBs</a>
-          <a class="footer-link">Online Streitbeilegung</a>
+          <router-link
+            class="footer-link"
+            to="/impressum"
+          >Impressum</router-link>
+          <router-link
+            class="footer-link"
+            to="/haftungsausschluss"
+          >Haftungsausschluss</router-link>
+          <router-link
+            class="footer-link"
+            to="/datenschutz"
+          >Datenschutz</router-link>
         </div>
         <div class="footer-contact">
           <h3 class="footer-title">Kontakt</h3>
@@ -144,9 +151,13 @@
             <span class="footer-text">Am See 20</span>
             <span class="footer-text">85077 Manching</span>
           </a>
-          <a class="footer-link">hello@roundtrips4you.de</a>
+          <a
+            class="footer-link"
+            href="mailto:hello@roundtrips4you.de"
+          >hello@roundtrips4you.de</a>
         </div>
       </div>
+      <CookieBanner></CookieBanner>
     </footer>
   </q-layout>
 </template>
@@ -154,9 +165,13 @@
 <script>
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
+import CookieBanner from '../pages/CookieBanner/CookieBanner'
 
 export default {
   name: 'MyLayout',
+  components: {
+    CookieBanner
+  },
   computed: {
     user () {
       return this.$store.getters['user/user']
