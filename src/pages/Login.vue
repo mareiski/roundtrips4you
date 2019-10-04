@@ -90,6 +90,12 @@ export default {
         context.$router.replace('/meine-rundreisen')
       }).catch(function (error) {
         console.log(error)
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'fas fa-exclamation-triangle',
+          message: 'Das Passwort oder der Benutzername ist leider falsch'
+        })
       })
     },
     signUpWithGoogle () {

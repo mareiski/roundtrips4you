@@ -104,7 +104,7 @@ export default {
   methods: {
     signUp () {
       let context = this
-      auth.createUserWithEmailAndPassword(this.userEmail, this.password).then(
+      auth.authRef().createUserWithEmailAndPassword(this.userEmail, this.password).then(
         (user) => {
           context.$q.notify({
             color: 'green-4',
