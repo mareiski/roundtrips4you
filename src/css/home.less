@@ -1,6 +1,10 @@
 @import "site.less";
 
-/*top of page > end of page*/
+/*
+top of page > end of page
+> media queries 
+> keyframes
+*/
 #MainImg,
 #MainImgOverlay {
     background: url('../statics/laos.jpg') center fixed;
@@ -54,6 +58,16 @@
         &>div {
             background-color: white;
         }
+    }
+
+    .scroll-down-icon {
+        height: 100px;
+        color: white;
+
+        -webkit-animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        -moz-animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        -ms-animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
     }
 }
 
@@ -122,6 +136,11 @@
                 background-position: center;
                 background-size: cover;
             }
+
+            .q-icon {
+                font-size: 80px;
+                color: @primary-orange;
+            }
         }
     }
 }
@@ -129,7 +148,7 @@
 .section-img {
     background: url('../statics/venice.jpg') center fixed;
     background-size: cover;
-    height: 400px;
+    height: 500px;
     position: absolute;
     left: 0;
     width: 100%;
@@ -137,7 +156,7 @@
 }
 
 .section-img-placeholder {
-    height: 400px;
+    height: 500px;
     color: white;
     display: flex;
     justify-content: center;
@@ -147,6 +166,14 @@
     margin-bottom: 100px;
     padding: 0 10% 0 10%;
     font-size: 30px;
+    background-color: rgba(48, 25, 0, 0.11)
+}
+
+.register-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 30px;
 }
 
 @media @tablet,
@@ -170,5 +197,73 @@
 
     .section-img-placeholder {
         font-size: 20px;
+    }
+}
+
+@-webkit-keyframes jump {
+    0% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+
+    50% {
+        padding-top: 90px;
+        font-size: 55px;
+    }
+
+    100% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+}
+
+@-moz-keyframes jump {
+    0% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+
+    50% {
+        padding-top: 90px;
+        font-size: 55px;
+    }
+
+    100% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+}
+
+@-ms-keyframes jump {
+    0% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+
+    50% {
+        padding-top: 90px;
+        font-size: 55px;
+    }
+
+    100% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+}
+
+@keyframes jump {
+    0% {
+        padding-top: 30px;
+        font-size: 50px;
+    }
+
+    50% {
+        padding-top: 90px;
+        font-size: 55px;
+    }
+
+    100% {
+        padding-top: 30px;
+        font-size: 50px;
     }
 }

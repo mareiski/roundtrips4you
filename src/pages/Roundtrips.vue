@@ -4,7 +4,7 @@
       <div style="display: flex;
     flex-direction: column;
     justify-content: center;">
-        <router-link to="/rundreisen-übersicht">zurück zu allen Rundreisen</router-link>
+        <router-link to="/rundreisen-übersicht">zurück zu allen Ländern</router-link>
       </div>
       <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
       <q-select
@@ -297,7 +297,10 @@
           v-for="(roundtrip) in roundtrips"
           :key="roundtrip"
         >
-          <div class="roundtrip-card">
+          <router-link
+            class="roundtrip-card"
+            :to="{ path: '/rundreisen-details/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
+          >
             <div class="card-left-col">
               <q-img
                 class="card-image"
@@ -350,7 +353,7 @@
                 <!--<a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>-->
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
         <div class="flex justify-center">
           <q-pagination

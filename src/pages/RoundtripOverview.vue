@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div class="roundtrips">
-      <h2 class="topic">Alle Rundreisen auf einen Blick</h2>
+      <h2 class="topic">Alle Traumländer auf einen Blick</h2>
       <div id="CardBackgroundImg"></div>
       <div id="CardBackgroundImgPlaceholder">
         <div
@@ -11,12 +11,12 @@
         >
           <div
             class="country-card"
-            :style="{ backgroundImage: 'url('+ require('../statics/' + country.imageUrl) +')' }"
+            :style="{ backgroundImage: 'url('+ country.ImageUrl +')' }"
           >
-            <h2 class="country-title">{{country.title}}</h2>
+            <h2 class="country-title">{{country.Name}}</h2>
             <router-link
               class="button"
-              :to="'/rundreisen/' + country.title"
+              :to="'/rundreisen/' + country.Name"
             >Zu den Rundreisen</router-link>
           </div>
         </div>
@@ -28,38 +28,31 @@
 @import "../css/roundtrips.less";
 </style>
 <script>
+import { db } from '../firebaseInit'
 export default {
   data () {
     return {
-      countries: [
-        {
-          title: 'Italien',
-          imageUrl: 'venice.jpg'
-        },
-        {
-          title: 'Vietnam',
-          imageUrl: 'vietnam.jpg'
-        },
-        {
-          title: 'USA',
-          imageUrl: 'goldenGate.jpg'
-        },
-        {
-          title: 'Italien',
-          imageUrl: 'venice.jpg'
-        },
-        {
-          title: 'Vietnam',
-          imageUrl: 'vietnam.jpg'
-        },
-        {
-          title: 'USA',
-          imageUrl: 'goldenGate.jpg'
-        }
-      ]
+      countries: []
     }
   },
-  name: 'RoundtripOverview'
+  name: 'RoundtripOverview',
+  methods: {
+    loadCountries () {
+      let countriesRef = db.collection('Countries')
+        .orderBy('Name')
+        .limit(200)
+
+      countriesRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            this.countries.push(doc.data())
+          })
+        })
+    }
+  },
+  created () {
+    this.loadCountries()
+  }
 }
 </script>
 
