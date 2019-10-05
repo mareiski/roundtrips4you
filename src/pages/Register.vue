@@ -104,7 +104,8 @@ export default {
   methods: {
     signUp () {
       let context = this
-      auth.authRef().createUserWithEmailAndPassword(this.userEmail, this.password).then(
+      let mail = this.userEmail
+      auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
           context.$q.notify({
             color: 'green-4',
@@ -112,7 +113,7 @@ export default {
             icon: 'fas fa-check-circle',
             message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
           })
-          context.$router.replace('/meine-rundreisen')
+          context.$router.replace('email-bestätigen')
         },
         (err) => {
           console.log(err)

@@ -28,6 +28,13 @@ const routes = [
         }
       },
       {
+        path: 'email-bestätigen',
+        component: () => import('pages/Verify.vue'),
+        meta: {
+          requireAuth: true
+        }
+      },
+      {
         path: 'registrieren',
         component: () => import('pages/Register.vue'),
         meta: {

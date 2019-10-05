@@ -87,15 +87,24 @@ export default {
     onUserLogin () {
       let context = this
       auth.authRef().signInWithEmailAndPassword(this.userEmail, this.password).then(function () {
-        context.$router.replace('/meine-rundreisen')
+        context.$router.replace('meine-rundreisen')
       }).catch(function (error) {
         console.log(error)
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
-          message: 'Das Passwort oder der Benutzername ist leider falsch'
-        })
+        if (error.code === 'auth/user-not-found') {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Diesen Benutzer konnten wir nicht finden'
+          })
+        } else {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Das Passwort oder der Benutzername ist leider falsch'
+          })
+        }
       })
     },
     signUpWithGoogle () {
@@ -116,20 +125,6 @@ export default {
         console.log(error)
       })
     }
-  },
-  created () {
-    auth.authRef().onAuthStateChanged((user) => {
-      this.$router.beforeEach((to, from, next) => {
-        let loggedIn = auth.user()
-        let requireAuth = to.matched.some(record => record.meta.requireAuth)
-        let guestOnly = to.matched.some(record => record.meta.guestOnly)
-        console.log(!guestOnly && loggedIn)
-
-        if (requireAuth && !loggedIn) next('login')
-        else if (guestOnly && loggedIn) next('meine-rundreisen')
-        else next()
-      })
-    })
   }
 }
 </script>

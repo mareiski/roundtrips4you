@@ -167,6 +167,8 @@ import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
 import CookieBanner from '../pages/CookieBanner/CookieBanner'
 
+let forEachCalled = false
+
 export default {
   name: 'MyLayout',
   components: {
@@ -188,14 +190,47 @@ export default {
   created () {
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
-        let loggedIn = auth.user()
+        let loggedIn = auth.user() !== null
+        let verified = auth.user() ? auth.user().emailVerified : false
+        forEachCalled = true
         let requireAuth = to.matched.some(record => record.meta.requireAuth)
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
+        let isOnLoginPage = to.path === '/login'
+        let isOnRoundtripsPage = to.path === '/meine-rundreisen'
+        let isOnVerifyPage = to.path === '/email-bestätigen'
 
-        if (requireAuth && !loggedIn) next('login')
-        else if (guestOnly && loggedIn) next('meine-rundreisen')
+        console.log(auth.user())
+        console.log(loggedIn)
+        console.log(!isOnLoginPage && requireAuth && !loggedIn)
+        console.log(!isOnVerifyPage && requireAuth && loggedIn && !verified)
+        console.log(!isOnRoundtripsPage && guestOnly && loggedIn && verified)
+        console.log(!isOnVerifyPage && guestOnly && loggedIn && !verified)
+        console.log(!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified)
+
+        if (!isOnLoginPage && requireAuth && !loggedIn) next('login')
+        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) next('email-bestätigen')
+        else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) next('meine-rundreisen')
+        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) next('email-bestätigen')
+        else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) next('meine-rundreisen')
         else next()
       })
+
+      if (!forEachCalled) {
+        let loggedIn = auth.user() !== null
+        let verified = auth.user() ? auth.user().emailVerified : false
+        let currentRoute = this.$router.currentRoute
+        let requireAuth = currentRoute.matched.some(record => record.meta.requireAuth)
+        let guestOnly = currentRoute.matched.some(record => record.meta.guestOnly)
+        let isOnLoginPage = currentRoute.fullPath === '/login'
+        let isOnRoundtripsPage = currentRoute.fullPath === '/meine-rundreisen'
+        let isOnVerifyPage = currentRoute.fullPath === '/email-bestätigen'
+
+        if (!isOnLoginPage && requireAuth && !loggedIn) this.$router.replace('login')
+        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) this.$router.replace('email-bestätigen')
+        else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) this.$router.replace('meine-rundreisen')
+        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestätigen')
+        else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) this.$router.replace('meine-rundreisen')
+      }
       Loading.hide()
     })
   }
