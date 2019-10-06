@@ -29,11 +29,11 @@
             size="50px"
             style="width: 50px; margin-top:5px;"
             :style="user ? null : 'font-size:60px;'"
-            :icon="user ? null : 'account_circle'"
+            :icon="user && user.photoURL !== '' ? null : 'account_circle'"
             @click="user ? null : $router.push('/login')"
           >
             <img
-              v-if="user"
+              v-if="user && user.photoURL !== ''"
               :src="user.photoURL"
             >
             <q-menu v-if="user">
@@ -159,6 +159,10 @@
       </div>
       <CookieBanner></CookieBanner>
     </footer>
+    <div
+      v-if="showPreload"
+      class="preloadOverlay"
+    ></div>
   </q-layout>
 </template>
 
@@ -168,11 +172,17 @@ import { Loading } from 'quasar'
 import CookieBanner from '../pages/CookieBanner/CookieBanner'
 
 let forEachCalled = false
+let redirected = false
 
 export default {
   name: 'MyLayout',
   components: {
     CookieBanner
+  },
+  data () {
+    return {
+      showPreload: true
+    }
   },
   computed: {
     user () {
@@ -183,9 +193,6 @@ export default {
     logOut () {
       auth.logout(this.$router)
     }
-  },
-  beforeCreate () {
-    Loading.show()
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
@@ -199,20 +206,14 @@ export default {
         let isOnRoundtripsPage = to.path === '/meine-rundreisen'
         let isOnVerifyPage = to.path === '/email-bestätigen'
 
-        console.log(auth.user())
-        console.log(loggedIn)
-        console.log(!isOnLoginPage && requireAuth && !loggedIn)
-        console.log(!isOnVerifyPage && requireAuth && loggedIn && !verified)
-        console.log(!isOnRoundtripsPage && guestOnly && loggedIn && verified)
-        console.log(!isOnVerifyPage && guestOnly && loggedIn && !verified)
-        console.log(!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified)
-
         if (!isOnLoginPage && requireAuth && !loggedIn) next('login')
         else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) next('email-bestätigen')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) next('meine-rundreisen')
         else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) next('email-bestätigen')
         else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) next('meine-rundreisen')
         else next()
+
+        redirected = true
       })
 
       if (!forEachCalled) {
@@ -230,8 +231,15 @@ export default {
         else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) this.$router.replace('meine-rundreisen')
         else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestätigen')
         else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) this.$router.replace('meine-rundreisen')
+
+        redirected = true
       }
-      Loading.hide()
+
+      if (redirected) {
+        redirected = false
+        this.showPreload = false
+        Loading.hide()
+      }
     })
   }
 }
