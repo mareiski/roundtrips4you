@@ -1,4 +1,4 @@
-@import '../css/colors.less';
+@import '../css/site.less';
 
 .cookie-banner {
     position: fixed;
@@ -11,10 +11,24 @@
     align-items: center;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     z-index: 9700;
+    flex-wrap: wrap;
 
 
     .q-btn {
         margin: 0;
         margin-left: 5px;
+    }
+}
+
+@media @mobile {
+    .cookie-banner {
+        min-height: 50px;
+        height: auto;
+
+
+        .q-btn {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
     }
 }

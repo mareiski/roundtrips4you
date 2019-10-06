@@ -187,16 +187,32 @@ top of page > end of page
 
             .card {
                 margin-bottom: 30px;
+
+                &:hover {
+                    transform: unset;
+                }
             }
         }
     }
 
-    #MainImgPlacholder .main-qoute {
-        font-size: 30px;
+    #MainImgPlacholder {
+        .main-qoute {
+            font-size: 30px;
+            line-height: 2;
+        }
+
+        .quote-author {
+            font-size: 20px;
+        }
     }
 
-    .section-img-placeholder {
-        font-size: 20px;
+    .section-img-placeholder h3 {
+        font-size: 25px;
+    }
+
+    h4 {
+        padding: 0 5px 0 5px;
+        font-size: 25px;
     }
 }
 

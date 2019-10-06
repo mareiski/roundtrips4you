@@ -1,6 +1,10 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <div id="Header">
+    <div
+      id="Header"
+      ref="Header"
+      v-click-outside="hideMenu"
+    >
       <div class="top-row">
         <div class="left-col">
           <a href="/">
@@ -29,11 +33,11 @@
             size="50px"
             style="width: 50px; margin-top:5px;"
             :style="user ? null : 'font-size:60px;'"
-            :icon="user && user.photoURL !== '' ? null : 'account_circle'"
+            :icon="user && user.photoURL !== null ? null : 'account_circle'"
             @click="user ? null : $router.push('/login')"
           >
             <img
-              v-if="user && user.photoURL !== ''"
+              v-if="user && user.photoURL !== null"
               :src="user.photoURL"
             >
             <q-menu v-if="user">
@@ -70,7 +74,8 @@
               class="ham hamRotate ham7"
               viewBox="0 0 100 100"
               width="80"
-              onclick="this.classList.toggle('active'); document.getElementById('Header').classList.toggle('active');"
+              ref="svg"
+              @click="[$refs.svg.classList.toggle('active'), $refs.Header.classList.toggle('active')]"
             >
               <path
                 class="line top"
@@ -90,18 +95,24 @@
         </div>
       </div>
       <div class="bottom-row">
-        <router-link
-          class="mobile-header-page-link"
-          to="/"
-        >home</router-link>
-        <router-link
-          class="mobile-header-page-link"
-          to="/rundreisen-übersicht"
-        >rundreisen</router-link>
-        <router-link
-          class="mobile-header-page-link"
-          to="/über"
-        >über uns</router-link>
+        <div @click="hideMenu()">
+          <router-link
+            class="mobile-header-page-link"
+            to="/"
+          >home</router-link>
+        </div>
+        <div @click="hideMenu()">
+          <router-link
+            class="mobile-header-page-link"
+            to="/rundreisen-übersicht"
+          >rundreisen</router-link>
+        </div>
+        <div @click="hideMenu()">
+          <router-link
+            class="mobile-header-page-link"
+            to="/über"
+          >über uns</router-link>
+        </div>
       </div>
     </div>
     <q-page-container>
@@ -192,6 +203,10 @@ export default {
   methods: {
     logOut () {
       auth.logout(this.$router)
+    },
+    hideMenu () {
+      this.$refs.svg.classList.remove('active')
+      this.$refs.Header.classList.remove('active')
     }
   },
   created () {

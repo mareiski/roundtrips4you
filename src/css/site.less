@@ -191,8 +191,6 @@ h2 {
             padding-right: 20px;
             max-height: 80px;
 
-
-
             #BurgerMenu {
                 width: auto;
                 display: none;
@@ -287,15 +285,15 @@ h2 {
             }
         }
     }
+
+    .router-link-exact-active {
+        color: @primary-orange  !important;
+    }
 }
 
 .q-page-container {
     margin-top: 80px;
     min-height: 90vh;
-}
-
-.active {
-    color: @primary-orange;
 }
 
 .q-avatar {
@@ -335,6 +333,7 @@ h2 {
     display: flex;
     justify-content: center;
     text-align: center;
+    padding: 0 5px 0 5px;
 
     h2 {
         font-size: 30px;
@@ -373,6 +372,10 @@ h2 {
             margin: auto;
             margin-right: 0;
         }
+    }
+
+    .box-seperator h2 {
+        font-size: 20px;
     }
 
     .box-seperator-placholder {
