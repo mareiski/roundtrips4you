@@ -236,8 +236,8 @@ export default {
                 RTId: doc.id,
                 Title: 'Titel des 1. Hotels',
                 Location: {
-                  lng: 40.785091,
-                  lat: -73.968285,
+                  lng: 40.758896,
+                  lat: -73.985130,
                   label: 'Manhattan'
                 }
               })

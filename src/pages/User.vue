@@ -287,12 +287,21 @@ export default {
         })
       }).catch(function (error) {
         console.log(error)
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
-          message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
-        })
+        if (error.code === 'auth/requires-recent-login') {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Bitte melde dich erneut an, bevor du dein Passwort änderst'
+          })
+        } else {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
+          })
+        }
       })
     },
     deleteAccount () {
@@ -302,17 +311,26 @@ export default {
           color: 'green-4',
           textColor: 'white',
           icon: 'fas fa-check-circle',
-          message: 'Schade :( dein Konto wurde gelöscht'
+          message: 'Schade, dein Konto wurde gelöscht'
         })
         context.$router.push('/')
       }).catch(function (error) {
         console.log(error)
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
-          message: 'Es ist ein Fehler aufgetreten, dein Konto konte nicht gelöscht werden'
-        })
+        if (error.code === 'auth/requires-recent-login') {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Bitte melde dich erneut an, bevor du dein Konto löscht'
+          })
+        } else {
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'fas fa-exclamation-triangle',
+            message: 'Es ist ein Fehler aufgetreten, dein Konto konnte nicht gelöscht werden'
+          })
+        }
       })
     }
   },
