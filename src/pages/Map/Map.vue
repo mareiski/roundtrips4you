@@ -43,7 +43,7 @@ export default {
     return {
       zoom: 13,
       center: [0, 0],
-      url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+      url: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
       bounds: L.latLngBounds([])
     }
