@@ -634,7 +634,12 @@ export default {
         Title,
         Location
       }).then(function () {
-        context.saveRoundtripDaysAndHotels()
+        context.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'fas fa-check-circle',
+          message: 'Eintrag wurde erstellt'
+        })
       })
     },
     saveRoundtripDaysAndHotels () {
@@ -1001,6 +1006,9 @@ export default {
           }
         })
     })
+  },
+  beforeDestroy () {
+    this.saveRoundtripDaysAndHotels()
   }
 }
 </script>
