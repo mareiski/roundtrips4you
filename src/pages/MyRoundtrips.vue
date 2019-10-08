@@ -104,7 +104,6 @@
             >
               <q-input
                 v-model="title"
-                lazy-rules
                 :rules="[val => val !== null && val !== '' || 'Bitte gib einen Titel an']"
                 label="Titel"
                 outlined
@@ -122,7 +121,6 @@
                 new-value-mode
                 clearable
                 class="input-item"
-                lazy-rules
                 use-input
                 style="margin:auto; margin-top:10px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"

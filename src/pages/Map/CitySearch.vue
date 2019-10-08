@@ -15,6 +15,7 @@
       @filter-abort="abortFilterFn"
       @input="$emit('update', $event)"
       style="width:300px;"
+      :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Stadt']"
     >
       <template v-slot:no-option>
         <q-item>

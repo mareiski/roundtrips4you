@@ -11,7 +11,6 @@
         v-model="userEmail"
         outlined
         type="email"
-        lazy-rules
         :rules="[val => val !== null && val !== '' || 'Bitte wähle gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
         label="Email"
       />
@@ -20,7 +19,6 @@
         outlined
         :type="isPwd ? 'password' : 'text'"
         label="neues Passwort"
-        lazy-rules
         :rules="[val => val !== null && val !== '' || 'Bitte gib dein neues Passwort ein']"
       >
         <template v-slot:append>
@@ -36,7 +34,6 @@
         outlined
         :type="isPwdRepeat ? 'password' : 'text'"
         label="neues Passwort wiederholen"
-        lazy-rules
         :rules="[val => val !== null && val !== '' || 'Bitte wiederhole dein Passwort',
            val => val === password || 'Die beiden Passwörter stimmen nicht überein']"
       >

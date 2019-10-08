@@ -66,38 +66,46 @@
               <q-input
                 filled
                 v-model="date"
-                lazy-rules
-                :rules="[val => val !== null && val !== '' || 'Bitte gib ein Datum an']"
+                error-message="Bitte gib ein richtiges Datum an"
+                :error="!isDateTimeValid()"
+                bottom-slots
                 style="width:300px"
                 class="input-item"
               >
-                <q-popup-proxy
-                  ref="qDateProxy"
-                  transition-show="scale"
-                  transition-hide="scale"
-                  @hide="() => [showDateEntry = true, showTimeEntry = false]"
-                >
-                  <q-date
-                    v-model="date"
-                    today-btn
-                    mask="DD.MM.YYYY HH:mm"
-                    v-if="showDateEntry"
-                    :options="dateOptions"
-                    @input="() => [showTimeEntry = true, showDateEntry = false]"
-                  />
-                  <q-time
-                    v-model="date"
-                    mask="DD.MM.YYYY HH:mm"
-                    v-if="showTimeEntry"
-                    @input="() => [showDateEntry = true, showTimeEntry = false, $refs.qDateProxy.hide()]"
-                    format24h
-                  />
-                </q-popup-proxy>
                 <template v-slot:prepend>
                   <q-icon
                     name="event"
                     class="cursor-pointer"
                   >
+                    <q-popup-proxy
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="date"
+                        today-btn
+                        mask="DD.MM.YYYY HH:mm"
+                        :options="dateOptions"
+                      />
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+
+                <template v-slot:append>
+                  <q-icon
+                    name="access_time"
+                    class="cursor-pointer"
+                  >
+                    <q-popup-proxy
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-time
+                        v-model="date"
+                        mask="DD.MM.YYYY HH:mm"
+                        format24h
+                      />
+                    </q-popup-proxy>
                   </q-icon>
                 </template>
               </q-input>
@@ -107,7 +115,6 @@
                 :options="options"
                 label="Eintrag"
                 class="input-item"
-                lazy-rules
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
                 style="width:300px"
               >
@@ -119,7 +126,6 @@
               <div v-if="selectedOption === 'Hotel'">
                 <q-input
                   v-model="generalTempLink"
-                  lazy-rules
                   ref="urlInput"
                   type="url"
                   style="width:300px;"
@@ -192,7 +198,6 @@
           :options="countryOptions"
           label="Land auswählen"
           @filter="filterFn"
-          lazy-rules
           :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
           style="padding-bottom: 32px"
         >
@@ -212,7 +217,6 @@
           v-model="category"
           :options="categoryOptions"
           label="Kategorie"
-          lazy-rules
           use-input
           :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
           clearable
@@ -236,7 +240,6 @@
           v-model="descriptionInput"
           outlined
           autogrow
-          lazy-rules
           label="Kurze Beschreibung"
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
           val => val.length > 10 && val.length < 150 || 'Bitte gib eine Beschreibung zwischen 10 und 150 Zeichen an' ]"
@@ -248,7 +251,6 @@
           v-model="tag1"
           label="Reiseart"
           outlined
-          lazy-rules
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Reiseart an']"
         > <template v-slot:prepend>
             <q-icon name="commute" />
@@ -545,8 +547,6 @@ export default {
       tag2: null,
       tag3: null,
       deleteDialog: false,
-      showDateEntry: true,
-      showTimeEntry: false,
       OfferStartPeriod: formattedScheduleDate,
       OfferEndPeriod: formattedScheduleDate,
       visible: false,
@@ -576,6 +576,7 @@ export default {
       return currentDate > compareDate
     },
     onAddEntry () {
+      if (!this.isDateTimeValid()) return false
       this.addExpanded = false
       this.addButtonActive = false
 
@@ -618,8 +619,6 @@ export default {
       Location = this.location
       this.location = {}
 
-      let context = this
-
       db.collection('RoundtripDetails').add({
         BookingComLink,
         DateDistance,
@@ -633,13 +632,6 @@ export default {
         RTId,
         Title,
         Location
-      }).then(function () {
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'fas fa-check-circle',
-          message: 'Eintrag wurde erstellt'
-        })
       })
     },
     saveRoundtripDaysAndHotels () {
@@ -976,6 +968,28 @@ export default {
         .then(snapshot => {
           return Number(snapshot.size) === 1
         })
+    },
+    isDateTimeValid () {
+      var testDate = this.date
+      if (testDate === null || testDate.length === 0) return false
+      var matches = testDate.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/)
+      if (matches === null) return false
+      var year = parseInt(matches[3], 10)
+      var month = parseInt(matches[2], 10) - 1
+      var day = parseInt(matches[1], 10)
+      var hour = parseInt(matches[4], 10)
+      var minute = parseInt(matches[5], 10)
+      var date = new Date(year, month, day, hour, minute)
+      if (date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day ||
+        date.getHours() !== hour ||
+        date.getMinutes() !== minute
+      ) {
+        return false
+      } else {
+        return true
+      }
     }
   },
   created () {

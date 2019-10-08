@@ -36,7 +36,6 @@
             :options="countryOptions"
             label="Land auswählen"
             @filter="filterFn"
-            lazy-rules
             :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
           >
             <template v-slot:prepend>
