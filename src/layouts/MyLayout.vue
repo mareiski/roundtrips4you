@@ -8,12 +8,12 @@
       <div class="top-row">
         <div class="left-col">
           <a href="/">
-            <img src="../statics/logo.png" />
+            <img src="../statics/headerSubmark.png" />
           </a>
         </div>
         <div class="center-col">
           <a href="/">
-            <img src="../statics/textLogo.png" />
+            <img src="../statics/textlogo.png" />
           </a>
         </div>
         <div class="right-col">
@@ -121,7 +121,10 @@
     <footer>
       <div class="left-footer-col">
         <a href="/">
-          <img src="../statics/logo.png" />
+          <img
+            style="width:auto; max-height:200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  border-radius: 50%;"
+            src="../statics/submark.png"
+          />
         </a>
       </div>
       <div class="right-footer-col">

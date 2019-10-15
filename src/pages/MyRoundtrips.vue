@@ -39,11 +39,7 @@
             color="primary"
             text-color="white"
           >
-            <img
-              :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
-              @error="imageUrlAlt($event)"
-            >
-            <img src="../statics/dummy-image-landscape-1-150x150.jpg">
+            <img :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
           </q-avatar>
         </q-item-section>
 
@@ -114,11 +110,11 @@
                 </template>
               </q-input>
               <q-select
+                @filter="filterFn"
                 outlined
                 v-model="selectedOption"
                 :options="countryOptions"
                 label="Land"
-                new-value-mode
                 clearable
                 class="input-item"
                 use-input
@@ -154,6 +150,7 @@
 <script>
 import { db, auth, storage } from '../firebaseInit'
 import { date } from 'quasar'
+import { countries } from '../countries'
 
 let uid = null
 let createdAtDatesArr = []
@@ -171,7 +168,7 @@ export default {
       addExpanded: false,
       addButtonActive: false,
       selectedOption: null,
-      countryOptions: ['Deutschland', 'Italien', 'Vietnam'],
+      countryOptions: countries,
       RTIds: [],
       showNoRoundtripsText: false
     }
@@ -234,9 +231,9 @@ export default {
                 RTId: doc.id,
                 Title: 'Titel des 1. Hotels',
                 Location: {
-                  lng: 40.758896,
-                  lat: -73.985130,
-                  label: 'Manhattan'
+                  lng: '13.3888599',
+                  lat: '52.5170365',
+                  label: 'Berlin, 10117, Germany'
                 }
               })
               this.getUserRoundtrips()
@@ -254,14 +251,10 @@ export default {
       }
       return true
     },
-    imageUrlAlt (event) {
-      event.target.src = '../statics/dummy-image-landscape-1-150x150.jpg'
-    },
     getUserRoundtrips () {
       roundtripArr = []
       roundtripDocIds = []
       var context = this
-      let showNoRoundtripsText = false
       let roundtripsRef = db.collection('Roundtrips')
         .where('UserId', '==', uid)
         .orderBy('createdAt')
@@ -281,22 +274,27 @@ export default {
               context.TitleImgs.push('../statics/dummy-image-landscape-1-150x150.jpg')
             })
           })
+          this.showNoRoundtripsText = snapshot.docs.length === 0
         }).catch(function (error) {
           console.log(error)
         })
 
       roundtripArr.forEach((roundtrip) => {
         createdAtDatesArr.push(date.formatDate(roundtrip.createdAt, 'YYYY/MM/DD'))
-        showNoRoundtripsText = true
       })
 
       this.roundtrips = roundtripArr
-      this.showNoRoundtripsText = showNoRoundtripsText
     },
     getCreatedAtDate () {
       let returnValue = createdAtDatesArr[roundtripCount]
       roundtripCount++
       return returnValue
+    },
+    filterFn (val, update, abort) {
+      update(() => {
+        const needle = val.toLowerCase()
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
     }
   },
   created () {

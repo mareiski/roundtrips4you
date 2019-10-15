@@ -1,5 +1,9 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
+    <router-link to="/meine-rundreisen">
+      <q-icon name="keyboard_arrow_left"></q-icon>
+      zurück zu meinen Rundreisen
+    </router-link>
     <h3>{{title}}
       <q-popup-edit
         v-model="title"
@@ -615,7 +619,6 @@ export default {
 
       HotelStop = HotelStop === 'Hotel'
 
-      console.log(this.location)
       Location = this.location
       this.location = {}
 
@@ -813,7 +816,6 @@ export default {
             documentIds.push(doc.id)
           })
 
-          console.log(documentIds)
           this.documentIds = documentIds
 
           let daysString = ''
@@ -858,6 +860,8 @@ export default {
           this.saveData('Hotels', hotelCount)
 
           this.stops = details
+
+          this.saveRoundtripDaysAndHotels()
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -870,7 +874,6 @@ export default {
         })
     },
     saveData (field, value) {
-      console.log(roundtripDocId)
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
       try {
         db.collection('Roundtrips').doc(roundtripDocId).update({
@@ -931,7 +934,6 @@ export default {
       fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
       fileRef.listAll().then(function (res) {
         res.items.forEach(function (itemRef) {
-          console.log(itemRef)
           fileRef = storage.ref().child(itemRef.fullPath)
           context.galeryImgUrls = []
           fileRef.getDownloadURL().then(function (url, index) {

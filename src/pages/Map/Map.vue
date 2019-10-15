@@ -15,7 +15,20 @@
         :key="stop"
         :lat-lng="[stop.Location.lat, stop.Location.lng]"
       >
-        <l-popup>Hello!</l-popup>
+        <l-popup>
+          <a
+            v-if="stop.HotelStop"
+            :href="stop.GeneralLink"
+            target="_blank"
+          >{{stop.Title}}</a>
+          <p v-if="!stop.HotelStop">{{stop.Title}}</p>
+          <p>
+            <a
+              target="_blank"
+              :href="'https://maps.google.com/?q=' + stop.Location.lat + ',' + stop.Location.lng"
+            >{{stop.Location.label}}</a>
+          </p>
+        </l-popup>
       </l-marker>
     </l-map>
   </div>

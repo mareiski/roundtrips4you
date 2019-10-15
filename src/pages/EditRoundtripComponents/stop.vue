@@ -210,7 +210,6 @@ export default {
         })
         return false
       }
-      console.log(this.docId)
       const context = this
       db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
         context.$q.notify({
