@@ -13,7 +13,7 @@
         </div>
         <div class="center-col">
           <a href="/">
-            <img src="../statics/textlogo.png" />
+            <img src="../statics/textLogo.png" />
           </a>
         </div>
         <div class="right-col">
