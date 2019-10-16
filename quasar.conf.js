@@ -114,15 +114,15 @@ module.exports = function (ctx) {
           }
         })
         // copy _redirects file
-        const CopyWebpackPlugin = require('copy-webpack-plugin')
-        cfg.plugins.push(
-          new CopyWebpackPlugin([
-            {
-              from: 'src/_redirects',
-              to: cfg.output.path
-            }
-          ])
-        )
+        // const CopyWebpackPlugin = require('copy-webpack-plugin')
+        // cfg.plugins.push(
+        //   new CopyWebpackPlugin([
+        //     {
+        //       from: 'src/_redirects',
+        //       to: cfg.output.path
+        //     }
+        //   ])
+        // )
       }
     },
 

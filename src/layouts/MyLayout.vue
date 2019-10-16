@@ -10,6 +10,11 @@
           <a href="/">
             <img src="../statics/headerSubmark.png" />
           </a>
+          <span class="beta-span cursor-pointer">[beta]
+            <q-tooltip>
+              Wir befinden uns derzeit noch in der Beta Phase
+            </q-tooltip>
+          </span>
         </div>
         <div class="center-col">
           <a href="/">
