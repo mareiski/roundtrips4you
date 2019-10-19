@@ -8,7 +8,7 @@
       <div class="top-row">
         <div class="left-col">
           <a href="/">
-            <img src="../statics/headerSubmark.png" />
+            <img alt="logo" src="../statics/headerSubmark.png" />
           </a>
           <span class="beta-span cursor-pointer">[beta]
             <q-tooltip>
@@ -18,7 +18,7 @@
         </div>
         <div class="center-col">
           <a href="/">
-            <img src="../statics/textLogo.png" />
+            <img alt="text logo" src="../statics/textLogo.png" />
           </a>
         </div>
         <div class="right-col">
@@ -127,6 +127,7 @@
       <div class="left-footer-col">
         <a href="/">
           <img
+            alt="logo"
             style="width:auto; max-height:200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  border-radius: 50%;"
             src="../statics/submark.png"
           />
