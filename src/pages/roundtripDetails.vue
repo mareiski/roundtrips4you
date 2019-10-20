@@ -5,7 +5,7 @@
       v-model="slide"
       navigation
       infinite
-      autoplay
+      :autoplay="10000"
       swipeable
       control-color="white"
       padding

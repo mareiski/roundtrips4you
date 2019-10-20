@@ -34,7 +34,7 @@
   </div>
 </template>
 <style lang="css" scoped>
-@import "https://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css";
+@import "https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.css";
 </style>
 <script>
 import * as L from 'leaflet'

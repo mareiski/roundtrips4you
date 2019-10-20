@@ -226,15 +226,25 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
+      let title
+      if (this.$router.currentRoute.path.substr(1)) {
+        title = this.$router.currentRoute.path.substr(1) + ' | roundtrips4you'
+        if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
+        else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
+      } else {
+        title = 'roundtrips4you'
+      }
+      document.title = title
+
       this.$router.beforeEach((to, from, next) => {
-        let title
         if (to.path.substr(1)) {
           title = to.path.substr(1) + ' | roundtrips4you'
           if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
-          else if (title.includes('rundreisen-details/')) title = 'rundreisen details'
+          else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
         } else {
           title = 'roundtrips4you'
         }
+
         document.title = title
 
         let loggedIn = auth.user() !== null
@@ -284,7 +294,3 @@ export default {
   }
 }
 </script>
-
-<style lang="less">
-@import "../css/site.less";
-</style>
