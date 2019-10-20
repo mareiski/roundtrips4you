@@ -117,10 +117,6 @@
   </q-page>
 </template>
 
-<style lang="less">
-@import "../css/home.less";
-</style>
-
 <script>
 import { countries } from '../countries'
 import { scroll } from 'quasar'
