@@ -8,7 +8,10 @@
       <div class="top-row">
         <div class="left-col">
           <a href="/">
-            <img alt="logo" src="../statics/headerSubmark.png" />
+            <img
+              alt="logo"
+              src="../statics/headerSubmark.png"
+            />
           </a>
           <span class="beta-span cursor-pointer">[beta]
             <q-tooltip>
@@ -18,7 +21,10 @@
         </div>
         <div class="center-col">
           <a href="/">
-            <img alt="text logo" src="../statics/textLogo.png" />
+            <img
+              alt="text logo"
+              src="../statics/textLogo.png"
+            />
           </a>
         </div>
         <div class="right-col">
@@ -221,6 +227,16 @@ export default {
   created () {
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
+        let title
+        if (to.path.substr(1)) {
+          title = to.path.substr(1) + ' | roundtrips4you'
+          if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
+          else if (title.includes('rundreisen-details/')) title = 'rundreisen details'
+        } else {
+          title = 'roundtrips4you'
+        }
+        document.title = title
+
         let loggedIn = auth.user() !== null
         let verified = auth.user() ? auth.user().emailVerified : false
         forEachCalled = true
