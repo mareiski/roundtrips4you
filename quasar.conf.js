@@ -122,7 +122,7 @@ module.exports = function (ctx) {
               to: cfg.output.path
             },
             {
-              from: 'src/robots',
+              from: 'src/robots.txt',
               to: cfg.output.path
             }
           ])
