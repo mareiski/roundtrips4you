@@ -120,6 +120,10 @@ module.exports = function (ctx) {
             {
               from: 'src/_redirects',
               to: cfg.output.path
+            },
+            {
+              from: 'src/robots',
+              to: cfg.output.path
             }
           ])
         )
