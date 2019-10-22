@@ -192,7 +192,7 @@
   </q-layout>
 </template>
 
-<style lang="less" scoped>
+<style lang="less">
 @import url("../css/site.less");
 </style>
 
