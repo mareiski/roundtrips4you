@@ -39,7 +39,10 @@
             color="primary"
             text-color="white"
           >
-            <img alt="Titelbild der Rundreise" :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
+            <img
+              alt="Titelbild der Rundreise"
+              :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
+            >
           </q-avatar>
         </q-item-section>
 

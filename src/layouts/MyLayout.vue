@@ -192,6 +192,10 @@
   </q-layout>
 </template>
 
+<style lang="less" scoped>
+@import url("../css/site.less");
+</style>
+
 <script>
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
