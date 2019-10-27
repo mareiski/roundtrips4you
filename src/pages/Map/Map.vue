@@ -29,7 +29,7 @@
             <p>
               <a
                 target="_blank"
-                :href="'https://maps.google.com/?q=' + stop.Location.lat + ',' + stop.Location.lng"
+                :href="'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label"
               >{{stop.Location.label}}</a>
             </p>
           </VCard>
