@@ -12,7 +12,6 @@
       label="Stadt suchen"
       :options="countryOptions"
       @filter="filterFn"
-      @filter-abort="abortFilterFn"
       @input="$emit('update', $event)"
       style="width:300px;"
       :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Stadt']"
@@ -20,7 +19,7 @@
       <template v-slot:no-option>
         <q-item>
           <q-item-section class="text-grey">
-            Keine Ergebnisse, bitte weitertippen
+            zu viele/keine Ergebnisse, bitte weitertippen
           </q-item-section>
         </q-item>
       </template>
@@ -55,9 +54,6 @@ export default {
           this.countryOptions = results
         })
       })
-    },
-    abortFilterFn () {
-      // console.log('delayed filter aborted')
     }
   }
 }

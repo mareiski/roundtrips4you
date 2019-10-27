@@ -9,6 +9,7 @@
       :mapboxGl="mapbox-gl"
       :attributionControl="false"
       @load="onMapLoaded"
+      @click="onMapClicked"
     >
       <MglNavigationControl position="top-right" />
       <MglMarker
@@ -34,27 +35,35 @@
           </VCard>
         </MglPopup>
       </MglMarker>
-      <MglPopup
+      <MglMarker
         v-for="route in addedRoutes"
         :key="route"
-        :coordinates="[0,0]"
-        :showed="true"
-        anchor="top"
+        :coordinates="route.location"
+        :color="route.color"
       >
-        <VCard>
-          <div>Hello {{route.duration}} h</div>
-        </VCard>
-      </MglPopup>
+        <q-icon
+          slot="marker"
+          :style="{'color': route.color}"
+          name="speed"
+        />
+        <MglPopup>
+          <VCard>
+            <div>{{route.duration}} bis {{route.destination}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+          </VCard>
+        </MglPopup>
+      </MglMarker>
+
     </MglMap>
   </div>
 </template>
-<style lang="css" scoped>
-@import "https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.css";
+<style lang="less" scoped>
+.mapboxgl-marker-anchor-center {
+  font-size: 40px;
+  position: absolute;
+}
 </style>
 <script>
-// import * as L from 'leaflet'
-// require('leaflet-routing-machine')
-// import { LMap, LTileLayer, LMarker, LPopup } from 'vue2-leaflet'
+
 import Mapbox from 'mapbox-gl'
 import {
   MglMap,
@@ -77,16 +86,13 @@ export default {
   data () {
     return {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
-      mapStyle: 'mapbox://styles/mapbox/streets-v11',
+      mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
       addedRoutes: []
-
     }
   },
   methods: {
     onMapLoaded (event) {
       const map = event.map
-      map.setLayoutProperty('country-label', 'text-field', ['get', 'name_de'])
-      map.setLayoutProperty('location-label', 'text-field', ['get', 'name_de'])
 
       let bounds = []
       this.stops.forEach((stop, index) => {
@@ -95,6 +101,18 @@ export default {
       })
 
       map.fitBounds(new Mapbox.LngLatBounds(bounds))
+    },
+    msToTime (duration) {
+      var minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+
+      let returnVal
+      if (hours === 0 && minutes === 0) returnVal = null
+      else if (hours === 0) returnVal = minutes + ' min'
+      else if (minutes === 0) returnVal = hours + ' h'
+      else returnVal = hours + ' h ' + minutes + ' min'
+
+      return returnVal
     },
     getRoute (startLocation, endLocation, map, index) {
       // make a directions request using cycling profile
@@ -122,12 +140,14 @@ export default {
         let id = 'route' + index
         let color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
 
-        let firstRoute = route[index]
-        let secondRoute = route[index - 1]
-        let locationAvarage = [(firstRoute[0] + secondRoute[0]) / 2, (firstRoute[1] + secondRoute[1])]
+        let geojsonCoords = geojson.geometry.coordinates
+        let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
 
-        context.addedRoutes.push({ location: locationAvarage, duration: Math.floor(data.duration / 3600), id: id })
-        console.log(context.addedRoutes)
+        let duration = context.msToTime(data.duration * 1000)
+
+        let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
+
+        if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, destination: context.stops[index].Location.label.split(',')[0], id: id })
 
         // if the route already exists on the map, reset it using setData
         if (map.getSource(id)) {

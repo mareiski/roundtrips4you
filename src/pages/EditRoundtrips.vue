@@ -439,6 +439,8 @@
         </div>
       </q-list>
     </q-form>
+    <h4>Routenvorschau</h4>
+    <Map :stops="stops"></Map>
     <h4>Danger Zone</h4>
     <q-list
       bordered
@@ -496,6 +498,7 @@ import Stop from '../pages/EditRoundtripComponents/stop'
 import CitySearch from '../pages/Map/CitySearch'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
+import Map from '../pages/Map/Map'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -523,7 +526,8 @@ export default {
   name: 'EditRoundtrips',
   components: {
     Stop,
-    CitySearch
+    CitySearch,
+    Map
   },
   data () {
     return {
