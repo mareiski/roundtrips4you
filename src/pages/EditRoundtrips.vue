@@ -23,19 +23,24 @@
       </q-timeline-entry>
 
       <div class="stop-list">
-        <Stop
-          v-for="(stop, index) in stopsAndDurations"
-          :key="stop"
-          :title="stop.Title"
-          :date="stop.InitDate"
-          :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
-          :editor-placeholder="stop.Description"
-          :editor="true"
-          :doc-id="index > 1 ? documentIds[index % 2] : documentIds[0]"
-          :general-link="stop.GeneralLink"
-          :location="stop.Location.label.split(',')[0]"
-          :duration="stop.duration"
-        ></Stop>
+        <template v-for="(stop, index) in stops">
+          <Stop
+            :key="stop"
+            :title="stop.Title"
+            :date="stop.InitDate"
+            :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
+            :editor-placeholder="stop.Description"
+            :editor="true"
+            :doc-id="index > 1 ? documentIds[index % 2] : documentIds[0]"
+            :general-link="stop.GeneralLink"
+            :location="stop.Location.label.split(',')[0]"
+          ></Stop>
+          <Duration
+            :key="stop"
+            v-if="index !== stops.length - 1 && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+            :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+          ></Duration>
+        </template>
       </div>
     </q-timeline>
     <q-list
@@ -496,6 +501,7 @@
 <script>
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
+import Duration from '../pages/EditRoundtripComponents/duration'
 import CitySearch from '../pages/Map/CitySearch'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
@@ -529,7 +535,8 @@ export default {
   components: {
     Stop,
     CitySearch,
-    Map
+    Map,
+    Duration
   },
   data () {
     return {
@@ -565,19 +572,8 @@ export default {
       price: 0,
       location: {},
       wholeYearOffer: false,
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg'
-    }
-  },
-  computed: {
-    stopsAndDurations () {
-      let stopsAndDurations = []
-      let lastStop = false
-      this.stops.forEach((stop, index) => {
-        stopsAndDurations.push(stop)
-        if (index === this.stops.length - 1) lastStop = true
-        if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], index, stopsAndDurations, lastStop)
-      })
-      return stopsAndDurations
+      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
+      durations: []
     }
   },
   methods: {
@@ -880,6 +876,10 @@ export default {
 
           this.stops = details
 
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title)
+          })
+
           this.saveRoundtripDaysAndHotels()
         })
         .catch(err => {
@@ -904,23 +904,19 @@ export default {
 
       return returnVal
     },
-    getDuration (startLocation, endLocation, index, stopsAndDurations, lastStop) {
+    getDuration (startLocation, endLocation, title) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
-
-      console.log(lastStop)
 
       axios.get(url)
         .then(response => {
           var data = response.data.routes[0]
 
           let duration = context.msToTime(data.duration * 1000)
+          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+          if (distance !== '') distance = ' (' + distance + ')'
 
-          if (duration !== null) stopsAndDurations.splice(index, 0, { Title: null, InitDate: null, HotelStop: null, Description: null, GeneralLink: null, Location: { label: null }, duration: duration })
-          if (lastStop) {
-            context.stopsAndDurations = stopsAndDurations
-            console.log(context.stopsAndDurations)
-          }
+          context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
         })
     },
     saveData (field, value) {

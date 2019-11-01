@@ -57,16 +57,22 @@
             Reiseverlauf
           </q-timeline-entry>
           <div class="stop-list">
-            <Stop
-              v-for="(stop, index) in stops"
-              :key="stop"
-              :title="stop.Title"
-              :date="dates[index]"
-              :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
-              :editor-placeholder="stop.Description"
-              :general-link="stop.GeneralLink"
-              :location="stop.Location.label.split(',')[0]"
-            ></Stop>
+            <template v-for="(stop, index) in stops">
+              <Stop
+                :key="stop"
+                :title="stop.Title"
+                :date="dates[index]"
+                :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
+                :editor-placeholder="stop.Description"
+                :general-link="stop.GeneralLink"
+                :location="stop.Location.label.split(',')[0]"
+              ></Stop>
+              <Duration
+                :key="stop"
+                v-if="index !== stops.length - 1 && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+              ></Duration>
+            </template>
           </div>
         </q-timeline>
       </q-tab-panel>
@@ -113,6 +119,8 @@ import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'
 import Map from '../pages/Map/Map'
+import Duration from '../pages/EditRoundtripComponents/duration'
+import axios from 'axios'
 
 let details = []
 let roundtrip = []
@@ -122,7 +130,8 @@ let roundtripDocId = null
 export default {
   components: {
     Stop,
-    Map
+    Map,
+    Duration
   },
   data () {
     return {
@@ -131,7 +140,10 @@ export default {
       roundtrip: [],
       slide: null,
       galeryImgUrls: [],
-      tab: 'overview'
+      tab: 'overview',
+      durations: [],
+      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg'
+
     }
   },
   methods: {
@@ -178,8 +190,6 @@ export default {
             retrievedDate.setMinutes(initDate.getMinutes())
             retrievedDate.setHours(initDate.getHours())
 
-            console.log('receivedDate' + retrievedDate)
-
             if (index > 0) {
               const date1 = initDates[index - 1]
               const date2 = initDates[index]
@@ -195,10 +205,41 @@ export default {
             }
           })
           this.stops = details
+
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title)
+          })
         })
         .catch(err => {
           console.log('Error getting Roundtripdetails', err)
         })
+    },
+    getDuration (startLocation, endLocation, title) {
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      let context = this
+
+      axios.get(url)
+        .then(response => {
+          var data = response.data.routes[0]
+
+          let duration = context.msToTime(data.duration * 1000)
+          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+          if (distance !== '') distance = ' (' + distance + ')'
+
+          context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+        })
+    },
+    msToTime (duration) {
+      var minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+
+      let returnVal
+      if (hours === 0 && minutes === 0) returnVal = null
+      else if (hours === 0) returnVal = minutes + ' min'
+      else if (minutes === 0) returnVal = hours + ' h'
+      else returnVal = hours + ' h ' + minutes + ' min'
+
+      return returnVal
     },
     loadGaleryImgs () {
       const context = this

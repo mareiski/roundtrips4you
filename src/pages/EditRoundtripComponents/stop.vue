@@ -1,8 +1,5 @@
 <template>
-  <q-timeline-entry
-    v-if="title !== null"
-    :icon="icon"
-  >
+  <q-timeline-entry :icon="icon">
     <div class="stop-container">
       <div class="flex">
         <h6 class="q-timeline__title">{{titleInput}}
@@ -87,12 +84,6 @@
       </span>
     </template>
   </q-timeline-entry>
-  <q-timeline-entry
-    v-else
-    icon="speed"
-  >
-    <span>{{duration}}</span>
-  </q-timeline-entry>
 </template>
 <script>
 import { db } from '../../firebaseInit'
@@ -106,8 +97,7 @@ export default {
     editor: Boolean,
     docId: String,
     generalLink: String,
-    location: String,
-    duration: String
+    location: String
   },
   data () {
     return {
@@ -253,9 +243,6 @@ export default {
       }
       return false
     }
-  },
-  created () {
-    console.log(this.duration)
   }
 }
 </script>
