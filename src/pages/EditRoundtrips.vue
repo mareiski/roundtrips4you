@@ -24,16 +24,17 @@
 
       <div class="stop-list">
         <Stop
-          v-for="(stop, index) in stops"
+          v-for="(stop, index) in stopsAndDurations"
           :key="stop"
           :title="stop.Title"
           :date="stop.InitDate"
           :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
           :editor-placeholder="stop.Description"
           :editor="true"
-          :doc-id="documentIds[index]"
+          :doc-id="index > 1 ? documentIds[index % 2] : documentIds[0]"
           :general-link="stop.GeneralLink"
           :location="stop.Location.label.split(',')[0]"
+          :duration="stop.duration"
         ></Stop>
       </div>
     </q-timeline>
@@ -499,6 +500,7 @@ import CitySearch from '../pages/Map/CitySearch'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import Map from '../pages/Map/Map'
+import axios from 'axios'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -562,7 +564,20 @@ export default {
       generalTempLink: '',
       price: 0,
       location: {},
-      wholeYearOffer: false
+      wholeYearOffer: false,
+      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg'
+    }
+  },
+  computed: {
+    stopsAndDurations () {
+      let stopsAndDurations = []
+      let lastStop = false
+      this.stops.forEach((stop, index) => {
+        stopsAndDurations.push(stop)
+        if (index === this.stops.length - 1) lastStop = true
+        if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], index, stopsAndDurations, lastStop)
+      })
+      return stopsAndDurations
     }
   },
   methods: {
@@ -875,6 +890,37 @@ export default {
             icon: 'fas fa-exclamation-triangle',
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
+        })
+    },
+    msToTime (duration) {
+      var minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+
+      let returnVal
+      if (hours === 0 && minutes === 0) returnVal = null
+      else if (hours === 0) returnVal = minutes + ' min'
+      else if (minutes === 0) returnVal = hours + ' h'
+      else returnVal = hours + ' h ' + minutes + ' min'
+
+      return returnVal
+    },
+    getDuration (startLocation, endLocation, index, stopsAndDurations, lastStop) {
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      let context = this
+
+      console.log(lastStop)
+
+      axios.get(url)
+        .then(response => {
+          var data = response.data.routes[0]
+
+          let duration = context.msToTime(data.duration * 1000)
+
+          if (duration !== null) stopsAndDurations.splice(index, 0, { Title: null, InitDate: null, HotelStop: null, Description: null, GeneralLink: null, Location: { label: null }, duration: duration })
+          if (lastStop) {
+            context.stopsAndDurations = stopsAndDurations
+            console.log(context.stopsAndDurations)
+          }
         })
     },
     saveData (field, value) {

@@ -9,7 +9,6 @@
       :mapboxGl="mapbox-gl"
       :attributionControl="false"
       @load="onMapLoaded"
-      @click="onMapClicked"
     >
       <MglNavigationControl position="top-right" />
       <MglMarker
@@ -71,6 +70,7 @@ import {
   MglMarker,
   MglNavigationControl
 } from 'vue-mapbox'
+import axios from 'axios'
 
 export default {
   name: 'Map',
@@ -115,73 +115,66 @@ export default {
       return returnVal
     },
     getRoute (startLocation, endLocation, map, index) {
-      // make a directions request using cycling profile
-      // an arbitrary start will always be the same
-      // only the end or destination will change
       var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
-      // make an XHR request https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest
-      var req = new XMLHttpRequest()
-      req.responseType = 'json'
-      req.open('GET', url, true)
-      req.onload = function () {
-        var data = req.response.routes[0]
-        var route = data.geometry.coordinates
-        var geojson = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: route
-          }
-        }
-
-        let id = 'route' + index
-        let color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
-
-        let geojsonCoords = geojson.geometry.coordinates
-        let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
-
-        let duration = context.msToTime(data.duration * 1000)
-
-        let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
-
-        if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, destination: context.stops[index].Location.label.split(',')[0], id: id })
-
-        // if the route already exists on the map, reset it using setData
-        if (map.getSource(id)) {
-          map.getSource(id).setData(geojson)
-        } else { // otherwise, make a new request
-          map.addLayer({
-            'id': id,
-            'type': 'line',
-            'source': {
-              'type': 'geojson',
-              'data': {
-                'type': 'Feature',
-                'properties': {},
-                'geometry': {
-                  'type': 'LineString',
-                  'coordinates': geojson
-                }
-              }
-            },
-            'layout': {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            'paint': {
-              'line-color': color,
-              'line-width': 5,
-              'line-opacity': 0.75
+      axios.get(url)
+        .then(response => {
+          var data = response.data.routes[0]
+          var route = data.geometry.coordinates
+          var geojson = {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: route
             }
-          })
-          map.getSource(id).setData(geojson)
-        }
-        // add turn instructions here at the end
-      }
-      req.send()
+          }
+
+          let id = 'route' + index
+          let color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
+
+          let geojsonCoords = geojson.geometry.coordinates
+          let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
+
+          let duration = context.msToTime(data.duration * 1000)
+
+          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
+
+          if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, destination: context.stops[index].Location.label.split(',')[0], id: id })
+
+          // if the route already exists on the map, reset it using setData
+          if (map.getSource(id)) {
+            map.getSource(id).setData(geojson)
+          } else { // otherwise, make a new request
+            map.addLayer({
+              'id': id,
+              'type': 'line',
+              'source': {
+                'type': 'geojson',
+                'data': {
+                  'type': 'Feature',
+                  'properties': {},
+                  'geometry': {
+                    'type': 'LineString',
+                    'coordinates': geojson
+                  }
+                }
+              },
+              'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+              },
+              'paint': {
+                'line-color': color,
+                'line-width': 5,
+                'line-opacity': 0.75
+              }
+            })
+            map.getSource(id).setData(geojson)
+          }
+          // add turn instructions here at the end
+        })
     }
   },
   created () {

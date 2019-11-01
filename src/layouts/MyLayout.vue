@@ -189,6 +189,13 @@
       v-if="showPreload"
       class="preloadOverlay"
     ></div>
+    <back-to-top style="z-index:9600;">
+      <q-btn
+        round
+        color="primary"
+        icon="airplanemode_active"
+      />
+    </back-to-top>
   </q-layout>
 </template>
 
@@ -200,6 +207,7 @@
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
 import CookieBanner from '../pages/CookieBanner/CookieBanner'
+import BackToTop from 'vue-backtotop'
 
 let forEachCalled = false
 let redirected = false
@@ -207,7 +215,8 @@ let redirected = false
 export default {
   name: 'MyLayout',
   components: {
-    CookieBanner
+    CookieBanner,
+    BackToTop
   },
   data () {
     return {

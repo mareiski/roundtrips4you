@@ -1,6 +1,6 @@
 <template>
   <div class="about q-px-lg q-pb-md">
-    <h3 style="padding-top:10px;">Hallo, schön das du hergefunden hast !</h3>
+    <h3 style="padding-top:10px;">Hallo, schön dass du hergefunden hast !</h3>
     <span>Wir sind ein kleines Startup aus Ingolstadt, welches sich auf die Rundreisenvermittlung & Erstellung spezialisiert hat.</span>
     <br><br>
     <span>Wir möchten aber nicht das du irgendeine Rundreise buchst, weil sie dir vorgeschlagen wurde.</span>

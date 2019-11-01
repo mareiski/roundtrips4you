@@ -9,16 +9,18 @@
           v-for="country in countries"
           :key="country"
         >
-          <div
+          <router-link
             class="country-card"
+            :to="'/rundreisen/' + country.Name"
             :style="{ backgroundImage: 'url('+ country.ImageUrl +')' }"
           >
             <h2 class="country-title">{{country.Name}}</h2>
-            <router-link
+            <div
               class="button"
               :to="'/rundreisen/' + country.Name"
-            >Zu den Rundreisen</router-link>
-          </div>
+            >Zu den Rundreisen
+            </div>
+          </router-link>
         </div>
       </div>
     </div>
