@@ -81,7 +81,8 @@ export default {
     MglNavigationControl
   },
   props: {
-    stops: Array
+    stops: Array,
+    profile: String
   },
   data () {
     return {
@@ -115,7 +116,7 @@ export default {
       return returnVal
     },
     getRoute (startLocation, endLocation, map, index) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + this.profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
       axios.get(url)

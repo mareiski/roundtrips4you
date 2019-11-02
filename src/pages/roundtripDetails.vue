@@ -78,7 +78,10 @@
       </q-tab-panel>
 
       <q-tab-panel name="card">
-        <Map :stops="stops"></Map>
+        <Map
+          profile="driving"
+          :stops="stops"
+        ></Map>
       </q-tab-panel>
 
       <q-tab-panel name="ratings">

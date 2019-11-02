@@ -229,7 +229,6 @@
           label="Kategorie"
           use-input
           :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
-          clearable
           class="input-item"
         >
           <template v-slot:prepend>
@@ -257,14 +256,20 @@
             <q-icon name="subject" />
           </template>
         </q-input>
-        <q-input
-          v-model="tag1"
-          label="Reiseart"
+        <q-select
           outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib eine Reiseart an']"
-        > <template v-slot:prepend>
+          v-model="tag1"
+          :options="['zu Fuß', 'Fahrradreise', 'Autoreise']"
+          label="Reiseart"
+          use-input
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
+          class="input-item"
+          @input="getProfile()"
+        >
+          <template v-slot:prepend>
             <q-icon name="commute" />
-          </template></q-input>
+          </template>
+        </q-select>
         <q-input
           v-model="tag2"
           label="Reisemerkmal 1"
@@ -446,7 +451,10 @@
       </q-list>
     </q-form>
     <h4>Routenvorschau</h4>
-    <Map :stops="stops"></Map>
+    <Map
+      :profile="profile"
+      :stops="stops"
+    ></Map>
     <h4>Danger Zone</h4>
     <q-list
       bordered
@@ -573,7 +581,8 @@ export default {
       location: {},
       wholeYearOffer: false,
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
-      durations: []
+      durations: [],
+      profile: ''
     }
   },
   methods: {
@@ -794,6 +803,8 @@ export default {
 
           retrievedDate = new Date(roundtrip[0].OfferStartPeriod.seconds * 1000)
           this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+
+          this.getProfile()
 
           this.loadInitImgs()
         })
@@ -1037,6 +1048,20 @@ export default {
         return false
       } else {
         return true
+      }
+    },
+    getProfile () {
+      console.log(this.tag1)
+      switch (this.tag1) {
+        case 'zu Fuß':
+          this.profile = 'walking'
+          break
+        case 'Fahrradreise':
+          this.profile = 'cycling'
+          break
+        default:
+          this.profile = 'driving'
+          break
       }
     }
   },
