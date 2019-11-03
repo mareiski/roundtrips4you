@@ -4,6 +4,17 @@
       <h2 class="topic">Alle Traumländer auf einen Blick</h2>
       <div id="CardBackgroundImg"></div>
       <div id="CardBackgroundImgPlaceholder">
+        <div class="country-card-container">
+          <router-link
+            class="country-card"
+            to="/meine-rundreisen/"
+            :style="{ backgroundImage: 'url(https://roundtrips4you.netlify.com/statics/oldCard.jpg)' }"
+          >
+            <h2 class="country-title">Meine Rundreisen</h2>
+            <div class="button">Zu meinen Reisen
+            </div>
+          </router-link>
+        </div>
         <div
           class="country-card-container"
           v-for="country in countries"

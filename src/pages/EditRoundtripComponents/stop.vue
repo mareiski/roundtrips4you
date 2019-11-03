@@ -24,6 +24,7 @@
             icon="link"
             size="1px"
             dense
+            class="linkChip"
             clickable
             @click="openInNewTab(generalLink)"
           >{{generalLinkText}}</q-chip>
@@ -43,19 +44,28 @@
       >{{location}}</q-chip>
     </div>
     <div>
-      <div v-html="descriptionInput"></div>
-      <q-popup-edit
-        v-if="editor"
-        @hide="saveData('Description', descriptionInput)"
-      >
-        <q-editor
-          v-model="descriptionInput"
-          min-height="5rem"
-          @keyup.enter.stop
-          :toolbar="editorToolbar"
-          :fonts="editorFonts"
-        />
-      </q-popup-edit>
+      <div
+        v-if="!editor"
+        v-html="descriptionInput"
+      ></div>
+      <q-editor
+        v-else
+        v-model="descriptionInput"
+        min-height="5rem"
+        ref="editor_ref"
+        @keyup.enter.stop
+        :toolbar="editorToolbar"
+        :fonts="editorFonts"
+        @paste.native="evt => pasteCapture(evt)"
+        style="margin-top:10px;"
+        :definitions="{
+        save: {
+          tip: 'Save your work',
+          icon: 'save',
+          label: 'Save',
+          handler: saveWork
+        }}"
+      />
     </div>
     <template v-slot:subtitle>
       <span class="q-timeline__title">{{date}}
@@ -126,6 +136,7 @@ export default {
             options: ['left', 'center', 'right', 'justify']
           }
         ],
+        ['save'],
         ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
         ['token', 'hr', 'link', 'custom_btn'],
         ['fullscreen'],
@@ -200,12 +211,38 @@ export default {
         ['' + field]: value
       })
     },
+    saveWork () {
+      this.$q.notify({
+        message: 'Deine Beschreibung wurde gespeichert',
+        color: 'green-4',
+        textColor: 'white',
+        icon: 'check_circle'
+      })
+      this.saveData('Description', this.descriptionInput)
+    },
+    pasteCapture (evt) {
+      let text, onPasteStripFormattingIEPaste
+      evt.preventDefault()
+      if (evt.originalEvent && evt.originalEvent.clipboardData.getData) {
+        text = evt.originalEvent.clipboardData.getData('text/plain')
+        this.$refs.editor_ref.runCmd('insertText', text)
+      } else if (evt.clipboardData && evt.clipboardData.getData) {
+        text = evt.clipboardData.getData('text/plain')
+        this.$refs.editor_ref.runCmd('insertText', text)
+      } else if (window.clipboardData && window.clipboardData.getData) {
+        if (!onPasteStripFormattingIEPaste) {
+          onPasteStripFormattingIEPaste = true
+          this.$refs.editor_ref.runCmd('ms-pasteTextOnly', text)
+        }
+        onPasteStripFormattingIEPaste = false
+      }
+    },
     deleteEntry () {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Der Eintrag konnte nicht gelöscht werden'
         })
         return false
@@ -215,7 +252,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Eintrag wurde gelöscht'
         })
         context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id)
@@ -224,7 +261,7 @@ export default {
         context.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Der Eintrag konnte nicht gelöscht werden'
         })
       })

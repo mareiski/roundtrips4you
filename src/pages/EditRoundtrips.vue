@@ -25,13 +25,13 @@
       <div class="stop-list">
         <template v-for="(stop, index) in stops">
           <Stop
-            :key="stop"
+            :key="index"
             :title="stop.Title"
             :date="stop.InitDate"
             :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
             :editor-placeholder="stop.Description"
             :editor="true"
-            :doc-id="index > 1 ? documentIds[index % 2] : documentIds[0]"
+            :doc-id="documentIds[index]"
             :general-link="stop.GeneralLink"
             :location="stop.Location.label.split(',')[0]"
           ></Stop>
@@ -95,8 +95,8 @@
                         v-model="date"
                         today-btn
                         mask="DD.MM.YYYY HH:mm"
-                        :options="dateOptions"
                       />
+                      <!--  :options="dateOptions" -->
                     </q-popup-proxy>
                   </q-icon>
                 </template>
@@ -309,9 +309,9 @@
               v-model="OfferStartPeriod"
               today-btn
               mask="DD.MM.YYYY"
-              :options="dateOptions"
               @input="() => [$refs.qDateProxy1.hide(), OfferEndPeriod = OfferStartPeriod]"
             />
+            <!-- :options="dateOptions" -->
           </q-popup-proxy>
           <template v-slot:prepend>
             <q-icon
@@ -615,7 +615,7 @@ export default {
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Eintrag wurde erstellt'
         })
       } catch (e) {
@@ -623,7 +623,7 @@ export default {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Der Eintrag konnte nicht erstellt werden'
         })
       }
@@ -719,7 +719,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Rundreise wurde gelöscht'
         })
         context.$router.push('/meine-rundreisen')
@@ -728,7 +728,7 @@ export default {
         context.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Die Rundreise konnte nicht gelöscht werden'
         })
       })
@@ -756,7 +756,7 @@ export default {
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Rundreise wurde gespeichert'
         })
       } else {
@@ -764,7 +764,7 @@ export default {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Die Rundreise konnte nicht gespeichert werden'
         })
       }
@@ -813,7 +813,7 @@ export default {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
         })
@@ -898,7 +898,7 @@ export default {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
         })
@@ -969,7 +969,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Bild wurde erfolgreich hochgeladen'
         })
         if (lastItem) context.visible = false
@@ -1012,7 +1012,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Bild wurde erfolgreich gelöscht'
         })
         context.galeryImgUrls.splice(index, 1)
@@ -1051,7 +1051,6 @@ export default {
       }
     },
     getProfile () {
-      console.log(this.tag1)
       switch (this.tag1) {
         case 'zu Fuß':
           this.profile = 'walking'
@@ -1086,7 +1085,7 @@ export default {
             this.$q.notify({
               color: 'red-5',
               textColor: 'white',
-              icon: 'fas fa-exclamation-triangle',
+              icon: 'error',
               message: 'Ooops da ist leider etwas schiefgelaufen'
             })
             this.$router.push('/meine-rundreisen')

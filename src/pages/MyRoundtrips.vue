@@ -39,10 +39,7 @@
             color="primary"
             text-color="white"
           >
-            <img
-              alt="Titelbild der Rundreise"
-              :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
-            >
+            <img :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
           </q-avatar>
         </q-item-section>
 
@@ -186,7 +183,7 @@ export default {
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Rundreise wurde erstellt'
         })
       }
@@ -247,7 +244,7 @@ export default {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut'
         })
         return false

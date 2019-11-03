@@ -229,7 +229,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Bild wurde erfolgreich hochgeladen'
         })
         fileRef.getDownloadURL().then(function (url) {
@@ -250,7 +250,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Einstellungen wurden erfolgreich gespeichert'
         })
         /* }).catch(function (error) {
@@ -258,7 +258,7 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
         }) */
@@ -267,7 +267,7 @@ export default {
         context.$q.notify({
           color: 'red-5',
           textColor: 'white',
-          icon: 'fas fa-exclamation-triangle',
+          icon: 'error',
           message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
         })
       })
@@ -278,7 +278,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Passwort wurde erfolgreich geändert'
         })
       }).catch(function (error) {
@@ -287,14 +287,14 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Bitte melde dich erneut an, bevor du dein Passwort änderst'
           })
         } else {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
         }
@@ -306,7 +306,7 @@ export default {
         context.$q.notify({
           color: 'green-4',
           textColor: 'white',
-          icon: 'fas fa-check-circle',
+          icon: 'check_circle',
           message: 'Schade, dein Konto wurde gelöscht'
         })
         context.$router.push('/')
@@ -316,14 +316,14 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Bitte melde dich erneut an, bevor du dein Konto löscht'
           })
         } else {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Es ist ein Fehler aufgetreten, dein Konto konnte nicht gelöscht werden'
           })
         }

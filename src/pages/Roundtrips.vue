@@ -100,7 +100,7 @@
             class="rounded-borders"
           >
             <q-expansion-item
-              label="Preis pro Person"
+              label="Gesamtpreis pro Person"
               class="filter-expansion"
               default-opened
             >
@@ -570,7 +570,7 @@ export default {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
         })

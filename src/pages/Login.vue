@@ -92,14 +92,14 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Diesen Benutzer konnten wir nicht finden'
           })
         } else {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Das Passwort oder der Benutzername ist leider falsch'
           })
         }

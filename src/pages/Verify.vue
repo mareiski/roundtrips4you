@@ -26,7 +26,7 @@ export default {
           context.$q.notify({
             color: 'green-4',
             textColor: 'white',
-            icon: 'fas fa-check-circle',
+            icon: 'check_circle',
             message: 'Wir haben dir eine Bestätigungsmail gesendet'
 
           })
@@ -35,7 +35,7 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Oh nein, wir konnten dir leider keine email senden, bitte versuche es manuell noch einmal'
           })
         })

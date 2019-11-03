@@ -107,7 +107,7 @@ export default {
           context.$q.notify({
             color: 'green-4',
             textColor: 'white',
-            icon: 'fas fa-check-circle',
+            icon: 'check_circle',
             message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
           })
           context.$router.replace('email-bestätigen')
@@ -117,7 +117,7 @@ export default {
           context.$q.notify({
             color: 'red-5',
             textColor: 'white',
-            icon: 'fas fa-exclamation-triangle',
+            icon: 'error',
             message: 'Oh nein, du konntest leider nicht registriert werden'
           })
         }
