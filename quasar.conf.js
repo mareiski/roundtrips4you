@@ -103,47 +103,33 @@ module.exports = function (ctx) {
       // gzip: true,
       // analyze: true,
       // extractCSS: false,
-      extendWebpack: ctx.mode.dev
-        ? { // so on dev we'll have
-          extendWebpack (cfg) {
-            cfg.module.rules.push({
-              enforce: 'pre',
-              test: /\.(js|vue)$/,
-              loader: 'eslint-loader',
-              exclude: /node_modules/,
-              options: {
-                formatter: require('eslint').CLIEngine.getFormatter('stylish')
-              }
-            })
+      extendWebpack (cfg) {
+        cfg.module.rules.push({
+          enforce: 'pre',
+          test: /\.(js|vue)$/,
+          loader: 'eslint-loader',
+          exclude: /node_modules/,
+          options: {
+            formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
-        }
-        : { // and on build (production):
-          extendWebpack (cfg) {
-            cfg.module.rules.push({
-              enforce: 'pre',
-              test: /\.(js|vue)$/,
-              loader: 'eslint-loader',
-              exclude: /node_modules/,
-              options: {
-                formatter: require('eslint').CLIEngine.getFormatter('stylish')
+        })
+        if (typeof cfg.output !== 'undefined') {
+          // copy _redirects file
+          const CopyWebpackPlugin = require('copy-webpack-plugin')
+          cfg.plugins.push(
+            new CopyWebpackPlugin([
+              {
+                from: 'src/_redirects',
+                to: cfg.output.path
+              },
+              {
+                from: 'src/robots.txt',
+                to: cfg.output.path
               }
-            })
-            // copy _redirects file
-            const CopyWebpackPlugin = require('copy-webpack-plugin')
-            cfg.plugins.push(
-              new CopyWebpackPlugin([
-                {
-                  from: 'src/_redirects',
-                  to: cfg.output.path
-                },
-                {
-                  from: 'src/robots.txt',
-                  to: cfg.output.path
-                }
-              ])
-            )
-          }
+            ])
+          )
         }
+      }
     },
 
     devServer: {
