@@ -42,7 +42,7 @@
           >über uns</router-link>
           <q-avatar
             size="50px"
-            style="width: 50px; margin:auto;"
+            style="width: 50px; margin:auto 10px auto 10px;"
             :style="user ? null : 'font-size:60px;'"
             :icon="user && user.photoURL !== null ? null : 'account_circle'"
             @click="user ? null : $router.push('/login')"

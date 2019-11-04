@@ -28,7 +28,7 @@
         clickable
         @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
         v-ripple
-        v-for="roundtrip in roundtrips"
+        v-for="(roundtrip, index) in roundtrips"
         :key="roundtrip"
       >
         <q-item-section
@@ -39,7 +39,7 @@
             color="primary"
             text-color="white"
           >
-            <img :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]">
+            <img :src="TitleImgs[index]">
           </q-avatar>
         </q-item-section>
 
@@ -263,15 +263,15 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             roundtripArr.push(doc.data())
-            roundtripDocIds.push(doc.id)
+            roundtripDocIds.splice(roundtripArr.findIndex(x => x.RTId === doc.data().RTId), 0, doc.id)
 
             var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
             fileRef.getDownloadURL().then(function (url) {
-              context.TitleImgs.push(url)
+              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
               context.RTIds.push(doc.data().RTId)
             }).catch(function (error) {
               console.log(error)
-              context.TitleImgs.push('../statics/dummy-image-landscape-1-150x150.jpg')
+              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, '../statics/dummy-image-landscape-1-150x150.jpg')
             })
           })
           this.showNoRoundtripsText = snapshot.docs.length === 0

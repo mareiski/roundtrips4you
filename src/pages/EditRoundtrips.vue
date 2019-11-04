@@ -7,6 +7,8 @@
     <h3>{{title}}
       <q-popup-edit
         v-model="title"
+        buttons
+        label-set="ok"
         @save="saveData('Title', title)"
       >
         <q-input
@@ -33,7 +35,7 @@
             :editor="true"
             :doc-id="documentIds[index]"
             :general-link="stop.GeneralLink"
-            :location="stop.Location.label.split(',')[0]"
+            :location="stop.Location !== null && stop.Location.label !== null && typeof stop.Location.label !== 'undfined' ? stop.Location.label.split(',')[0] : null"
           ></Stop>
           <Duration
             :key="stop"
@@ -853,6 +855,8 @@ export default {
           details.forEach((stop) => {
             const initDate = new Date(stop.InitDate.seconds * 1000)
             stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+
+            if (details.indexOf(stop) === details.length - 1) this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
 
             if (stop.HotelStop) hotelCount++
 

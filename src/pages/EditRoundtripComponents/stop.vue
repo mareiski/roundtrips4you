@@ -7,6 +7,8 @@
             v-model="titleInput"
             v-if="editor"
             @save="saveData('Title', titleInput)"
+            buttons
+            label-set="ok"
           >
             <q-input
               v-model="titleInput"
@@ -14,6 +16,7 @@
               autofocus
             />
           </q-popup-edit>
+          <q-icon name="edit" />
         </h6>
         <div
           v-if="generalLink != null && generalLink.length > 0"
@@ -68,29 +71,46 @@
       />
     </div>
     <template v-slot:subtitle>
-      <span class="q-timeline__title">{{date}}
+      <span class="q-timeline__title">
+        {{date !== null && date.length > 0 ? date.split(' ')[0]: date}}
         <q-popup-proxy
           v-if="editor"
           ref="qDateProxy"
           transition-show="scale"
           transition-hide="scale"
-          @hide="() => [showDateEntry = true, showTimeEntry = false, saveDate(date)]"
         >
           <q-date
             v-model="date"
             today-btn
             mask="DD.MM.YYYY HH:mm"
-            v-if="showDateEntry"
-            @input="() => [showTimeEntry = true, showDateEntry = false]"
           />
+        </q-popup-proxy>
+        <q-icon
+          size="16px"
+          name="event"
+        />
+      </span>
+      <span
+        class="q-timeline__title"
+        style="padding-right:10px;"
+      >
+        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}
+        <q-popup-proxy
+          v-if="editor"
+          ref="qTimeProxy"
+          transition-show="scale"
+          transition-hide="scale"
+        >
           <q-time
             v-model="date"
             mask="DD.MM.YYYY HH:mm"
-            v-if="showTimeEntry"
-            @input="() => [showDateEntry = true, showTimeEntry = false, $refs.qDateProxy.hide()]"
             format24h
           />
         </q-popup-proxy>
+        <q-icon
+          size="16px"
+          name="access_time"
+        />
       </span>
     </template>
   </q-timeline-entry>
