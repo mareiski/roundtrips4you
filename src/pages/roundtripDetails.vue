@@ -36,7 +36,7 @@
         label="Übersicht"
       />
       <q-tab
-        name="card"
+        name="map"
         label="Karte"
       />
       <!--<q-tab
@@ -50,6 +50,7 @@
     <q-tab-panels
       v-model="tab"
       animated
+      ref="tabPanels"
     >
       <q-tab-panel name="overview">
         <q-timeline color="secondary">
@@ -75,13 +76,20 @@
             </template>
           </div>
         </q-timeline>
+        <a
+          class="panel-links"
+          @click="$refs.tabPanels.goTo('map')"
+        >zur Karte</a>
+
       </q-tab-panel>
 
-      <q-tab-panel name="card">
+      <q-tab-panel name="map">
         <Map
           profile="driving"
           :stops="stops"
         ></Map>
+        <br>
+        <a @click="$refs.tabPanels.goTo('overview')">zur Routenübersicht</a>
       </q-tab-panel>
 
       <q-tab-panel name="ratings">
@@ -111,7 +119,6 @@
         </div>
       </q-tab-panel>
     </q-tab-panels>
-
   </div>
 </template>
 <style lang="less">

@@ -40,6 +40,7 @@
             class="header-page-link"
             to="/über"
           >über uns</router-link>
+          <span v-if="!user"></span>
           <q-avatar
             size="50px"
             style="width: 50px; margin:auto 10px auto 10px;"

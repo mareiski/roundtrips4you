@@ -42,7 +42,7 @@
       >
         <q-icon
           slot="marker"
-          :style="{'color': route.color}"
+          :style="{'color': route.color, 'background-color': 'white', 'border-radius': '50%'}"
           name="speed"
         />
         <MglPopup>

@@ -16,7 +16,10 @@
               autofocus
             />
           </q-popup-edit>
-          <q-icon name="edit" />
+          <q-icon
+            v-if="editor"
+            name="edit"
+          />
         </h6>
         <div
           v-if="generalLink != null && generalLink.length > 0"
@@ -86,6 +89,7 @@
           />
         </q-popup-proxy>
         <q-icon
+          v-if="editor"
           size="16px"
           name="event"
         />
@@ -108,6 +112,7 @@
           />
         </q-popup-proxy>
         <q-icon
+          v-if="editor"
           size="16px"
           name="access_time"
         />
