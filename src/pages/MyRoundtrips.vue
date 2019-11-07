@@ -48,7 +48,7 @@
           <q-item-label caption>
             {{ getCreatedAtDate() }}
             <q-tooltip>
-              Diese Rundreise wurde am {{getCreatedAtDate()}} erstellt
+              Diese Rundreise wurde am {{ getCreatedAtDate() }} erstellt
             </q-tooltip>
           </q-item-label>
         </q-item-section>
@@ -201,7 +201,8 @@ export default {
           Public: false,
           RTId: 3445340985430,
           Stars: 3,
-          Tags: ['Tag1', 'Tag2', 'Tag3'],
+          Profile: 'Autoreise',
+          Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
           Title: Title,
           OfferEndPeriod: new Date(timeStamp),
           OfferStartPeriod: new Date(timeStamp),

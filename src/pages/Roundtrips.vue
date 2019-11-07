@@ -321,10 +321,17 @@
                 />
                 <q-icon
                   name="location_on"
-                  class="marker"
+                  class="card-icon"
                 >
                 </q-icon>
                 <span class="country-title">{{roundtrip.Location}}</span>
+              </div>
+              <div class="card-row">
+                <q-icon
+                  class="card-icon"
+                  name="commute"
+                ></q-icon>
+                <span>{{roundtrip.Profile}}</span>
               </div>
               <div class="card-row">
                 <span class="card-days">{{roundtrip.Days}},</span>
@@ -334,9 +341,9 @@
                 <p class="card-description">{{roundtrip.Description}}</p>
               </div>
               <div class="card-bottom-row">
-                <q-chip size="10px">{{roundtrip.Tags[0]}}</q-chip>
-                <q-chip size="10px">{{roundtrip.Tags[1]}}</q-chip>
-                <q-chip size="10px">{{roundtrip.Tags[2]}}</q-chip>
+                <q-chip size="10px">{{roundtrip.Highlights[0]}}</q-chip>
+                <q-chip size="10px">{{roundtrip.Highlights[1]}}</q-chip>
+                <q-chip size="10px">{{roundtrip.Highlights[2]}}</q-chip>
               </div>
             </div>
             <div class="card-right-col">
@@ -449,20 +456,20 @@ export default {
         let attrLeng = this.filteredRoundtripAttr.length
         if (attrLeng > 0) {
           if (attrLeng === 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Tags[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Tags[2])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
+            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2])) this.removeRoundtrip(roundtrip)
+            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
             else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           } else if (attrLeng > 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Tags[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Tags[2])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
+            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2])) this.removeRoundtrip(roundtrip)
+            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
             else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           }
         } else {
-          if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Tags[0])) this.removeRoundtrip(roundtrip)
+          if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
           else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
           else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
           else console.log('nothing')
@@ -546,9 +553,9 @@ export default {
           // read all posible values for filter
           roundtripArr.forEach((roundtrip) => {
             if (price < roundtrip.Price) price = roundtrip.Price
-            if (!tripKind.includes(roundtrip.Tags[0])) tripKind.push(roundtrip.Tags[0])
-            if (!roundtripAttr.includes(roundtrip.Tags[1])) roundtripAttr.push(roundtrip.Tags[1])
-            if (!roundtripAttr.includes(roundtrip.Tags[2])) roundtripAttr.push(roundtrip.Tags[2])
+            if (!tripKind.includes(roundtrip.Highlights[0])) tripKind.push(roundtrip.Highlights[0])
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
+            if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
 
             // load userImages

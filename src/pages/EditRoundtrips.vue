@@ -260,7 +260,7 @@
         </q-input>
         <q-select
           outlined
-          v-model="tag1"
+          v-model="inputProfile"
           :options="['zu Fuß', 'Fahrradreise', 'Autoreise']"
           label="Reiseart"
           use-input
@@ -273,18 +273,26 @@
           </template>
         </q-select>
         <q-input
-          v-model="tag2"
-          label="Reisemerkmal 1"
+          v-model="highlight1"
+          label="Highlight 1"
           outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
+          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
         > <template v-slot:prepend>
             <q-icon name="turned_in" />
           </template></q-input>
         <q-input
-          v-model="tag3"
-          label="Reisemerkmal 2"
+          v-model="highlight2"
+          label="Highlight 2"
           outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Reisemerkmal an']"
+          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+        > <template v-slot:prepend>
+            <q-icon name="turned_in" />
+          </template></q-input>
+        <q-input
+          v-model="highlight3"
+          label="Highlight 3"
+          outlined
+          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
         > <template v-slot:prepend>
             <q-icon name="turned_in" />
           </template></q-input>
@@ -363,6 +371,8 @@
           </template>
         </q-input>
         <div>
+          <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br></span>
+          <br>
           <div class="uploader">
             <q-img
               style="height:100%;"
@@ -570,9 +580,10 @@ export default {
       stars: 3,
       tempStars: 3,
       descriptionInput: null,
-      tag1: null,
-      tag2: null,
-      tag3: null,
+      highlight1: null,
+      highlight2: null,
+      highlight3: null,
+      inputProfile: null,
       deleteDialog: false,
       OfferStartPeriod: formattedScheduleDate,
       OfferEndPeriod: formattedScheduleDate,
@@ -749,7 +760,8 @@ export default {
         this.saveData('Category', this.category) &&
         this.saveData('Stars', this.stars) &&
         this.saveData('Description', this.descriptionInput) &&
-        this.saveData('Tags', [this.tag1, this.tag2, this.tag3]) &&
+        this.saveData('Highlights', [this.highlight1, this.highlight2, this.highlight3]) &&
+        this.saveData('Profile', this.inputProfile) &&
         this.saveData('OfferStartPeriod', offerStartPeriod) &&
         this.saveData('OfferEndPeriod', offerEndPeriod) &&
         this.saveData('Price', this.price) &&
@@ -794,9 +806,10 @@ export default {
           this.stars = roundtrip[0].Stars
           this.category = roundtrip[0].Category
           this.descriptionInput = roundtrip[0].Description
-          this.tag1 = roundtrip[0].Tags[0]
-          this.tag2 = roundtrip[0].Tags[1]
-          this.tag3 = roundtrip[0].Tags[2]
+          this.highlight1 = roundtrip[0].Highlights[0]
+          this.highlight2 = roundtrip[0].Highlights[1]
+          this.highlight3 = roundtrip[0].Highlights[2]
+          this.inputProfile = roundtrip[0].Profile
           this.price = roundtrip[0].Price
           this.wholeYearOffer = roundtrip[0].OfferWholeYear
 
@@ -1055,7 +1068,7 @@ export default {
       }
     },
     getProfile () {
-      switch (this.tag1) {
+      switch (this.inputProfile) {
         case 'zu Fuß':
           this.profile = 'walking'
           break
