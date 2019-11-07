@@ -32,6 +32,12 @@
             <q-icon name="search" />
           </template>
         </q-select>
+        <span style="margin-top:10px; color:white;">oder</span>
+        <q-btn
+          @click="$router.push('/registrieren')"
+          color="primary"
+          style="margin-top:10px;"
+        >erstelle deine eigene reise einfach selbst...</q-btn>
         <q-icon
           class="scroll-down-icon cursor-pointer"
           name="keyboard_arrow_down"
