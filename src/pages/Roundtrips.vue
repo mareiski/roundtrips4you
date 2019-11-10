@@ -6,7 +6,7 @@
     justify-content: center;">
         <router-link to="/rundreisen-übersicht">zurück zu allen Ländern</router-link>
       </div>
-      <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{roundtrips.length==1?null:'n'}} gefunden</h2>
+      <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{ roundtripCount === 1 ? null : 'n'}} gefunden</h2>
       <q-select
         outlined
         v-model="sort"
@@ -450,32 +450,65 @@ export default {
     },
     filterRoundtrips () {
       this.filterRoundtripArr = []
-      this.filterRoundtripArr = this.filterRoundtripArr.concat(originalRoundtripArr)
-      originalRoundtripArr.forEach((roundtrip) => {
-        let attrLeng = this.filteredRoundtripAttr.length
-        if (attrLeng > 0) {
-          if (attrLeng === 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
-            else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
-            else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
-            else console.log('nothing')
-          } else if (attrLeng > 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
-            else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
-            else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
-            else console.log('nothing')
-          }
-        } else {
-          if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
-          else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
-          else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
-          else console.log('nothing')
-        }
-      })
       this.roundtrips = []
-      this.roundtrips = this.roundtrips.concat(this.filterRoundtripArr)
+
+      this.selectedCountry = this.country
+      this.visible = true
+      this.showSimulatedReturnData = false
+      originalRoundtripArr.length = 0
+
+      let dateParts = this.OfferPeriod.split('.')
+      let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
+
+      let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
+      if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
+
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('Location', '==', this.country)
+        .where('Public', '==', true)
+
+      if (this.dayModel !== null && this.dayModel.length > 0) roundtripsRef = roundtripsRef.where('Days', '==', this.dayModel)
+
+      if (this.filteredRoundtripAttr.length > 0) roundtripsRef = roundtripsRef.where('Highlights', 'array-contains-any', this.filteredRoundtripAttr)
+
+      this.filteredTripKinds.forEach(profile => {
+        roundtripsRef = roundtripsRef.where('Profile', '==', profile)
+      })
+
+      this.filteredRoundtripCategories.forEach(cat => {
+        roundtripsRef = roundtripsRef.where('Category', '==', cat)
+      })
+
+      roundtripsRef = roundtripsRef.orderBy('createdAt').startAt(searchCreatedAt).limit(20)
+
+      roundtripsRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
+              let roundtrip = doc.data()
+              let isInPriceRange = this.step.max >= Number(roundtrip.Price) && this.step.min <= Number(roundtrip.Price)
+              let isInFilter = this.includesArray(roundtrip.Highlights, this.filteredRoundtripAttr)
+
+              if (isInFilter && isInPriceRange) this.filterRoundtripArr.push(roundtrip)
+            }
+          })
+
+          this.roundtrips = []
+          this.roundtrips = this.roundtrips.concat(this.filterRoundtripArr)
+          this.roundtripCount = this.roundtrips.length
+
+          this.visible = false
+          this.showSimulatedReturnData = true
+        })
+    },
+    includesArray (array1, array2) {
+      if (array1.lenght === 0 || array2.length === 0) return true
+      let returnVal = true
+      array2.forEach(element => {
+        console.log(array1.includes(element))
+        if (!array1.includes(element)) returnVal = false
+      })
+      return returnVal
     },
     removeRoundtrip (roundtrip) {
       this.filterRoundtripArr.splice(this.filterRoundtripArr.indexOf(roundtrip), 1)
@@ -514,7 +547,14 @@ export default {
 
       let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
       if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
-      console.log(searchCreatedAt)
+
+      // reset filer
+
+      this.filteredRoundtripAttr = []
+
+      this.filteredTripKinds = []
+
+      this.filteredRoundtripCategories = []
 
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', '==', this.country)
