@@ -1,6 +1,16 @@
 <template>
-  <q-page>
+  <q-page style="overflow: hidden;">
     <div class="home">
+      <div id="flyingPlane">
+        <router-link to="/meine-rundreisen">
+          <q-btn class="banner">Eigene Reise erstellen</q-btn>
+        </router-link>
+        <span class="line"></span>
+        <img
+          class="plane"
+          src="../statics/plane.png"
+        />
+      </div>
       <div id="MainImg"></div>
       <div id="MainImgOverlay">
       </div>

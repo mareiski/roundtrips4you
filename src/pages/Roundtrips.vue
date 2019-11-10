@@ -119,6 +119,32 @@
                 Preis ab {{ step.min }} € bis {{ step.max }} €
               </p>
             </q-expansion-item>
+            <!--<q-expansion-item
+              class="filter-expansion"
+              default-opened
+            >
+              <template v-slot:header>
+                <q-item-section>
+                  Region
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="info">
+                    <q-tooltip>
+                      Die Region in der deine Reise stattfindet
+                    </q-tooltip>
+                  </q-icon>
+                </q-item-section>
+              </template>
+               <q-checkbox
+                v-for="region in tripKind"
+                :key="kind"
+                :label="kind"
+                v-model="filteredTripKinds"
+                :val="kind"
+                color="dark-orange"
+                @input="filterRoundtrips()"
+              />
+            </q-expansion-item>-->
             <q-expansion-item
               class="filter-expansion"
               default-opened
@@ -151,12 +177,12 @@
             >
               <template v-slot:header>
                 <q-item-section>
-                  Reisemerkmal
+                  Highlights
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="info">
                     <q-tooltip>
-                      Die Merkmale deiner Reise
+                      Die Highlights deiner Reise
                     </q-tooltip>
                   </q-icon>
                 </q-item-section>
@@ -197,34 +223,7 @@
                 @input="filterRoundtrips()"
               />
             </q-expansion-item>
-            <!-- <q-expansion-item
-              class="filter-expansion"
-              default-opened
-            >
-              <template v-slot:header>
-                <q-item-section>
-                  Region
-                </q-item-section>
-                <q-item-section side>
-                  <q-icon name="info">
-                    <q-tooltip>
-                      Die Region in der deine Reise stattfindet
-                    </q-tooltip>
-                  </q-icon>
-                </q-item-section>
-              </template>
-              <q-checkbox
-                label="Gruppenreise"
-                v-model="orange"
-                color="dark-orange"
-              />
-              <q-checkbox
-                label="Gruppenreise"
-                v-model="orange"
-                color="dark-orange"
-              />
-            </q-expansion-item>
-            <q-expansion-item
+            <!--<q-expansion-item
               class="filter-expansion"
               default-opened
             >
@@ -324,7 +323,7 @@
                   class="card-icon"
                 >
                 </q-icon>
-                <span class="country-title">{{roundtrip.Location}}</span>
+                <span class="country-title">{{roundtrip.Location }}{{ roundtrip.Region && typeof roundtrip.Region !== 'undefined' ? ', ' + roundtrip.Region : null}}</span>
               </div>
               <div class="card-row">
                 <q-icon
@@ -456,20 +455,20 @@ export default {
         let attrLeng = this.filteredRoundtripAttr.length
         if (attrLeng > 0) {
           if (attrLeng === 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
+            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2]) && !this.filteredRoundtripAttr.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
+            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
             else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           } else if (attrLeng > 1) {
-            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2])) this.removeRoundtrip(roundtrip)
-            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
+            if (!this.filteredRoundtripAttr.includes(roundtrip.Highlights[1]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[2]) || !this.filteredRoundtripAttr.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
+            else if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
             else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
             else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
             else console.log('nothing')
           }
         } else {
-          if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Highlights[0])) this.removeRoundtrip(roundtrip)
+          if (this.filteredTripKinds.length > 0 && !this.filteredTripKinds.includes(roundtrip.Profile)) this.removeRoundtrip(roundtrip)
           else if (this.filteredRoundtripCategories.length > 0 && !this.filteredRoundtripCategories.includes(roundtrip.Category)) this.removeRoundtrip(roundtrip)
           else if (this.step.max < Number(roundtrip.Price) || this.step.min > Number(roundtrip.Price)) this.removeRoundtrip(roundtrip)
           else console.log('nothing')
@@ -553,7 +552,8 @@ export default {
           // read all posible values for filter
           roundtripArr.forEach((roundtrip) => {
             if (price < roundtrip.Price) price = roundtrip.Price
-            if (!tripKind.includes(roundtrip.Highlights[0])) tripKind.push(roundtrip.Highlights[0])
+            if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
             if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
             if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)

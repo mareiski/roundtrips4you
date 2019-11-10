@@ -224,6 +224,13 @@
             </q-item>
           </template>
         </q-select>
+        <q-input
+          v-model="region"
+          label="Region (wenn vorhanden)"
+          outlined
+        > <template v-slot:prepend>
+            <q-icon name="location_on" />
+          </template></q-input>
         <q-select
           outlined
           v-model="category"
@@ -278,7 +285,7 @@
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
         > <template v-slot:prepend>
-            <q-icon name="turned_in" />
+            <q-icon name="star" />
           </template></q-input>
         <q-input
           v-model="highlight2"
@@ -286,7 +293,7 @@
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
         > <template v-slot:prepend>
-            <q-icon name="turned_in" />
+            <q-icon name="star" />
           </template></q-input>
         <q-input
           v-model="highlight3"
@@ -294,7 +301,7 @@
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
         > <template v-slot:prepend>
-            <q-icon name="turned_in" />
+            <q-icon name="star" />
           </template></q-input>
         <q-item-label>Angebotszeitraum</q-item-label>
         <q-toggle
@@ -595,7 +602,8 @@ export default {
       wholeYearOffer: false,
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       durations: [],
-      profile: ''
+      profile: '',
+      region: null
     }
   },
   methods: {
@@ -761,6 +769,7 @@ export default {
         this.saveData('Stars', this.stars) &&
         this.saveData('Description', this.descriptionInput) &&
         this.saveData('Highlights', [this.highlight1, this.highlight2, this.highlight3]) &&
+        this.saveData('Region', this.region) &&
         this.saveData('Profile', this.inputProfile) &&
         this.saveData('OfferStartPeriod', offerStartPeriod) &&
         this.saveData('OfferEndPeriod', offerEndPeriod) &&
@@ -810,6 +819,7 @@ export default {
           this.highlight2 = roundtrip[0].Highlights[1]
           this.highlight3 = roundtrip[0].Highlights[2]
           this.inputProfile = roundtrip[0].Profile
+          this.region = roundtrip[0].Region
           this.price = roundtrip[0].Price
           this.wholeYearOffer = roundtrip[0].OfferWholeYear
 
@@ -967,6 +977,7 @@ export default {
     fileAdded: function (event, kind) {
       let files = event
       let context = this
+
       Array.from(Array(files.length).keys()).map(x => {
         this.upload(files[x], kind, x + context.galeryImgUrls.length, x === files.length - 1)
       })

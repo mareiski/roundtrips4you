@@ -197,6 +197,7 @@ export default {
           Description: 'Kurze Beschreibung deiner Rundreise',
           Hotels: '1',
           Location: Location,
+          Region: null,
           Price: 100,
           Public: false,
           RTId: 3445340985430,
