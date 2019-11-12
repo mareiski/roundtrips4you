@@ -4,7 +4,7 @@
       <div style="display: flex;
     flex-direction: column;
     justify-content: center;">
-        <router-link to="/rundreisen-übersicht">zurück zu allen Ländern</router-link>
+        <router-link to="/rundreisen-uebersicht">zurück zu allen Ländern</router-link>
       </div>
       <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{ roundtripCount === 1 ? null : 'n'}} gefunden</h2>
       <q-select

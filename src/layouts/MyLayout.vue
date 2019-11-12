@@ -34,11 +34,11 @@
           >home</router-link>
           <router-link
             class="header-page-link"
-            to="/rundreisen-übersicht"
+            to="/rundreisen-uebersicht"
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
-            to="/über"
+            to="/ueber"
           >über uns</router-link>
           <span v-if="!user"></span>
           <q-avatar
@@ -52,6 +52,14 @@
               v-if="user && user.photoURL !== null"
               :src="user.photoURL"
             >
+            <div
+              v-if="user"
+              style="pointer-events: none;"
+            >
+              <q-tooltip :value="showHelloTooltip">
+                Hallo, {{user.displayName}}
+              </q-tooltip>
+            </div>
             <q-menu v-if="user">
               <q-list style="min-width: 100px">
                 <q-item
@@ -116,13 +124,13 @@
         <div @click="hideMenu()">
           <router-link
             class="mobile-header-page-link"
-            to="/rundreisen-übersicht"
+            to="/rundreisen-uebersicht"
           >rundreisen</router-link>
         </div>
         <div @click="hideMenu()">
           <router-link
             class="mobile-header-page-link"
-            to="/über"
+            to="/ueber"
           >über uns</router-link>
         </div>
       </div>
@@ -149,11 +157,11 @@
           >Home</router-link>
           <router-link
             class="footer-link"
-            to="/rundreisen-übersicht"
+            to="/rundreisen-uebersicht"
           >Rundreisen</router-link>
           <router-link
             class="footer-link"
-            to="/über"
+            to="/ueber"
           >Über uns</router-link>
         </div>
         <div class="footer-infos">
@@ -221,7 +229,8 @@ export default {
   },
   data () {
     return {
-      showPreload: true
+      showPreload: true,
+      showHelloTooltip: true
     }
   },
   computed: {
@@ -268,12 +277,12 @@ export default {
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
         let isOnLoginPage = to.path === '/login'
         let isOnRoundtripsPage = to.path === '/meine-rundreisen'
-        let isOnVerifyPage = to.path === '/email-bestätigen'
+        let isOnVerifyPage = to.path === '/email-bestaetigen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) next('login')
-        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) next('email-bestätigen')
+        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) next('email-bestaetigen')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) next('meine-rundreisen')
-        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) next('email-bestätigen')
+        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) next('email-bestaetigen')
         else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) next('meine-rundreisen')
         else next()
 
@@ -288,12 +297,12 @@ export default {
         let guestOnly = currentRoute.matched.some(record => record.meta.guestOnly)
         let isOnLoginPage = currentRoute.fullPath === '/login'
         let isOnRoundtripsPage = currentRoute.fullPath === '/meine-rundreisen'
-        let isOnVerifyPage = currentRoute.fullPath === '/email-bestätigen'
+        let isOnVerifyPage = currentRoute.fullPath === '/email-bestaetigen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) this.$router.replace('login')
-        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) this.$router.replace('email-bestätigen')
+        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) this.$router.replace('email-bestaetigen')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) this.$router.replace('meine-rundreisen')
-        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestätigen')
+        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestaetigen')
         else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) this.$router.replace('meine-rundreisen')
 
         redirected = true
@@ -303,6 +312,10 @@ export default {
         redirected = false
         this.showPreload = false
         Loading.hide()
+        let context = this
+        setTimeout(function () {
+          context.showHelloTooltip = false
+        }, 5000)
       }
     })
   }

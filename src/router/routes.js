@@ -9,7 +9,7 @@ const routes = [
         component: () => import('pages/Index.vue')
       },
       {
-        path: 'rundreisen-übersicht',
+        path: 'rundreisen-uebersicht',
         component: () => import('pages/RoundtripOverview.vue')
       },
       {
@@ -28,7 +28,7 @@ const routes = [
         }
       },
       {
-        path: 'email-bestätigen',
+        path: 'email-bestaetigen',
         component: () => import('pages/Verify.vue'),
         meta: {
           requireAuth: true
@@ -56,8 +56,12 @@ const routes = [
         }
       },
       {
-        path: 'über',
+        path: 'ueber',
         component: () => import('pages/Über.vue')
+      },
+      {
+        path: 'blog',
+        component: () => import('pages/Blog.vue')
       },
       {
         path: 'impressum',

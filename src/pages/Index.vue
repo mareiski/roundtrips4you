@@ -47,6 +47,7 @@
           @click="$router.push('/registrieren')"
           color="primary"
           style="margin-top:10px;"
+          class="create-own-btn"
         >erstelle deine eigene reise einfach selbst...</q-btn>
         <q-icon
           class="scroll-down-icon cursor-pointer"
@@ -110,7 +111,7 @@
         <div class="card-wrap left">
           <router-link
             class="card"
-            to="/rundreisen-übersicht"
+            to="/rundreisen-uebersicht"
           >
             <q-icon name="compare_arrows" />
             <h3>Vergleichen</h3>

@@ -110,7 +110,7 @@ export default {
             icon: 'check_circle',
             message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
           })
-          context.$router.replace('email-bestätigen')
+          context.$router.replace('email-bestaetigen')
         },
         (err) => {
           console.log(err)
