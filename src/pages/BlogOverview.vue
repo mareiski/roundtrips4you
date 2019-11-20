@@ -18,7 +18,7 @@
         >
           <h2 class="story-title">{{story.name}}</h2>
           <span class="story-date">{{story.first_published_at.split('T')[0]}}</span>
-          <span class="story-author">{{story.content.Autor}}</span>
+          <span class="story-author">{{story.content.Country}}</span>
         </router-link>
       </div>
     </div>

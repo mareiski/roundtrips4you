@@ -1,6 +1,6 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
-    <router-link to="/meine-rundreisen">
+    <router-link style="text-decoration:none;" to="/meine-rundreisen">
       <q-icon name="keyboard_arrow_left"></q-icon>
       zurück zu meinen Rundreisen
     </router-link>
