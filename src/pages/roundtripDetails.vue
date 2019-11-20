@@ -67,6 +67,7 @@
                 :editor-placeholder="stop.Description"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location.label.split(',')[0]"
+                :days="getDays(stop, index)"
               ></Stop>
               <Duration
                 :key="stop"
@@ -89,7 +90,7 @@
           :stops="stops"
         ></Map>
         <br>
-        <a @click="$refs.tabPanels.goTo('overview')">zur Routenübersicht</a>
+        <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>
       </q-tab-panel>
 
       <q-tab-panel name="ratings">
@@ -250,6 +251,30 @@ export default {
       else returnVal = hours + ' h ' + minutes + ' min'
 
       return returnVal
+    },
+    getDays (stop, index) {
+      let days = NaN
+      let daysString = null
+
+      if (index < this.stops.length - 1) {
+        let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        let dateTimeParts = formattedDate.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        let timeParts = dateTimeParts[1].split(':')
+        let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+        formattedDate = date.formatDate(new Date(this.stops[index + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        dateTimeParts = formattedDate.split(' ')
+        dateParts = dateTimeParts[0].split('.')
+        timeParts = dateTimeParts[1].split(':')
+        let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+        days = parseInt((nextInitDate.getTime() - currentInitDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      // console.log(days)
+      if (!isNaN(days)) daysString = days.toString()
+      return daysString
     },
     loadGaleryImgs () {
       const context = this

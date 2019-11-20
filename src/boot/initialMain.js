@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import { AddressbarColor, Loading } from 'quasar'
 import vClickOutside from 'v-click-outside'
 import vue from 'vue'
+import StoryblokVue from 'storyblok-vue'
 
 // "async" is optional
 export default async ({ app, store, router }) => {
@@ -19,4 +20,5 @@ export default async ({ app, store, router }) => {
   })
   AddressbarColor.set('#D56026')
   vue.use(vClickOutside)
+  vue.use(StoryblokVue)
 }

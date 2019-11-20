@@ -38,8 +38,8 @@
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
-            to="/ueber"
-          >über uns</router-link>
+            to="/blog"
+          >blog</router-link>
           <span v-if="!user"></span>
           <q-avatar
             size="50px"
@@ -130,8 +130,8 @@
         <div @click="hideMenu()">
           <router-link
             class="mobile-header-page-link"
-            to="/ueber"
-          >über uns</router-link>
+            to="/blog"
+          >blog</router-link>
         </div>
       </div>
     </div>
@@ -159,6 +159,10 @@
             class="footer-link"
             to="/rundreisen-uebersicht"
           >Rundreisen</router-link>
+          <router-link
+            class="footer-link"
+            to="/blog"
+          >Blog</router-link>
           <router-link
             class="footer-link"
             to="/ueber"
@@ -248,12 +252,16 @@ export default {
     }
   },
   created () {
+    this.$storyblok.init({
+      accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
+    })
     auth.authRef().onAuthStateChanged((user) => {
       let title
       if (this.$router.currentRoute.path.substr(1)) {
         title = this.$router.currentRoute.path.substr(1) + ' | roundtrips4you'
         if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
         else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
+        else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
       } else {
         title = 'roundtrips4you'
       }
@@ -264,6 +272,7 @@ export default {
           title = to.path.substr(1) + ' | roundtrips4you'
           if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
           else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
+          else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
         } else {
           title = 'roundtrips4you'
         }

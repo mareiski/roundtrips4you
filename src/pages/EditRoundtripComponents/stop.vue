@@ -85,6 +85,7 @@
           <q-date
             v-model="date"
             today-btn
+            @input="saveDate($event)"
             mask="DD.MM.YYYY HH:mm"
           />
         </q-popup-proxy>
@@ -98,7 +99,7 @@
         class="q-timeline__title"
         style="padding-right:10px;"
       >
-        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}
+        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && !editor ? ', ' + days + (days === '1' ? ' Tag' : ' Tage') + ' Aufenthalt' : null}}
         <q-popup-proxy
           v-if="editor"
           ref="qTimeProxy"
@@ -109,6 +110,7 @@
             v-model="date"
             mask="DD.MM.YYYY HH:mm"
             format24h
+            @input="saveDate($event)"
           />
         </q-popup-proxy>
         <q-icon
@@ -132,7 +134,8 @@ export default {
     editor: Boolean,
     docId: String,
     generalLink: String,
-    location: String
+    location: String,
+    days: String
   },
   data () {
     return {
@@ -221,6 +224,7 @@ export default {
   },
   methods: {
     saveDate (value) {
+      console.log(value)
       let dateTimeParts = value.split(' ')
       let dateParts = dateTimeParts[0].split('.')
       let timeParts = dateTimeParts[1].split(':')
