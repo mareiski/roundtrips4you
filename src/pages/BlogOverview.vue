@@ -3,8 +3,8 @@
     id="BlogOverview"
     class="q-px-lg q-pb-md"
   >
-    <div id="CardBackgroundImg"></div>
-    <div id="CardBackgroundImgPlaceholder">
+    <div id="BlogBackgroundImg"></div>
+    <div id="BlogBackgroundImgPlaceholder">
       <div
         class="story-card-container"
         v-for="story in stories"

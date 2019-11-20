@@ -38,8 +38,8 @@
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
-            to="/blog"
-          >blog</router-link>
+            to="/ueber"
+          >über uns</router-link>
           <span v-if="!user"></span>
           <q-avatar
             size="50px"
@@ -130,8 +130,8 @@
         <div @click="hideMenu()">
           <router-link
             class="mobile-header-page-link"
-            to="/blog"
-          >blog</router-link>
+            to="/ueber"
+          >über uns</router-link>
         </div>
       </div>
     </div>
@@ -159,10 +159,6 @@
             class="footer-link"
             to="/rundreisen-uebersicht"
           >Rundreisen</router-link>
-          <router-link
-            class="footer-link"
-            to="/blog"
-          >Blog</router-link>
           <router-link
             class="footer-link"
             to="/ueber"
