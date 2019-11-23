@@ -68,6 +68,7 @@
                 :general-link="stop.GeneralLink"
                 :location="stop.Location.label.split(',')[0]"
                 :days="getDays(stop, index)"
+                :parkingPlace="stop.Parking && stop.Parking.label !== null && typeof stop.Parking.label !== 'undfined' ? stop.Parking.label.split(',')[0] : null"
               ></Stop>
               <Duration
                 :key="stop"

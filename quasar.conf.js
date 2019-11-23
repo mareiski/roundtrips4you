@@ -113,6 +113,14 @@ module.exports = function (ctx) {
             formatter: require('eslint').CLIEngine.getFormatter('stylish')
           }
         })
+        const path = require('path')
+        const PrerenderSPAPlugin = require('prerender-spa-plugin')
+        cfg.plugins.push(
+          new PrerenderSPAPlugin({
+            staticDir: path.join(__dirname, 'dist'),
+            // Required - Routes to render.
+            routes: ['/', '/about', '/some/deep/nested/route']
+          }))
         if (typeof cfg.output !== 'undefined') {
           // copy _redirects file
           const CopyWebpackPlugin = require('copy-webpack-plugin')

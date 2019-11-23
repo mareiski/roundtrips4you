@@ -48,6 +48,33 @@
         icon="location_on"
         size="3px"
       >{{location}}</q-chip>
+      <q-chip
+        icon="local_parking"
+        size="3px"
+        clickable
+        @click="editParkingPlace = true"
+      >{{parkingPlace}}</q-chip>
+      <q-dialog
+        v-if="editor"
+        v-model="editParkingPlace"
+        persistent
+      >
+        <q-card-section>
+          <CitySearch
+            ref="citySearch"
+            :parkingPlaceSearch="false"
+            @update="updateLocation($event)"
+          ></CitySearch>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="OK"
+            color="primary"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-dialog>
     </div>
     <div>
       <div
@@ -66,11 +93,18 @@
         style="margin-top:10px;"
         :definitions="{
         save: {
-          tip: 'Save your work',
+          tip: 'Die Beschreibung Speichern',
           icon: 'save',
-          label: 'Save',
+          label: 'Speichern',
           handler: saveWork
-        }}"
+        },
+        format: {
+          top: 'Formatierung bei Kopieren beibehaten',
+          icon: $q.iconSet.editor.formatting,
+          label: 'Format bei Kopie ' + (this.preventPasting ? 'aus' : 'an'),
+          handler: formatOn
+        }
+        }"
       />
     </div>
     <template v-slot:subtitle>
@@ -99,7 +133,7 @@
         class="q-timeline__title"
         style="padding-right:10px;"
       >
-        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && !editor ? ', ' + days + (days === '1' ? ' Tag' : ' Tage') + ' Aufenthalt' : null}}
+        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && days > 0 && !editor ? ', ' + days + (days === '1' ? ' Tag' : ' Tage') + ' Aufenthalt' : null}}
         <q-popup-proxy
           v-if="editor"
           ref="qTimeProxy"
@@ -124,8 +158,12 @@
 </template>
 <script>
 import { db } from '../../firebaseInit'
+import CitySearch from '../Map/CitySearch'
 
 export default {
+  components: {
+    CitySearch
+  },
   props: {
     title: String,
     date: String,
@@ -135,7 +173,8 @@ export default {
     docId: String,
     generalLink: String,
     location: String,
-    days: String
+    days: String,
+    parkingPlace: String
   },
   data () {
     return {
@@ -144,6 +183,9 @@ export default {
       generalLinkText: '',
       showDateEntry: true,
       showTimeEntry: false,
+      preventPasting: true,
+      editParkingPlace: false,
+
       editorFonts: {
         arial: 'Arial',
         arial_black: 'Arial Black',
@@ -217,7 +259,7 @@ export default {
           }
         ],
         ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
-
+        ['format'],
         ['undo', 'redo']
       ]
     }
@@ -249,21 +291,26 @@ export default {
       })
       this.saveData('Description', this.descriptionInput)
     },
+    formatOn () {
+      this.preventPasting = !this.preventPasting
+    },
     pasteCapture (evt) {
-      let text, onPasteStripFormattingIEPaste
-      evt.preventDefault()
-      if (evt.originalEvent && evt.originalEvent.clipboardData.getData) {
-        text = evt.originalEvent.clipboardData.getData('text/plain')
-        this.$refs.editor_ref.runCmd('insertText', text)
-      } else if (evt.clipboardData && evt.clipboardData.getData) {
-        text = evt.clipboardData.getData('text/plain')
-        this.$refs.editor_ref.runCmd('insertText', text)
-      } else if (window.clipboardData && window.clipboardData.getData) {
-        if (!onPasteStripFormattingIEPaste) {
-          onPasteStripFormattingIEPaste = true
-          this.$refs.editor_ref.runCmd('ms-pasteTextOnly', text)
+      if (this.preventPasting) {
+        let text, onPasteStripFormattingIEPaste
+        evt.preventDefault()
+        if (evt.originalEvent && evt.originalEvent.clipboardData.getData) {
+          text = evt.originalEvent.clipboardData.getData('text/plain')
+          this.$refs.editor_ref.runCmd('insertText', text)
+        } else if (evt.clipboardData && evt.clipboardData.getData) {
+          text = evt.clipboardData.getData('text/plain')
+          this.$refs.editor_ref.runCmd('insertText', text)
+        } else if (window.clipboardData && window.clipboardData.getData) {
+          if (!onPasteStripFormattingIEPaste) {
+            onPasteStripFormattingIEPaste = true
+            this.$refs.editor_ref.runCmd('ms-pasteTextOnly', text)
+          }
+          onPasteStripFormattingIEPaste = false
         }
-        onPasteStripFormattingIEPaste = false
       }
     },
     deleteEntry () {

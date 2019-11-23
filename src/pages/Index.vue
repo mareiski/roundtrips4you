@@ -1,6 +1,6 @@
 <template>
   <q-page style="overflow: hidden;">
-    <div class="home">
+    <div class="home q-px-lg q-pb-md">
       <div id="flyingPlane">
         <router-link to="/meine-rundreisen">
           <q-btn class="banner">Eigene Reise erstellen</q-btn>
@@ -15,7 +15,7 @@
       <div id="MainImgOverlay">
       </div>
       <div id="MainImgPlacholder">
-        <h1 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h1>
+        <h2 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h2>
         <span class="quote-author">Kurt Tucholsky</span>
         <q-select
           filled
@@ -59,7 +59,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h2>Entdecke dein Traumziel mit einer Rundreise die zu dir passt!</h2>
+        <h1>Entdecke dein Traumziel mit einer Rundreise die zu dir passt!</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -139,6 +139,29 @@
           </router-link>
         </div>
       </div>
+      <h4 style="text-align:center;">Deine eigene Rundreise erstellen: so einfach geht's!</h4>
+      <ol class="create-roundtrip-ol">
+        <li>
+          <h2>Titel und Land angeben</h2>
+          <q-img src="../statics/createRT.png" />
+        </li>
+        <li>
+          <h2>Orte und Zeiten der einzelnen Stopps eingeben</h2>
+          <q-img src="../statics/stopps.png" />
+        </li>
+        <li>
+          <h2>Strecke und Dauer zwischen den Stopps wird automatisch berechnet</h2>
+          <q-img src="../statics/duration.png" />
+        </li>
+        <li>
+          <h2>Karte wird automatisch erstellt</h2>
+          <q-img src="../statics/card.png" />
+        </li>
+        <li>
+          <h2>Schmücke deine Rundreise mit Bildern, Highlights und vielen weiteren Informationen aus!</h2>
+          <q-img src="../statics/rt-card.png" />
+        </li>
+      </ol>
     </div>
   </q-page>
 </template>

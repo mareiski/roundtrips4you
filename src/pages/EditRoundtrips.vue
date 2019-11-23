@@ -1,6 +1,9 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
-    <router-link style="text-decoration:none;" to="/meine-rundreisen">
+    <router-link
+      style="text-decoration:none;"
+      to="/meine-rundreisen"
+    >
       <q-icon name="keyboard_arrow_left"></q-icon>
       zurück zu meinen Rundreisen
     </router-link>
@@ -36,6 +39,7 @@
             :doc-id="documentIds[index]"
             :general-link="stop.GeneralLink"
             :location="stop.Location !== null && stop.Location.label !== null && typeof stop.Location.label !== 'undfined' ? stop.Location.label.split(',')[0] : null"
+            :parkingPlace="stop.Parking && stop.Parking.label !== null && typeof stop.Parking.label !== 'undfined' ? stop.Parking.label.split(',')[0] : null"
           ></Stop>
           <Duration
             :key="stop"
@@ -134,7 +138,16 @@
                   <q-icon name="list" />
                 </template>
               </q-select>
-              <CitySearch @update="updateLocation($event)"></CitySearch>
+              <CitySearch
+                ref="citySearch"
+                :parkingPlaceSearch="false"
+                @update="updateLocation($event)"
+              ></CitySearch>
+              <CitySearch
+                ref="parkingPlaceSearch"
+                :parkingPlaceSearch="true"
+                @update="updateParkingPlace($event)"
+              ></CitySearch>
               <div v-if="selectedOption === 'Hotel'">
                 <q-input
                   v-model="generalTempLink"
@@ -567,7 +580,7 @@ export default {
   },
   data () {
     return {
-      options: ['Stop', 'Hotel'],
+      options: ['Stopp', 'Hotel'],
       category: null,
       categoryOptions: ['Kategorie1', 'Kategorie2'],
       selectedOption: null,
@@ -603,7 +616,8 @@ export default {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       durations: [],
       profile: '',
-      region: null
+      region: null,
+      parkingPlace: {}
     }
   },
   methods: {
@@ -666,6 +680,7 @@ export default {
 
       Location = this.location
       this.location = {}
+      this.$refs.citySearch.clear()
 
       db.collection('RoundtripDetails').add({
         BookingComLink,
@@ -679,7 +694,8 @@ export default {
         Price,
         RTId,
         Title,
-        Location
+        Location,
+        Parking: this.parkingPlace
       })
     },
     saveRoundtripDaysAndHotels () {
@@ -846,6 +862,15 @@ export default {
     updateLocation (event) {
       if (event !== null) {
         this.location = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
+    },
+    updateParkingPlace (event) {
+      if (event !== null) {
+        this.parkingPlace = {
           lng: event.x,
           lat: event.y,
           label: event.label

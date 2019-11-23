@@ -7,14 +7,15 @@
       fill-input
       input-debounce="0"
       clearable
+      ref="select"
       v-model="searchLocation"
       hide-dropdown-icon
-      label="Stadt suchen"
+      :label="!parkingPlaceSearch ? 'Ort suchen' : 'Parkpatz suchen'"
       :options="countryOptions"
       @filter="filterFn"
       @input="$emit('update', $event)"
       style="width:300px;"
-      :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Stadt']"
+      :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
     >
       <template v-slot:no-option>
         <q-item>
@@ -24,7 +25,7 @@
         </q-item>
       </template>
       <template v-slot:append>
-        <q-icon name="search" />
+        <q-icon :name="!parkingPlaceSearch ? 'location_on' : 'local_parking'" />
       </template>
     </q-select>
   </div>
@@ -36,6 +37,9 @@ const provider = new OpenStreetMapProvider()
 
 export default {
   name: 'Map',
+  props: {
+    parkingPlaceSearch: Boolean
+  },
   data () {
     return {
       searchLocation: '',
@@ -54,6 +58,11 @@ export default {
           this.countryOptions = results
         })
       })
+    },
+    clear () {
+      this.searchLocation = ''
+      this.countryOptions = null
+      this.$refs.select.resetValidation()
     }
   }
 }
