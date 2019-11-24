@@ -17,7 +17,6 @@
         <q-input
           v-model="title"
           dense
-          autofocus
         />
       </q-popup-edit>
     </h3>
@@ -38,8 +37,9 @@
             :editor="true"
             :doc-id="documentIds[index]"
             :general-link="stop.GeneralLink"
-            :location="stop.Location !== null && stop.Location.label !== null && typeof stop.Location.label !== 'undfined' ? stop.Location.label.split(',')[0] : null"
-            :parkingPlace="stop.Parking && stop.Parking.label !== null && typeof stop.Parking.label !== 'undfined' ? stop.Parking.label.split(',')[0] : null"
+            :location="stop.Location && typeof stop.Location !== 'undefined' &&stop.Location.label ? stop.Location.label : null"
+            :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
+            :lastItem="index === stops.length -1"
           ></Stop>
           <Duration
             :key="stop"
@@ -141,12 +141,14 @@
               <CitySearch
                 ref="citySearch"
                 :parkingPlaceSearch="false"
+                :defaultLocation="null"
                 @update="updateLocation($event)"
               ></CitySearch>
               <CitySearch
                 ref="parkingPlaceSearch"
                 :parkingPlaceSearch="true"
                 @update="updateParkingPlace($event)"
+                :defaultLocation="null"
               ></CitySearch>
               <div v-if="selectedOption === 'Hotel'">
                 <q-input
@@ -539,7 +541,7 @@
 @import "../css/editRoundtrips.less";
 </style>
 <script>
-import { date } from 'quasar'
+import { date, scroll, Loading } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import Duration from '../pages/EditRoundtripComponents/duration'
 import CitySearch from '../pages/Map/CitySearch'
@@ -547,6 +549,8 @@ import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import Map from '../pages/Map/Map'
 import axios from 'axios'
+
+const { getScrollTarget, setScrollPosition } = scroll
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -681,6 +685,7 @@ export default {
       Location = this.location
       this.location = {}
       this.$refs.citySearch.clear()
+      this.$refs.parkingPlaceSearch.clear()
 
       db.collection('RoundtripDetails').add({
         BookingComLink,
@@ -944,6 +949,7 @@ export default {
           })
 
           this.saveRoundtripDaysAndHotels()
+          Loading.hide()
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1115,6 +1121,14 @@ export default {
           this.profile = 'driving'
           break
       }
+    },
+    scrollTo (el) {
+      console.log(getScrollTarget(el))
+      const target = getScrollTarget(el)
+      console.log(target)
+      const offset = el.offsetTop
+      const duration = 400
+      setScrollPosition(target, offset, duration)
     }
   },
   created () {

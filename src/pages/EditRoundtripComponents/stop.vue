@@ -1,5 +1,8 @@
 <template>
-  <q-timeline-entry :icon="icon">
+  <q-timeline-entry
+    :ref="lastItem ? 'lastTimelineEntry' : null"
+    :icon="icon"
+  >
     <div class="stop-container">
       <div class="flex">
         <h6 class="q-timeline__title">{{titleInput}}
@@ -13,7 +16,6 @@
             <q-input
               v-model="titleInput"
               dense
-              autofocus
             />
           </q-popup-edit>
           <q-icon
@@ -47,33 +49,77 @@
       <q-chip
         icon="location_on"
         size="3px"
-      >{{location}}</q-chip>
+        :clickable="editor"
+        @click="editLocation = true"
+      >{{location && typeof location !== 'undefined' ? location.split(',')[0] : 'Ort hinzufügen'}}</q-chip>
+      <q-dialog
+        v-if="editor"
+        v-model="editLocation"
+        persistent
+      >
+        <q-card>
+          <q-card-section>
+            <CitySearch
+              ref="citySearch"
+              :parkingPlaceSearch="false"
+              :defaultLocation="location"
+              @update="updateLocation($event)"
+            ></CitySearch>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="Abbrechen"
+              color="primary"
+              v-close-popup
+            />
+            <q-btn
+              flat
+              label="OK"
+              color="primary"
+              @click="saveData('Location', tempLocation)"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
       <q-chip
+        v-if="parkingPlace || editor"
         icon="local_parking"
         size="3px"
-        clickable
+        :clickable="editor"
         @click="editParkingPlace = true"
-      >{{parkingPlace}}</q-chip>
+      >{{ parkingPlace && typeof parkingPlace !== 'undefined' ?  parkingPlace.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
       <q-dialog
         v-if="editor"
         v-model="editParkingPlace"
         persistent
       >
-        <q-card-section>
-          <CitySearch
-            ref="citySearch"
-            :parkingPlaceSearch="false"
-            @update="updateLocation($event)"
-          ></CitySearch>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn
-            flat
-            label="OK"
-            color="primary"
-            v-close-popup
-          />
-        </q-card-actions>
+        <q-card>
+          <q-card-section>
+            <CitySearch
+              ref="parkingPlaceSearch"
+              :parkingPlaceSearch="true"
+              :defaultLocation="parkingPlace"
+              @update="updateParkLocation($event)"
+            ></CitySearch>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="Abbrechen"
+              color="primary"
+              v-close-popup
+            />
+            <q-btn
+              flat
+              label="OK"
+              color="primary"
+              @click="saveData('Parking', tempParkingPlace)"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
       </q-dialog>
     </div>
     <div>
@@ -174,7 +220,8 @@ export default {
     generalLink: String,
     location: String,
     days: String,
-    parkingPlace: String
+    parkingPlace: String,
+    lastItem: Boolean
   },
   data () {
     return {
@@ -185,6 +232,9 @@ export default {
       showTimeEntry: false,
       preventPasting: true,
       editParkingPlace: false,
+      tempParkingPlace: {},
+      editLocation: false,
+      tempLocation: {},
 
       editorFonts: {
         arial: 'Arial',
@@ -278,18 +328,41 @@ export default {
     },
     saveData (field, value) {
       console.log(this.docId)
-      db.collection('RoundtripDetails').doc(this.docId).update({
-        ['' + field]: value
-      })
+      try {
+        db.collection('RoundtripDetails').doc(this.docId).update({
+          ['' + field]: value
+        })
+        this.$q.notify({
+          message: 'Deine Änderungen wurde gespeichert',
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle'
+        })
+        this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id)
+      } catch (e) {
+        console.log(e)
+      }
     },
     saveWork () {
-      this.$q.notify({
-        message: 'Deine Beschreibung wurde gespeichert',
-        color: 'green-4',
-        textColor: 'white',
-        icon: 'check_circle'
-      })
       this.saveData('Description', this.descriptionInput)
+    },
+    updateLocation (event) {
+      if (event !== null) {
+        this.tempLocation = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
+    },
+    updateParkLocation (event) {
+      if (event !== null) {
+        this.tempParkingPlace = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
     },
     formatOn () {
       this.preventPasting = !this.preventPasting
@@ -355,6 +428,11 @@ export default {
         }
       }
       return false
+    }
+  },
+  mounted () {
+    if (this.lastItem) {
+      this.getParent('EditRoundtrips').scrollTo(this.$refs.lastTimelineEntry)
     }
   }
 }

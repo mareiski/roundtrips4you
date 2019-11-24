@@ -188,15 +188,14 @@
           </a>
           <a
             class="footer-link"
-            href="mailto:hello@roundtrips4you.de"
-          >hello@roundtrips4you.de</a>
-
-          <a
-            class="footer-link"
             href="https://www.instagram.com/roundtrips4you/"
             target="_blank"
           >
             <q-icon name="thumb_up_alt" /> roundtrips4you auf Instagram</a>
+          <a
+            class="footer-link"
+            href="mailto:hello@roundtrips4you.de"
+          >hello@roundtrips4you.de</a>
         </div>
       </div>
       <CookieBanner></CookieBanner>

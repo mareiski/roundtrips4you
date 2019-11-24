@@ -15,7 +15,7 @@
       @filter="filterFn"
       @input="$emit('update', $event)"
       style="width:300px;"
-      :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+      :rules="!parkingPlaceSearch ? [val => val !== null && val !== '' || 'Bitte wähle einen Ort'] : []"
     >
       <template v-slot:no-option>
         <q-item>
@@ -38,7 +38,8 @@ const provider = new OpenStreetMapProvider()
 export default {
   name: 'Map',
   props: {
-    parkingPlaceSearch: Boolean
+    parkingPlaceSearch: Boolean,
+    defaultLocation: String
   },
   data () {
     return {
@@ -64,6 +65,9 @@ export default {
       this.countryOptions = null
       this.$refs.select.resetValidation()
     }
+  },
+  created () {
+    if (this.defaultLocation !== null) this.searchLocation = this.defaultLocation
   }
 }
 

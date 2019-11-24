@@ -1,4 +1,6 @@
 User-agent: *
-Disallow: 
+Disallow: /impressum/
+Disallow: /haftungsausschluss/
+Disallow: /datenschutz/
 Disallow: /cgi-bin/
 Sitemap: https://roundtrips4you.netlify.com/statics/sitemap.xml

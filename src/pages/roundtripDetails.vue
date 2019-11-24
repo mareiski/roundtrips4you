@@ -66,9 +66,9 @@
                 :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :general-link="stop.GeneralLink"
-                :location="stop.Location.label.split(',')[0]"
+                :location="stop.Location && typeof stop.Location !== 'undefined' &&stop.Location.label ? stop.Location.label : null"
+                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
                 :days="getDays(stop, index)"
-                :parkingPlace="stop.Parking && stop.Parking.label !== null && typeof stop.Parking.label !== 'undfined' ? stop.Parking.label.split(',')[0] : null"
               ></Stop>
               <Duration
                 :key="stop"
