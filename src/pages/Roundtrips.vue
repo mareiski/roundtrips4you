@@ -4,9 +4,13 @@
       <div style="display: flex;
     flex-direction: column;
     justify-content: center;">
-        <router-link to="/rundreisen-uebersicht" style="text-decoration:none;">
-         <q-icon name="keyboard_arrow_left"></q-icon>
-        zurück zu allen Ländern</router-link>
+        <router-link
+          to="/rundreisen-uebersicht"
+          style="text-decoration:none;"
+        >
+          <q-icon name="keyboard_arrow_left"></q-icon>
+          zurück zu allen Ländern
+        </router-link>
       </div>
       <h2>{{selectedCountry}}: {{roundtripCount}} Rundreise{{ roundtripCount === 1 ? null : 'n'}} gefunden</h2>
       <q-select
@@ -292,6 +296,41 @@
             color="primary"
           />
         </q-inner-loading>
+        <div
+          class="roundtrip-card-container"
+          v-if="!visible && roundtripCount === 0"
+        >
+          <router-link
+            class="roundtrip-card"
+            :to="{ path: '/meine-rundreisen/'}"
+          >
+            <div
+              class="card-center-col"
+              style="justify-content:flex-start;"
+            >
+              <div class="card-row">
+                <h2 class="country-title">Es wurden leider noch keine Rundreisen für {{selectedCountry}} erstellt</h2>
+              </div>
+              <div class="card-row">
+                <h2
+                  class="country-title"
+                  style="font-size:20px; padding-top:35px;"
+                >Ertelle jetzt als Erster deine eigene Rundreise für {{selectedCountry}}</h2>
+              </div>
+            </div>
+            <div
+              class="card-right-col"
+              style="width:auto; justify-content:flex-end;"
+            >
+              <div class="card-bottom-row">
+                <router-link
+                  class="button details-button"
+                  :to="{ path: '/meine-rundreisen'}"
+                >Jetzt erstellen</router-link>
+              </div>
+            </div>
+          </router-link>
+        </div>
         <div
           class="roundtrip-card-container"
           v-for="(roundtrip) in roundtrips"

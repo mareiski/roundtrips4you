@@ -68,7 +68,7 @@
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' &&stop.Location.label ? stop.Location.label : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
-                :days="getDays(stop, index)"
+                :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
               ></Stop>
               <Duration
                 :key="stop"
@@ -154,7 +154,8 @@ export default {
       galeryImgUrls: [],
       tab: 'overview',
       durations: [],
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg'
+      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
+      days: []
 
     }
   },
@@ -208,8 +209,12 @@ export default {
               const diffTime = new Date(date2 - date1).getTime()
 
               const addedTime = retrievedDate.setTime(retrievedDate.getTime() + diffTime)
+              const addedDate = new Date(addedTime)
 
-              const returnDate = date.formatDate(new Date(addedTime), 'DD.MM.YYYY HH:mm')
+              addedDate.setMinutes(initDate.getMinutes())
+              addedDate.setHours(initDate.getHours())
+
+              const returnDate = date.formatDate(addedDate, 'DD.MM.YYYY HH:mm')
 
               this.dates.splice(index, 0, returnDate)
             } else {
@@ -219,14 +224,14 @@ export default {
           this.stops = details
 
           this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title)
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1)
           })
         })
         .catch(err => {
           console.log('Error getting Roundtripdetails', err)
         })
     },
-    getDuration (startLocation, endLocation, title) {
+    getDuration (startLocation, endLocation, title, stop, index) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
@@ -234,7 +239,10 @@ export default {
         .then(response => {
           var data = response.data.routes[0]
 
+          context.getDays(stop, index, data.duration * 1000, title)
+
           let duration = context.msToTime(data.duration * 1000)
+
           let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
           if (distance !== '') distance = ' (' + distance + ')'
 
@@ -242,6 +250,8 @@ export default {
         })
     },
     msToTime (duration) {
+      if (duration === 0) return null
+
       var minutes = Math.floor((duration / (1000 * 60)) % 60),
         hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
 
@@ -253,9 +263,8 @@ export default {
 
       return returnVal
     },
-    getDays (stop, index) {
-      let days = NaN
-      let daysString = null
+    getDays (stop, index, duration) {
+      let days = null
 
       if (index < this.stops.length - 1) {
         let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
@@ -270,12 +279,12 @@ export default {
         timeParts = dateTimeParts[1].split(':')
         let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-        days = parseInt((nextInitDate.getTime() - currentInitDate.getTime()) / (24 * 3600 * 1000))
-      }
+        console.log(duration)
 
-      // console.log(days)
-      if (!isNaN(days)) daysString = days.toString()
-      return daysString
+        let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
+        days = this.msToTime(dateDistance)
+      }
+      this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
     },
     loadGaleryImgs () {
       const context = this

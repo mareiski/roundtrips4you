@@ -8,6 +8,7 @@
         <span class="line"></span>
         <img
           class="plane"
+          rel="preload"
           src="../statics/plane.png"
         />
       </div>

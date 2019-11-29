@@ -179,7 +179,7 @@
         class="q-timeline__title"
         style="padding-right:10px;"
       >
-        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && days > 0 && !editor ? ', ' + days + (days === '1' ? ' Tag' : ' Tage') + ' Aufenthalt' : null}}
+        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && !editor ? ', ca. ' + days + ' Aufenthalt' : null}}
         <q-popup-proxy
           v-if="editor"
           ref="qTimeProxy"
