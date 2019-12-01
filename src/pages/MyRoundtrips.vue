@@ -45,10 +45,13 @@
 
         <q-item-section>
           <q-item-label lines="1">{{roundtrip.Title}}</q-item-label>
-          <q-item-label caption>
-            {{ getCreatedAtDate() }}
+          <q-item-label
+            caption
+            style="width:100px;"
+          >
+            {{ getCreatedAtDate(roundtrip.createdAt) }}
             <q-tooltip>
-              Diese Rundreise wurde am {{ getCreatedAtDate() }} erstellt
+              Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
             </q-tooltip>
           </q-item-label>
         </q-item-section>
@@ -100,7 +103,7 @@
             >
               <q-input
                 v-model="title"
-                :rules="[val => val !== null && val !== '' || 'Bitte gib einen Titel an']"
+                :rules="[val => val !== null &&  val !== '' && val.replace(/ /g, '') === '' || 'Bitte gib einen Titel an', val => isUniqueTitel(val), val => val.indexOf(' ') === 0 || 'Der Titel darf keine Leerzeichen enthalten']"
                 label="Titel"
                 outlined
                 style="margin:auto; margin-top:20px;"
@@ -153,8 +156,6 @@ import { date } from 'quasar'
 import { countries } from '../countries'
 
 let uid = null
-let createdAtDatesArr = []
-let roundtripCount = 0
 let roundtripDocIds = []
 let roundtripArr = []
 
@@ -191,6 +192,7 @@ export default {
     addRoundtrip (Title, Location) {
       try {
         let timeStamp = Date.now()
+        let tempRTId = Math.floor(Math.random() * 10000000000000)
         db.collection('Roundtrips').add({
           Category: 'Kategorie',
           Days: '< 5 Tage',
@@ -200,7 +202,7 @@ export default {
           Region: null,
           Price: 100,
           Public: false,
-          RTId: 3445340985430,
+          RTId: tempRTId,
           Stars: 3,
           Profile: 'Autoreise',
           Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
@@ -212,7 +214,7 @@ export default {
           createdAt: new Date(timeStamp)
         })
         let roundtripsRef = db.collection('Roundtrips')
-          .where('RTId', '==', 3445340985430)
+          .where('RTId', '==', tempRTId)
           .limit(1)
         roundtripsRef.get()
           .then(snapshot => {
@@ -281,21 +283,28 @@ export default {
           console.log(error)
         })
 
-      roundtripArr.forEach((roundtrip) => {
-        createdAtDatesArr.push(date.formatDate(roundtrip.createdAt, 'YYYY/MM/DD'))
-      })
-
       this.roundtrips = roundtripArr
     },
-    getCreatedAtDate () {
-      let returnValue = createdAtDatesArr[roundtripCount]
-      roundtripCount++
-      return returnValue
+    getCreatedAtDate (timeStamp) {
+      return date.formatDate(new Date(timeStamp.seconds * 1000), 'DD.MM.YYYY')
     },
     filterFn (val, update, abort) {
       update(() => {
         const needle = val.toLowerCase()
         this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
+    isUniqueTitel (value) {
+      return new Promise((resolve, reject) => {
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+        value = value.replace(/ /g, '')
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('Title', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          })
       })
     }
   },

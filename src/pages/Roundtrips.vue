@@ -336,6 +336,58 @@
           v-for="(roundtrip) in roundtrips"
           :key="roundtrip"
         >
+          <div class="edit-btn-container">
+            <q-btn
+              round
+              color="primary"
+              icon="edit"
+              @click="editRTDialog = true"
+            >
+              <q-tooltip>Diese Rundreise bearbeiten</q-tooltip>
+            </q-btn>
+            <q-dialog
+              v-model="editRTDialog"
+              persistent
+            >
+              <q-card style="min-width: 350px">
+                <q-card-section>
+                  <div class="text-h6">Rundreise bearbeiten</div>
+                  <span>Diese Rundreise wird zu deinen eigenen Rundreisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
+                </q-card-section>
+
+                <q-card-section>
+                  <q-input
+                    v-model="title"
+                    autofocus
+                    outlined
+                    @input="checkDisableEditBtn($event)"
+                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+                    label="Titel der Rundreise"
+                    style="text-transform:capitalize;"
+                  />
+                </q-card-section>
+
+                <q-card-actions
+                  align="right"
+                  class="text-primary"
+                >
+                  <q-btn
+                    label="Abbrechen"
+                    v-close-popup
+                    flat
+                  />
+                  <q-btn
+                    type="submit"
+                    label="Rundreise bearbeiten"
+                    flat
+                    v-close-popup
+                    :disable="disableEditBtn"
+                    @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
+          </div>
           <router-link
             class="roundtrip-card"
             :to="{ path: '/rundreisen-details/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
@@ -469,8 +521,11 @@ export default {
       sort: 'Erstellungsdatum',
       sortOptions: [
         'Preis aufsteigend', 'Preis absteigend', 'Hotelbewertung aufsteigend', 'Hotelbewertung absteigend', 'Erstellungsdatum'
-      ]
+      ],
       // 'Reisedauer aufsteigend', 'Reisedauer absteigend' missing in sort opt
+      title: null,
+      editRTDialog: false,
+      disableEditBtn: true
     }
   },
   name: 'Roundtrips',
@@ -488,6 +543,27 @@ export default {
       const currentDate = new Date(date)
 
       return currentDate >= compareDate
+    },
+    isUniqueTitle (value) {
+      return new Promise((resolve, reject) => {
+        value = value.toLowerCase()
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+        value = value.replace(/ /g, '')
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('Title', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          })
+      })
+    },
+    checkDisableEditBtn (val) {
+      this.isUniqueTitle(val).then(uniqueTitle => {
+        if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
+        this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
+      }
+      )
     },
     filterRoundtrips () {
       this.filterRoundtripArr = []

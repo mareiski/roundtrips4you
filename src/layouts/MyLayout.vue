@@ -251,6 +251,11 @@ export default {
     hideMenu () {
       this.$refs.svg.classList.remove('active')
       this.$refs.Header.classList.remove('active')
+    },
+    hideLoading () {
+      redirected = false
+      this.showPreload = false
+      Loading.hide()
     }
   },
   created () {
@@ -300,6 +305,7 @@ export default {
         redirected = true
       })
 
+      let isOnDetailsPage = false
       if (!forEachCalled) {
         let loggedIn = auth.user() !== null
         let verified = auth.user() ? auth.user().emailVerified : false
@@ -316,10 +322,11 @@ export default {
         else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestaetigen')
         else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) this.$router.replace('meine-rundreisen')
 
+        isOnDetailsPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-details'
         redirected = true
       }
 
-      if (redirected) {
+      if (redirected && !isOnDetailsPage) {
         redirected = false
         this.showPreload = false
         Loading.hide()

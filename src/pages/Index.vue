@@ -88,7 +88,7 @@
           >
             <div id="USAImg"></div>
             <h3>USA</h3>
-            <span>Erlebe die Weltmetropole in den USA</span>
+            <span>Erlebe das Land der unbegrenzten Möglichkeiten</span>
           </router-link>
         </div>
         <div class="card-wrap right">
@@ -132,7 +132,7 @@
         <div class="card-wrap right">
           <router-link
             class="card"
-            to="/meine-rundreisen"
+            to="/rundreisen-uebersicht"
           >
             <q-icon name="edit" />
             <h3>Bearbeiten</h3>

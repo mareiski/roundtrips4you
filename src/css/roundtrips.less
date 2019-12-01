@@ -26,6 +26,16 @@
         }
     }
 
+    .edit-btn-container {
+        width: 95%;
+        max-width: 1230px;
+        position: absolute;
+        display: flex;
+        justify-content: flex-end;
+        z-index: 5;
+        margin-top: -12px;
+    }
+
     #CardBackgroundImg {
         background: url('../statics/travel-background.jpg') fixed center;
         width: 100%;
@@ -175,7 +185,7 @@
                 align-items: center;
                 height: 280px;
                 margin-bottom: 10px;
-                padding-top: 20px;
+                padding-top: 30px;
 
                 .roundtrip-card {
                     width: 90%;
@@ -305,6 +315,10 @@
             }
         }
     }
+}
+
+.q-field__messages>div {
+    text-transform: none;
 }
 
 @media @tablet,

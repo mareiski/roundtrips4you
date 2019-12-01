@@ -1,5 +1,60 @@
 <template>
   <div class="roundtrip-details q-px-lg q-pb-md">
+    <div
+      class="edit-btn-container"
+      style="position:absolute; z-index:1; right:0; padding: 10px"
+    >
+      <q-btn
+        round
+        color="primary"
+        icon="edit"
+        @click="editRTDialog = true"
+      >
+        <q-tooltip>Diese Rundreise bearbeiten</q-tooltip>
+      </q-btn>
+      <q-dialog
+        v-model="editRTDialog"
+        persistent
+      >
+        <q-card style="min-width: 350px">
+          <q-card-section>
+            <div class="text-h6">Rundreise bearbeiten</div>
+            <span>Diese Rundreise wird zu deinen eigenen Rundreisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
+          </q-card-section>
+
+          <q-card-section>
+            <q-input
+              v-model="title"
+              autofocus
+              outlined
+              @input="checkDisableEditBtn($event)"
+              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+              label="Titel der Rundreise"
+              style="text-transform:capitalize;"
+            />
+          </q-card-section>
+
+          <q-card-actions
+            align="right"
+            class="text-primary"
+          >
+            <q-btn
+              label="Abbrechen"
+              v-close-popup
+              flat
+            />
+            <q-btn
+              type="submit"
+              label="Rundreise bearbeiten"
+              flat
+              v-close-popup
+              :disable="disableEditBtn"
+              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
     <q-carousel
       animated
       v-model="slide"
@@ -155,8 +210,9 @@ export default {
       tab: 'overview',
       durations: [],
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
-      days: []
-
+      days: [],
+      editRTDialog: false,
+      title: null
     }
   },
   methods: {
@@ -226,10 +282,36 @@ export default {
           this.stops.forEach((stop, index) => {
             if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1)
           })
+          let context = this
+          setTimeout(function () {
+            context.getParent('MyLayout').hideLoading()
+          }, 500)
         })
         .catch(err => {
+          this.getParent('MyLayout').hideLoading()
           console.log('Error getting Roundtripdetails', err)
         })
+    },
+    isUniqueTitle (value) {
+      return new Promise((resolve, reject) => {
+        value = value.toLowerCase()
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+        value = value.replace(/ /g, '')
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('Title', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          })
+      })
+    },
+    checkDisableEditBtn (val) {
+      this.isUniqueTitle(val).then(uniqueTitle => {
+        if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
+        this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
+      }
+      )
     },
     getDuration (startLocation, endLocation, title, stop, index) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
@@ -279,8 +361,6 @@ export default {
         timeParts = dateTimeParts[1].split(':')
         let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-        console.log(duration)
-
         let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
         days = this.msToTime(dateDistance)
       }
@@ -301,6 +381,17 @@ export default {
       }).catch(function (error) {
         console.log(error)
       })
+    },
+    getParent (name) {
+      let p = this.$parent
+      while (typeof p !== 'undefined') {
+        if (p.$options.name === name) {
+          return p
+        } else {
+          p = p.$parent
+        }
+      }
+      return false
     }
   },
   created () {

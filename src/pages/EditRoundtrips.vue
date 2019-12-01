@@ -1123,37 +1123,147 @@ export default {
       }
     },
     scrollTo (el) {
-      console.log(getScrollTarget(el))
       const target = getScrollTarget(el)
-      console.log(target)
       const offset = el.offsetTop
       const duration = 400
       setScrollPosition(target, offset, duration)
+    },
+    copyRT (originalRT, UserId, newTitle) {
+      this.isUniqueTitle(newTitle).then(uniqueTitle => {
+        if (newTitle === null || newTitle === '' || !uniqueTitle || newTitle.indexOf(' ') !== -1) {
+          this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Ooops da ist wohl was schiefgelaufen'
+          })
+          this.$router.push('/meine-rundreisen')
+          return false
+        } else {
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Rundreise wird zum bearbeiten kopiert...'
+          })
+        }
+
+        let timeStamp = Date.now()
+        let tempRTId = Math.floor(Math.random() * 10000000000000)
+        db.collection('Roundtrips').add({
+          Category: originalRT.Category,
+          Days: originalRT.Days,
+          Description: originalRT.Description,
+          Hotels: originalRT.Hotels,
+          Location: originalRT.Location,
+          Region: originalRT.Region,
+          Price: originalRT.Price,
+          Public: false,
+          RTId: tempRTId,
+          Stars: originalRT.Stars,
+          Profile: originalRT.Profile,
+          Highlights: originalRT.Highlights,
+          Title: newTitle,
+          OfferEndPeriod: originalRT.OfferEndPeriod,
+          OfferStartPeriod: originalRT.OfferStartPeriod,
+          OfferWholeYear: originalRT.OfferWholeYear,
+          UserId: UserId,
+          createdAt: new Date(timeStamp)
+        })
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('RTId', '==', tempRTId)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              db.collection('Roundtrips').doc(doc.id).update({
+                'RTId': doc.id
+              })
+
+              let roundtripDetailsRef = db.collection('RoundtripDetails')
+                .where('RTId', '==', originalRT.RTId)
+              roundtripDetailsRef.get()
+                .then(detailsSnapshot => {
+                  detailsSnapshot.forEach(detailDoc => {
+                    let docData = detailDoc.data()
+
+                    console.log(docData)
+
+                    db.collection('RoundtripDetails').add({
+                      BookingComLink: docData.BookingComLink,
+                      DateDistance: docData.DateDistance,
+                      Description: docData.Description,
+                      ExpediaLink: docData.ExpediaLink,
+                      GeneralLink: docData.GeneralLink,
+                      HotelStop: docData.HotelStop,
+                      ImageUrl: docData.ImageUrl,
+                      InitDate: docData.InitDate,
+                      Price: docData.Price,
+                      RTId: doc.id,
+                      Title: docData.Title,
+                      Location: {
+                        lng: docData.Location.lng,
+                        lat: docData.Location.lat,
+                        label: docData.Location.label
+                      }
+                    })
+
+                    this.loadRoundtripDetails(doc.id)
+                    this.loadSingleRoundtrip(doc.id)
+                  })
+                })
+            })
+          })
+      }
+      )
+    },
+    isUniqueTitle (value) {
+      return new Promise((resolve, reject) => {
+        value = value.toLowerCase()
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+        value = value.replace(/ /g, '')
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('Title', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0)
+          })
+      })
     }
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
       if (auth.user() === null) this.$router.push('/login')
-      const RTId = this.$route.params.id
-      let hasDisplayPermission = false
+      const params = this.$route.params.id
+      let RTId = params
+      let title = null
+
+      if (params.includes('&')) {
+        RTId = params.split('&')[0]
+        title = params.split('&')[1]
+      }
 
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
-        .where('UserId', '==', auth.user().uid)
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
-          hasDisplayPermission = Number(snapshot.size) === 1
+          let isCreator = auth.user().uid === snapshot.docs[0].data().UserId
+          let isPublic = snapshot.docs[0].data().Public === true
 
-          if (hasDisplayPermission) {
+          if (isCreator) {
             this.loadRoundtripDetails(RTId)
             this.loadSingleRoundtrip(RTId)
+          } else if (isPublic) {
+            console.log(title)
+            this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
           } else {
             this.$q.notify({
               color: 'red-5',
               textColor: 'white',
               icon: 'error',
-              message: 'Ooops da ist leider etwas schiefgelaufen'
+              message: 'Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat'
             })
             this.$router.push('/meine-rundreisen')
           }
