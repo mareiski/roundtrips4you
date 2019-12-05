@@ -338,7 +338,7 @@
         >
           <div
             class="edit-btn-container"
-            v-if="user || user.uid !== roundtrip.UserId"
+            v-if="user === null || user.uid !== roundtrip.UserId"
           >
             <q-btn
               round
