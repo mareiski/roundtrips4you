@@ -344,7 +344,7 @@
               round
               color="primary"
               icon="edit"
-              @click="editRTDialog = true"
+              @click="user ? editRTDialog = true : $router.push('/login')"
             >
               <q-tooltip>Diese Rundreise bearbeiten</q-tooltip>
             </q-btn>
@@ -443,13 +443,13 @@
             </div>
             <div class="card-right-col">
               <div class="card-row ">
-                <q-avatar
+                <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
+                <!-- <q-avatar
                   size="50px"
                   style="width: 50px; margin:auto 10px auto 10px;"
                 >
                   <q-img :src="userImages[0]"></q-img>
-                </q-avatar>
-                <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
+                </q-avatar> -->
               </div>
               <div class="card-bottom-row">
                 <router-link
