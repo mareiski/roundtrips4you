@@ -405,8 +405,20 @@
               color="primary"
               icon="add"
               style="position: absolute;"
+              :disable="titleUploadDisabled"
               @click="() => $refs.titleUpload.pickFiles()"
-            ></q-btn>
+            >
+              <q-inner-loading
+                :showing="titleUploadDisabled"
+                style="border-radius:50%"
+              >
+                <q-spinner
+                  size="42px"
+                  color="primary"
+                >
+                </q-spinner>
+              </q-inner-loading>
+            </q-btn>
           </div>
           <q-uploader
             url=""
@@ -612,6 +624,7 @@ export default {
       OfferStartPeriod: formattedScheduleDate,
       OfferEndPeriod: formattedScheduleDate,
       visible: false,
+      titleUploadDisabled: false,
       urlReg: /^(http:\/\/|https:\/\/)/,
       generalTempLink: '',
       price: 0,
@@ -621,7 +634,9 @@ export default {
       durations: [],
       profile: '',
       region: null,
-      parkingPlace: {}
+      parkingPlace: {},
+      uploading: false,
+      uploadIndex: 0
     }
   },
   methods: {
@@ -1007,37 +1022,64 @@ export default {
     },
     fileAdded: function (event, kind) {
       let files = event
-      let context = this
 
-      Array.from(Array(files.length).keys()).map(x => {
-        this.upload(files[x], kind, x + context.galeryImgUrls.length, x === files.length - 1)
-      })
+      // disable another upload
+      if (kind === 'galery') this.visible = true
+      else this.titleUploadDisabled = true
+      this.uploadNext(files, kind)
+
       this.$refs.titleUpload.reset()
       this.$refs.galeryUpload.reset()
     },
-    upload (file, kind, count, lastItem) {
-      this.visible = true
-      let kindPath = 'Title/titleImg'
-      const context = this
-      if (kind === 'galery') {
-        kindPath = 'Galery/galeryImg' + count
-      }
-      const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/' + kindPath)
-
-      fileRef.put(file).then(function (snapshot) {
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Bild wurde erfolgreich hochgeladen'
+    uploadNext (files, kind) {
+      let context = this
+      if (!this.uploading) {
+        this.upload(files[this.uploadIndex], kind, this.uploadIndex + this.galeryImgUrls.length, this.uploadIndex === files.length - 1, files.length).then(function (success) {
+          context.uploading = false
+          context.uploadIndex++
+          if (context.uploadIndex < files.length) context.uploadNext(files, kind)
         })
-        if (lastItem) context.visible = false
-        fileRef.getDownloadURL().then(function (url) {
-          if (kind === 'galery') {
-            context.galeryImgUrls.push(url)
-          } else if (kind === 'title') {
-            context.titleImgUrl = url
+      }
+    },
+    upload (file, kind, count, lastItem, absoluteFiles) {
+      return new Promise((resolve, reject) => {
+        this.uploading = true
+
+        let kindPath = 'Title/titleImg'
+        const context = this
+        if (kind === 'galery') {
+          kindPath = 'Galery/galeryImg' + count
+        }
+        const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/' + kindPath)
+
+        fileRef.put(file).then(function (snapshot) {
+          resolve(true)
+          context.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Bild ' + (context.uploadIndex + 1) + ' von ' + absoluteFiles + ' wurde erfolgreich hochgeladen'
+          })
+          if (lastItem) {
+            context.visible = false
+            context.titleUploadDisabled = false
           }
+          fileRef.getDownloadURL().then(function (url) {
+            if (kind === 'galery') {
+              context.galeryImgUrls.push(url)
+            } else if (kind === 'title') {
+              context.titleImgUrl = url
+            }
+          })
+        }).catch(function (error) {
+          resolve(false)
+          console.log(error)
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Das Bild konnte nicht hochgeladen werden'
+          })
         })
       })
     },

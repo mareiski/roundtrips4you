@@ -336,7 +336,10 @@
           v-for="(roundtrip) in roundtrips"
           :key="roundtrip"
         >
-          <div class="edit-btn-container">
+          <div
+            class="edit-btn-container"
+            v-if="user.uid !== roundtrip.UserId"
+          >
             <q-btn
               round
               color="primary"
@@ -439,9 +442,14 @@
               </div>
             </div>
             <div class="card-right-col">
-              <div class="card-row">
+              <div class="card-row ">
+                <q-avatar
+                  size="50px"
+                  style="width: 50px; margin:auto 10px auto 10px;"
+                >
+                  <q-img :src="userImages[0]"></q-img>
+                </q-avatar>
                 <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
-                <!--<q-img :src="userImages[index]"></q-img>-->
               </div>
               <div class="card-bottom-row">
                 <router-link
@@ -529,6 +537,11 @@ export default {
     }
   },
   name: 'Roundtrips',
+  computed: {
+    user () {
+      return this.$store.getters['user/user']
+    }
+  },
   methods: {
     filterFn (val, update, abort) {
       update(() => {
@@ -622,7 +635,6 @@ export default {
       if (array1.lenght === 0 || array2.length === 0) return true
       let returnVal = true
       array2.forEach(element => {
-        console.log(array1.includes(element))
         if (!array1.includes(element)) returnVal = false
       })
       return returnVal
@@ -639,15 +651,13 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             users.push(doc.data())
-            console.log(users[0].UserImage)
-            return users[0].UserImage
+            this.userImages.push(users[0].UserImage)
           })
         })
     },
     loadTitleImg (docId, RTId) {
       let context = this
       storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg').getDownloadURL().then(function (url) {
-        console.log(url)
         context.TitleImgs.push(url)
         context.RTIds.push(RTId)
       })
@@ -716,7 +726,7 @@ export default {
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
 
             // load userImages
-            // this.userImages.push(this.loadUserImage(roundtrip.UserId))
+            this.loadUserImage(roundtrip.UserId)
           })
 
           this.step.max = price
@@ -780,10 +790,8 @@ export default {
           this.roundtrips.sort((a, b) => parseFloat(b.Days) - parseFloat(a.Days))
           break
         case 'Erstellungsdatum':
-          console.log(originalRoundtripArr)
           this.roundtrips = []
           this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
-          console.log(this.roundtrips)
           break
       }
     }

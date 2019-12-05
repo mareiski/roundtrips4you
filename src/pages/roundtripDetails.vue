@@ -2,6 +2,7 @@
   <div class="roundtrip-details q-px-lg q-pb-md">
     <div
       class="edit-btn-container"
+      v-if="user.uid !== roundtrip[0].UserId"
       style="position:absolute; z-index:1; right:0; padding: 10px"
     >
       <q-btn
@@ -49,7 +50,7 @@
               flat
               v-close-popup
               :disable="disableEditBtn"
-              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
+              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip[0].RTId +'&' + title)"
             />
           </q-card-actions>
         </q-card>
@@ -213,6 +214,11 @@ export default {
       days: [],
       editRTDialog: false,
       title: null
+    }
+  },
+  computed: {
+    user () {
+      return this.$store.getters['user/user']
     }
   },
   methods: {

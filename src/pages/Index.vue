@@ -43,7 +43,7 @@
             <q-icon name="search" />
           </template>
         </q-select>
-        <span style="margin-top:10px; color:white;">oder</span>
+        <span  class="create-own-btn" style="margin-top:10px; color:white;">oder</span>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
