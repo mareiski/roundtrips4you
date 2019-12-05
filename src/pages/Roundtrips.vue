@@ -726,7 +726,7 @@ export default {
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
 
             // load userImages
-            this.loadUserImage(roundtrip.UserId)
+            //  this.loadUserImage(roundtrip.UserId)
           })
 
           this.step.max = price
