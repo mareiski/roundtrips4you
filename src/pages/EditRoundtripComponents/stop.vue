@@ -161,6 +161,7 @@
           ref="qDateProxy"
           transition-show="scale"
           transition-hide="scale"
+          @hide="hideDialog()"
         >
           <q-date
             v-model="date"
@@ -185,6 +186,7 @@
           ref="qTimeProxy"
           transition-show="scale"
           transition-hide="scale"
+          @hide="hideDialog()"
         >
           <q-time
             v-model="date"
@@ -325,6 +327,9 @@ export default {
       db.collection('RoundtripDetails').doc(this.docId).update({
         'InitDate': initDate
       })
+    },
+    hideDialog () {
+      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id)
     },
     saveData (field, value) {
       console.log(this.docId)

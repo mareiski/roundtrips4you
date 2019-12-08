@@ -16,6 +16,7 @@
       >
         <q-input
           v-model="title"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val)]"
           dense
         />
       </q-popup-edit>

@@ -302,7 +302,7 @@
         >
           <router-link
             class="roundtrip-card"
-            :to="{ path: '/meine-rundreisen/'}"
+            :to="user ? { path: '/meine-rundreisen'} : { path: '/login'}"
           >
             <div
               class="card-center-col"
@@ -325,7 +325,7 @@
               <div class="card-bottom-row">
                 <router-link
                   class="button details-button"
-                  :to="{ path: '/meine-rundreisen'}"
+                  :to="user ? { path: '/meine-rundreisen'} : { path: '/login'}"
                 >Jetzt erstellen</router-link>
               </div>
             </div>

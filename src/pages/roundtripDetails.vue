@@ -29,7 +29,7 @@
               autofocus
               outlined
               @input="checkDisableEditBtn($event)"
-              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val)]"
               label="Titel der Rundreise"
               style="text-transform:capitalize;"
             />
