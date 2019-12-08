@@ -276,7 +276,7 @@
           autogrow
           label="Kurze Beschreibung"
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
-          val => val.length > 10 && val.length < 150 || 'Bitte gib eine Beschreibung zwischen 10 und 150 Zeichen an' ]"
+          val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
         > <template v-slot:prepend>
             <q-icon name="subject" />
           </template>
@@ -599,7 +599,7 @@ export default {
     return {
       options: ['Stopp', 'Hotel'],
       category: null,
-      categoryOptions: ['Kategorie1', 'Kategorie2'],
+      categoryOptions: ['Familienreise', 'Kultur', 'Natur & Landschaft', 'für Paare', 'Städtereise', 'Sport', 'Bagpacker', 'Alleine'],
       selectedOption: null,
       date: formattedDate,
       addButtonActive: false,
