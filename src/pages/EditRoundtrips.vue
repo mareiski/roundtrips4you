@@ -16,7 +16,7 @@
       >
         <q-input
           v-model="title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val)]"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
           dense
         />
       </q-popup-edit>
@@ -44,7 +44,7 @@
           ></Stop>
           <Duration
             :key="stop"
-            v-if="index !== stops.length - 1 && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+            v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
             :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
           ></Duration>
         </template>
@@ -599,7 +599,7 @@ export default {
     return {
       options: ['Stopp', 'Hotel'],
       category: null,
-      categoryOptions: ['Familienreise', 'Kultur', 'Natur & Landschaft', 'für Paare', 'Städtereise', 'Sport', 'Bagpacker', 'Alleine'],
+      categoryOptions: [],
       selectedOption: null,
       date: formattedDate,
       addButtonActive: false,
@@ -880,6 +880,16 @@ export default {
           })
         })
     },
+    loadCategories () {
+      let roundtripsRef = db.collection('Categories')
+      roundtripsRef.get()
+        .then(snapshot => {
+          this.categoryOptions = []
+          snapshot.forEach(doc => {
+            this.categoryOptions.push(doc.data().Category)
+          })
+        })
+    },
     updateLocation (event) {
       if (event !== null) {
         this.location = {
@@ -997,11 +1007,13 @@ export default {
         .then(response => {
           var data = response.data.routes[0]
 
-          let duration = context.msToTime(data.duration * 1000)
-          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-          if (distance !== '') distance = ' (' + distance + ')'
+          if (data !== null && typeof data !== 'undefined') {
+            let duration = context.msToTime(data.duration * 1000)
+            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+            if (distance !== '') distance = ' (' + distance + ')'
 
-          context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+            context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+          }
         })
     },
     saveData (field, value) {
@@ -1298,6 +1310,7 @@ export default {
           if (isCreator) {
             this.loadRoundtripDetails(RTId)
             this.loadSingleRoundtrip(RTId)
+            this.loadCategories()
           } else if (isPublic) {
             console.log(title)
             this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)

@@ -74,6 +74,7 @@
     <q-list
       bordered
       class="rounded-borders"
+      v-if="roundtrips.length < 20"
     >
       <q-expansion-item
         clickable
@@ -103,9 +104,10 @@
             >
               <q-input
                 v-model="title"
-                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val)]"
+                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
                 label="Titel"
                 outlined
+                ref="titleInput"
                 style="margin:auto; margin-top:20px;"
               >
                 <template v-slot:prepend>
@@ -121,13 +123,26 @@
                 clearable
                 class="input-item"
                 use-input
+                ref="countrySelect"
                 style="margin:auto; margin-top:10px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
               >
                 <template v-slot:prepend>
-                  <q-icon name="location_on" />
+                  <q-icon name="explore" />
                 </template>
               </q-select>
+              <span
+                class="flex justify-center"
+                style="text-align:center;"
+              >Bitte gib hier deinen Startort ein. <br> (Du kannst diesen später bearbeiten)</span>
+              <CitySearch
+                class="flex justify-center"
+                style="margin:auto; margin-top:10px;"
+                ref="citySearch"
+                :parkingPlaceSearch="false"
+                :defaultLocation="null"
+                @update="updateLocation($event)"
+              ></CitySearch>
               <div>
                 <q-btn
                   round
@@ -154,6 +169,7 @@
 import { db, auth, storage } from '../firebaseInit'
 import { date } from 'quasar'
 import { countries } from '../countries'
+import CitySearch from './Map/CitySearch'
 
 let uid = null
 let roundtripDocIds = []
@@ -161,6 +177,9 @@ let roundtripArr = []
 
 export default {
   name: 'myRoundtrips',
+  components: {
+    CitySearch
+  },
   data () {
     return {
       roundtrips: [],
@@ -171,25 +190,38 @@ export default {
       selectedOption: null,
       countryOptions: countries,
       RTIds: [],
-      showNoRoundtripsText: false
+      showNoRoundtripsText: false,
+      tempLocation: {}
     }
   },
   methods: {
     onAddRoundtrip () {
-      this.addExpanded = false
-      this.addButtonActive = false
-      this.showNoRoundtripsText = false
+      if (this.roundtrips.length < 20) {
+        this.addExpanded = false
+        this.addButtonActive = false
+        this.showNoRoundtripsText = false
 
-      if (this.addRoundtrip(this.title, this.selectedOption)) {
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Rundreise wurde erstellt'
-        })
+        if (this.addRoundtrip(this.title, this.selectedOption)) {
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Rundreise wurde erstellt'
+          })
+        } else {
+          this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
+          })
+        }
       }
     },
     addRoundtrip (Title, Location) {
+      Title = Title.toLowerCase()
+      Title = Title.charAt(0).toUpperCase() + Title.slice(1)
+      Title = Title.replace(/ /g, '')
       try {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
@@ -234,7 +266,7 @@ export default {
                 Price: 0,
                 RTId: doc.id,
                 Title: 'Titel des 1. Hotels',
-                Location: {
+                Location: this.tempLocation ? this.tempLocation : {
                   lng: '13.3888599',
                   lat: '52.5170365',
                   label: 'Berlin, 10117, Germany'
@@ -243,6 +275,11 @@ export default {
               this.getUserRoundtrips()
             })
           })
+        this.title = ''
+        this.selectedOption = null
+        this.$refs.titleInput.resetValidation()
+        this.$refs.countrySelect.resetValidation()
+        this.$refs.citySearch.clear()
       } catch (error) {
         console.log(error)
         this.$q.notify({
@@ -283,7 +320,18 @@ export default {
           console.log(error)
         })
 
+      console.log(this.roundtrips)
+      this.roundtrips = []
       this.roundtrips = roundtripArr
+    },
+    updateLocation (event) {
+      if (event !== null) {
+        this.tempLocation = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
     },
     isUniqueTitle (value) {
       return new Promise((resolve, reject) => {

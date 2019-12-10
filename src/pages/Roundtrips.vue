@@ -461,8 +461,12 @@
             </div>
           </router-link>
         </div>
-        <div class="flex justify-center">
+        <div
+          class="flex justify-center"
+          style="padding-bottom:15px;"
+        >
           <q-pagination
+            class="pagination"
             v-if="paginationMax > 1"
             v-model="currentPage"
             color="primary"
