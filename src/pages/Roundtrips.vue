@@ -157,12 +157,12 @@
             >
               <template v-slot:header>
                 <q-item-section>
-                  Reiseart
+                  Reisemittel
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="info">
                     <q-tooltip>
-                      Die Art deiner Reise
+                      Das Reisemittel auf deiner Reise
                     </q-tooltip>
                   </q-icon>
                 </q-item-section>
@@ -432,7 +432,7 @@
                 <span class="card-days">{{roundtrip.Days}},</span>
                 <span class="card-hotels">{{roundtrip.Hotels}} Hotel{{roundtrip.Hotels==1?null:'s'}}</span>
               </div>
-              <div class="card-row">
+              <div class="card-row description">
                 <p class="card-description">{{roundtrip.Description}}</p>
               </div>
               <div class="card-bottom-row">

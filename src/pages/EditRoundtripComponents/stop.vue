@@ -51,7 +51,9 @@
         size="3px"
         :clickable="editor"
         @click="editLocation = true"
-      >{{location && typeof location !== 'undefined' ? location.split(',')[0] : 'Ort hinzufügen'}}</q-chip>
+      >{{location && typeof location !== 'undefined' ? location.split(',')[0] : 'Ort hinzufügen'}}
+        <q-tooltip v-if="location && typeof location !== 'undefined'">{{location}}</q-tooltip>
+      </q-chip>
       <q-dialog
         v-if="editor"
         v-model="editLocation"
@@ -134,6 +136,7 @@
         ref="editor_ref"
         @keyup.enter.stop
         :toolbar="editorToolbar"
+        toolbar-toggle-color="primary"
         :fonts="editorFonts"
         @paste.native="evt => pasteCapture(evt)"
         style="margin-top:10px;"
@@ -141,7 +144,8 @@
         save: {
           tip: 'Die Beschreibung Speichern',
           icon: 'save',
-          label: 'Speichern',
+          color: this.savedEditorContent !== descriptionInput ? 'red' : '#707070',
+          label: this.savedEditorContent !== descriptionInput ? 'nicht gespeichert' : 'alles gespeichert',
           handler: saveWork
         },
         format: {
@@ -237,6 +241,7 @@ export default {
       tempParkingPlace: {},
       editLocation: false,
       tempLocation: {},
+      savedEditorContent: this.editorPlaceholder,
 
       editorFonts: {
         arial: 'Arial',
@@ -350,6 +355,7 @@ export default {
     },
     saveWork () {
       this.saveData('Description', this.descriptionInput)
+      this.savedEditorContent = this.descriptionInput
     },
     updateLocation (event) {
       if (event !== null) {

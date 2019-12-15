@@ -46,6 +46,9 @@
             :key="stop"
             v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
             :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+            :editor="true"
+            :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+            :doc-id="documentIds[index]"
           ></Duration>
         </template>
       </div>
@@ -284,12 +287,12 @@
         <q-select
           outlined
           v-model="inputProfile"
-          :options="['zu Fuß', 'Fahrradreise', 'Autoreise']"
-          label="Reiseart"
+          :options="['zu Fuß', 'Fahrrad', 'Auto']"
+          label="Reisemittel"
           use-input
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
           class="input-item"
-          @input="getProfile()"
+          @input="getGeneralProfile()"
         >
           <template v-slot:prepend>
             <q-icon name="commute" />
@@ -699,9 +702,6 @@ export default {
       HotelStop = HotelStop === 'Hotel'
 
       Location = this.location
-      this.location = {}
-      this.$refs.citySearch.clear()
-      this.$refs.parkingPlaceSearch.clear()
 
       db.collection('RoundtripDetails').add({
         BookingComLink,
@@ -718,6 +718,13 @@ export default {
         Location,
         Parking: this.parkingPlace
       })
+
+      // clear all values
+      this.selectedOption = null
+      this.generalTempLink = null
+      this.location = {}
+      this.$refs.citySearch.clear()
+      this.$refs.parkingPlaceSearch.clear()
     },
     saveRoundtripDaysAndHotels () {
       let daysString = ''
@@ -866,7 +873,12 @@ export default {
           retrievedDate = new Date(roundtrip[0].OfferStartPeriod.seconds * 1000)
           this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
-          this.getProfile()
+          this.getGeneralProfile()
+
+          this.durations = []
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, stop.Profile)
+          })
 
           this.loadInitImgs()
         })
@@ -970,10 +982,6 @@ export default {
 
           this.stops = details
 
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title)
-          })
-
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
         })
@@ -999,9 +1007,13 @@ export default {
 
       return returnVal
     },
-    getDuration (startLocation, endLocation, title) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+    getDuration (startLocation, endLocation, title, stopProfile) {
+      let profile = this.profile
+      if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
+
+      console.log(url)
 
       axios.get(url)
         .then(response => {
@@ -1164,17 +1176,27 @@ export default {
         return true
       }
     },
-    getProfile () {
+    getGeneralProfile () {
       switch (this.inputProfile) {
         case 'zu Fuß':
           this.profile = 'walking'
           break
-        case 'Fahrradreise':
+        case 'Fahrrad':
           this.profile = 'cycling'
           break
         default:
           this.profile = 'driving'
           break
+      }
+    },
+    getStringProfile (profile) {
+      switch (profile) {
+        case 'walking':
+          return 'zu Fuß'
+        case 'cycling':
+          return 'Fahrrad'
+        default:
+          return 'Auto'
       }
     },
     scrollTo (el) {

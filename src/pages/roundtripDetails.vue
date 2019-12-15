@@ -2,7 +2,7 @@
   <div class="roundtrip-details q-px-lg q-pb-md">
     <div
       class="edit-btn-container"
-      v-if="user.uid !== roundtrip[0].UserId"
+      v-if="user !== null && user.uid !== roundtrip[0].UserId"
       style="position:absolute; z-index:1; right:0; padding: 10px"
     >
       <q-btn
@@ -98,6 +98,7 @@
       <!--<q-tab
         name="ratings"
         label="Bewertungen"
+        https://hotellook.com/?destination=lucca&checkIn=2018-12-01&checkOut=2018-12-02&adults=2
       />-->
     </q-tabs>
 

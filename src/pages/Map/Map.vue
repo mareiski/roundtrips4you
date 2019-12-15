@@ -97,7 +97,7 @@ export default {
 
       let bounds = []
       this.stops.forEach((stop, index) => {
-        if (index >= 1) this.getRoute([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], map, index)
+        if (index >= 1) this.getRoute([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
         bounds.push([stop.Location.lng, stop.Location.lat])
       })
 
@@ -115,8 +115,18 @@ export default {
 
       return returnVal
     },
-    getRoute (startLocation, endLocation, map, index) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + this.profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+    getRandomColor () {
+      var letters = '0123456789ABCDEF'
+      var color = '#'
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)]
+      }
+      return color
+    },
+    getRoute (startLocation, endLocation, map, index, stopProfile) {
+      let profile = this.profile
+      if (stopProfile && stop.Profile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
       axios.get(url)
@@ -133,7 +143,7 @@ export default {
           }
 
           let id = 'route' + index
-          let color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16)
+          let color = this.getRandomColor()
 
           let geojsonCoords = geojson.geometry.coordinates
           let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
