@@ -8,7 +8,7 @@
       size="3px"
       :clickable="editor"
       @click="editStopProfile = true"
-    >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : 'Reisemittel hinzufügen'}}</q-chip>
+    >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}</q-chip>
     <q-dialog
       v-if="editor"
       v-model="editStopProfile"
@@ -57,6 +57,7 @@ export default {
     duration: String,
     editor: Boolean,
     defaultProfile: String,
+    roundtripProfile: String,
     docId: String
   },
   data () {

@@ -129,8 +129,11 @@
               ></Stop>
               <Duration
                 :key="stop"
-                v-if="index !== stops.length - 1 && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
-                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+            v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+            :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+            :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+            :roundtripProfile="inputProfile"
+
               ></Duration>
             </template>
           </div>
@@ -214,7 +217,8 @@ export default {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       days: [],
       editRTDialog: false,
-      title: null
+      title: null,
+      inputProfile: null
     }
   },
   computed: {
@@ -234,6 +238,7 @@ export default {
             roundtrip.push(doc.data())
             roundtripDocId = doc.id
           })
+          this.inputProfile = roundtrip[0].Profile
           this.roundtrip = roundtrip
           this.loadGaleryImgs()
         })

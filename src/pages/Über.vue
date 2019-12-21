@@ -25,32 +25,3 @@
 <style lang="less">
 @import url("../css/about.less");
 </style>
-<script>
-import axios from 'axios'
-
-export default {
-  created () {
-    const proxyurl = 'https://cors-anywhere.herokuapp.com/'
-    const url = 'https://api.makcorps.com/auth'
-
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-
-    const postData = {
-      username: 'roundtrips4you',
-      password: 'roundtrips4you@mallorca88re'
-    }
-
-    axios.post(proxyurl + url, postData, {
-      withCredentials: true,
-      headers: headers
-    }).then(function (response) {
-      console.log('Authenticated')
-    }).catch(function (error) {
-      console.log('Error on Authentication' + error)
-    })
-  }
-}
-</script>
