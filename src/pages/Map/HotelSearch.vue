@@ -1,35 +1,43 @@
 <template>
-  <div>
-    <q-select
-      outlined
-      use-input
-      hide-selected
-      fill-input
-      input-debounce="0"
-      clearable
-      ref="select"
+  <div
+    class="flex hotel-search"
+    style="flex-direction:column;"
+  >
+    <q-input
       v-model="hotelName"
-      hide-dropdown-icon
+      outlined
+      :loading="searchingForHotels"
       label="Hotelname suchen"
-      :options="hotels"
-      @filter="filterFn"
-      @input="$emit('update', $event)"
-      style="width:300px;"
+      style="width:300px; padding:0;"
+      @click="hotelListVisible ? hotelListVisible = false : hotelListVisible = true"
       :rules="val => val !== null && val !== '' || 'Bitte wähle ein Hotel'"
     >
-      <template v-slot:no-option>
-        <q-item>
-          <q-item-section class="text-grey">
-            zu viele/keine Ergebnisse, bitte weitertippen
-          </q-item-section>
-        </q-item>
-      </template>
       <template v-slot:append>
-        <q-icon :name="!parkingPlaceSearch ? 'location_on' : 'local_parking'" />
+        <q-btn
+          icon="search"
+          @click="searchHotel()"
+          round
+        ></q-btn>
       </template>
-    </q-select>
+    </q-input>
+    <q-card>
+      <q-list>
+        <q-item
+          clickable
+          @click="[hotelName = hotel.hotel.name, hideHotelList()]"
+          v-show="hotelListVisible"
+          v-for="hotel in hotels"
+          :key="hotel"
+        >
+          {{hotel != null ? hotel.hotel.name : 'Es konnten keine Hotels gefunden werden'}}
+        </q-item>
+      </q-list>
+    </q-card>
   </div>
 </template>
+<style lang="less" scoped>
+@import url("../../css/hotelSearch.less");
+</style>
 <script>
 import axios from 'axios'
 var querystring = require('querystring')
@@ -38,25 +46,31 @@ export default {
   data () {
     return {
       hotelName: '',
-      hotels: null
+      hotels: [],
+      searchingForHotels: false,
+      hotelListVisible: false
     }
   },
   props: {
-    lat: Number,
-    long: Number
+    lat: String,
+    long: String
   },
   methods: {
-    filterFn (val, update, abort) {
-      if (val.length < 2 && this.countryOptions != null) {
-        abort()
-        return
-      }
-
-      update(() => {
-        this.getHotels(this.hotelName, this.lat, this.long).then((results) => {
-          this.hotels = results
-        })
+    searchHotel () {
+      this.searchingForHotels = true
+      this.getHotels(this.hotelName, this.lat, this.long).then((results) => {
+        if (results !== null) {
+          this.hotels = results.data.data
+          if (this.hotels.length === 0) this.hotels = { hotel: null }
+        } else {
+          this.hotels = { hotel: null }
+        }
+        this.hotelListVisible = true
+        this.searchingForHotels = false
       })
+    },
+    hideHotelList () {
+      this.hotelListVisible = false
     },
     clear () {
       this.hotelName = ''
@@ -88,7 +102,7 @@ export default {
           let token = response.data.access_token
           const tokenString = 'Bearer ' + token
 
-          axios.get('https://test.api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&includeClosed=true&radius=10&currency=EUR&hotelName=' + hotelName + '&lang=de&view=NONE', {
+          axios.get('https://test.api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&includeClosed=true&radius=50&currency=EUR&hotelName=' + hotelName + '&lang=de&view=NONE', {
             headers: {
               'Authorization': tokenString
             }

@@ -38,8 +38,8 @@
             :editor="true"
             :doc-id="documentIds[index]"
             :general-link="stop.GeneralLink"
-            :location="stop.Location && typeof stop.Location !== 'undefined' &&stop.Location.label ? stop.Location.label : null"
-            :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
+            :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
+            :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
             :lastItem="index === stops.length -1"
           ></Stop>
           <Duration
@@ -148,6 +148,12 @@
                 :defaultLocation="null"
                 @update="updateLocation($event)"
               ></CitySearch>
+              <!-- <HotelSearch
+                v-if="selectedOption === 'Hotel' && location.lat"
+                :lat="location.lng"
+                :long="location.lat"
+                ref="hotelSearch"
+              ></HotelSearch> -->
               <CitySearch
                 ref="parkingPlaceSearch"
                 :parkingPlaceSearch="true"
@@ -216,7 +222,7 @@
           icon="share"
         >
           <q-tooltip>
-            Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen.
+            Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten
           </q-tooltip>
         </q-toggle>
         <q-select
@@ -244,12 +250,41 @@
           </template>
         </q-select>
         <q-input
-          v-model="region"
-          label="Region (wenn vorhanden)"
           outlined
-        > <template v-slot:prepend>
+          v-model="region"
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="0"
+          :options="regionOptions"
+          label="Region (wenn vorhanden)"
+        >
+          <template v-slot:prepend>
             <q-icon name="location_on" />
           </template></q-input>
+        <!-- <q-select
+          outlined
+          v-model="region"
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="0"
+          :options="regionOptions"
+          label="Region (wenn vorhanden)"
+          @filter="filterRegions"
+          style="padding-bottom: 32px"
+        >
+          <template v-slot:prepend>
+            <q-icon name="location_on" />
+          </template>
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                Keine Ergebnisse
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select> -->
         <q-select
           outlined
           v-model="category"
@@ -561,6 +596,7 @@ import { date, scroll, Loading } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import Duration from '../pages/EditRoundtripComponents/duration'
 import CitySearch from '../pages/Map/CitySearch'
+// import HotelSearch from '../pages/Map/HotelSearch'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import Map from '../pages/Map/Map'
@@ -597,6 +633,7 @@ export default {
     CitySearch,
     Map,
     Duration
+    // HotelSearch
   },
   data () {
     return {
@@ -613,6 +650,7 @@ export default {
       submitting: false,
       deleting: false,
       countryOptions: countries,
+      regionOptions: null,
       stops: [],
       documentIds: [],
       titleImgUrl: null,
@@ -842,6 +880,42 @@ export default {
         this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
+    filterRegions (val, update, abort) {
+      if (val.length < 2 && this.regionOptions != null) {
+        abort()
+        return
+      }
+
+      update(() => {
+        this.getRegions(this.country, val).then((results) => {
+          this.regionOptions = results
+        })
+      })
+    },
+    getRegions (country, regionPref) {
+      return new Promise((resolve, reject) => {
+        axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
+          headers: {
+            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+          }
+        }).then(function (response) {
+          console.log(response)
+          axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries/' + response.code + '/regions?limit=5&offset=0&languageCode=de&namePrefix=' + regionPref, {
+            headers: {
+              'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+            }
+          }).then(function (response) {
+            resolve(response)
+          }).catch(function (error) {
+            console.log('Error' + error)
+            resolve(null)
+          })
+        }).catch(function (error) {
+          console.log('Error' + error)
+          resolve(null)
+        })
+      })
+    },
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
@@ -909,6 +983,8 @@ export default {
           lat: event.y,
           label: event.label
         }
+      } else {
+        this.location = {}
       }
     },
     updateParkingPlace (event) {

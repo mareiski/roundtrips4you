@@ -461,6 +461,18 @@
             </div>
           </router-link>
         </div>
+        <ins
+          class="bookingaff"
+          data-aid="1931644"
+          data-target_aid="1931644"
+          data-prod="banner"
+          data-width="728"
+          data-height="90"
+          data-lang="de"
+        >
+          <!-- Anything inside will go away once widget is loaded. -->
+          <a href="//www.booking.com?aid=1931644"></a>
+        </ins>
         <div
           class="flex justify-center"
           style="padding-bottom:15px;"
@@ -798,16 +810,24 @@ export default {
           this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
           break
       }
+    },
+    loadBookingComWidget () {
+      (function (d, sc, u) {
+        var s = d.createElement(sc), p = d.getElementsByTagName(sc)[0]
+        s.type = 'text/javascript'
+        s.async = true
+        s.src = u + '?v=' + (+new Date())
+        p.parentNode.insertBefore(s, p)
+      })(document, 'script', '//aff.bstatic.com/static/affiliate_base/js/flexiproduct.js')
     }
   },
   created () {
     this.loadRoundtrips()
     this.getRTCount()
+    this.loadBookingComWidget()
+  },
+  mounted () {
+    this.loadBookingComWidget()
   }
 }
-
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-</style>

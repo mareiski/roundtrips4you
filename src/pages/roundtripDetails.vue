@@ -123,17 +123,16 @@
                 :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :general-link="stop.GeneralLink"
-                :location="stop.Location && typeof stop.Location !== 'undefined' &&stop.Location.label ? stop.Location.label : null"
+                :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
               ></Stop>
               <Duration
                 :key="stop"
-            v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
-            :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
-            :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-            :roundtripProfile="inputProfile"
-
+                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+                :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+                :roundtripProfile="inputProfile"
               ></Duration>
             </template>
           </div>

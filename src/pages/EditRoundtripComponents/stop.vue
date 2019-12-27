@@ -51,8 +51,8 @@
         size="3px"
         :clickable="editor"
         @click="editLocation = true"
-      >{{location && typeof location !== 'undefined' ? location.split(',')[0] : 'Ort hinzufügen'}}
-        <q-tooltip v-if="location && typeof location !== 'undefined'">{{location}}</q-tooltip>
+      >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
+        <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
       </q-chip>
       <q-dialog
         v-if="editor"
@@ -91,7 +91,7 @@
         size="3px"
         :clickable="editor"
         @click="editParkingPlace = true"
-      >{{ parkingPlace && typeof parkingPlace !== 'undefined' ?  parkingPlace.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
+      >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
       <q-dialog
         v-if="editor"
         v-model="editParkingPlace"
@@ -125,6 +125,32 @@
       </q-dialog>
     </div>
     <div>
+      <div v-if="sights !== null && sights !== 'error'">
+        <a
+          v-for="sight in sights"
+          :key="sight"
+          :href="'https://www.google.com/search?q=' + sight.name"
+          target="_blank"
+          style="text-decoration:none;"
+        >
+          <q-chip
+            v-if="editor"
+            size="3px"
+            clickable
+          >{{sight.name}}</q-chip>
+        </a>
+        <a
+          target="_blank"
+          style="text-decoration:none;"
+          :href="'https://www.google.com/search?q=' + location.label.split(',')"
+        >weitere anzeigen</a>
+      </div>
+      <q-chip
+        v-else-if="editor"
+        size="3px"
+        clickable
+        @click="searchSights()"
+      >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
       <div
         v-if="!editor"
         v-html="descriptionInput"
@@ -211,6 +237,8 @@
 <script>
 import { db } from '../../firebaseInit'
 import CitySearch from '../Map/CitySearch'
+var querystring = require('querystring')
+import axios from 'axios'
 
 export default {
   components: {
@@ -224,7 +252,7 @@ export default {
     editor: Boolean,
     docId: String,
     generalLink: String,
-    location: String,
+    location: Object,
     days: String,
     parkingPlace: String,
     lastItem: Boolean
@@ -242,6 +270,7 @@ export default {
       editLocation: false,
       tempLocation: {},
       savedEditorContent: this.editorPlaceholder,
+      sights: null,
 
       editorFonts: {
         arial: 'Arial',
@@ -439,7 +468,62 @@ export default {
         }
       }
       return false
+    },
+    searchSights () {
+      if (this.location.lng && this.location.lat) {
+        this.getSights(this.location.lng, this.location.lat).then((results) => {
+          if (results !== null) {
+            this.sights = results.data.data
+          } else {
+            this.sights = 'error'
+          }
+        })
+      }
+    },
+    getSights (long, lat) {
+      return new Promise((resolve, reject) => {
+        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+
+        const headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        const data = querystring.stringify({
+          grant_type: 'client_credentials', // gave the values directly for testing
+          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+          client_secret: '5NLWAdMXnOyNxWnk'
+        })
+
+        axios.post(url, data, {
+          headers: headers,
+          form: {
+            'grant_type': 'client_credentials',
+            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+            'client_secret': '5NLWAdMXnOyNxWnk'
+          }
+        }).then(function (response) {
+          let token = response.data.access_token
+          const tokenString = 'Bearer ' + token
+
+          console.log(token)
+
+          axios.get('https://test.api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=2&page[limit]=5&page[offset]=0&categories=SIGHTS', {
+            headers: {
+              'Authorization': tokenString
+            }
+          }).then(function (response) {
+            resolve(response)
+          }).catch(function (error) {
+            console.log('Error' + error)
+            resolve(null)
+          })
+        }).catch(function (error) {
+          console.log('Error on Authentication' + error)
+          resolve(null)
+        })
+      })
     }
+
   },
   mounted () {
     if (this.lastItem) {

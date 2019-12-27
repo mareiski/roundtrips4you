@@ -43,7 +43,10 @@
             <q-icon name="search" />
           </template>
         </q-select>
-        <span  class="create-own-btn" style="margin-top:10px; color:white;">oder</span>
+        <span
+          class="create-own-btn"
+          style="margin-top:10px; color:white;"
+        >oder</span>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
@@ -60,7 +63,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Entdecke dein Traumziel mit einer Rundreise die zu dir passt!</h1>
+        <h1>Erstelle deine eigene Reise mit einem Reiseplaner der zu dir passt!</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">

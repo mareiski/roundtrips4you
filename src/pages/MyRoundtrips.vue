@@ -226,7 +226,7 @@ export default {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
         db.collection('Roundtrips').add({
-          Category: 'Kategorie',
+          Category: 'Gruppenreise',
           Days: '< 5 Tage',
           Description: 'Kurze Beschreibung deiner Rundreise',
           Hotels: '1',
@@ -257,7 +257,7 @@ export default {
               db.collection('RoundtripDetails').add({
                 BookingComLink: '',
                 DateDistance: '',
-                Description: '',
+                Description: 'Beschreibung dieses Hotels',
                 ExpediaLink: '',
                 GeneralLink: '',
                 HotelStop: true,
@@ -273,6 +273,7 @@ export default {
                 }
               })
               this.getUserRoundtrips()
+              this.$router.push('/rundreise-bearbeiten/' + doc.id)
             })
           })
         this.title = ''

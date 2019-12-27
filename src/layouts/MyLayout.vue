@@ -236,7 +236,8 @@ export default {
   data () {
     return {
       showPreload: true,
-      showHelloTooltip: true
+      showHelloTooltip: true,
+      onLine: navigator.onLine
     }
   },
   computed: {
@@ -256,7 +257,40 @@ export default {
       redirected = false
       this.showPreload = false
       Loading.hide()
+    },
+    updateOnlineStatus (e) {
+      const {
+        type
+      } = e
+      this.onLine = type === 'online'
     }
+  },
+  watch: {
+    onLine (v) {
+      if (v) {
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Verbindung wieder hergestellt'
+        })
+      } else {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Bitte überprüfe deine Internetverbindung'
+        })
+      }
+    }
+  },
+  mounted () {
+    window.addEventListener('online', this.updateOnlineStatus)
+    window.addEventListener('offline', this.updateOnlineStatus)
+  },
+  beforeDestroy () {
+    window.removeEventListener('online', this.updateOnlineStatus)
+    window.removeEventListener('offline', this.updateOnlineStatus)
   },
   created () {
     this.$storyblok.init({
