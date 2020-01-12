@@ -1,5 +1,5 @@
 <template>
-  <div class="my-roundtrips">
+  <div class="my-roundtrips  q-px-lg q-pb-md">
     <h3>Meine Rundreisen</h3>
     <q-list
       bordered
@@ -44,7 +44,7 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label lines="1">{{roundtrip.Title}}</q-item-label>
+          <q-item-label lines="1">{{roundtrip.Title}} - {{roundtrip.Location}}</q-item-label>
           <q-item-label
             caption
             style="width:100px;"
@@ -143,6 +143,69 @@
                 :defaultLocation="null"
                 @update="updateLocation($event)"
               ></CitySearch>
+              <p
+                class="flex justify-center"
+                style="text-align:center; margin-bottom:15px;"
+              >Die folgenden Informationen werden nur dir angezeigt.</p>
+              <div>
+                <q-input
+                  style="margin:auto; margin-top:20px;"
+                  v-model="rooms"
+                  label="Zimmer"
+                  type="number"
+                  :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="house" />
+                  </template>
+                </q-input>
+                <q-input
+                  v-model="adults"
+                  label="Erwachsene"
+                  type="number"
+                  :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
+                  outlined
+                  style="margin:auto; margin-top:20px;"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="group" />
+                  </template>
+                </q-input>
+                <q-input
+                  v-model="children"
+                  label="Kinder"
+                  type="number"
+                  @input="childrenAges.length = parseInt(children)"
+                  :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
+                  outlined
+                  style="margin:auto; margin-top:20px;"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="child_friendly" />
+                  </template>
+                </q-input>
+                <div
+                  class="flex justify-center"
+                  style="margin:auto; margin-top:20px;"
+                  v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+                >
+                  <q-input
+                    v-for="childNum in parseInt(children)"
+                    :key="childNum"
+                    v-model="childrenAges[childNum - 1]"
+                    :label="'Alter Kind ' + childNum"
+                    type="number"
+                    style="margin-right:10px;"
+                    :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
+                    outlined
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="child_friendly" />
+                    </template>
+                  </q-input>
+                </div>
+              </div>
               <div>
                 <q-btn
                   round
@@ -191,7 +254,11 @@ export default {
       countryOptions: countries,
       RTIds: [],
       showNoRoundtripsText: false,
-      tempLocation: {}
+      tempLocation: {},
+      rooms: 1,
+      adults: 1,
+      children: 0,
+      childrenAges: []
     }
   },
   methods: {
@@ -222,6 +289,7 @@ export default {
       Title = Title.toLowerCase()
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       Title = Title.replace(/ /g, '')
+
       try {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
@@ -229,7 +297,7 @@ export default {
           Category: 'Gruppenreise',
           Days: '< 5 Tage',
           Description: 'Kurze Beschreibung deiner Rundreise',
-          Hotels: '1',
+          Hotels: '0',
           Location: Location,
           Region: null,
           Price: 100,
@@ -243,7 +311,10 @@ export default {
           OfferStartPeriod: new Date(timeStamp),
           OfferWholeYear: true,
           UserId: this.$store.getters['user/user'].uid,
-          createdAt: new Date(timeStamp)
+          createdAt: new Date(timeStamp),
+          Rooms: this.rooms,
+          Adults: this.adults,
+          ChildrenAges: this.childrenAges
         })
         let roundtripsRef = db.collection('Roundtrips')
           .where('RTId', '==', tempRTId)
@@ -257,15 +328,15 @@ export default {
               db.collection('RoundtripDetails').add({
                 BookingComLink: '',
                 DateDistance: '',
-                Description: 'Beschreibung dieses Hotels',
+                Description: 'Beschreibung dieses Stopps',
                 ExpediaLink: '',
                 GeneralLink: '',
-                HotelStop: true,
+                HotelStop: false,
                 ImageUrl: '',
                 InitDate: new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
-                Title: 'Titel des 1. Hotels',
+                Title: 'Titel des 1. Stopps',
                 Location: this.tempLocation ? this.tempLocation : {
                   lng: '13.3888599',
                   lat: '52.5170365',
@@ -296,6 +367,7 @@ export default {
     getUserRoundtrips () {
       roundtripArr = []
       roundtripDocIds = []
+
       var context = this
       let roundtripsRef = db.collection('Roundtrips')
         .where('UserId', '==', uid)
@@ -321,8 +393,6 @@ export default {
           console.log(error)
         })
 
-      console.log(this.roundtrips)
-      this.roundtrips = []
       this.roundtrips = roundtripArr
     },
     updateLocation (event) {

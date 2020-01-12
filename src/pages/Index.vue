@@ -146,26 +146,33 @@
       <h4 style="text-align:center;">Deine eigene Rundreise erstellen: so einfach geht's!</h4>
       <ol class="create-roundtrip-ol">
         <li>
-          <h2>Titel und Land angeben</h2>
-          <q-img src="../statics/createRT.png" />
+          <q-icon name="info" />
+          <h2>Allgemeine Infos angeben</h2>
+          <p>Gib als Erstes das Land, den Titel und die Anzahl der Reisenden auf deiner Rundreise an.</p>
+          <p>Damit hast du auch schon das Grundgerüst für deine eigene Traumreise fertiggestellt.</p>
         </li>
         <li>
-          <h2>Orte und Zeiten der einzelnen Stopps eingeben</h2>
-          <q-img src="../statics/stopps.png" />
+          <q-icon name="location_on" />
+          <h2>Orte und Art des Stopps festlegen</h2>
+          <p>Nun kannst du jeden einzelnen Ort auf deine Reise anlegen und die Art des Stopps (Zwischenstopp oder Hotel) auswählen.</p>
+          <p>Solltest du noch hilfe bei der Auswahl der Orte brauchen, kannst du dich von unseren Städtevorschlägen inspirieren lassen.</p>
         </li>
         <li>
-          <h2>Strecke und Dauer zwischen den Stopps wird automatisch berechnet</h2>
-          <q-img src="../statics/duration.png" />
+          <q-icon name="build" />
+          <h2>Lass dich von unseren Tools unterstützen</h2>
+          <p>Durch eine Vielzahl von Funktionen, wie der automatischen Kartenerstellung und Routenberechnung unterstützen wir dich bei deiner Planung.</p>
+          <p>Zusätzlich zeigen wir dir wichtige Informationen, wie z.B. die Kontaktdaten und Adresse deines Hotels.</p>
         </li>
+
         <li>
-          <h2>Karte wird automatisch erstellt</h2>
-          <q-img src="../statics/card.png" />
-        </li>
-        <li>
-          <h2>Schmücke deine Rundreise mit Bildern, Highlights und vielen weiteren Informationen aus!</h2>
-          <q-img src="../statics/rt-card.png" />
+          <div class="flex">
+            <q-icon name="share" />
+            <h2>Teile deine Rundreise</h2>
+          </div>
+          <p>Schmücke deine Rundreise mit Bildern, Highlights und vielen weiteren Informationen aus, um deine Rundreise mit der Welt zu teilen.</p>
         </li>
       </ol>
+      <!-- Unsere automatisierten Funktionen -->
     </div>
   </q-page>
 </template>

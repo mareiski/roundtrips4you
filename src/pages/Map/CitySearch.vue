@@ -10,7 +10,7 @@
       ref="select"
       v-model="searchLocation"
       hide-dropdown-icon
-      :label="!parkingPlaceSearch ? 'Ort suchen' : 'Parkpatz suchen'"
+      :label="!parkingPlaceSearch ? 'Ort suchen' : 'Parkplatz suchen'"
       :options="countryOptions"
       @filter="filterFn"
       @input="$emit('update', $event)"
@@ -24,7 +24,7 @@
           </q-item-section>
         </q-item>
       </template>
-      <template v-slot:append>
+      <template v-slot:prepend>
         <q-icon :name="!parkingPlaceSearch ? 'location_on' : 'local_parking'" />
       </template>
     </q-select>

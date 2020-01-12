@@ -108,6 +108,7 @@
       v-model="tab"
       animated
       ref="tabPanels"
+      keep-alive
     >
       <q-tab-panel name="overview">
         <q-timeline color="secondary">
@@ -126,6 +127,14 @@
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
+                :hotelStars="parseInt(stop.HotelStars)"
+                :hotelName="stop.HotelName"
+                :hotelLocation="stop.HotelLocation"
+                :hotelContact="stop.HotelContact"
+                :checkOutDate="dates[index + 1] ? dates[index + 1] : dates[index]"
+                :adults="parseInt(adults)"
+                :childrenAges="childrenAges"
+                :rooms="parseInt(rooms)"
               ></Stop>
               <Duration
                 :key="stop"
@@ -217,7 +226,8 @@ export default {
       days: [],
       editRTDialog: false,
       title: null,
-      inputProfile: null
+      inputProfile: null,
+      childrenAges: []
     }
   },
   computed: {
@@ -238,7 +248,9 @@ export default {
             roundtripDocId = doc.id
           })
           this.inputProfile = roundtrip[0].Profile
+          this.childrenAges = roundtrip[0].ChildrenAges
           this.roundtrip = roundtrip
+
           this.loadGaleryImgs()
         })
         .catch(err => {

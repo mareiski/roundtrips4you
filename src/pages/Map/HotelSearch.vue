@@ -23,20 +23,20 @@
     <q-card>
       <q-list>
         <q-item
-          clickable
-          @click="[hotelName = hotel.hotel.name, hideHotelList()]"
+          :clickable="hotel !== null"
+          @click="[hotelName = hotel.hotel.name, hideHotelList(), $emit('update', hotel)]"
           v-show="hotelListVisible"
           v-for="hotel in hotels"
           :key="hotel"
         >
-          {{hotel != null ? hotel.hotel.name : 'Es konnten keine Hotels gefunden werden'}}
+          {{hotel !== null ? hotel.hotel.name : 'Es konnten keine Hotels gefunden werden'}}
         </q-item>
       </q-list>
     </q-card>
   </div>
 </template>
 <style lang="less" scoped>
-@import url("../../css/hotelSearch.less");
+@import url("../../css/hotelRegionSearch.less");
 </style>
 <script>
 import axios from 'axios'
@@ -53,12 +53,17 @@ export default {
   },
   props: {
     lat: String,
-    long: String
+    long: String,
+    checkInDate: String,
+    checkOutDate: String,
+    roomAmount: Number,
+    adults: Number,
+    childrenAges: Array
   },
   methods: {
     searchHotel () {
       this.searchingForHotels = true
-      this.getHotels(this.hotelName, this.lat, this.long).then((results) => {
+      this.getHotels(this.hotelName, this.lat, this.long, this.checkInDate, this.checkOutDate, this.roomAmount, this.adults, this.childrenAges).then((results) => {
         if (results !== null) {
           this.hotels = results.data.data
           if (this.hotels.length === 0) this.hotels = { hotel: null }
@@ -77,7 +82,7 @@ export default {
       this.hotels = null
       this.$refs.select.resetValidation()
     },
-    getHotels (hotelName, long, lat) {
+    getHotels (hotelName, long, lat, checkInDate, checkOutDate, roomAmount, adults, childrenAges) {
       return new Promise((resolve, reject) => {
         const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
 
@@ -91,6 +96,13 @@ export default {
           client_secret: '5NLWAdMXnOyNxWnk'
         })
 
+        const dateTimeParts = checkInDate.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        const formattedCheckInDate = dateParts[2] + '-' + dateParts[1] - 1 + '-' + dateParts[0] - 1
+
+        dateParts = checkOutDate.split('.')
+        const formattedCheckOutDate = dateParts[2] + '-' + dateParts[1] - 1 + '-' + dateParts[0] - 1
+
         axios.post(url, data, {
           headers: headers,
           form: {
@@ -102,7 +114,11 @@ export default {
           let token = response.data.access_token
           const tokenString = 'Bearer ' + token
 
-          axios.get('https://test.api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&includeClosed=true&radius=50&currency=EUR&hotelName=' + hotelName + '&lang=de&view=NONE', {
+          const offerUrl = 'https://test.api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&hotelName=' +
+            hotelName + '&checkInDate=' + formattedCheckInDate + '&chechOutDate=' + formattedCheckOutDate + '&roomQuantity=' + roomAmount + '&adults=' +
+            adults + '&childAges' + childrenAges + '&includeClosed=true&radius=50&currency=EUR&lang=de&view=LIGHT'
+
+          axios.get(offerUrl, {
             headers: {
               'Authorization': tokenString
             }

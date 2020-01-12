@@ -48,6 +48,10 @@
         <MglPopup>
           <VCard>
             <div>{{route.duration}} bis {{route.destination}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+            <a
+              target="_blank"
+              :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination"
+            >auf Google ansehen</a>
           </VCard>
         </MglPopup>
       </MglMarker>
@@ -152,7 +156,7 @@ export default {
 
           let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
 
-          if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, destination: context.stops[index].Location.label.split(',')[0], id: id })
+          if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
 
           // if the route already exists on the map, reset it using setData
           if (map.getSource(id)) {

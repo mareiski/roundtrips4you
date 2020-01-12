@@ -21,161 +21,254 @@
         />
       </q-popup-edit>
     </h3>
-    <q-timeline color="secondary">
-      <q-timeline-entry heading>
-        Reiseverlauf
-
-      </q-timeline-entry>
-
-      <div class="stop-list">
-        <template v-for="(stop, index) in stops">
-          <Stop
-            :key="index"
-            :title="stop.Title"
-            :date="stop.InitDate"
-            :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
-            :editor-placeholder="stop.Description"
-            :editor="true"
-            :doc-id="documentIds[index]"
-            :general-link="stop.GeneralLink"
-            :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
-            :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
-            :lastItem="index === stops.length -1"
-          ></Stop>
-          <Duration
-            :key="stop"
-            v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
-            :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
-            :editor="true"
-            :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-            :doc-id="documentIds[index]"
-          ></Duration>
-        </template>
-      </div>
-    </q-timeline>
-    <q-list
-      bordered
-      class="rounded-borders"
+    <q-tabs
+      v-model="tab"
+      dense
+      class="text-grey"
+      active-color="primary"
+      indicator-color="primary"
+      align="justify"
+      narrow-indicator
+      style="padding-top:20px;"
     >
-      <q-expansion-item
-        clickable
-        expand-separator
-        v-model="addExpanded"
-        class="add-item"
-        @click="addButtonActive = !addButtonActive"
-      >
-        <template v-slot:header>
-          <q-item-section style="align-items: center;">
-            <q-btn
-              class="add-button"
-              side
-              round
-              color="primary"
-              icon="add"
-              :class="{ active: addButtonActive }"
-            >
-            </q-btn>
-          </q-item-section>
-        </template>
-        <q-card>
-          <q-card-section>
-            <q-form
-              @submit="onAddEntry"
-              class="q-gutter-md addEntryForm"
-            >
-              <q-input
-                filled
-                v-model="date"
-                error-message="Bitte gib ein richtiges Datum an"
-                :error="!isDateTimeValid()"
-                bottom-slots
-                style="width:300px"
-                class="input-item"
-              >
-                <template v-slot:prepend>
-                  <q-icon
-                    name="event"
-                    class="cursor-pointer"
-                  >
-                    <q-popup-proxy
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date
-                        v-model="date"
-                        today-btn
-                        mask="DD.MM.YYYY HH:mm"
-                      />
-                      <!--  :options="dateOptions" -->
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
+      <q-tab
+        name="inspiration"
+        label="Inspiration"
+        :disable="inspirationDisabled"
+      />
+      <q-tab
+        name="route"
+        label="Reiseverlauf"
+        :disable="routeDisabled"
+      />
+      <q-tab
+        name="start"
+        label="An-/Abreise"
+        :disable="startDisabled"
+      />
+      <q-tab
+        name="settings"
+        label="Einstellungen"
+        :disable="settingsDisabled"
+      />
+      <q-tab
+        name="map"
+        label="Karte"
+        :disable="mapDisabled"
+      />
+    </q-tabs>
 
-                <template v-slot:append>
-                  <q-icon
-                    name="access_time"
-                    class="cursor-pointer"
-                  >
-                    <q-popup-proxy
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-time
-                        v-model="date"
-                        mask="DD.MM.YYYY HH:mm"
-                        format24h
-                      />
-                    </q-popup-proxy>
-                  </q-icon>
-                </template>
-              </q-input>
-              <q-select
-                outlined
-                v-model="selectedOption"
-                :options="options"
-                label="Eintrag"
-                class="input-item"
-                :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
-                style="width:300px"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="list" />
-                </template>
-              </q-select>
-              <CitySearch
-                ref="citySearch"
-                :parkingPlaceSearch="false"
-                :defaultLocation="null"
-                @update="updateLocation($event)"
-              ></CitySearch>
-              <!-- <HotelSearch
-                v-if="selectedOption === 'Hotel' && location.lat"
-                :lat="location.lng"
-                :long="location.lat"
-                ref="hotelSearch"
-              ></HotelSearch> -->
-              <CitySearch
-                ref="parkingPlaceSearch"
-                :parkingPlaceSearch="true"
-                @update="updateParkingPlace($event)"
-                :defaultLocation="null"
-              ></CitySearch>
-              <div v-if="selectedOption === 'Hotel'">
-                <q-input
-                  v-model="generalTempLink"
-                  ref="urlInput"
-                  type="url"
-                  style="width:300px;"
-                  :rules="[val => urlReg.test(val)|| 'Bitte gib einen richtigen Link an']"
-                  label="Hotel link"
-                  outlined
+    <q-separator />
+
+    <q-tab-panels
+      v-model="tab"
+      keep-alive
+      animated
+      ref="tabPanels"
+    >
+      <q-tab-panel name="inspiration">
+        <h4>Inspiration</h4>
+        <CitySuggestion :country="country"></CitySuggestion>
+      </q-tab-panel>
+      <q-tab-panel name="route">
+        <q-timeline color="secondary">
+          <q-timeline-entry heading>
+            Reiseverlauf
+          </q-timeline-entry>
+
+          <div class="stop-list">
+            <template v-for="(stop, index) in stops">
+              <Stop
+                :key="index"
+                :title="stop.Title"
+                :date="stop.InitDate"
+                :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
+                :editor-placeholder="stop.Description"
+                :editor="true"
+                :doc-id="documentIds[index]"
+                :general-link="stop.GeneralLink"
+                :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
+                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
+                :lastItem="index === stops.length -1"
+                :hotelStars="parseInt(stop.HotelStars)"
+                :hotelName="stop.HotelName"
+                :hotelLocation="stop.HotelLocation"
+                :hotelContact="stop.HotelContact"
+                :checkOutDate="checkOutDate"
+                :adults="parseInt(adults)"
+                :childrenAges="childrenAges"
+                :rooms="parseInt(rooms)"
+              ></Stop>
+              <Duration
+                :key="stop"
+                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
+                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+                :editor="true"
+                :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+                :doc-id="documentIds[index]"
+              ></Duration>
+            </template>
+          </div>
+        </q-timeline>
+        <q-list
+          bordered
+          class="rounded-borders"
+        >
+          <q-expansion-item
+            clickable
+            expand-separator
+            v-model="addExpanded"
+            class="add-item"
+            @click="addButtonActive = !addButtonActive"
+          >
+            <template v-slot:header>
+              <q-item-section style="align-items: center;">
+                <q-btn
+                  class="add-button"
+                  side
+                  round
+                  color="primary"
+                  icon="add"
+                  :class="{ active: addButtonActive }"
                 >
-                  <template v-slot:prepend>
-                    <q-icon name="link" />
-                  </template>
-                </q-input>
-              </div>
-              <!--<div
+                </q-btn>
+              </q-item-section>
+            </template>
+            <q-card>
+              <q-card-section>
+                <q-form
+                  @submit="onAddEntry"
+                  class="q-gutter-md addEntryForm"
+                >
+                  <q-input
+                    filled
+                    v-model="date"
+                    error-message="Bitte gib ein richtiges Datum an"
+                    :error="!isDateTimeValid()"
+                    bottom-slots
+                    style="width:300px"
+                    class="input-item"
+                    outlined
+                  >
+                    <template v-slot:prepend>
+                      <q-icon
+                        name="event"
+                        class="cursor-pointer"
+                      >
+                        <q-popup-proxy
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date
+                            v-model="date"
+                            today-btn
+                            mask="DD.MM.YYYY HH:mm"
+                          />
+                          <!--  :options="dateOptions" -->
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+
+                    <template v-slot:append>
+                      <q-icon
+                        name="access_time"
+                        class="cursor-pointer"
+                      >
+                        <q-popup-proxy
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-time
+                            v-model="date"
+                            mask="DD.MM.YYYY HH:mm"
+                            format24h
+                          />
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                  <q-select
+                    outlined
+                    v-model="selectedOption"
+                    :options="options"
+                    label="Eintrag"
+                    class="input-item"
+                    :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
+                    style="width:300px"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="list" />
+                    </template>
+                  </q-select>
+                  <CitySearch
+                    ref="citySearch"
+                    :parkingPlaceSearch="false"
+                    :defaultLocation="null"
+                    @update="updateLocation($event)"
+                  ></CitySearch>
+                  <q-input
+                    v-if="selectedOption === 'Hotel'"
+                    filled
+                    label="Check Out Datum"
+                    v-model="checkOutDate"
+                    :rules="[date || 'Bitte gib ein richtiges Datum ein']"
+                    bottom-slots
+                    style="width:300px"
+                    class="input-item"
+                    outlined
+                  >
+                    <template v-slot:prepend>
+                      <q-icon
+                        name="event"
+                        class="cursor-pointer"
+                      >
+                        <q-popup-proxy
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date
+                            v-model="checkOutDate"
+                            today-btn
+                            mask="DD.MM.YYYY"
+                          />
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                  <HotelSearch
+                    v-if="selectedOption === 'Hotel' && location.lat && checkOutDate"
+                    :lat="location.lng"
+                    :long="location.lat"
+                    :checkInDate="date"
+                    :checkOutDate="checkOutDate"
+                    :roomAmount="rooms"
+                    :adults="adults"
+                    :childrenAges="childrenAges"
+                    @update="updateHotelData($event)"
+                    ref="hotelSearch"
+                  ></HotelSearch>
+                  <CitySearch
+                    ref="parkingPlaceSearch"
+                    :parkingPlaceSearch="true"
+                    @update="updateParkingPlace($event)"
+                    :defaultLocation="null"
+                  ></CitySearch>
+                  <div v-if="selectedOption === 'Hotel'">
+                    <q-input
+                      v-model="generalTempLink"
+                      ref="urlInput"
+                      type="url"
+                      style="width:300px;"
+                      :rules="[val => urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+                      label="Hotel link"
+                      outlined
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="link" />
+                      </template>
+                    </q-input>
+                  </div>
+                  <!--<div
                 v-if="selectedOption === 'Hotel'"
                 class="flex"
               >
@@ -188,404 +281,638 @@
                 />
                 <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
               </div>-->
-              <div>
+                  <div>
+                    <q-btn
+                      round
+                      color="primary"
+                      icon="add"
+                      type="submit"
+                    >
+                      <q-tooltip>
+                        Eintrag hinzufügen
+                      </q-tooltip>
+                    </q-btn>
+                  </div>
+                </q-form>
+              </q-card-section>
+            </q-card>
+          </q-expansion-item>
+        </q-list>
+      </q-tab-panel>
+      <q-tab-panel name="start">
+        <div class="arrival-depature-container">
+          <h4>An-/Abreise</h4>
+          <q-form
+            @submit="onSaveArrivalDepature"
+            bordered
+            class="q-gutter-md rounded-borders"
+          >
+            <q-select
+              outlined
+              v-model="arrivalDepatureProfile"
+              input-debounce="0"
+              :options="['Flugzeug', 'Andere']"
+              label="Reisemittel"
+              :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+              style="padding-bottom: 32px"
+            >
+              <template v-slot:prepend>
+                <q-icon name="commute" />
+              </template>
+            </q-select>
+            <div
+              v-if="arrivalDepatureProfile === 'Flugzeug'"
+              class="flight-container"
+            >
+              <q-select
+                outlined=""
+                use-input
+                hide-selected
+                fill-input
+                input-debounce="0"
+                clearable
+                ref="select"
+                v-model="origin"
+                hide-dropdown-icon
+                label="Abflugsort"
+                :options="originOptions"
+                @filter="getOrigins"
+                style="width:300px; text-transform:capitalize;"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+              >
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      zu viele/keine Ergebnisse, bitte weitertippen
+                    </q-item-section>
+                  </q-item>
+                </template>
+                <template v-slot:prepend>
+                  <q-icon name="flight_takeoff" />
+                </template>
+              </q-select>
+              <q-select
+                outlined=""
+                use-input
+                hide-selected
+                fill-input
+                input-debounce="0"
+                clearable
+                ref="select"
+                v-model="destination"
+                hide-dropdown-icon
+                label="Ankunftsort"
+                :options="destinationOptions"
+                @filter="getDestinations"
+                style="width:300px;"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+              >
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      zu viele/keine Ergebnisse, bitte weitertippen
+                    </q-item-section>
+                  </q-item>
+                </template>
+                <template v-slot:prepend>
+                  <q-icon name="flight_land" />
+                </template>
+              </q-select>
+              <q-input
+                outlined
+                v-model="depatureDate"
+                label="Abflugsdatum"
+                class="input-item rounded-borders"
+              >
+                <q-popup-proxy
+                  ref="qDateProxy1"
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="depatureDate"
+                    today-btn
+                    mask="DD.MM.YYYY"
+                  />
+                </q-popup-proxy>
+                <template v-slot:prepend>
+                  <q-icon
+                    name="event"
+                    class="cursor-pointer"
+                  >
+                  </q-icon>
+                </template>
+              </q-input>
+              <q-input
+                outlined
+                v-model="returnDate"
+                label="Rückflugsdatum"
+                class="input-item rounded-borders"
+              >
+                <q-popup-proxy
+                  ref="qDateProxy1"
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="returnDate"
+                    today-btn
+                    mask="DD.MM.YYYY"
+                  />
+                </q-popup-proxy>
+                <template v-slot:prepend>
+                  <q-icon
+                    name="event"
+                    class="cursor-pointer"
+                  >
+                  </q-icon>
+                </template>
+              </q-input>
+              <q-select
+                outlined
+                v-model="travelClass"
+                input-debounce="0"
+                :options="['Economy', 'Premium Economy', 'Business', 'First']"
+                label="Reiseklasse auswählen"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="star" />
+                </template>
+              </q-select>
+              <q-select
+                outlined
+                v-model="nonStop"
+                input-debounce="0"
+                :options="['Ja', 'Nein']"
+                label="Non Stop"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Option']"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="flight" />
+                </template>
+              </q-select>
+            </div>
+            <div v-else>
+              <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+            </div>
+            <!-- price -->
+            <div class="row justify-between">
+              <q-btn
+                @click="openBookingComFlights()"
+                class="q-mt-md"
+                color="primary"
+                text-color="white"
+                label="Flüge auf Booking.com buchen"
+              ></q-btn>
+              <!-- <q-btn
+                v-if="validOfferSearchData()"
+                :loading="offersSubmitting"
+                @click="searchOffers()"
+                label="Angebote suchen"
+                class="q-mt-md"
+                color="primary"
+                text-color="white"
+              >
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn> -->
+              <q-btn
+                type="submit"
+                :loading="submitting"
+                label="Speichern"
+                class="q-mt-md"
+                color="primary"
+                text-color="white"
+              >
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
+            </div>
+          </q-form>
+        </div>
+      </q-tab-panel>
+      <q-tab-panel name="settings">
+
+        <h4>Allgemeine Einstellungen</h4>
+        <q-form
+          @submit="onSaveRoundtrip"
+          bordered
+          class="q-gutter-md rounded-borders"
+        >
+          <q-list
+            bordered
+            class="rounded-borders"
+            style="padding:10px"
+          >
+            <q-toggle
+              v-model="publish"
+              label="Rundreise veröffentlichen"
+              icon="share"
+            >
+              <q-tooltip>
+                Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten
+              </q-tooltip>
+            </q-toggle>
+            <q-select
+              outlined
+              v-model="country"
+              use-input
+              hide-selected
+              fill-input
+              input-debounce="0"
+              :options="countryOptions"
+              label="Land auswählen"
+              @filter="filterFn"
+              :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+              style="padding-bottom: 32px"
+            >
+              <template v-slot:prepend>
+                <q-icon name="explore" />
+              </template>
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    Keine Ergebnisse
+                  </q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+            <RegionSearch
+              :country="country"
+              :defaultRegion="region"
+              @update="updateRegion($event)"
+            ></RegionSearch>
+            <q-select
+              outlined
+              v-model="category"
+              :options="categoryOptions"
+              label="Kategorie"
+              use-input
+              :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
+              class="input-item"
+            >
+              <template v-slot:prepend>
+                <q-icon name="access_time" />
+              </template>
+            </q-select>
+            <div class="flex">
+              <q-rating
+                class="stars"
+                v-model="stars"
+                size="15px"
+                color="gold"
+                :readonly="!isNaN(hotelRatingAvg())"
+                style="margin-right:10px;"
+              />
+              <q-item-label>Durchschittliche Hotelbewertung {{!isNaN(hotelRatingAvg()) ? '(errechnet)' : ''}}</q-item-label>
+            </div>
+            <q-input
+              v-model="descriptionInput"
+              outlined
+              autogrow
+              label="Kurze Beschreibung"
+              :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
+          val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
+            > <template v-slot:prepend>
+                <q-icon name="subject" />
+              </template>
+            </q-input>
+            <q-select
+              outlined
+              v-model="inputProfile"
+              :options="['zu Fuß', 'Fahrrad', 'Auto']"
+              label="Reisemittel"
+              use-input
+              :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+              class="input-item"
+              @input="getGeneralProfile()"
+            >
+              <template v-slot:prepend>
+                <q-icon name="commute" />
+              </template>
+            </q-select>
+            <q-input
+              v-model="highlight1"
+              label="Highlight 1"
+              outlined
+              :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+            > <template v-slot:prepend>
+                <q-icon name="star" />
+              </template></q-input>
+            <q-input
+              v-model="highlight2"
+              label="Highlight 2"
+              outlined
+              :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+            > <template v-slot:prepend>
+                <q-icon name="star" />
+              </template></q-input>
+            <q-input
+              v-model="highlight3"
+              label="Highlight 3"
+              outlined
+              :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+            > <template v-slot:prepend>
+                <q-icon name="star" />
+              </template></q-input>
+            <q-item-label>Angebotszeitraum</q-item-label>
+            <q-toggle
+              v-model="wholeYearOffer"
+              label="Ganzes Jahr"
+              icon="event"
+            >
+            </q-toggle>
+            <q-input
+              :disable="wholeYearOffer"
+              outlined
+              v-model="OfferStartPeriod"
+              label="von"
+              class="input-item rounded-borders"
+            >
+              <q-popup-proxy
+                ref="qDateProxy1"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="OfferStartPeriod"
+                  today-btn
+                  mask="DD.MM.YYYY"
+                  @input="() => [$refs.qDateProxy1.hide(), OfferEndPeriod = OfferStartPeriod]"
+                />
+                <!-- :options="dateOptions" -->
+              </q-popup-proxy>
+              <template v-slot:prepend>
+                <q-icon
+                  name="event"
+                  class="cursor-pointer"
+                >
+                </q-icon>
+              </template>
+            </q-input>
+            <q-input
+              :disable="wholeYearOffer"
+              outlined
+              v-model="OfferEndPeriod"
+              label="bis"
+              class="input-item rounded-borders"
+            >
+              <q-popup-proxy
+                ref="qDateProxy2"
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  v-model="OfferEndPeriod"
+                  today-btn
+                  mask="DD.MM.YYYY"
+                  :options="scheduleDateOptions"
+                  @input="() => $refs.qDateProxy2.hide()"
+                />
+              </q-popup-proxy>
+              <template v-slot:prepend>
+                <q-icon
+                  name="event"
+                  class="cursor-pointer"
+                >
+                </q-icon>
+              </template>
+            </q-input>
+            <q-input
+              v-model="price"
+              label="Preis"
+              type="number"
+              outlined
+              :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
+            ><template v-slot:prepend>
+                <q-icon name="euro">
+                </q-icon>
+              </template>
+            </q-input>
+            <h4 style="margin-bottom:10px;">Persönliche Informationen</h4>
+            <p style="margin-bottom:15px;">Diese werden nur dir angezeigt und auch beim veröffentlichen nicht berücksichtigt.</p>
+            <div>
+              <q-input
+                v-model="rooms"
+                label="Zimmer"
+                type="number"
+                :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="house" />
+                </template>
+              </q-input>
+              <q-input
+                v-model="adults"
+                label="Erwachsene"
+                type="number"
+                :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="group" />
+                </template>
+              </q-input>
+              <q-input
+                v-model="children"
+                label="Kinder"
+                type="number"
+                @input="childrenAges.length = parseInt(children)"
+                :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="child_friendly" />
+                </template>
+              </q-input>
+              <div
+                class="flex"
+                v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+              >
+                <q-input
+                  v-for="childNum in parseInt(children)"
+                  :key="childNum"
+                  v-model="childrenAges[childNum - 1]"
+                  :label="'Alter Kind ' + childNum"
+                  type="number"
+                  style="margin-right:10px;"
+                  :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="child_friendly" />
+                  </template>
+                </q-input>
+              </div>
+            </div>
+            <div>
+              <h4 style="margin-bottom:10px;">Bilder</h4>
+              <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br></span>
+              <br>
+              <span>Titelbild</span>
+              <div class="uploader">
+                <q-img
+                  style="height:100%;"
+                  :src="titleImgUrl"
+                ></q-img>
                 <q-btn
                   round
                   color="primary"
                   icon="add"
-                  type="submit"
+                  style="position: absolute;"
+                  :disable="titleUploadDisabled"
+                  @click="() => $refs.titleUpload.pickFiles()"
                 >
-                  <q-tooltip>
-                    Eintrag hinzufügen
-                  </q-tooltip>
+                  <q-inner-loading
+                    :showing="titleUploadDisabled"
+                    style="border-radius:50%"
+                  >
+                    <q-spinner
+                      size="42px"
+                      color="primary"
+                    >
+                    </q-spinner>
+                  </q-inner-loading>
                 </q-btn>
               </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
-      </q-expansion-item>
-    </q-list>
-    <h4>Allgemeine Einstellungen</h4>
-    <q-form
-      @submit="onSaveRoundtrip"
-      bordered
-      class="q-gutter-md rounded-borders"
-    >
-      <q-list
-        bordered
-        class="rounded-borders"
-        style="padding:10px"
-      >
-        <q-toggle
-          v-model="publish"
-          label="Rundreise veröffentlichen"
-          icon="share"
-        >
-          <q-tooltip>
-            Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten
-          </q-tooltip>
-        </q-toggle>
-        <q-select
-          outlined
-          v-model="country"
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          :options="countryOptions"
-          label="Land auswählen"
-          @filter="filterFn"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-          style="padding-bottom: 32px"
-        >
-          <template v-slot:prepend>
-            <q-icon name="explore" />
-          </template>
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Keine Ergebnisse
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-        <q-input
-          outlined
-          v-model="region"
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          :options="regionOptions"
-          label="Region (wenn vorhanden)"
-        >
-          <template v-slot:prepend>
-            <q-icon name="location_on" />
-          </template></q-input>
-        <!-- <q-select
-          outlined
-          v-model="region"
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          :options="regionOptions"
-          label="Region (wenn vorhanden)"
-          @filter="filterRegions"
-          style="padding-bottom: 32px"
-        >
-          <template v-slot:prepend>
-            <q-icon name="location_on" />
-          </template>
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Keine Ergebnisse
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select> -->
-        <q-select
-          outlined
-          v-model="category"
-          :options="categoryOptions"
-          label="Kategorie"
-          use-input
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
-          class="input-item"
-        >
-          <template v-slot:prepend>
-            <q-icon name="access_time" />
-          </template>
-        </q-select>
-        <div class="flex">
-          <q-rating
-            class="stars"
-            v-model="stars"
-            size="15px"
-            color="gold"
-            style="margin-right:10px;"
-          />
-          <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
-        </div>
-        <q-input
-          v-model="descriptionInput"
-          outlined
-          autogrow
-          label="Kurze Beschreibung"
-          :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
-          val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
-        > <template v-slot:prepend>
-            <q-icon name="subject" />
-          </template>
-        </q-input>
-        <q-select
-          outlined
-          v-model="inputProfile"
-          :options="['zu Fuß', 'Fahrrad', 'Auto']"
-          label="Reisemittel"
-          use-input
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
-          class="input-item"
-          @input="getGeneralProfile()"
-        >
-          <template v-slot:prepend>
-            <q-icon name="commute" />
-          </template>
-        </q-select>
-        <q-input
-          v-model="highlight1"
-          label="Highlight 1"
-          outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        > <template v-slot:prepend>
-            <q-icon name="star" />
-          </template></q-input>
-        <q-input
-          v-model="highlight2"
-          label="Highlight 2"
-          outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        > <template v-slot:prepend>
-            <q-icon name="star" />
-          </template></q-input>
-        <q-input
-          v-model="highlight3"
-          label="Highlight 3"
-          outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        > <template v-slot:prepend>
-            <q-icon name="star" />
-          </template></q-input>
-        <q-item-label>Angebotszeitraum</q-item-label>
-        <q-toggle
-          v-model="wholeYearOffer"
-          label="Ganzes Jahr"
-          icon="event"
-        >
-        </q-toggle>
-        <q-input
-          :disable="wholeYearOffer"
-          outlined
-          v-model="OfferStartPeriod"
-          label="von"
-          class="input-item rounded-borders"
-        >
-          <q-popup-proxy
-            ref="qDateProxy1"
-            transition-show="scale"
-            transition-hide="scale"
-          >
-            <q-date
-              v-model="OfferStartPeriod"
-              today-btn
-              mask="DD.MM.YYYY"
-              @input="() => [$refs.qDateProxy1.hide(), OfferEndPeriod = OfferStartPeriod]"
+              <q-uploader
+                url=""
+                label="Titelbild hochladen"
+                accept=".jpg, image/*"
+                style="max-width: 300px; display:none;"
+                hide-upload-btn
+                ref="titleUpload"
+                @added="fileAdded($event, 'title')"
+              />
+            </div>
+            <q-uploader
+              url=""
+              label="Weitere Bilder hochladen"
+              multiple
+              style="max-width: 300px; display:none;"
+              hide-upload-btn
+              ref="galeryUpload"
+              @added="fileAdded($event, 'galery')"
             />
-            <!-- :options="dateOptions" -->
-          </q-popup-proxy>
-          <template v-slot:prepend>
-            <q-icon
-              name="event"
-              class="cursor-pointer"
-            >
-            </q-icon>
-          </template>
-        </q-input>
-        <q-input
-          :disable="wholeYearOffer"
-          outlined
-          v-model="OfferEndPeriod"
-          label="bis"
-          class="input-item rounded-borders"
+            <span>weiter Bilder</span>
+            <div class="galeryImgUploaderContainer">
+              <div
+                class="uploader"
+                v-for="(url, index) in galeryImgUrls"
+                :key="url"
+              >
+                <q-img
+                  style="height:100%;"
+                  :src="url"
+                ></q-img>
+                <q-btn
+                  round
+                  color="primary"
+                  icon="add"
+                  style="transform:rotate(45deg); position: absolute;"
+                  @click="removeFile(index)"
+                >
+                </q-btn>
+              </div>
+              <div class="uploader">
+                <q-btn
+                  round
+                  color="primary"
+                  icon="add"
+                  :disable="visible"
+                  @click="() => $refs.galeryUpload.pickFiles()"
+                  style="position:relative;"
+                >
+                  <q-inner-loading
+                    :showing="visible"
+                    style="border-radius:50%"
+                  >
+                    <q-spinner
+                      size="42px"
+                      color="primary"
+                    >
+                    </q-spinner>
+                  </q-inner-loading>
+                </q-btn>
+              </div>
+            </div>
+            <div class="row justify-end">
+              <q-btn
+                type="submit"
+                :loading="submitting"
+                label="Speichern"
+                class="q-mt-md"
+                color="primary"
+                text-color="white"
+              >
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
+            </div>
+          </q-list>
+        </q-form>
+        <h4>Danger Zone</h4>
+        <q-list
+          bordered
+          class="rounded-borders"
+          style="padding:10px; border-color:red;"
         >
-          <q-popup-proxy
-            ref="qDateProxy2"
-            transition-show="scale"
-            transition-hide="scale"
-          >
-            <q-date
-              v-model="OfferEndPeriod"
-              today-btn
-              mask="DD.MM.YYYY"
-              :options="scheduleDateOptions"
-              @input="() => $refs.qDateProxy2.hide()"
-            />
-          </q-popup-proxy>
-          <template v-slot:prepend>
-            <q-icon
-              name="event"
-              class="cursor-pointer"
-            >
-            </q-icon>
-          </template>
-        </q-input>
-        <q-input
-          v-model="price"
-          label="Preis"
-          type="number"
-          outlined
-          :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
-        ><template v-slot:prepend>
-            <q-icon name="euro">
-            </q-icon>
-          </template>
-        </q-input>
-        <div>
-          <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br></span>
-          <br>
-          <div class="uploader">
-            <q-img
-              style="height:100%;"
-              :src="titleImgUrl"
-            ></q-img>
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              style="position: absolute;"
-              :disable="titleUploadDisabled"
-              @click="() => $refs.titleUpload.pickFiles()"
-            >
-              <q-inner-loading
-                :showing="titleUploadDisabled"
-                style="border-radius:50%"
-              >
-                <q-spinner
-                  size="42px"
-                  color="primary"
-                >
-                </q-spinner>
-              </q-inner-loading>
-            </q-btn>
-          </div>
-          <q-uploader
-            url=""
-            label="Titelbild hochladen"
-            accept=".jpg, image/*"
-            style="max-width: 300px; display:none;"
-            hide-upload-btn
-            ref="titleUpload"
-            @added="fileAdded($event, 'title')"
-          />
-        </div>
-        <q-uploader
-          url=""
-          label="Weitere Bilder hochladen"
-          multiple
-          style="max-width: 300px; display:none;"
-          hide-upload-btn
-          ref="galeryUpload"
-          @added="fileAdded($event, 'galery')"
-        />
-        <div class="galeryImgUploaderContainer">
-          <div
-            class="uploader"
-            v-for="(url, index) in galeryImgUrls"
-            :key="url"
-          >
-            <q-img
-              style="height:100%;"
-              :src="url"
-            ></q-img>
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              style="transform:rotate(45deg); position: absolute;"
-              @click="removeFile(index)"
-            >
-            </q-btn>
-          </div>
-          <div class="uploader">
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              :disable="visible"
-              @click="() => $refs.galeryUpload.pickFiles()"
-              style="position:relative;"
-            >
-              <q-inner-loading
-                :showing="visible"
-                style="border-radius:50%"
-              >
-                <q-spinner
-                  size="42px"
-                  color="primary"
-                >
-                </q-spinner>
-              </q-inner-loading>
-            </q-btn>
-          </div>
-        </div>
-        <div class="row justify-end">
+          <p style="font-size:18px;">Diese Rundreise und alle enthaltenen Inhalte löschen</p>
           <q-btn
-            type="submit"
-            :loading="submitting"
-            label="Speichern"
+            :loading="deleting"
+            label="Löschen"
             class="q-mt-md"
             color="primary"
             text-color="white"
+            @click="deleteDialog = true;"
           >
             <template v-slot:loading>
               <q-spinner />
             </template>
           </q-btn>
-        </div>
-      </q-list>
-    </q-form>
-    <h4>Routenvorschau</h4>
-    <Map
-      :profile="profile"
-      :stops="stops"
-    ></Map>
-    <h4>Danger Zone</h4>
-    <q-list
-      bordered
-      class="rounded-borders"
-      style="padding:10px; border-color:red;"
-    >
-      <p style="font-size:18px;">Diese Rundreise und alle enthaltenen Inhalte löschen</p>
-      <q-btn
-        :loading="deleting"
-        label="Löschen"
-        class="q-mt-md"
-        color="primary"
-        text-color="white"
-        @click="deleteDialog = true;"
-      >
-        <template v-slot:loading>
-          <q-spinner />
-        </template>
-      </q-btn>
-      <q-dialog
-        persistent
-        v-model="deleteDialog"
-      >
-        <q-card>
-          <q-card-section class="row items-center">
-            <span class="q-ml-sm">Willst du wirklich diese Rundreise und alle enthaltenen Inhalte löschen ? Dies kann nicht mehr rückgängig gemacht werden.</span>
-          </q-card-section>
+          <q-dialog
+            persistent
+            v-model="deleteDialog"
+          >
+            <q-card>
+              <q-card-section class="row items-center">
+                <span class="q-ml-sm">Willst du wirklich diese Rundreise und alle enthaltenen Inhalte löschen ? Dies kann nicht mehr rückgängig gemacht werden.</span>
+              </q-card-section>
 
-          <q-card-actions align="right">
-            <q-btn
-              flat
-              label="Abbrechen"
-              color="primary"
-              v-close-popup
-            />
-            <q-btn
-              flat
-              label="Rundreise Löschen"
-              @click="deleteRoundtrip()"
-              color="primary"
-              v-close-popup
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-    </q-list>
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  label="Abbrechen"
+                  color="primary"
+                  v-close-popup
+                />
+                <q-btn
+                  flat
+                  label="Rundreise Löschen"
+                  @click="deleteRoundtrip()"
+                  color="primary"
+                  v-close-popup
+                />
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+        </q-list>
+      </q-tab-panel>
+      <q-tab-panel name="map">
+
+        <h4>Karte</h4>
+        <Map
+          :profile="profile"
+          :stops="stops"
+        ></Map>
+      </q-tab-panel>
+    </q-tab-panels>
+
   </div>
 </template>
 <style lang="less">
@@ -596,11 +923,14 @@ import { date, scroll, Loading } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import Duration from '../pages/EditRoundtripComponents/duration'
 import CitySearch from '../pages/Map/CitySearch'
-// import HotelSearch from '../pages/Map/HotelSearch'
+import HotelSearch from '../pages/Map/HotelSearch'
+import RegionSearch from '../pages/Map/RegionSearch'
+import CitySuggestion from '../pages/Map/CitySuggestion'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import Map from '../pages/Map/Map'
 import axios from 'axios'
+var querystring = require('querystring')
 
 const { getScrollTarget, setScrollPosition } = scroll
 
@@ -632,8 +962,10 @@ export default {
     Stop,
     CitySearch,
     Map,
-    Duration
-    // HotelSearch
+    Duration,
+    HotelSearch,
+    RegionSearch,
+    CitySuggestion
   },
   data () {
     return {
@@ -648,6 +980,7 @@ export default {
       title: '',
       country: '',
       submitting: false,
+      offersSubmitting: false,
       deleting: false,
       countryOptions: countries,
       regionOptions: null,
@@ -678,7 +1011,36 @@ export default {
       region: null,
       parkingPlace: {},
       uploading: false,
-      uploadIndex: 0
+      uploadIndex: 0,
+      tab: 'start',
+      rooms: 0,
+      adults: 0,
+      children: 0,
+      childrenAges: [],
+      checkOutDate: formattedScheduleDate,
+      hotelName: null,
+      hotelLocation: {},
+      hotelStars: 0,
+      hotelContact: {},
+      arrivalDepatureProfile: 'Flugzeug',
+      origin: null,
+      destination: null,
+      depatureDate: formattedScheduleDate,
+      returnDate: formattedScheduleDate,
+      travelClass: 'Economy',
+      nonStop: 'Ja',
+      originOptions: [],
+      originCodes: [],
+      destinationOptions: [],
+      destinationCodes: [],
+      originCode: null,
+      destinationCode: null,
+      inspirationDisabled: true,
+      routeDisabled: true,
+      startDisabled: false,
+      settingsDisabled: true,
+      mapDisabled: true
+
     }
   },
   methods: {
@@ -698,6 +1060,17 @@ export default {
       const currentDate = new Date(date)
 
       return currentDate > compareDate
+    },
+    openBookingComFlights () {
+      let childrenAgeString = ''
+      this.childrenAges.forEach((childAge, index) => {
+        childrenAgeString += childAge
+        if (index < this.childrenAges.length - 1) childrenAgeString += '%2C'
+      })
+
+      let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?aid=1632674&type=ROUNDTRIP&adults=' + this.adults +
+        '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getDepatureReturnDate(this.depatureDate) + '&return=' + this.getDepatureReturnDate(this.returnDate) + '&sort=BEST'
+      window.open(url, '_blank')
     },
     onAddEntry () {
       if (!this.isDateTimeValid()) return false
@@ -723,6 +1096,60 @@ export default {
           message: 'Der Eintrag konnte nicht erstellt werden'
         })
       }
+    },
+    searchOffers () {
+      return new Promise((resolve, reject) => {
+        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+        let context = this
+
+        const headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        const data = querystring.stringify({
+          grant_type: 'client_credentials', // gave the values directly for testing
+          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+          client_secret: '5NLWAdMXnOyNxWnk'
+        })
+
+        axios.post(url, data, {
+          headers: headers,
+          form: {
+            'grant_type': 'client_credentials',
+            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+            'client_secret': '5NLWAdMXnOyNxWnk'
+          }
+        }).then(function (response) {
+          let token = response.data.access_token
+          const tokenString = 'Bearer ' + token
+
+          let nonStopFlight = context.nonStop === 'Ja'
+
+          axios.get('https://test.api.amadeus.com/v1/shopping/flight-offers?origin=' + context.originCode +
+            '&destination=' + context.destinationCode + '&departureDate=' + context.getDepatureReturnDate(context.depatureDate) +
+            '&travelClass=' + context.travelClass.toUpperCase() + '&nonStop=' + nonStopFlight + '&max=10&currency=EUR', {
+            headers: {
+              'Authorization': tokenString
+            }
+          }).then(function (response) {
+            console.log(response)
+            resolve(response)
+          }).catch(function (error) {
+            console.log('Error' + error)
+            resolve(null)
+          })
+        }).catch(function (error) {
+          console.log('Error on Authentication' + error)
+          resolve(null)
+        })
+      })
+    },
+    validOfferSearchData () {
+      return this.originCode && this.destinationCode && this.depatureDate && this.travelClass && this.nonStop && this.arrivalDepatureProfile === 'Flugzeug'
+    },
+    getDepatureReturnDate (dateString) {
+      let dateParts = dateString.split('.')
+      return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     },
     addStop (DateString, HotelStop) {
       RTId = this.$route.params.id
@@ -754,7 +1181,11 @@ export default {
         RTId,
         Title,
         Location,
-        Parking: this.parkingPlace
+        Parking: this.parkingPlace,
+        HotelLocation: HotelStop ? this.hotelLocation : null,
+        HotelStars: HotelStop ? this.hotelStars : null,
+        HotelContact: HotelStop ? this.hotelContact : null,
+        HotelName: HotelStop ? this.hotelName : null
       })
 
       // clear all values
@@ -856,8 +1287,13 @@ export default {
         this.saveData('OfferStartPeriod', offerStartPeriod) &&
         this.saveData('OfferEndPeriod', offerEndPeriod) &&
         this.saveData('Price', this.price) &&
-        this.saveData('OfferWholeYear', this.wholeYearOffer)) {
+        this.saveData('OfferWholeYear', this.wholeYearOffer) &&
+        this.saveData('Rooms', this.rooms) &&
+        this.saveData('Adults', this.adults) &&
+        this.saveData('ChildrenAges', this.childrenAges)
+      ) {
         this.submitting = false
+        this.enableTabs()
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -874,35 +1310,139 @@ export default {
         })
       }
     },
+    onSaveArrivalDepature () {
+      this.submitting = true
+
+      if (this.arrivalDepatureProfile === 'Flugzeug') {
+        let dateParts = this.depatureDate.split('.')
+        let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        dateParts = this.returnDate.split('.')
+        let returnDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        if (this.saveData('TransportProfile', this.arrivalDepatureProfile) &&
+          this.saveData('Origin', this.origin) &&
+          this.saveData('OriginCode', this.originCodes[this.originOptions.indexOf(this.origin)] ? this.originCodes[this.originOptions.indexOf(this.origin)] : this.originCode) &&
+          this.saveData('Destination', this.destination) &&
+          this.saveData('DestinationCode', this.destinationCodes[this.destinationOptions.indexOf(this.destination)] ? this.destinationCodes[this.destinationOptions.indexOf(this.destination)] : this.destinationCode) &&
+          this.saveData('DepatureDate', depatureDate) &&
+          this.saveData('ReturnDate', returnDate) &&
+          this.saveData('TravelClass', this.travelClass) &&
+          this.saveData('NonStop', this.nonStop)
+        ) {
+          this.submitting = false
+          this.enableTabs()
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Daten wurden gespeichert'
+          })
+        } else {
+          this.submitting = false
+          this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Die Daten konnten nicht gespeichert werden'
+          })
+        }
+      } else {
+        if (this.saveData('TransportProfile', this.arrivalDepatureProfile)) {
+          this.submitting = false
+          this.enableTabs()
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Daten wurden gespeichert'
+          })
+        } else {
+          this.submitting = false
+          this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Die Daten konnten nicht gespeichert werden'
+          })
+        }
+      }
+    },
     filterFn (val, update, abort) {
       update(() => {
         const needle = val.toLowerCase()
         this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
-    filterRegions (val, update, abort) {
-      if (val.length < 2 && this.regionOptions != null) {
+    getOrigins (val, update, abort) {
+      this.filterAirports(val, update, abort, true)
+    },
+    getDestinations (val, update, abort) {
+      this.filterAirports(val, update, abort, false)
+    },
+    filterAirports (val, update, abort, originSearch) {
+      if (val.length < 3) {
         abort()
         return
       }
 
       update(() => {
-        this.getRegions(this.country, val).then((results) => {
-          this.regionOptions = results
-        })
+        if (val.length >= 3) {
+          this.getAirports(val).then((results) => {
+            if (originSearch) {
+              this.originOptions = []
+              this.originCodes = []
+            } else {
+              this.destinationOptions = []
+              this.destinationCodes = []
+            }
+
+            results.data.data.forEach(city => {
+              if (originSearch) {
+                this.originOptions.push(this.capitalize(city.name))
+                this.originCodes.push(city.iataCode)
+              } else {
+                this.destinationOptions.push(this.capitalize(city.name))
+                this.destinationCodes.push(city.iataCode)
+              }
+            })
+          })
+        }
       })
     },
-    getRegions (country, regionPref) {
+    capitalize (s) {
+      s = s.toLowerCase()
+      s = s.charAt(0).toUpperCase() + s.slice(1)
+      return s
+    },
+    getAirports (val) {
       return new Promise((resolve, reject) => {
-        axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
-          headers: {
-            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+
+        const headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        const data = querystring.stringify({
+          grant_type: 'client_credentials', // gave the values directly for testing
+          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+          client_secret: '5NLWAdMXnOyNxWnk'
+        })
+
+        axios.post(url, data, {
+          headers: headers,
+          form: {
+            'grant_type': 'client_credentials',
+            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+            'client_secret': '5NLWAdMXnOyNxWnk'
           }
         }).then(function (response) {
-          console.log(response)
-          axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries/' + response.code + '/regions?limit=5&offset=0&languageCode=de&namePrefix=' + regionPref, {
+          let token = response.data.access_token
+          const tokenString = 'Bearer ' + token
+
+          axios.get('https://test.api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
             headers: {
-              'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+              'Authorization': tokenString
             }
           }).then(function (response) {
             resolve(response)
@@ -911,7 +1451,7 @@ export default {
             resolve(null)
           })
         }).catch(function (error) {
-          console.log('Error' + error)
+          console.log('Error on Authentication' + error)
           resolve(null)
         })
       })
@@ -940,12 +1480,44 @@ export default {
           this.region = roundtrip[0].Region
           this.price = roundtrip[0].Price
           this.wholeYearOffer = roundtrip[0].OfferWholeYear
+          this.rooms = roundtrip[0].Rooms
+          this.adults = roundtrip[0].Adults
+          this.children = roundtrip[0].ChildrenAges.length
+          this.childrenAges = roundtrip[0].ChildrenAges
+
+          this.arrivalDepatureProfile = roundtrip[0].TransportProfile ? roundtrip[0].TransportProfile : 'Flugzeug'
+          this.origin = roundtrip[0].Origin
+
+          // set first tab
+          this.setFirstTab()
 
           let retrievedDate = new Date(roundtrip[0].OfferEndPeriod.seconds * 1000)
           this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
           retrievedDate = new Date(roundtrip[0].OfferStartPeriod.seconds * 1000)
           this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+
+          if (this.arrivalDepatureProfile === 'Flugzeug') {
+            this.destination = roundtrip[0].Destination
+            this.travelClass = roundtrip[0].TravelClass ? roundtrip[0].TravelClass : 'Economy'
+            this.nonStop = roundtrip[0].NonStop ? roundtrip[0].NonStop : 'Ja'
+            this.originCode = roundtrip[0].OriginCode
+            this.destinationCode = roundtrip[0].DestinationCode
+
+            if (this.depatureDate && roundtrip[0].DepatureDate) {
+              retrievedDate = new Date(roundtrip[0].DepatureDate.seconds * 1000)
+              this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+            } else {
+              this.depatureDate = formattedScheduleDate
+            }
+
+            if (this.returnDate && roundtrip[0].ReturnDate) {
+              retrievedDate = new Date(roundtrip[0].ReturnDate.seconds * 1000)
+              this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+            } else {
+              this.depatureDate = formattedScheduleDate
+            }
+          }
 
           this.getGeneralProfile()
 
@@ -962,9 +1534,37 @@ export default {
             color: 'red-5',
             textColor: 'white',
             icon: 'error',
-            message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
+            message: 'Deine Rundreise konnte nicht richtig geladen werden, bitte versuche es erneut'
           })
         })
+    },
+    setFirstTab () {
+      if (!this.origin) {
+        this.tab = 'start'
+        this.disableTabs(true, true, false, true, true)
+      } else if (this.highlight1 === 'Highlight 1') {
+        this.tab = 'settings'
+        this.disableTabs(true, true, false, false, true)
+      } else {
+        this.tab = 'route'
+        this.disableTabs(false, false, false, false, false)
+      }
+    },
+    enableTabs () {
+      if (!this.origin) {
+        this.disableTabs(true, true, false, true, true)
+      } else if (this.highlight1 === 'Highlight 1') {
+        this.disableTabs(true, true, false, false, true)
+      } else {
+        this.disableTabs(false, false, false, false, false)
+      }
+    },
+    disableTabs (inspirationDisabled, routeDisabled, startDisabled, settingsDisabled, mapDisabled) {
+      this.inspirationDisabled = inspirationDisabled
+      this.routeDisabled = routeDisabled
+      this.startDisabled = startDisabled
+      this.settingsDisabled = settingsDisabled
+      this.mapDisabled = mapDisabled
     },
     loadCategories () {
       let roundtripsRef = db.collection('Categories')
@@ -996,6 +1596,35 @@ export default {
         }
       }
     },
+    updateRegion (event) {
+      if (event !== null) {
+        console.log(event)
+        this.region = event
+      }
+    },
+    updateHotelData (event) {
+      if (event !== null) {
+        let hotel = event.hotel
+
+        let hotelLat = hotel.latitude
+        let hotelLng = hotel.longitude
+
+        // capitalize cityName
+        let hotelLocationLabel = hotel.address.lines[0]
+
+        this.hotelLocation = {
+          lng: hotelLat,
+          lat: hotelLng,
+          label: hotelLocationLabel
+        }
+
+        typeof hotel.rating !== 'undefined' ? this.hotelStars = hotel.rating : this.hotelStars = null
+
+        this.hotelName = hotel.name
+
+        this.hotelContact = hotel.contact
+      }
+    },
     loadRoundtripDetails (RTId) {
       this.selectedCountry = this.country
       this.showSimulatedReturnData = false
@@ -1023,7 +1652,15 @@ export default {
             const initDate = new Date(stop.InitDate.seconds * 1000)
             stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
 
-            if (details.indexOf(stop) === details.length - 1) this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+            if (details.indexOf(stop) === details.length - 1) {
+              this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+
+              // add one day
+              const defaultCheckOutDate = new Date()
+              defaultCheckOutDate.setDate(initDate.getDate() + 1)
+
+              this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
+            }
 
             if (stop.HotelStop) hotelCount++
 
@@ -1088,8 +1725,6 @@ export default {
       if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
-
-      console.log(url)
 
       axios.get(url)
         .then(response => {
@@ -1230,6 +1865,19 @@ export default {
           return Number(snapshot.size) === 1
         })
     },
+    hotelRatingAvg () {
+      let sum = 0
+      let count = 0
+
+      this.stops.forEach((stop, index) => {
+        if (stop.HotelStop) {
+          sum += parseInt(stop.HotelStars, 10)
+          count++
+        }
+      })
+
+      return sum / count
+    },
     isDateTimeValid () {
       var testDate = this.date
       if (testDate === null || testDate.length === 0) return false
@@ -1340,8 +1988,6 @@ export default {
                   detailsSnapshot.forEach(detailDoc => {
                     let docData = detailDoc.data()
 
-                    console.log(docData)
-
                     db.collection('RoundtripDetails').add({
                       BookingComLink: docData.BookingComLink,
                       DateDistance: docData.DateDistance,
@@ -1397,6 +2043,8 @@ export default {
         title = params.split('&')[1]
       }
 
+      this.stars = !isNaN(this.hotelRatingAvg()) ? this.hotelRatingAvg() : 3
+
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
         .limit(1)
@@ -1410,7 +2058,6 @@ export default {
             this.loadSingleRoundtrip(RTId)
             this.loadCategories()
           } else if (isPublic) {
-            console.log(title)
             this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
           } else {
             this.$q.notify({

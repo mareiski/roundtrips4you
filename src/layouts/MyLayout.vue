@@ -44,7 +44,7 @@
           <q-avatar
             size="50px"
             style="width: 50px; margin:auto 10px auto 10px;"
-            :style="user ? null : 'font-size:60px;'"
+            :style="user ? 'padding:0;' : 'font-size:60px;'"
             :icon="user && user.photoURL !== null ? null : 'account_circle'"
             @click="user ? null : $router.push('/login')"
           >
@@ -52,12 +52,13 @@
               v-if="user && user.photoURL !== null"
               :src="user.photoURL"
             >
-            <div
-              v-if="user"
-              style="pointer-events: none;"
-            >
-              <q-tooltip :value="showHelloTooltip">
-                Hallo, {{user.displayName}}
+            <div style="pointer-events: none;">
+              <q-tooltip
+                :value="true"
+                self="center middle"
+                content-style="font-size: 14px"
+              >
+                {{user ? 'Hallo, ' + user.displayName : 'Anmelden'}}
               </q-tooltip>
             </div>
             <q-menu v-if="user">
@@ -236,7 +237,6 @@ export default {
   data () {
     return {
       showPreload: true,
-      showHelloTooltip: true,
       onLine: navigator.onLine
     }
   },
@@ -364,10 +364,6 @@ export default {
         redirected = false
         this.showPreload = false
         Loading.hide()
-        let context = this
-        setTimeout(function () {
-          context.showHelloTooltip = false
-        }, 5000)
       }
     })
   }

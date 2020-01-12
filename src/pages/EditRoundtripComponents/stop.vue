@@ -24,9 +24,9 @@
           />
         </h6>
         <div
-          v-if="generalLink != null && generalLink.length > 0"
           @mouseover="generalLinkText = 'Hotel link'"
           @mouseleave="generalLinkText = ''"
+          v-if="generalLink !== null && generalLink.length > 0"
         >
           <q-chip
             icon="link"
@@ -35,8 +35,17 @@
             class="linkChip"
             clickable
             @click="openInNewTab(generalLink)"
-          >{{generalLinkText}}</q-chip>
+          >{{ generalLinkText}}</q-chip>
         </div>
+        <q-chip
+          icon="hotel"
+          v-if="hotelName && typeof hotelName !== 'undefined'"
+          size="1px"
+          dense
+          class="linkChip"
+          clickable
+          @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+        >auf booking.com ansehen</q-chip>
       </div>
       <q-icon
         v-if="editor"
@@ -47,12 +56,21 @@
     </div>
     <div>
       <q-chip
+        v-if="!hotelLocation ||  typeof hotelLocation === 'undefined'"
         icon="location_on"
         size="3px"
-        :clickable="editor"
-        @click="editLocation = true"
+        clickable
+        @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
       >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
         <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
+      </q-chip>
+      <q-chip
+        v-else
+        icon="house"
+        size="3px"
+        clickable
+        @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
+      >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelName + ', ' + hotelLocation.label) :  'kein Ort angegeben'}}
       </q-chip>
       <q-dialog
         v-if="editor"
@@ -123,13 +141,40 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
+      <q-rating
+        v-if="!isNaN(hotelStars)"
+        class="stars"
+        v-model="hotelStars"
+        readonly
+        size="15px"
+        color="gold"
+        style="margin-right:10px;"
+      />
+    </div>
+    <div v-if="hotelContact && typeof hotelContact !== 'undefined'">
+      <q-chip
+        v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
+        icon="email"
+        size="3px"
+        clickable
+        @click="openInNewTab('mailto:' + hotelContact.email)"
+      >{{ hotelContact.email}}
+      </q-chip>
+      <q-chip
+        icon="phone"
+        v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+        size="3px"
+        clickable
+        @click="openInNewTab('tel:' + hotelContact.phone)"
+      >{{hotelContact.phone}}
+      </q-chip>
     </div>
     <div>
-      <div v-if="sights !== null && sights !== 'error'">
+      <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
         <a
           v-for="sight in sights"
           :key="sight"
-          :href="'https://www.google.com/search?q=' + sight.name"
+          :href="'https://www.google.com/search?q=' + sight.name + ' ' + location.label.split(',')[0]"
           target="_blank"
           style="text-decoration:none;"
         >
@@ -137,21 +182,23 @@
             v-if="editor"
             size="3px"
             clickable
+            :icon="sight.category === 'RESTAURANT' ? 'restaurant_menu' : 'account_balance'"
           >{{sight.name}}</q-chip>
         </a>
         <a
           target="_blank"
           style="text-decoration:none;"
-          :href="'https://www.google.com/search?q=' + location.label.split(',')"
+          :href="'https://www.google.com/search?q=' + location.label.split(',')[0]"
         >weitere anzeigen</a>
       </div>
       <q-chip
-        v-else-if="editor"
+        v-else-if="editor && (!hotelName || typeof hotelName === 'undefined')"
         size="3px"
         clickable
         @click="searchSights()"
       >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
       <div
+        style="margin-top:10px;"
         v-if="!editor"
         v-html="descriptionInput"
       ></div>
@@ -255,7 +302,15 @@ export default {
     location: Object,
     days: String,
     parkingPlace: String,
-    lastItem: Boolean
+    lastItem: Boolean,
+    hotelStars: Number,
+    hotelName: String,
+    hotelLocation: Object,
+    hotelContact: Object,
+    checkOutDate: String,
+    adults: Number,
+    childrenAges: Array,
+    rooms: Number
   },
   data () {
     return {
@@ -362,6 +417,13 @@ export default {
         'InitDate': initDate
       })
     },
+    getChildrenText () {
+      let text = '&group_children=' + this.childrenAges.length
+      this.childrenAges.forEach(child => {
+        text += '&age=' + child
+      })
+      return text
+    },
     hideDialog () {
       this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id)
     },
@@ -403,6 +465,11 @@ export default {
           label: event.label
         }
       }
+    },
+    capitalize (s) {
+      s = s.toLowerCase()
+      s = s.charAt(0).toUpperCase() + s.slice(1)
+      return s
     },
     formatOn () {
       this.preventPasting = !this.preventPasting
@@ -507,7 +574,7 @@ export default {
 
           console.log(token)
 
-          axios.get('https://test.api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=2&page[limit]=5&page[offset]=0&categories=SIGHTS', {
+          axios.get('https://test.api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=10&page[limit]=5&page[offset]=0&categories=SIGHTS', {
             headers: {
               'Authorization': tokenString
             }
