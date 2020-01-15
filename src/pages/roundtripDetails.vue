@@ -158,6 +158,7 @@
           :profile="profile"
           :stops="stops"
           :childrenAges="childrenAges"
+          :checkOutDate="dates[index + 1] ? dates[index + 1] : dates[index]"
         ></Map>
         <br>
         <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>

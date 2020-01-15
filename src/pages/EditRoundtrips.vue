@@ -959,6 +959,7 @@
           :profile="profile"
           :stops="stops"
           :childrenAges="childrenAges"
+          :checkOutDate="checkOutDate"
         ></Map>
       </q-tab-panel>
     </q-tab-panels>

@@ -14,7 +14,7 @@
       <MglMarker
         v-for="stop in stops"
         :key="stop"
-        :coordinates="stop.HotelStop ? [stop.HotelLocation.lng, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
+        :coordinates="stop.HotelStop ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
       >
         <MglPopup>
@@ -23,17 +23,44 @@
               v-if="stop.HotelStop"
               :href="stop.GeneralLink"
               target="_blank"
-            >{{stop.Title}}</a>
+            >{{stop.Title + ' - ' + capitalize(stop.HotelName)}}</a>
             <p v-if="!stop.HotelStop">{{stop.Title}}</p>
+            <q-chip
+              icon="hotel"
+              v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
+              size="1px"
+              dense
+              class="linkChip"
+              clickable
+              @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + stop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + stop.InitDate.split('.')[1] + '&checkin_monthday=' + stop.InitDate.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+            >auf booking.com</q-chip>
             <p>
               <a
                 target="_blank"
-                :href="stop.HotelStop ? 'https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de' :'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label"
-              >{{stop.HotelStop ? stop.HotelLocation.label + ' auf Booking.com' : stop.Location.label}}</a>
+                :href="!stop.HotelStop ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
+              >{{stop.HotelStop ? stop.HotelLocation.label : stop.Location.label}}</a>
             </p>
           </VCard>
         </MglPopup>
       </MglMarker>
+      <div
+        v-for="stop in stops"
+        :key="stop"
+      >
+        <MglMarker
+          v-if="stop.Parking && typeof stop.Parking !== 'undefined'"
+          :key="
+          stop"
+          :coordinates="[stop.Parking.lng, stop.Parking.lat]"
+          color="#D56026"
+        >
+          <MglPopup>
+            <VCard>
+              <p>{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
+            </VCard>
+          </MglPopup>
+        </MglMarker>
+      </div>
       <MglMarker
         v-for="route in addedRoutes"
         :key="route"
@@ -50,6 +77,7 @@
             <div>{{route.duration}} bis {{route.destination}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
             <a
               target="_blank"
+              v-if="route.origin !== route.destination"
               :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination"
             >auf Google ansehen</a>
           </VCard>
@@ -87,7 +115,8 @@ export default {
   props: {
     stops: Array,
     profile: String,
-    childrenAges: Array
+    childrenAges: Array,
+    checkOutDate: String
 
   },
   data () {
@@ -103,11 +132,32 @@ export default {
 
       let bounds = []
       this.stops.forEach((stop, index) => {
-        if (index >= 1) this.getRoute([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
-        bounds.push([stop.Location.lng, stop.Location.lat])
+        let previousStopLng = 0
+        let previousStopLat = 0
+        if (index >= 1) {
+          if (this.stops[index - 1].HotelStop) {
+            previousStopLng = this.stops[index - 1].HotelLocation.lat
+            previousStopLat = this.stops[index - 1].HotelLocation.lng
+          } else {
+            previousStopLat = this.stops[index - 1].Location.lat
+            previousStopLng = this.stops[index - 1].Location.lng
+          }
+        }
+
+        if (stop.HotelStop) {
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lat, stop.HotelLocation.lng], map, index, stop.Profile)
+
+          bounds.push([stop.HotelLocation.lat, stop.HotelLocation.lng])
+        } else {
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
+          bounds.push([stop.Location.lng, stop.Location.lat])
+        }
       })
 
       map.fitBounds(new Mapbox.LngLatBounds(bounds))
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     },
     getChildrenText () {
       let text = '&group_children=' + this.childrenAges.length
