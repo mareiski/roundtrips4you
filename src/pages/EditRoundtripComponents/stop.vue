@@ -26,7 +26,7 @@
         <div
           @mouseover="generalLinkText = 'Hotel link'"
           @mouseleave="generalLinkText = ''"
-          v-if="generalLink !== null && generalLink.length > 0"
+          v-if="generalLink && generalLink.length > 0"
         >
           <q-chip
             icon="link"

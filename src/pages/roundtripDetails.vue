@@ -155,8 +155,9 @@
 
       <q-tab-panel name="map">
         <Map
-          profile="driving"
+          :profile="profile"
           :stops="stops"
+          :childrenAges="childrenAges"
         ></Map>
         <br>
         <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>

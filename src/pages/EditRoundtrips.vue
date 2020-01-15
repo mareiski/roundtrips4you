@@ -35,7 +35,15 @@
         name="inspiration"
         label="Inspiration"
         :disable="inspirationDisabled"
-      />
+      >
+        <q-badge
+          color="primary"
+          floating
+          v-if="!inspirationDisabled && stops.length <= 1"
+          label="weiter"
+        >
+        </q-badge>
+      </q-tab>
       <q-tab
         name="route"
         label="Reiseverlauf"
@@ -44,13 +52,21 @@
       <q-tab
         name="start"
         label="An-/Abreise"
-        :disable="startDisabled"
-      />
+      >
+        <q-badge
+          color="primary"
+          floating
+          v-if="!routeDisabled && settingsDisabled"
+          label="start"
+        >
+        </q-badge>
+      </q-tab>
       <q-tab
         name="settings"
         label="Einstellungen"
         :disable="settingsDisabled"
-      />
+      >
+      </q-tab>
       <q-tab
         name="map"
         label="Karte"
@@ -67,6 +83,22 @@
       ref="tabPanels"
     >
       <q-tab-panel name="inspiration">
+        <q-banner
+          class="bg-grey-3"
+          v-if="stops.length <= 1"
+        >
+          <template v-slot:avatar>
+            <q-icon
+              name="check_circle"
+              color="primary"
+            />
+          </template>
+          Lasse dich einfach inspirieren und erstelle im <a
+            style="text-decoration:underline;"
+            @click="$refs.tabPanels.goTo('route')"
+          >Reiseverlauf</a> weitere Stopps. <br>
+        </q-banner>
+
         <h4>Inspiration</h4>
         <CitySuggestion :country="country"></CitySuggestion>
       </q-tab-panel>
@@ -259,8 +291,8 @@
                       ref="urlInput"
                       type="url"
                       style="width:300px;"
-                      :rules="[val => urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
-                      label="Hotel link"
+                      :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+                      label="Hotel link (optional)"
                       outlined
                     >
                       <template v-slot:prepend>
@@ -463,6 +495,7 @@
                 class="q-mt-md"
                 color="primary"
                 text-color="white"
+                v-if="arrivalDepatureProfile === 'Flugzeug'"
                 label="Flüge auf Booking.com buchen"
               ></q-btn>
               <!-- <q-btn
@@ -495,6 +528,19 @@
         </div>
       </q-tab-panel>
       <q-tab-panel name="settings">
+
+        <q-banner
+          class="bg-grey-3"
+          v-if="routeDisabled"
+        >
+          <template v-slot:avatar>
+            <q-icon
+              name="error"
+              color="primary"
+            />
+          </template>
+          Bitte verfolständige deine Einstellungen & speichere diese um zum nächsten Schritt zu kommen.
+        </q-banner>
 
         <h4>Allgemeine Einstellungen</h4>
         <q-form
@@ -558,7 +604,10 @@
                 <q-icon name="access_time" />
               </template>
             </q-select>
-            <div class="flex">
+            <div
+              class="flex"
+              v-if="!routeDisabled"
+            >
               <q-rating
                 class="stars"
                 v-model="stars"
@@ -909,6 +958,7 @@
         <Map
           :profile="profile"
           :stops="stops"
+          :childrenAges="childrenAges"
         ></Map>
       </q-tab-panel>
     </q-tab-panels>
@@ -1037,7 +1087,6 @@ export default {
       destinationCode: null,
       inspirationDisabled: true,
       routeDisabled: true,
-      startDisabled: false,
       settingsDisabled: true,
       mapDisabled: true
 
@@ -1539,30 +1588,25 @@ export default {
         })
     },
     setFirstTab () {
-      if (!this.origin) {
+      if (!this.origin && this.arrivalDepatureProfile === 'Flugzeug') {
         this.tab = 'start'
-        this.disableTabs(true, true, false, true, true)
-      } else if (this.highlight1 === 'Highlight 1') {
-        this.tab = 'settings'
-        this.disableTabs(true, true, false, false, true)
+        this.disableTabs(true, true, true, true)
       } else {
         this.tab = 'route'
-        this.disableTabs(false, false, false, false, false)
+        this.disableTabs(false, false, false, false)
       }
     },
     enableTabs () {
-      if (!this.origin) {
-        this.disableTabs(true, true, false, true, true)
-      } else if (this.highlight1 === 'Highlight 1') {
-        this.disableTabs(true, true, false, false, true)
+      if (!this.origin && this.arrivalDepatureProfile === 'Flugzeug') {
+        this.disableTabs(true, true, true, true)
       } else {
-        this.disableTabs(false, false, false, false, false)
+        this.disableTabs(false, false, false, false)
       }
+      this.scrollTo(document.getElementById('Header'))
     },
-    disableTabs (inspirationDisabled, routeDisabled, startDisabled, settingsDisabled, mapDisabled) {
+    disableTabs (inspirationDisabled, routeDisabled, settingsDisabled, mapDisabled) {
       this.inspirationDisabled = inspirationDisabled
       this.routeDisabled = routeDisabled
-      this.startDisabled = startDisabled
       this.settingsDisabled = settingsDisabled
       this.mapDisabled = mapDisabled
     },

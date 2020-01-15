@@ -7,7 +7,7 @@
       v-if="cities.length === 0"
       @click="getCities(country)"
     >Städte vorschlagen</q-btn>
-    <div class="flex justify-between">
+    <div class="flex justify-between cards-container">
       <q-card
         class="city-card"
         v-for="city in cities"

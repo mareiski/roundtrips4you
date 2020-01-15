@@ -11,6 +11,7 @@
         v-model="userEmail"
         outlined
         type="email"
+        lazy-rules
         :rules="[val => val !== null && val !== '' || 'Bitte wähle gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
         label="Email"
       />

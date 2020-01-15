@@ -1,3 +1,5 @@
+   @import "./imports.less";
+
    .city-suggestion {
        .city-card {
            width: 200px;
@@ -7,5 +9,11 @@
                color: white;
                text-decoration: none;
            }
+       }
+   }
+
+   @media @mobile {
+       .cards-container {
+           justify-content: center;
        }
    }

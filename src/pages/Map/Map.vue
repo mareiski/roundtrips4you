@@ -14,7 +14,7 @@
       <MglMarker
         v-for="stop in stops"
         :key="stop"
-        :coordinates="[stop.Location.lng, stop.Location.lat]"
+        :coordinates="stop.HotelStop ? [stop.HotelLocation.lng, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
       >
         <MglPopup>
@@ -28,8 +28,8 @@
             <p>
               <a
                 target="_blank"
-                :href="'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label"
-              >{{stop.Location.label}}</a>
+                :href="stop.HotelStop ? 'https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de' :'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label"
+              >{{stop.HotelStop ? stop.HotelLocation.label + ' auf Booking.com' : stop.Location.label}}</a>
             </p>
           </VCard>
         </MglPopup>
@@ -86,7 +86,9 @@ export default {
   },
   props: {
     stops: Array,
-    profile: String
+    profile: String,
+    childrenAges: Array
+
   },
   data () {
     return {
@@ -107,6 +109,13 @@ export default {
 
       map.fitBounds(new Mapbox.LngLatBounds(bounds))
     },
+    getChildrenText () {
+      let text = '&group_children=' + this.childrenAges.length
+      this.childrenAges.forEach(child => {
+        text += '&age=' + child
+      })
+      return text
+    },
     msToTime (duration) {
       var minutes = Math.floor((duration / (1000 * 60)) % 60),
         hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
@@ -126,6 +135,11 @@ export default {
         color += letters[Math.floor(Math.random() * 16)]
       }
       return color
+    },
+    capitalize (s) {
+      s = s.toLowerCase()
+      s = s.charAt(0).toUpperCase() + s.slice(1)
+      return s
     },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile

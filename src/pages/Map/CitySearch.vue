@@ -10,7 +10,7 @@
       ref="select"
       v-model="searchLocation"
       hide-dropdown-icon
-      :label="!parkingPlaceSearch ? 'Ort suchen' : 'Parkplatz suchen'"
+      :label="!parkingPlaceSearch ? 'Ort suchen' : 'Parkplatz suchen (optional)'"
       :options="countryOptions"
       @filter="filterFn"
       @input="$emit('update', $event)"

@@ -79,7 +79,9 @@ module.exports = function (ctx) {
         'QTabPanel',
         'QSeparator',
         'QChatMessage',
-        'QPagination'
+        'QPagination',
+        'QBadge',
+        'QBanner'
       ],
 
       directives: [
