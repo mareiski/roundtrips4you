@@ -824,10 +824,10 @@ export default {
   created () {
     this.loadRoundtrips()
     this.getRTCount()
-    this.loadBookingComWidget()
+    // this.loadBookingComWidget()
   },
   mounted () {
-    this.loadBookingComWidget()
+    // this.loadBookingComWidget()
   }
 }
 </script>
