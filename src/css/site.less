@@ -380,6 +380,15 @@ h2 {
     margin-left: 5px;
 }
 
+.register-btn {
+    position: fixed;
+    top: 85vh;
+    right: 10px;
+    z-index: 1000;
+    box-shadow: 0 0 0 rgba(211, 104, 48, 0.4);
+    animation: pulse 2s infinite;
+}
+
 @media @tablet,
 @mobile {
     .right-col {
@@ -440,5 +449,36 @@ h2 {
         img {
             display: none;
         }
+    }
+}
+
+@-webkit-keyframes pulse {
+    0% {
+        -webkit-box-shadow: 0 0 0 0 rgba(211, 104, 48, 0.5);
+    }
+
+    70% {
+        -webkit-box-shadow: 0 0 0 15px rgba(211, 104, 48, 0);
+    }
+
+    100% {
+        -webkit-box-shadow: 0 0 0 0 rgba(211, 104, 48, 0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        -moz-box-shadow: 0 0 0 0 rgba(211, 104, 48, 0.5);
+        box-shadow: 0 0 0 0 rgba(211, 104, 48, 0.5);
+    }
+
+    70% {
+        -moz-box-shadow: 0 0 0 15px rgba(211, 104, 48, 0);
+        box-shadow: 0 0 0 15px rgba(211, 104, 48, 0);
+    }
+
+    100% {
+        -moz-box-shadow: 0 0 0 0 rgba(211, 104, 48, 0);
+        box-shadow: 0 0 0 0 rgba(211, 104, 48, 0);
     }
 }

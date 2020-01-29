@@ -116,7 +116,9 @@ export default {
     stops: Array,
     profile: String,
     childrenAges: Array,
-    checkOutDate: String
+    checkOutDate: String,
+    adults: Number,
+    rooms: Number
 
   },
   data () {
@@ -126,35 +128,17 @@ export default {
       addedRoutes: []
     }
   },
+  watch: {
+    'stops': function (val, oldVal) {
+      if (val !== oldVal) {
+        this.loadMap()
+      }
+    }
+  },
   methods: {
     onMapLoaded (event) {
       const map = event.map
-
-      let bounds = []
-      this.stops.forEach((stop, index) => {
-        let previousStopLng = 0
-        let previousStopLat = 0
-        if (index >= 1) {
-          if (this.stops[index - 1].HotelStop) {
-            previousStopLng = this.stops[index - 1].HotelLocation.lat
-            previousStopLat = this.stops[index - 1].HotelLocation.lng
-          } else {
-            previousStopLat = this.stops[index - 1].Location.lat
-            previousStopLng = this.stops[index - 1].Location.lng
-          }
-        }
-
-        if (stop.HotelStop) {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lat, stop.HotelLocation.lng], map, index, stop.Profile)
-
-          bounds.push([stop.HotelLocation.lat, stop.HotelLocation.lng])
-        } else {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
-          bounds.push([stop.Location.lng, stop.Location.lat])
-        }
-      })
-
-      map.fitBounds(new Mapbox.LngLatBounds(bounds))
+      this.loadMap(map)
     },
     openInNewTab (link) {
       window.open(link, '_blank')
@@ -190,6 +174,34 @@ export default {
       s = s.toLowerCase()
       s = s.charAt(0).toUpperCase() + s.slice(1)
       return s
+    },
+    loadMap (map) {
+      let bounds = []
+
+      this.stops.forEach((stop, index) => {
+        let previousStopLng = 0
+        let previousStopLat = 0
+        if (index >= 1) {
+          if (this.stops[index - 1].HotelStop) {
+            previousStopLng = this.stops[index - 1].HotelLocation.lat
+            previousStopLat = this.stops[index - 1].HotelLocation.lng
+          } else {
+            previousStopLat = this.stops[index - 1].Location.lat
+            previousStopLng = this.stops[index - 1].Location.lng
+          }
+        }
+
+        if (stop.HotelStop) {
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lat, stop.HotelLocation.lng], map, index, stop.Profile)
+
+          bounds.push([stop.HotelLocation.lat, stop.HotelLocation.lng])
+        } else {
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
+          bounds.push([stop.Location.lng, stop.Location.lat])
+        }
+      })
+
+      map.fitBounds(new Mapbox.LngLatBounds(bounds))
     },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile

@@ -119,7 +119,7 @@
           >
             <q-icon name="compare_arrows" />
             <h3>Vergleichen</h3>
-            <span>Vergleiche eine Vielzahl von top Reisen auf der ganzen Welt mit wenigen klicks</span>
+            <span>Vergleiche eine Vielzahl von top Reisen auf der ganzen Welt mit wenigen Klicks</span>
           </router-link>
         </div>
         <div class="card-wrap">
@@ -153,7 +153,7 @@
         </li>
         <li>
           <q-icon name="location_on" />
-          <h2>Orte und Art des Stopps festlegen</h2>
+          <h2>Orte und Art der Stopps festlegen</h2>
           <p>Nun kannst du jeden einzelnen Ort auf deine Reise anlegen und die Art des Stopps (Zwischenstopp oder Hotel) auswählen.</p>
           <p>Solltest du noch hilfe bei der Auswahl der Orte brauchen, kannst du dich von unseren Städtevorschlägen inspirieren lassen.</p>
         </li>
@@ -165,14 +165,19 @@
         </li>
 
         <li>
-          <div class="flex">
-            <q-icon name="share" />
-            <h2>Teile deine Rundreise</h2>
-          </div>
+          <q-icon name="share" />
+          <h2>Teile deine Rundreise</h2>
           <p>Schmücke deine Rundreise mit Bildern, Highlights und vielen weiteren Informationen aus, um deine Rundreise mit der Welt zu teilen.</p>
         </li>
       </ol>
       <!-- Unsere automatisierten Funktionen -->
+      <div class="register-container">
+        <h4 style="text-align:center;">Registriere dich jetzt und nutze unser ganzes Angebot komplett kostenlos</h4>
+        <q-btn
+          @click="$router.push('/registrieren')"
+          color="primary"
+        >JETZT REGISTRIEREN</q-btn>
+      </div>
     </div>
   </q-page>
 </template>

@@ -158,7 +158,9 @@
           :profile="profile"
           :stops="stops"
           :childrenAges="childrenAges"
-          :checkOutDate="dates[index + 1] ? dates[index + 1] : dates[index]"
+          :checkOutDate="checkOutDate"
+          :adults="adults"
+          :rooms="rooms"
         ></Map>
         <br>
         <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>
@@ -229,7 +231,10 @@ export default {
       editRTDialog: false,
       title: null,
       inputProfile: null,
-      childrenAges: []
+      childrenAges: [],
+      adults: 0,
+      rooms: 0,
+      checkOutDate: null
     }
   },
   computed: {
@@ -251,6 +256,8 @@ export default {
           })
           this.inputProfile = roundtrip[0].Profile
           this.childrenAges = roundtrip[0].ChildrenAges
+          this.rooms = roundtrip[0].Rooms
+          this.adults = roundtrip[0].Adults
           this.roundtrip = roundtrip
 
           this.loadGaleryImgs()
@@ -300,6 +307,14 @@ export default {
               this.dates.splice(index, 0, returnDate)
             } else {
               this.dates.splice(index, 0, date.formatDate(retrievedDate, 'DD.MM.YYYY HH:mm'))
+            }
+
+            if (details.indexOf(stop) === details.length - 1) {
+              // add one day
+              const defaultCheckOutDate = new Date()
+              defaultCheckOutDate.setDate(initDate.getDate() + 1)
+
+              this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
             }
           })
           this.stops = details

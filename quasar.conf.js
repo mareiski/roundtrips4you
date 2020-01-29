@@ -92,7 +92,8 @@ module.exports = function (ctx) {
       // Quasar plugins
       plugins: [
         'Notify',
-        'AddressbarColor'
+        'AddressbarColor',
+        'Cookies'
       ]
     },
 
@@ -124,14 +125,18 @@ module.exports = function (ctx) {
             routes: ['/', '/about', '/some/deep/nested/route']
           }))
         if (typeof cfg.output !== 'undefined') {
-          // copy _redirects file
+          // copy _redirects file & robots.txt
           const CopyWebpackPlugin = require('copy-webpack-plugin')
           cfg.plugins.push(
             new CopyWebpackPlugin([
               {
                 from: 'src/_redirects',
                 to: cfg.output.path
-              },
+              }
+            ])
+          )
+          cfg.plugins.push(
+            new CopyWebpackPlugin([
               {
                 from: 'src/robots.txt',
                 to: cfg.output.path

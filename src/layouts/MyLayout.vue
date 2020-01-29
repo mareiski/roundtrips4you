@@ -212,6 +212,21 @@
         icon="airplanemode_active"
       />
     </back-to-top>
+    <div
+      class="register-btn"
+      v-if="!user"
+    >
+      <router-link
+        class="footer-link"
+        to="/registrieren"
+      >
+        <q-btn
+          color="primary"
+          icon="account_circle"
+          label="Registrieren"
+        />
+      </router-link>
+    </div>
   </q-layout>
 </template>
 

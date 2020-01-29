@@ -8,7 +8,7 @@
       label="Ok"
       class="q-mt-md"
       color="primary"
-      @click="cookiesAllowed = true"
+      @click="[cookiesAllowed = true, setAllowedCookie()]"
       text-color="white"
     ></q-btn>
   </div>
@@ -17,10 +17,22 @@
 @import url("../../css/cookie.less");
 </style>
 <script>
+
 export default {
   data () {
     return {
       cookiesAllowed: false
+    }
+  },
+  methods: {
+    setAllowedCookie () {
+      this.$q.cookies.set('cookies_allowed', true, { expires: 10 })
+    }
+  },
+  created () {
+    let cookiesAllowedCookie = this.$q.cookies.get('cookies_allowed')
+    if (cookiesAllowedCookie) {
+      this.cookiesAllowed = true
     }
   }
 }

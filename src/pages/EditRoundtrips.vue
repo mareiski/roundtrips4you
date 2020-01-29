@@ -100,7 +100,11 @@
         </q-banner>
 
         <h4>Inspiration</h4>
-        <CitySuggestion :country="country"></CitySuggestion>
+        <CitySuggestion
+          :country="country"
+          :dates="initDates"
+          :RTId="$route.params.id"
+        ></CitySuggestion>
       </q-tab-panel>
       <q-tab-panel name="route">
         <q-timeline color="secondary">
@@ -330,6 +334,42 @@
             </q-card>
           </q-expansion-item>
         </q-list>
+        <q-btn
+          @click="showAutoRoutedialog = true"
+          class="q-mt-md"
+          color="primary"
+          style="margin-top:30px;"
+          text-color="white"
+          :disable="stops.length <= 1"
+          label="automatische Route erstellen"
+        >
+        </q-btn>
+        <q-dialog
+          persistent
+          v-model="showAutoRoutedialog"
+        >
+          <q-card>
+            <q-card-section class="row items-center">
+              <span class="q-ml-sm">Wenn du eine automatische Route erstellst gehen die akutellen Daten der Stopps verlohren. Außerdem ordnen wir die Stopps in der kürzesten Reihenfolge wieder an..</span>
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="Rundreise automatisch erstellen"
+                @click="setToShortestRoute()"
+                color="primary"
+                v-close-popup
+              />
+              <q-btn
+                flat
+                label="Abbrechen"
+                color="primary"
+                v-close-popup
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -369,7 +409,7 @@
                 label="Abflugsort"
                 :options="originOptions"
                 @filter="getOrigins"
-                style="width:300px; text-transform:capitalize;"
+                style="width:300px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
               >
                 <template v-slot:no-option>
@@ -936,14 +976,14 @@
               <q-card-actions align="right">
                 <q-btn
                   flat
-                  label="Abbrechen"
+                  label="Rundreise Löschen"
+                  @click="deleteRoundtrip()"
                   color="primary"
                   v-close-popup
                 />
                 <q-btn
                   flat
-                  label="Rundreise Löschen"
-                  @click="deleteRoundtrip()"
+                  label="Abbrechen"
                   color="primary"
                   v-close-popup
                 />
@@ -960,6 +1000,8 @@
           :stops="stops"
           :childrenAges="childrenAges"
           :checkOutDate="checkOutDate"
+          :rooms="rooms"
+          :adults="adults"
         ></Map>
       </q-tab-panel>
     </q-tab-panels>
@@ -1089,7 +1131,9 @@ export default {
       inspirationDisabled: true,
       routeDisabled: true,
       settingsDisabled: true,
-      mapDisabled: true
+      mapDisabled: true,
+      initDates: [],
+      showAutoRoutedialog: false
 
     }
   },
@@ -1121,6 +1165,71 @@ export default {
       let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?aid=1632674&type=ROUNDTRIP&adults=' + this.adults +
         '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getDepatureReturnDate(this.depatureDate) + '&return=' + this.getDepatureReturnDate(this.returnDate) + '&sort=BEST'
       window.open(url, '_blank')
+    },
+    setToShortestRoute () {
+      let suggestedStops = this.getShortestRoute()
+
+      let dateTimeParts = this.stops[0].InitDate.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      suggestedStops.forEach(stop => {
+        db.collection('RoundtripDetails').doc(documentIds[this.stops.indexOf(stop)]).update({
+          'InitDate': initDate
+        })
+        initDate.setDate(initDate.getDate() + 1)
+      })
+      this.loadRoundtripDetails(this.$route.params.id)
+      this.loadSingleRoundtrip(this.$route.params.id)
+    },
+    getShortestRoute () {
+      let stopsTaken = [this.stops[0]]
+      this.stops.forEach((stop, index) => {
+        if (index > 0) {
+          let foundStop = this.getShortestDistance(stopsTaken[stopsTaken.length - 1], stopsTaken)
+          if (foundStop !== null) {
+            stopsTaken.push(foundStop)
+          }
+        }
+      })
+      return stopsTaken
+    },
+    getShortestDistance (originStop, stopsTaken) {
+      let distances = []
+      let stop = null
+      this.stops.forEach(stop => {
+        if (!stopsTaken.includes(stop)) {
+          distances.push({ distance: this.getDistanceFromLatLonInKm(originStop.Location.lng, originStop.Location.lat, stop.Location.lng, stop.Location.lat), stop: stop })
+        }
+      })
+      if (distances.length > 0) {
+        let distanceValues = []
+
+        distances.forEach(distanceArr => {
+          distanceValues.push(distanceArr.distance)
+        })
+
+        let minVal = Math.min.apply(null, distanceValues)
+        stop = distances[distances.findIndex(x => x.distance === minVal)].stop
+      }
+      return stop
+    },
+    getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
+      var R = 6371 // Radius of the earth in km
+      var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
+      var dLon = this.deg2rad(lon2 - lon1)
+      var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      var d = R * c // Distance in km
+      return d
+    },
+    deg2rad (deg) {
+      return deg * (Math.PI / 180)
     },
     onAddEntry () {
       if (!this.isDateTimeValid()) return false
@@ -1719,6 +1828,8 @@ export default {
 
             days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
           }
+
+          this.initDates = initDates
 
           if (days < 5) {
             daysString = '< 5 Tage'

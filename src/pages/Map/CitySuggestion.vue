@@ -30,8 +30,19 @@
           </q-img>
         </a>
 
+        <q-btn
+          round
+          color="primary"
+          class="add-to-rt"
+          icon="add"
+          @click="addStop(city)"
+        >
+        </q-btn>
+
         <q-card-section>
-          {{ city.region }}, {{city.country}} <br> <br>
+          {{ city.region }}, {{city.country}}
+          <br>
+          <br>
           Photo from <a
             style="color:black;"
             href="https://pixabay.com"
@@ -39,6 +50,10 @@
         </q-card-section>
       </q-card>
     </div>
+    <q-btn
+      v-if="cities && cities.length > 0"
+      @click="openInNewTab('https://www.google.de/search?q=' + country)"
+    >weitere Städte auf Google</q-btn>
   </div>
 </template>
 <style lang="less" scoped>
@@ -46,6 +61,7 @@
 </style>
 <script>
 import axios from 'axios'
+import { db } from '../../firebaseInit'
 
 export default {
   data () {
@@ -55,7 +71,9 @@ export default {
     }
   },
   props: {
-    country: String
+    country: String,
+    dates: Array,
+    RTId: String
   },
   methods: {
     getCities (country) {
@@ -86,13 +104,75 @@ export default {
         console.log('Error' + error)
       })
     },
+    addStop (city) {
+      let initDate = null
+      Date(Math.max.apply(null, this.dates.map(function (e) {
+        initDate = e
+      })))
+
+      initDate.setDate(initDate.getDate() + 1)
+
+      let cityName = city.name
+
+      db.collection('RoundtripDetails').add({
+        DateDistance: '',
+        Description: 'Beschreibung über ' + cityName,
+        GeneralLink: null,
+        HotelStop: false,
+        ImageUrl: null,
+        InitDate: initDate,
+        Price: 0,
+        RTId: this.RTId,
+        Title: cityName,
+        Location: {
+          lng: city.longitude,
+          lat: city.latitude,
+          label: city.name
+        },
+        Parking: null,
+        HotelLocation: null,
+        HotelStars: null,
+        HotelContact: null,
+        HotelName: null
+      })
+      this.getParent('EditRoundtrips').loadRoundtripDetails(this.RTId)
+
+      this.$q.notify({
+        color: 'green-4',
+        textColor: 'white',
+        icon: 'check_circle',
+        message: 'Zur Reise hinzugefügt'
+      })
+    },
+    getParent (name) {
+      let p = this.$parent
+      while (typeof p !== 'undefined') {
+        if (p.$options.name === name) {
+          return p
+        } else {
+          p = p.$parent
+        }
+      }
+      return false
+    },
     getCityImage (cityName, cityCountry) {
       let context = this
       axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
       ).then(function (response) {
         context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
       })
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     }
+  },
+  created () {
+    let initDate = null
+    Date(Math.max.apply(null, this.dates.map(function (e) {
+      initDate = e
+      console.log(initDate)
+    })))
+    console.log(initDate)
   }
 }
 </script>

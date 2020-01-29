@@ -8,7 +8,7 @@
           <router-link
             class="country-card"
             to="/meine-rundreisen/"
-            :style="{ backgroundImage: 'url(https://roundtrips4you.netlify.com/statics/oldCard.jpg)' }"
+            :style="{ backgroundImage: 'url(https://roundtrips4you.de/statics/oldCard.jpg)' }"
           >
             <h2 class="country-title">Meine Rundreisen</h2>
             <div class="button">Zu meinen Reisen

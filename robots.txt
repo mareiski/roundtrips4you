@@ -3,4 +3,4 @@ Disallow: /impressum/
 Disallow: /haftungsausschluss/
 Disallow: /datenschutz/
 Disallow: /cgi-bin/
-Sitemap: https://roundtrips4you.netlify.com/statics/sitemap.xml
+Sitemap: https://roundtrips4you.de/statics/sitemap.xml

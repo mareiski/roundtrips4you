@@ -1,14 +1,22 @@
 <template>
   <div class="login q-px-lg q-pb-md">
     <h2>Email bestätigen</h2>
-    <span>Die wurde ein bestätigungslink geschickt. <br> Bitte öffne dein Postfach und klicke auf diesen Link, um zu beginnen.</span>
+    <h4>Gleich geschafft!</h4>
+    <div class="flex">
+      <q-icon
+        size="40px"
+        name="email"
+        style="margin-right:20px;"
+      />
+      <span>Dir wurde ein Bestätigungslink an deine Email-Adresse geschickt. <br> Bitte öffne dein Postfach und klicke auf den Link, um dich anzumelden.</span>
+    </div>
   </div>
 </template>
 <script>
 import { auth } from '../firebaseInit'
 
 var actionCodeSettings = {
-  url: 'https://roundtrips4you.netlify.com/login',
+  url: 'https://roundtrips4you.de/login',
   // This must be true.
   handleCodeInApp: true
 }

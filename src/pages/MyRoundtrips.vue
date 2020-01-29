@@ -1,6 +1,6 @@
 <template>
   <div class="my-roundtrips  q-px-lg q-pb-md">
-    <h3>Meine Rundreisen</h3>
+    <h3 id="Title">Meine Rundreisen</h3>
     <q-list
       bordered
       padding
@@ -81,7 +81,7 @@
         expand-separator
         v-model="addExpanded"
         class="add-item"
-        @click="addButtonActive = !addButtonActive"
+        @click="[addButtonActive = !addButtonActive,  scrollOnAddButtonClicked()]"
       >
         <template v-slot:header>
           <q-item-section style="align-items: center;">
@@ -96,127 +96,129 @@
             </q-btn>
           </q-item-section>
         </template>
-        <q-card>
+        <q-card id="AddRTCard">
           <q-card-section>
             <q-form
               @submit="onAddRoundtrip"
               class="q-gutter-md"
             >
-              <q-input
-                v-model="title"
-                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
-                label="Titel"
-                outlined
-                ref="titleInput"
-                style="margin:auto; margin-top:20px;"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="title" />
-                </template>
-              </q-input>
-              <q-select
-                @filter="filterFn"
-                outlined
-                v-model="selectedOption"
-                :options="countryOptions"
-                label="Land"
-                clearable
-                class="input-item"
-                use-input
-                ref="countrySelect"
-                style="margin:auto; margin-top:10px;"
-                :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="explore" />
-                </template>
-              </q-select>
-              <span
-                class="flex justify-center"
-                style="text-align:center;"
-              >Bitte gib hier deinen Startort ein. <br> (Du kannst diesen später bearbeiten)</span>
-              <CitySearch
-                class="flex justify-center"
-                style="margin:auto; margin-top:10px;"
-                ref="citySearch"
-                :parkingPlaceSearch="false"
-                :defaultLocation="null"
-                @update="updateLocation($event)"
-              ></CitySearch>
-              <p
-                class="flex justify-center"
-                style="text-align:center; margin-bottom:15px;"
-              >Die folgenden Informationen werden nur dir angezeigt.</p>
               <div>
                 <q-input
-                  style="margin:auto; margin-top:20px;"
-                  v-model="rooms"
-                  label="Zimmer"
-                  type="number"
-                  :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
+                  v-model="title"
+                  :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+                  label="Titel"
                   outlined
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="house" />
-                  </template>
-                </q-input>
-                <q-input
-                  v-model="adults"
-                  label="Erwachsene"
-                  type="number"
-                  :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
-                  outlined
+                  ref="titleInput"
                   style="margin:auto; margin-top:20px;"
                 >
                   <template v-slot:prepend>
-                    <q-icon name="group" />
+                    <q-icon name="title" />
                   </template>
                 </q-input>
-                <q-input
-                  v-model="children"
-                  label="Kinder"
-                  type="number"
-                  @input="childrenAges.length = parseInt(children)"
-                  :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
+                <q-select
+                  @filter="filterFn"
                   outlined
-                  style="margin:auto; margin-top:20px;"
+                  v-model="selectedOption"
+                  :options="countryOptions"
+                  label="Land"
+                  clearable
+                  class="input-item"
+                  use-input
+                  ref="countrySelect"
+                  style="margin:auto; margin-top:10px;"
+                  :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
                 >
                   <template v-slot:prepend>
-                    <q-icon name="child_friendly" />
+                    <q-icon name="explore" />
                   </template>
-                </q-input>
-                <div
+                </q-select>
+                <span
                   class="flex justify-center"
-                  style="margin:auto; margin-top:20px;"
-                  v-if="parseInt(children) > 0  && parseInt(children) <= 20"
-                >
+                  style="text-align:center;"
+                >Bitte gib hier deinen Startort ein. <br> (Du kannst diesen später bearbeiten)</span>
+                <CitySearch
+                  class="flex justify-center"
+                  style="margin:auto; margin-top:10px;"
+                  ref="citySearch"
+                  :parkingPlaceSearch="false"
+                  :defaultLocation="null"
+                  @update="updateLocation($event)"
+                ></CitySearch>
+                <p
+                  class="flex justify-center"
+                  style="text-align:center; margin-bottom:15px;"
+                >Die folgenden Informationen werden nur dir angezeigt.</p>
+                <div>
                   <q-input
-                    v-for="childNum in parseInt(children)"
-                    :key="childNum"
-                    v-model="childrenAges[childNum - 1]"
-                    :label="'Alter Kind ' + childNum"
+                    style="margin:auto; margin-top:20px;"
+                    v-model="rooms"
+                    label="Zimmer"
                     type="number"
-                    style="margin-right:10px;"
-                    :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
+                    :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
                     outlined
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="house" />
+                    </template>
+                  </q-input>
+                  <q-input
+                    v-model="adults"
+                    label="Erwachsene"
+                    type="number"
+                    :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
+                    outlined
+                    style="margin:auto; margin-top:20px;"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="group" />
+                    </template>
+                  </q-input>
+                  <q-input
+                    v-model="children"
+                    label="Kinder"
+                    type="number"
+                    @input="childrenAges.length = parseInt(children)"
+                    :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
+                    outlined
+                    style="margin:auto; margin-top:20px;"
                   >
                     <template v-slot:prepend>
                       <q-icon name="child_friendly" />
                     </template>
                   </q-input>
+                  <div
+                    class="flex justify-center"
+                    style="margin:auto; margin-top:20px;"
+                    v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+                  >
+                    <q-input
+                      v-for="childNum in parseInt(children)"
+                      :key="childNum"
+                      v-model="childrenAges[childNum - 1]"
+                      :label="'Alter Kind ' + childNum"
+                      type="number"
+                      style="margin-right:10px;"
+                      :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
+                      outlined
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="child_friendly" />
+                      </template>
+                    </q-input>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <q-btn
-                  round
-                  color="primary"
-                  icon="add"
-                  type="submit"
-                >
-                  <q-tooltip>
-                    Rundreise hinzufügen
-                  </q-tooltip>
-                </q-btn>
+                <div>
+                  <q-btn
+                    round
+                    color="primary"
+                    icon="add"
+                    type="submit"
+                  >
+                    <q-tooltip>
+                      Rundreise hinzufügen
+                    </q-tooltip>
+                  </q-btn>
+                </div>
               </div>
             </q-form>
           </q-card-section>
@@ -230,13 +232,15 @@
 </style>
 <script>
 import { db, auth, storage } from '../firebaseInit'
-import { date } from 'quasar'
+import { date, scroll } from 'quasar'
 import { countries } from '../countries'
 import CitySearch from './Map/CitySearch'
 
 let uid = null
 let roundtripDocIds = []
 let roundtripArr = []
+
+const { getScrollTarget, setScrollPosition } = scroll
 
 export default {
   name: 'myRoundtrips',
@@ -284,6 +288,15 @@ export default {
           })
         }
       }
+    },
+    scrollOnAddButtonClicked () {
+      this.addExpanded ? scrollTo(document.getElementById('AddRTCard')) : scrollTo(document.getElementById('Title'))
+    },
+    scrollTo (el) {
+      const target = getScrollTarget(el)
+      const offset = el.offsetTop
+      const duration = 400
+      setScrollPosition(target, offset, duration)
     },
     addRoundtrip (Title, Location) {
       Title = Title.toLowerCase()
