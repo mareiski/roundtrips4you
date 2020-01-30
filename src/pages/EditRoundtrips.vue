@@ -374,6 +374,19 @@
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
           <h4>An-/Abreise</h4>
+          <q-banner
+            style="margin-bottom:40px; padding-bottom:10px;"
+            class="bg-grey-3"
+            v-if="inspirationDisabled"
+          >
+            <template v-slot:avatar>
+              <q-icon
+                name="info"
+                color="primary"
+              />
+            </template>
+            Bitte gib deine An- und Abreise Informationen ein um zum nächsten Schritt zu kommen.
+          </q-banner>
           <q-form
             @submit="onSaveArrivalDepature"
             bordered
@@ -535,6 +548,7 @@
                 class="q-mt-md"
                 color="primary"
                 text-color="white"
+                :disable="!destination"
                 v-if="arrivalDepatureProfile === 'Flugzeug'"
                 label="Flüge auf Booking.com buchen"
               ></q-btn>
@@ -569,7 +583,7 @@
       </q-tab-panel>
       <q-tab-panel name="settings">
 
-        <q-banner
+        <!-- <q-banner
           class="bg-grey-3"
           v-if="routeDisabled"
         >
@@ -580,7 +594,7 @@
             />
           </template>
           Bitte verfolständige deine Einstellungen & speichere diese um zum nächsten Schritt zu kommen.
-        </q-banner>
+        </q-banner> -->
 
         <h4>Allgemeine Einstellungen</h4>
         <q-form
@@ -1478,6 +1492,14 @@ export default {
 
         dateParts = this.returnDate.split('.')
         let returnDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        try {
+          db.collection('RoundtripDetails').doc(this.documentIds[0]).update({
+            'InitDate': depatureDate
+          })
+        } catch (error) {
+          console.log(error)
+        }
 
         if (this.saveData('TransportProfile', this.arrivalDepatureProfile) &&
           this.saveData('Origin', this.origin) &&
