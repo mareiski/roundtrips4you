@@ -14,17 +14,17 @@
       <MglMarker
         v-for="stop in stops"
         :key="stop"
-        :coordinates="stop.HotelStop ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
+        :coordinates="stop.HotelStop && stop.HotelLocation ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
       >
         <MglPopup>
           <VCard>
             <a
-              v-if="stop.HotelStop"
+              v-if="stop.HotelStop && stop.HotelName"
               :href="stop.GeneralLink"
               target="_blank"
             >{{stop.Title + ' - ' + capitalize(stop.HotelName)}}</a>
-            <p v-if="!stop.HotelStop">{{stop.Title}}</p>
+            <p v-if="!stop.HotelStop || !stop.HotelName">{{stop.Title}}</p>
             <q-chip
               icon="hotel"
               v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
@@ -37,8 +37,8 @@
             <p>
               <a
                 target="_blank"
-                :href="!stop.HotelStop ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
-              >{{stop.HotelStop ? stop.HotelLocation.label : stop.Location.label}}</a>
+                :href="!stop.HotelStop || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
+              >{{stop.HotelStop && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
             </p>
           </VCard>
         </MglPopup>
@@ -171,8 +171,10 @@ export default {
       return color
     },
     capitalize (s) {
-      s = s.toLowerCase()
-      s = s.charAt(0).toUpperCase() + s.slice(1)
+      if (s) {
+        s = s.toLowerCase()
+        s = s.charAt(0).toUpperCase() + s.slice(1)
+      }
       return s
     },
     loadMap (map) {
@@ -182,7 +184,7 @@ export default {
         let previousStopLng = 0
         let previousStopLat = 0
         if (index >= 1) {
-          if (this.stops[index - 1].HotelStop) {
+          if (this.stops[index - 1].HotelStop && this.stops[index - 1].HotelLocation) {
             previousStopLng = this.stops[index - 1].HotelLocation.lat
             previousStopLat = this.stops[index - 1].HotelLocation.lng
           } else {
@@ -191,17 +193,17 @@ export default {
           }
         }
 
-        if (stop.HotelStop) {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lat, stop.HotelLocation.lng], map, index, stop.Profile)
+        if (stop.HotelStop && stop.HotelLocation) {
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, stop.Profile)
 
-          bounds.push([stop.HotelLocation.lat, stop.HotelLocation.lng])
+          bounds.push([stop.HotelLocation.lng, stop.HotelLocation.lat])
         } else {
           if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
           bounds.push([stop.Location.lng, stop.Location.lat])
         }
       })
 
-      map.fitBounds(new Mapbox.LngLatBounds(bounds))
+      if (map) map.fitBounds(new Mapbox.LngLatBounds(bounds))
     },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile

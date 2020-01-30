@@ -155,7 +155,7 @@
 
       <q-tab-panel name="map">
         <Map
-          :profile="profile"
+          :profile="getProfile(inputProfile)"
           :stops="stops"
           :childrenAges="childrenAges"
           :checkOutDate="checkOutDate"
@@ -384,6 +384,26 @@ export default {
       else returnVal = hours + ' h ' + minutes + ' min'
 
       return returnVal
+    },
+    getProfile (profile) {
+      switch (profile) {
+        case 'zu Fuß':
+          return 'walking'
+        case 'Fahrrad':
+          return 'cycling'
+        default:
+          return 'driving'
+      }
+    },
+    getStringProfile (profile) {
+      switch (profile) {
+        case 'walking':
+          return 'zu Fuß'
+        case 'cycling':
+          return 'Fahrrad'
+        default:
+          return 'Auto'
+      }
     },
     getDays (stop, index, duration) {
       let days = null
