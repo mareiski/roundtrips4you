@@ -14,7 +14,7 @@
             />
           </a>
           <span class="beta-span cursor-pointer">[beta]
-            <q-tooltip>
+            <q-tooltip @click="$event.show()">
               Wir befinden uns derzeit noch in der Beta Phase
             </q-tooltip>
           </span>
