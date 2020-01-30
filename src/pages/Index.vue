@@ -78,6 +78,7 @@
           <router-link
             class="card"
             to="/rundreisen/Vietnam"
+            itemtype="http://schema.org/Offer"
           >
             <div id="VietnamImg"></div>
             <h3>Vietnam</h3>
@@ -88,6 +89,7 @@
           <router-link
             class="card"
             to="/rundreisen/USA"
+            itemtype="http://schema.org/Offer"
           >
             <div id="USAImg"></div>
             <h3>USA</h3>
@@ -98,6 +100,7 @@
           <router-link
             class="card"
             to="/rundreisen/Italien"
+            itemtype="http://schema.org/Offer"
           >
             <div id="ItalyImg"></div>
             <h3>Italien</h3>
