@@ -100,6 +100,7 @@
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
+                :firstStop="index === 0"
               ></Stop>
               <Duration
                 :key="stop"
@@ -309,6 +310,7 @@
           :disable="stops.length <= 1"
           label="automatische Route erstellen"
         >
+          <q-tooltip v-if="stops.length <= 1">Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
         </q-btn>
         <q-dialog
           persistent
@@ -1722,6 +1724,7 @@ export default {
       }
     },
     loadRoundtripDetails (RTId) {
+      this.stops = []
       this.selectedCountry = this.country
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')

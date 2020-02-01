@@ -48,7 +48,7 @@
         >auf booking.com ansehen</q-chip>
       </div>
       <q-icon
-        v-if="editor"
+        v-if="editor && !firstStop"
         name="delete"
         class="cursor-pointer"
         @click="deleteEntry()"
@@ -310,7 +310,8 @@ export default {
     checkOutDate: String,
     adults: Number,
     childrenAges: Array,
-    rooms: Number
+    rooms: Number,
+    firstStop: Boolean
   },
   data () {
     return {
