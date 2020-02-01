@@ -300,8 +300,12 @@ top of page > end of page
 }
 
 @media @mobile {
-    #OfferContainer>div:nth-child(2) {
-        display: none;
+    #OfferContainer>div {
+        width: 100%;
+
+        &:nth-child(2) {
+            display: none;
+        }
     }
 }
 
