@@ -34,43 +34,25 @@
       <q-tab
         name="inspiration"
         label="Inspiration"
-        :disable="inspirationDisabled"
       >
-        <q-badge
-          color="primary"
-          floating
-          v-if="!inspirationDisabled && stops.length <= 1"
-          label="weiter"
-        >
-        </q-badge>
       </q-tab>
       <q-tab
         name="route"
         label="Reiseverlauf"
-        :disable="routeDisabled"
       />
       <q-tab
         name="start"
         label="An-/Abreise"
       >
-        <q-badge
-          color="primary"
-          floating
-          v-if="!routeDisabled && settingsDisabled"
-          label="start"
-        >
-        </q-badge>
       </q-tab>
       <q-tab
         name="settings"
         label="Einstellungen"
-        :disable="settingsDisabled"
       >
       </q-tab>
       <q-tab
         name="map"
         label="Karte"
-        :disable="mapDisabled"
       />
     </q-tabs>
 
@@ -83,22 +65,6 @@
       ref="tabPanels"
     >
       <q-tab-panel name="inspiration">
-        <q-banner
-          class="bg-grey-3"
-          v-if="stops.length <= 1"
-        >
-          <template v-slot:avatar>
-            <q-icon
-              name="check_circle"
-              color="primary"
-            />
-          </template>
-          Lasse dich einfach inspirieren und erstelle im <a
-            style="text-decoration:underline;"
-            @click="$refs.tabPanels.goTo('route')"
-          >Reiseverlauf</a> weitere Stopps. <br>
-        </q-banner>
-
         <h4>Inspiration</h4>
         <CitySuggestion
           :country="country"
@@ -374,19 +340,6 @@
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
           <h4>An-/Abreise</h4>
-          <q-banner
-            style="margin-bottom:40px; padding-bottom:10px;"
-            class="bg-grey-3"
-            v-if="inspirationDisabled"
-          >
-            <template v-slot:avatar>
-              <q-icon
-                name="info"
-                color="primary"
-              />
-            </template>
-            Bitte gib deine An- und Abreise Informationen ein um zum nächsten Schritt zu kommen.
-          </q-banner>
           <q-form
             @submit="onSaveArrivalDepature"
             bordered
@@ -658,10 +611,7 @@
                 <q-icon name="access_time" />
               </template>
             </q-select>
-            <div
-              class="flex"
-              v-if="!routeDisabled"
-            >
+            <div class="flex">
               <q-rating
                 class="stars"
                 v-model="stars"
@@ -1119,7 +1069,7 @@ export default {
       parkingPlace: {},
       uploading: false,
       uploadIndex: 0,
-      tab: 'start',
+      tab: 'route',
       rooms: 0,
       adults: 0,
       children: 0,
@@ -1142,10 +1092,6 @@ export default {
       destinationCodes: [],
       originCode: null,
       destinationCode: null,
-      inspirationDisabled: true,
-      routeDisabled: true,
-      settingsDisabled: true,
-      mapDisabled: true,
       initDates: [],
       showAutoRoutedialog: false
 
@@ -1669,9 +1615,6 @@ export default {
           this.arrivalDepatureProfile = roundtrip[0].TransportProfile ? roundtrip[0].TransportProfile : 'Flugzeug'
           this.origin = roundtrip[0].Origin
 
-          // set first tab
-          this.setFirstTab()
-
           let retrievedDate = new Date(roundtrip[0].OfferEndPeriod.seconds * 1000)
           this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
@@ -1718,29 +1661,6 @@ export default {
             message: 'Deine Rundreise konnte nicht richtig geladen werden, bitte versuche es erneut'
           })
         })
-    },
-    setFirstTab () {
-      if (!this.origin && this.arrivalDepatureProfile === 'Flugzeug') {
-        this.tab = 'start'
-        this.disableTabs(true, true, true, true)
-      } else {
-        this.tab = 'route'
-        this.disableTabs(false, false, false, false)
-      }
-    },
-    enableTabs () {
-      if (!this.origin && this.arrivalDepatureProfile === 'Flugzeug') {
-        this.disableTabs(true, true, true, true)
-      } else {
-        this.disableTabs(false, false, false, false)
-      }
-      this.scrollTo(document.getElementById('Header'))
-    },
-    disableTabs (inspirationDisabled, routeDisabled, settingsDisabled, mapDisabled) {
-      this.inspirationDisabled = inspirationDisabled
-      this.routeDisabled = routeDisabled
-      this.settingsDisabled = settingsDisabled
-      this.mapDisabled = mapDisabled
     },
     loadCategories () {
       let roundtripsRef = db.collection('Categories')

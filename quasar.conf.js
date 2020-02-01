@@ -81,7 +81,10 @@ module.exports = function (ctx) {
         'QChatMessage',
         'QPagination',
         'QBadge',
-        'QBanner'
+        'QBanner',
+        'QStepper',
+        'QStep',
+        'QStepperNavigation'
       ],
 
       directives: [

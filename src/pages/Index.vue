@@ -18,41 +18,47 @@
       <div id="MainImgPlacholder">
         <h2 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h2>
         <span class="quote-author">Kurt Tucholsky</span>
-        <q-select
-          filled
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          v-model="searchLocation"
-          hide-dropdown-icon
-          label="Finde jetzt deine Traumreise..."
-          :options="countryOptions"
-          @filter="filterFn"
-          @input="$router.push('/rundreisen/' + searchLocation)"
-          class="main-search-bar"
+        <div
+          class="flex justify-around"
+          id="OfferContainer"
         >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                Keine Ergebnisse
-              </q-item-section>
-            </q-item>
-          </template>
-          <template v-slot:append>
-            <q-icon name="search" />
-          </template>
-        </q-select>
-        <span
-          class="create-own-btn"
-          style="margin-top:10px; color:white;"
-        >oder</span>
-        <q-btn
-          @click="$router.push('/registrieren')"
-          color="primary"
-          style="margin-top:10px;"
-          class="create-own-btn"
-        >erstelle deine eigene reise einfach selbst...</q-btn>
+          <div>
+            <p>Starte jetzt in dein eigenes Abenteuer und erstelle kostenlos deine eigene Reise!</p>
+            <q-btn
+              @click="$router.push('/registrieren')"
+              color="primary"
+              style="margin-top:10px;"
+            >Los geht's</q-btn>
+          </div>
+          <div>
+            <p>Lasse dich durch bereits erstellte Reisen inspirieren!</p>
+            <q-select
+              filled
+              use-input
+              hide-selected
+              fill-input
+              input-debounce="0"
+              v-model="searchLocation"
+              hide-dropdown-icon
+              label="Land suchen..."
+              :options="countryOptions"
+              @filter="filterFn"
+              @input="$router.push('/rundreisen/' + searchLocation)"
+              class="main-search-bar"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">
+                    Keine Ergebnisse
+                  </q-item-section>
+                </q-item>
+              </template>
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-select>
+          </div>
+        </div>
         <q-icon
           class="scroll-down-icon cursor-pointer"
           name="keyboard_arrow_down"
@@ -73,6 +79,7 @@
           color="primary"
         >JETZT REGISTRIEREN</q-btn>
       </div>
+      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir bereits erstellte Rundreisen an</p>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
@@ -110,8 +117,10 @@
       </div>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
-        <h3>Begebe dich jetzt auf die Suche nach der besten Rundreise f&uuml;r dein Traumland oder erstelle einfach selbst deine individuelle Traumreise!</h3>
-        <button>Zu den Rundreisen</button>
+        <h3>Erstelle jetzt ganz einfach und kostenlos deine individuelle Traumreise nach deinen Wünschen!</h3>
+        <router-link to="/registrieren">
+          <button>Jetzt kostenlos beginnen</button>
+        </router-link>
       </div>
       <h4 style="text-align:center;">Noch nicht überzeugt ? <br> Hier sind unsere Features:</h4>
       <div class="card-container">

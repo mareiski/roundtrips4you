@@ -102,127 +102,319 @@
               @submit="onAddRoundtrip"
               class="q-gutter-md"
             >
-              <div>
-                <q-input
-                  v-model="title"
-                  :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
-                  label="Titel"
-                  outlined
-                  ref="titleInput"
-                  style="margin:auto; margin-top:20px;"
+              <q-stepper
+                v-model="step"
+                vertical
+                color="primary"
+                animated
+                flat
+                keep-alive
+              >
+                <q-step
+                  :name="1"
+                  title="Titel & Land auswählen"
+                  icon="settings"
+                  :done="step > 1"
                 >
-                  <template v-slot:prepend>
-                    <q-icon name="title" />
-                  </template>
-                </q-input>
-                <q-select
-                  @filter="filterFn"
-                  outlined
-                  v-model="selectedOption"
-                  :options="countryOptions"
-                  label="Land"
-                  clearable
-                  class="input-item"
-                  use-input
-                  ref="countrySelect"
-                  style="margin:auto; margin-top:10px;"
-                  :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                  <q-input
+                    v-model="title"
+                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+                    label="Titel"
+                    outlined
+                    ref="titleInput"
+                    style="margin:auto; margin-top:20px;"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="title" />
+                    </template>
+                  </q-input>
+                  <q-select
+                    @filter="filterFn"
+                    outlined
+                    v-model="selectedOption"
+                    :options="countryOptions"
+                    label="Land"
+                    clearable
+                    class="input-item"
+                    use-input
+                    ref="countrySelect"
+                    style="margin:auto; margin-top:10px;"
+                    :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                  >
+                    <template v-slot:prepend>
+                      <q-icon name="explore" />
+                    </template>
+                  </q-select>
+                  <q-stepper-navigation>
+                    <q-btn
+                      @click="step = 2"
+                      color="primary"
+                      label="Weiter"
+                      :disable="!title || !selectedOption"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+                <q-step
+                  :name="2"
+                  title="An-/Abreise planen"
+                  icon="location_on"
+                  :done="step > 2"
                 >
-                  <template v-slot:prepend>
-                    <q-icon name="explore" />
-                  </template>
-                </q-select>
-                <span
-                  class="flex justify-center"
-                  style="text-align:center;"
-                >Bitte gib hier deinen Startort ein. <br> (Du kannst diesen später bearbeiten)</span>
-                <CitySearch
-                  class="flex justify-center"
-                  style="margin:auto; margin-top:10px;"
-                  ref="citySearch"
-                  :parkingPlaceSearch="false"
-                  :defaultLocation="null"
-                  @update="updateLocation($event)"
-                ></CitySearch>
-                <p
-                  class="flex justify-center"
-                  style="text-align:center; margin-bottom:15px;"
-                >Die folgenden Informationen werden nur dir angezeigt.</p>
-                <div>
-                  <q-input
-                    style="margin:auto; margin-top:20px;"
-                    v-model="rooms"
-                    label="Zimmer"
-                    type="number"
-                    :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
+                  <q-select
                     outlined
+                    v-model="arrivalDepatureProfile"
+                    input-debounce="0"
+                    :options="['Flugzeug', 'Andere']"
+                    label="Reisemittel"
+                    :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+                    style="padding-bottom: 32px"
                   >
                     <template v-slot:prepend>
-                      <q-icon name="house" />
+                      <q-icon name="commute" />
                     </template>
-                  </q-input>
-                  <q-input
-                    v-model="adults"
-                    label="Erwachsene"
-                    type="number"
-                    :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
-                    outlined
-                    style="margin:auto; margin-top:20px;"
-                  >
-                    <template v-slot:prepend>
-                      <q-icon name="group" />
-                    </template>
-                  </q-input>
-                  <q-input
-                    v-model="children"
-                    label="Kinder"
-                    type="number"
-                    @input="childrenAges.length = parseInt(children)"
-                    :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
-                    outlined
-                    style="margin:auto; margin-top:20px;"
-                  >
-                    <template v-slot:prepend>
-                      <q-icon name="child_friendly" />
-                    </template>
-                  </q-input>
+                  </q-select>
                   <div
-                    class="flex justify-center"
-                    style="margin:auto; margin-top:20px;"
-                    v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+                    v-if="arrivalDepatureProfile === 'Flugzeug'"
+                    class="flight-container"
                   >
+                    <q-select
+                      outlined=""
+                      use-input
+                      hide-selected
+                      fill-input
+                      input-debounce="0"
+                      clearable
+                      ref="select"
+                      v-model="origin"
+                      hide-dropdown-icon
+                      label="Abflugsort"
+                      :options="originOptions"
+                      @filter="getOrigins"
+                      style="width:300px;"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+                    >
+                      <template v-slot:no-option>
+                        <q-item>
+                          <q-item-section class="text-grey">
+                            zu viele/keine Ergebnisse, bitte weitertippen
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                      <template v-slot:prepend>
+                        <q-icon name="flight_takeoff" />
+                      </template>
+                    </q-select>
+                    <q-select
+                      outlined=""
+                      use-input
+                      hide-selected
+                      fill-input
+                      input-debounce="0"
+                      clearable
+                      ref="select"
+                      v-model="destination"
+                      hide-dropdown-icon
+                      label="Ankunftsort"
+                      :options="destinationOptions"
+                      @filter="getDestinations"
+                      style="width:300px;"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+                    >
+                      <template v-slot:no-option>
+                        <q-item>
+                          <q-item-section class="text-grey">
+                            zu viele/keine Ergebnisse, bitte weitertippen
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                      <template v-slot:prepend>
+                        <q-icon name="flight_land" />
+                      </template>
+                    </q-select>
                     <q-input
-                      v-for="childNum in parseInt(children)"
-                      :key="childNum"
-                      v-model="childrenAges[childNum - 1]"
-                      :label="'Alter Kind ' + childNum"
-                      type="number"
-                      style="margin-right:10px;"
-                      :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
                       outlined
+                      v-model="depatureDate"
+                      label="Abflugsdatum"
+                      class="input-item rounded-borders"
+                    >
+                      <q-popup-proxy
+                        ref="qDateProxy1"
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="depatureDate"
+                          today-btn
+                          mask="DD.MM.YYYY"
+                        />
+                      </q-popup-proxy>
+                      <template v-slot:prepend>
+                        <q-icon
+                          name="event"
+                          class="cursor-pointer"
+                        >
+                        </q-icon>
+                      </template>
+                    </q-input>
+                    <q-input
+                      outlined
+                      v-model="returnDate"
+                      label="Rückflugsdatum"
+                      class="input-item rounded-borders"
+                    >
+                      <q-popup-proxy
+                        ref="qDateProxy1"
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="returnDate"
+                          today-btn
+                          mask="DD.MM.YYYY"
+                        />
+                      </q-popup-proxy>
+                      <template v-slot:prepend>
+                        <q-icon
+                          name="event"
+                          class="cursor-pointer"
+                        >
+                        </q-icon>
+                      </template>
+                    </q-input>
+                    <q-select
+                      outlined
+                      v-model="travelClass"
+                      input-debounce="0"
+                      :options="['Economy', 'Premium Economy', 'Business', 'First']"
+                      label="Reiseklasse auswählen"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="star" />
+                      </template>
+                    </q-select>
+                    <q-select
+                      outlined
+                      v-model="nonStop"
+                      input-debounce="0"
+                      :options="['Ja', 'Nein']"
+                      label="Non Stop"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Option']"
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="flight" />
+                      </template>
+                    </q-select>
+                  </div>
+                  <div v-else>
+                    <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+                  </div>
+                  <q-stepper-navigation>
+                    <q-btn
+                      @click="step = 3"
+                      color="primary"
+                      :disable="!arrivalDepatureProfile || !origin || !destination || !depatureDate || !returnDate || !travelClass || !nonStop"
+                      label="Weiter"
+                    />
+                    <q-btn
+                      flat
+                      @click="step = 1"
+                      color="primary"
+                      label="Zurück"
+                      class="q-ml-sm"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+                <q-step
+                  :name="3"
+                  title="Reisende angeben"
+                  icon="group"
+                  :done="step > 3"
+                >
+                  <p
+                    class="flex justify-center"
+                    style="text-align:center; margin-bottom:15px;"
+                  >Die folgenden Informationen werden nur dir angezeigt.</p>
+                  <div>
+                    <q-input
+                      style="margin:auto; margin-top:20px;"
+                      v-model="rooms"
+                      label="Zimmer"
+                      type="number"
+                      :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
+                      outlined
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="house" />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="adults"
+                      label="Erwachsene"
+                      type="number"
+                      :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
+                      outlined
+                      style="margin:auto; margin-top:20px;"
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="group" />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="children"
+                      label="Kinder"
+                      type="number"
+                      @input="childrenAges.length = parseInt(children)"
+                      :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
+                      outlined
+                      style="margin:auto; margin-top:20px;"
                     >
                       <template v-slot:prepend>
                         <q-icon name="child_friendly" />
                       </template>
                     </q-input>
+                    <div
+                      class="flex justify-center"
+                      style="margin:auto; margin-top:20px;"
+                      v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+                    >
+                      <q-input
+                        v-for="childNum in parseInt(children)"
+                        :key="childNum"
+                        v-model="childrenAges[childNum - 1]"
+                        :label="'Alter Kind ' + childNum"
+                        type="number"
+                        style="margin-right:10px;"
+                        :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
+                        outlined
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="child_friendly" />
+                        </template>
+                      </q-input>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <q-btn
-                    round
-                    color="primary"
-                    icon="add"
-                    type="submit"
-                  >
-                    <q-tooltip>
-                      Rundreise hinzufügen
-                    </q-tooltip>
-                  </q-btn>
-                </div>
-              </div>
+                  <q-stepper-navigation>
+                    <q-btn
+                      color="primary"
+                      label="Fertig"
+                      :disable="!rooms || !adults"
+                      type="submit"
+                    />
+                    <q-btn
+                      flat
+                      @click="step = 2"
+                      color="primary"
+                      label="Zurück"
+                      class="q-ml-sm"
+                    />
+                  </q-stepper-navigation>
+                </q-step>
+              </q-stepper>
             </q-form>
           </q-card-section>
         </q-card>
+
       </q-expansion-item>
     </q-list>
   </div>
@@ -234,19 +426,20 @@
 import { db, auth, storage } from '../firebaseInit'
 import { date, scroll } from 'quasar'
 import { countries } from '../countries'
-import CitySearch from './Map/CitySearch'
 
 let uid = null
 let roundtripDocIds = []
 let roundtripArr = []
+import axios from 'axios'
+var querystring = require('querystring')
 
 const { getScrollTarget, setScrollPosition } = scroll
 
+let timeStamp = Date.now()
+let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
+
 export default {
   name: 'myRoundtrips',
-  components: {
-    CitySearch
-  },
   data () {
     return {
       roundtrips: [],
@@ -258,11 +451,30 @@ export default {
       countryOptions: countries,
       RTIds: [],
       showNoRoundtripsText: false,
-      tempLocation: {},
       rooms: 1,
       adults: 1,
       children: 0,
-      childrenAges: []
+      childrenAges: [],
+      step: 1,
+      arrivalDepatureProfile: 'Flugzeug',
+      origin: null,
+      destination: null,
+      depatureDate: formattedScheduleDate,
+      returnDate: formattedScheduleDate,
+      travelClass: 'Economy',
+      nonStop: 'Ja',
+      originOptions: [],
+      destinationOptions: [],
+      originCodes: [],
+      destinationCodes: [],
+      originCode: null,
+      destinationCode: null,
+      destinationAddresses: []
+    }
+  },
+  watch: {
+    'destination': function (val, oldVal) {
+      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
     }
   },
   methods: {
@@ -272,21 +484,37 @@ export default {
         this.addButtonActive = false
         this.showNoRoundtripsText = false
 
-        if (this.addRoundtrip(this.title, this.selectedOption)) {
-          this.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Rundreise wurde erstellt'
-          })
+        if (this.title && this.selectedOption && this.arrivalDepatureProfile && this.origin && this.destination && this.depatureDate && this.returnDate && this.travelClass && this.nonStop && this.rooms && this.adults) {
+          if (this.addRoundtrip(this.title, this.selectedOption)) {
+            this.$q.notify({
+              color: 'green-4',
+              textColor: 'white',
+              icon: 'check_circle',
+              message: 'Rundreise wurde erstellt'
+            })
+          } else {
+            this.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Oh nein, da ist wohl etwas schief gelaufen, bitte versuche es erneut'
+            })
+          }
         } else {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
             icon: 'error',
-            message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
+            message: 'Bitte überprüfe deine Angaben'
           })
         }
+      } else {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
+        })
       }
     },
     scrollOnAddButtonClicked () {
@@ -329,6 +557,7 @@ export default {
           Adults: this.adults,
           ChildrenAges: this.childrenAges
         })
+
         let roundtripsRef = db.collection('Roundtrips')
           .where('RTId', '==', tempRTId)
           .limit(1)
@@ -356,6 +585,7 @@ export default {
                   label: 'Berlin, 10117, Germany'
                 }
               })
+              this.saveArrivalDepature(doc.id)
               this.getUserRoundtrips()
               this.$router.push('/rundreise-bearbeiten/' + doc.id)
             })
@@ -364,7 +594,6 @@ export default {
         this.selectedOption = null
         this.$refs.titleInput.resetValidation()
         this.$refs.countrySelect.resetValidation()
-        this.$refs.citySearch.clear()
       } catch (error) {
         console.log(error)
         this.$q.notify({
@@ -408,14 +637,62 @@ export default {
 
       this.roundtrips = roundtripArr
     },
-    updateLocation (event) {
-      if (event !== null) {
-        this.tempLocation = {
-          lng: event.x,
-          lat: event.y,
-          label: event.label
+    getLocationFromIataCode (code, countryName) {
+      let context = this
+      axios.get('http://iatageo.com/getLatLng/' + code
+      ).then(function (response) {
+        context.tempLocation = {
+          lat: response.data.latitude,
+          lng: response.data.longitude,
+          label: countryName
+        }
+      }).catch(function (error) {
+        console.log('Error' + error)
+      })
+    },
+    saveArrivalDepature (RTDocId) {
+      this.submitting = true
+
+      if (this.arrivalDepatureProfile === 'Flugzeug') {
+        let dateParts = this.depatureDate.split('.')
+        let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        dateParts = this.returnDate.split('.')
+        let returnDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        if (this.saveData('TransportProfile', this.arrivalDepatureProfile, RTDocId) &&
+          this.saveData('Origin', this.origin, RTDocId) &&
+          this.saveData('OriginCode', this.originCodes[this.originOptions.indexOf(this.origin)] ? this.originCodes[this.originOptions.indexOf(this.origin)] : this.originCode, RTDocId) &&
+          this.saveData('Destination', this.destination, RTDocId) &&
+          this.saveData('DestinationCode', this.destinationCodes[this.destinationOptions.indexOf(this.destination)] ? this.destinationCodes[this.destinationOptions.indexOf(this.destination)] : this.destinationCode, RTDocId) &&
+          this.saveData('DepatureDate', depatureDate, RTDocId) &&
+          this.saveData('ReturnDate', returnDate, RTDocId) &&
+          this.saveData('TravelClass', this.travelClass, RTDocId) &&
+          this.saveData('NonStop', this.nonStop, RTDocId)
+        ) {
+          return true
+        } else {
+          return false
+        }
+      } else {
+        if (this.saveData('TransportProfile', this.arrivalDepatureProfile)) {
+          return true
+        } else {
+          return false
         }
       }
+    },
+    saveData (field, value, roundtripDocId) {
+      if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
+      try {
+        db.collection('Roundtrips').doc(roundtripDocId).update({
+          ['' + field]: value
+        })
+      } catch (error) {
+        console.log(error)
+        return false
+      }
+      return true
     },
     isUniqueTitle (value) {
       return new Promise((resolve, reject) => {
@@ -438,6 +715,89 @@ export default {
       update(() => {
         const needle = val.toLowerCase()
         this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
+    getOrigins (val, update, abort) {
+      this.filterAirports(val, update, abort, true)
+    },
+    getDestinations (val, update, abort) {
+      this.filterAirports(val, update, abort, false)
+    },
+    filterAirports (val, update, abort, originSearch) {
+      if (val.length < 3) {
+        abort()
+        return
+      }
+
+      update(() => {
+        if (val.length >= 3) {
+          this.getAirports(val).then((results) => {
+            if (originSearch) {
+              this.originOptions = []
+              this.originCodes = []
+            } else {
+              this.destinationOptions = []
+              this.destinationCodes = []
+            }
+
+            results.data.data.forEach(city => {
+              if (originSearch) {
+                this.originOptions.push(this.capitalize(city.name))
+                this.originCodes.push(city.iataCode)
+              } else {
+                this.destinationOptions.push(this.capitalize(city.name))
+                this.destinationCodes.push(city.iataCode)
+                this.destinationAddresses.push(this.capitalize(city.address.cityName))
+              }
+            })
+          })
+        }
+      })
+    },
+    capitalize (s) {
+      s = s.toLowerCase()
+      s = s.charAt(0).toUpperCase() + s.slice(1)
+      return s
+    },
+    getAirports (val) {
+      return new Promise((resolve, reject) => {
+        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+
+        const headers = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
+        const data = querystring.stringify({
+          grant_type: 'client_credentials', // gave the values directly for testing
+          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+          client_secret: '5NLWAdMXnOyNxWnk'
+        })
+
+        axios.post(url, data, {
+          headers: headers,
+          form: {
+            'grant_type': 'client_credentials',
+            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+            'client_secret': '5NLWAdMXnOyNxWnk'
+          }
+        }).then(function (response) {
+          let token = response.data.access_token
+          const tokenString = 'Bearer ' + token
+
+          axios.get('https://test.api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
+            headers: {
+              'Authorization': tokenString
+            }
+          }).then(function (response) {
+            resolve(response)
+          }).catch(function (error) {
+            console.log('Error' + error)
+            resolve(null)
+          })
+        }).catch(function (error) {
+          console.log('Error on Authentication' + error)
+          resolve(null)
+        })
       })
     },
     isUniqueTitel (value) {

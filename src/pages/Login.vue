@@ -1,6 +1,7 @@
 <template>
   <div class="login q-px-lg q-pb-md">
     <h2>Log in</h2>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um zu deinen Rundreisen zu kommen</p>
     <q-form
       @submit="onUserLogin"
       bordered
@@ -61,7 +62,7 @@
       </q-btn>
     </div>
     <br>
-    <span>Du hast noch gar keinen Account ? Dann <router-link to="/registrieren">registriere</router-link> dich noch heute !</span>
+    <span style="font-size:18px;">Du hast noch gar keinen Account ? Dann <router-link to="/registrieren">registriere</router-link> dich noch heute !</span>
   </div>
 </template>
 

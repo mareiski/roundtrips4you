@@ -1,6 +1,7 @@
 <template>
   <div class="register q-px-lg q-pb-md">
     <h2>Registrieren</h2>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Registriere dich jetzt und nutze alle unsere Funktionen komplett kostenlos</p>
     <q-form
       @submit="signUp"
       bordered
@@ -76,7 +77,7 @@
       </q-btn>
     </div>
     <br>
-    <span>Du hast bereits einen Account ? Dann <router-link to="/login">logge</router-link> dich jetzt ein.</span>
+    <span style="font-size:18px;">Du hast bereits einen Account ? Dann <router-link to="/login">logge</router-link> dich jetzt ein.</span>
   </div>
 </template>
 

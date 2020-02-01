@@ -70,6 +70,7 @@ top of page > end of page
         z-index: 100;
         color: white;
         padding: 0 10% 0 10%;
+        margin-top: 0;
     }
 
     .quote-author {
@@ -80,12 +81,11 @@ top of page > end of page
     }
 
     .main-search-bar {
-        width: 60%;
+        width: 100%;
         height: 50px;
-        margin-top: 50px;
         font-size: 30px;
         padding-left: 10px;
-        max-width: unset;
+        max-width: 552px;
 
         &>div {
             background-color: white;
@@ -103,10 +103,31 @@ top of page > end of page
     }
 }
 
+#OfferContainer {
+    width: 100%;
+    color: white;
+    margin-top: 100px;
+
+    &>div {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        font-size: 18px;
+        width: 50%;
+        align-items: center;
+        padding: 10px;
+
+        button {
+            max-width: 522px;
+            width: 100%;
+        }
+    }
+}
+
 .card-container {
     display: flex;
     justify-content: center;
-    padding: 40px 0 100px 0;
+    padding: 10px 0 100px 0;
 
     .card-wrap {
         display: flex;
@@ -245,10 +266,6 @@ top of page > end of page
         }
     }
 
-    .create-own-btn {
-        display: none;
-    }
-
     #MainImgPlacholder {
         .main-qoute {
             font-size: 24px;
@@ -260,6 +277,18 @@ top of page > end of page
         }
     }
 
+    #OfferContainer {
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+
+        &>div:nth-child(2) {
+            margin-top: 30px;
+            border-top: solid 1px;
+            padding-top: 30px;
+        }
+    }
+
     .section-img-placeholder h3 {
         font-size: 20px;
     }
@@ -267,6 +296,12 @@ top of page > end of page
     h4 {
         padding: 0 5px 0 5px;
         font-size: 25px;
+    }
+}
+
+@media @mobile {
+    #OfferContainer>div:nth-child(2) {
+        display: none;
     }
 }
 

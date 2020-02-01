@@ -214,7 +214,7 @@
     </back-to-top>
     <div
       class="register-btn"
-      v-if="!user"
+      v-if="!user && !$router.currentRoute.fullPath === '/registrieren'"
     >
       <router-link
         class="footer-link"
