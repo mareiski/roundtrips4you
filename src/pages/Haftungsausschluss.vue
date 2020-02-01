@@ -18,3 +18,12 @@
     Quelle: <a href="http://www.haftungsausschluss-vorlage.de/">Haftungsausschluss Muster</a> von <a href="http://www.haftungsausschluss.org/">Haftungsausschluss.org</a>, <a href="http://www.dsgvo-gesetz.info/">www.dsgvo-gesetz.info</a> und das <a href="http://www.datenschutzgesetz.de/">Datenschutzgesetz</a>
   </div>
 </template>
+<script>
+export default {
+  metaInfo: {
+    meta: [
+      { name: 'robot', content: 'noIndex' }
+    ]
+  }
+}
+</script>

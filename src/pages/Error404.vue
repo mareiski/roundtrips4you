@@ -22,6 +22,11 @@ export default {
   name: 'Error404',
   created () {
     Loading.hide()
+  },
+  metaInfo: {
+    meta: [
+      { name: 'robot', content: 'noIndex' }
+    ]
   }
 }
 </script>

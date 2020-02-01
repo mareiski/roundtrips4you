@@ -23,3 +23,12 @@
     <p>Quelle: <a href="https://www.e-recht24.de">eRecht24</a></p>
   </div>
 </template>
+<script>
+export default {
+  metaInfo: {
+    meta: [
+      { name: 'robot', content: 'noIndex' }
+    ]
+  }
+}
+</script>

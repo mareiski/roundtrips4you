@@ -103,3 +103,12 @@
     <p>Quelle: <a href="https://www.e-recht24.de/muster-datenschutzerklaerung.html">https://www.e-recht24.de/muster-datenschutzerklaerung.html</a></p>
   </div>
 </template>
+<script>
+export default {
+  metaInfo: {
+    meta: [
+      { name: 'robot', content: 'noIndex' }
+    ]
+  }
+}
+</script>
