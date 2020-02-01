@@ -1,10 +1,12 @@
 <template>
   <div
     class="flex city-suggestion"
-    style="flex-direction:column;"
+    :style="cities.length === 0 ? 'flex-direction:row; justify-content:center;' : 'flex-direction:column;'"
   >
     <q-btn
       v-if="cities.length === 0"
+      color="primary"
+      style="width:200px;"
       @click="getCities(country)"
     >Städte vorschlagen</q-btn>
     <div class="flex justify-between cards-container">

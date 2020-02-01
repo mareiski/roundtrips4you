@@ -1,7 +1,10 @@
 <template>
   <q-page style="overflow: hidden;">
     <div class="home q-px-lg q-pb-md">
-      <div id="flyingPlane">
+      <div
+        id="flyingPlane"
+        v-show="imgLoaded"
+      >
         <router-link to="/meine-rundreisen">
           <q-btn class="banner">Eigene Reise erstellen</q-btn>
         </router-link>
@@ -9,6 +12,7 @@
         <img
           class="plane"
           rel="preload"
+          @load="imgLoaded = true"
           src="../statics/plane.png"
         />
       </div>
@@ -209,7 +213,8 @@ export default {
     return {
       date: '2019/02/01',
       countryOptions: countries,
-      searchLocation: ''
+      searchLocation: '',
+      imgLoaded: false
     }
   },
   methods: {

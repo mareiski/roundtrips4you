@@ -537,20 +537,6 @@
         </div>
       </q-tab-panel>
       <q-tab-panel name="settings">
-
-        <!-- <q-banner
-          class="bg-grey-3"
-          v-if="routeDisabled"
-        >
-          <template v-slot:avatar>
-            <q-icon
-              name="error"
-              color="primary"
-            />
-          </template>
-          Bitte verfolständige deine Einstellungen & speichere diese um zum nächsten Schritt zu kommen.
-        </q-banner> -->
-
         <h4>Allgemeine Einstellungen</h4>
         <q-form
           @submit="onSaveRoundtrip"

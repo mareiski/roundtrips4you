@@ -81,7 +81,6 @@ module.exports = function (ctx) {
         'QChatMessage',
         'QPagination',
         'QBadge',
-        'QBanner',
         'QStepper',
         'QStep',
         'QStepperNavigation'

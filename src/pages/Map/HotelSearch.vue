@@ -84,7 +84,7 @@ export default {
     },
     getHotels (hotelName, long, lat, checkInDate, checkOutDate, roomAmount, adults, childrenAges) {
       return new Promise((resolve, reject) => {
-        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
 
         const headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -92,29 +92,30 @@ export default {
 
         const data = querystring.stringify({
           grant_type: 'client_credentials', // gave the values directly for testing
-          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-          client_secret: '5NLWAdMXnOyNxWnk'
+          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+          client_secret: 'lHQlUheyyAZtGQDA'
         })
 
         const dateTimeParts = checkInDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
-        const formattedCheckInDate = dateParts[2] + '-' + dateParts[1] - 1 + '-' + dateParts[0] - 1
+        console.log(dateParts)
+        const formattedCheckInDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
 
         dateParts = checkOutDate.split('.')
-        const formattedCheckOutDate = dateParts[2] + '-' + dateParts[1] - 1 + '-' + dateParts[0] - 1
+        const formattedCheckOutDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
 
         axios.post(url, data, {
           headers: headers,
           form: {
             'grant_type': 'client_credentials',
-            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-            'client_secret': '5NLWAdMXnOyNxWnk'
+            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+            'client_secret': 'lHQlUheyyAZtGQDA'
           }
         }).then(function (response) {
           let token = response.data.access_token
           const tokenString = 'Bearer ' + token
 
-          const offerUrl = 'https://test.api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&hotelName=' +
+          const offerUrl = 'https://api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&hotelName=' +
             hotelName + '&checkInDate=' + formattedCheckInDate + '&chechOutDate=' + formattedCheckOutDate + '&roomQuantity=' + roomAmount + '&adults=' +
             adults + '&childAges' + childrenAges + '&includeClosed=true&radius=50&currency=EUR&lang=de&view=LIGHT'
 
