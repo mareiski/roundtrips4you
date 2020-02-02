@@ -86,6 +86,11 @@ import { auth } from '../firebaseInit'
 import firebase from 'firebase'
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Registriere dich jetzt kostenlos bei roundtrips4you und erstelle selbst deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+    ]
+  },
   name: 'Register',
   data () {
     return {

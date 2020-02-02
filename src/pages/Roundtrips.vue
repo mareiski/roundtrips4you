@@ -510,6 +510,11 @@ const originalRoundtripArr = []
 let createdAts = []
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Lass dich von vorgefertigten Rundreisen Inspirieren und bearbeite diese nach deinen Wünschen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+    ]
+  },
   data () {
     return {
       OfferPeriod: formattedDate,

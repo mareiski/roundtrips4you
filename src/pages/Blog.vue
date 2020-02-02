@@ -74,6 +74,11 @@
 
 <script>
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    ]
+  },
   data () {
     return {
       story: {},

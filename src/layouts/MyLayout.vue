@@ -318,6 +318,7 @@ export default {
         if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
         else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
         else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
+        else if (title.includes('ueber')) title = 'über uns'
       } else {
         title = 'roundtrips4you - der Reiseplaner für deine individuellen Traumreisen'
       }
@@ -329,6 +330,7 @@ export default {
           if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
           else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
           else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
+          else if (title.includes('ueber')) title = 'über uns'
         } else {
           title = 'roundtrips4you - der Reiseplaner für deine individuellen Traumreisen'
         }

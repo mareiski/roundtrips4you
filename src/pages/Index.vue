@@ -208,6 +208,11 @@ import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    ]
+  },
   name: 'PageIndex',
   data () {
     return {

@@ -1002,6 +1002,11 @@ let roundtripDocId = ''
 let galeryImgId = 0
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Reise auf roundtrips4you jetzt bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    ]
+  },
   name: 'EditRoundtrips',
   components: {
     Stop,

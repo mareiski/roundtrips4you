@@ -71,6 +71,11 @@ import { auth } from '../firebaseInit'
 import firebase from 'firebase'
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: '' }
+    ]
+  },
   name: 'login',
   data () {
     return {

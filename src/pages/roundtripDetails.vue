@@ -212,6 +212,11 @@ let roundtrip = []
 let roundtripDocId = null
 
 export default {
+  metaInfo: {
+    meta: [
+      { name: 'description', content: 'Reise auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    ]
+  },
   components: {
     Stop,
     Map,
