@@ -1405,7 +1405,6 @@ export default {
         this.saveData('ChildrenAges', this.childrenAges)
       ) {
         this.submitting = false
-        this.enableTabs()
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -1451,7 +1450,6 @@ export default {
           this.saveData('NonStop', this.nonStop)
         ) {
           this.submitting = false
-          this.enableTabs()
           this.$q.notify({
             color: 'green-4',
             textColor: 'white',
@@ -1470,7 +1468,6 @@ export default {
       } else {
         if (this.saveData('TransportProfile', this.arrivalDepatureProfile)) {
           this.submitting = false
-          this.enableTabs()
           this.$q.notify({
             color: 'green-4',
             textColor: 'white',

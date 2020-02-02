@@ -309,12 +309,18 @@
                   </div>
                   <div v-else>
                     <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+                    <CitySearch
+                      ref="citySearch"
+                      :parkingPlaceSearch="false"
+                      :defaultLocation="null"
+                      @update="updateLocation($event)"
+                    ></CitySearch>
                   </div>
                   <q-stepper-navigation>
                     <q-btn
                       @click="step = 3"
                       color="primary"
-                      :disable="!arrivalDepatureProfile || !origin || !destination || !depatureDate || !returnDate || !travelClass || !nonStop"
+                      :disable="arrivalDepatureProfile === 'Flugzeug' && (!arrivalDepatureProfile || !origin || !destination || !depatureDate || !returnDate || !travelClass || !nonStop)"
                       label="Weiter"
                     />
                     <q-btn
@@ -427,6 +433,7 @@
 import { db, auth, storage } from '../firebaseInit'
 import { date, scroll } from 'quasar'
 import { countries } from '../countries'
+import CitySearch from './Map/CitySearch'
 
 let uid = null
 let roundtripDocIds = []
@@ -444,6 +451,9 @@ export default {
     meta: [
       { name: 'description', content: 'Deine Reisen auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
     ]
+  },
+  components: {
+    CitySearch
   },
   name: 'myRoundtrips',
   data () {
@@ -486,25 +496,34 @@ export default {
   methods: {
     onAddRoundtrip () {
       if (this.roundtrips.length < 20) {
-        this.addExpanded = false
         this.addButtonActive = false
         this.showNoRoundtripsText = false
 
-        if (this.title && this.selectedOption && this.arrivalDepatureProfile && this.origin && this.destination && this.depatureDate && this.returnDate && this.travelClass && this.nonStop && this.rooms && this.adults) {
-          if (this.addRoundtrip(this.title, this.selectedOption)) {
-            this.$q.notify({
-              color: 'green-4',
-              textColor: 'white',
-              icon: 'check_circle',
-              message: 'Rundreise wurde erstellt'
-            })
-          } else {
+        if (this.title && this.selectedOption && this.arrivalDepatureProfile && this.rooms && this.adults) {
+          if (this.arrivalDepatureProfile === 'Flugzeug' && !this.origin && !this.destination && !this.depatureDate && !this.returnDate && !this.travelClass && !this.nonStop) {
             this.$q.notify({
               color: 'red-5',
               textColor: 'white',
               icon: 'error',
-              message: 'Oh nein, da ist wohl etwas schief gelaufen, bitte versuche es erneut'
+              message: 'Bitte überprüfe deine Angaben'
             })
+          } else {
+            if (this.addRoundtrip(this.title, this.selectedOption)) {
+              this.$q.notify({
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'check_circle',
+                message: 'Rundreise wurde erstellt'
+              })
+              this.addExpanded = false
+            } else {
+              this.$q.notify({
+                color: 'red-5',
+                textColor: 'white',
+                icon: 'error',
+                message: 'Oh nein, da ist wohl etwas schief gelaufen, bitte versuche es erneut'
+              })
+            }
           }
         } else {
           this.$q.notify({
@@ -531,6 +550,14 @@ export default {
       const offset = el.offsetTop
       const duration = 400
       setScrollPosition(target, offset, duration)
+    },
+    updateLocation (event) {
+      this.tempLocation = {
+        lat: event.y,
+        lng: event.x,
+        label: event.label
+      }
+      console.log(event)
     },
     addRoundtrip (Title, Location) {
       Title = Title.toLowerCase()
@@ -682,7 +709,7 @@ export default {
           return false
         }
       } else {
-        if (this.saveData('TransportProfile', this.arrivalDepatureProfile)) {
+        if (this.saveData('TransportProfile', this.arrivalDepatureProfile, RTDocId)) {
           return true
         } else {
           return false
