@@ -68,7 +68,7 @@
         v-else
         icon="house"
         size="3px"
-        clickable
+        :clickable="hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined'"
         @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
       >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelName + ', ' + hotelLocation.label) :  'kein Ort angegeben'}}
       </q-chip>
@@ -142,7 +142,7 @@
         </q-card>
       </q-dialog>
       <q-rating
-        v-if="!isNaN(hotelStars)"
+        v-if="hotelStars && !isNaN(hotelStars)"
         class="stars"
         v-model="hotelStars"
         readonly
@@ -203,7 +203,7 @@
         v-html="descriptionInput"
       ></div>
       <q-editor
-        v-else
+        v-else-if="!hotelName"
         v-model="descriptionInput"
         min-height="5rem"
         ref="editor_ref"

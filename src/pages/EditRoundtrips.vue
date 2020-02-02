@@ -142,6 +142,7 @@
                 <q-form
                   @submit="onAddEntry"
                   class="q-gutter-md addEntryForm"
+                  ref="addEntryForm"
                 >
                   <q-input
                     filled
@@ -986,13 +987,11 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 // stop parameters
 let BookingComLink = '',
   DateDistance = '',
-  Description = 'Beschreibung',
   ExpediaLink = '',
   GeneralLink = '',
   ImageUrl = '',
   Price = 0,
   RTId = 0,
-  Title = 'Titel',
   Location = {}
 
 let details = []
@@ -1283,7 +1282,7 @@ export default {
       db.collection('RoundtripDetails').add({
         BookingComLink,
         DateDistance,
-        Description,
+        Description: 'Beschreibung zu ' + Location.label.split(',')[0],
         ExpediaLink,
         GeneralLink,
         HotelStop,
@@ -1291,7 +1290,7 @@ export default {
         InitDate,
         Price,
         RTId,
-        Title,
+        Title: HotelStop && this.hotelName ? 'Hotel ' + this.hotelName : HotelStop ? 'Hotel in ' + Location.label.split(',')[0] : 'Zwischenstopp in ' + Location.label.split(',')[0],
         Location,
         Parking: this.parkingPlace,
         HotelLocation: HotelStop ? this.hotelLocation : null,
@@ -1301,6 +1300,7 @@ export default {
       })
 
       // clear all values
+      this.$refs.addEntryForm.reset()
       this.selectedOption = null
       this.generalTempLink = null
       this.location = {}

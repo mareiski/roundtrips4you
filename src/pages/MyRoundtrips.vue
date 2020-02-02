@@ -101,6 +101,7 @@
             <q-form
               @submit="onAddRoundtrip"
               class="q-gutter-md"
+              ref="addRoundtripForm"
             >
               <q-stepper
                 v-model="step"
@@ -595,6 +596,7 @@ export default {
               this.$router.push('/rundreise-bearbeiten/' + doc.id)
             })
           })
+        this.$refs.addRoundtripForm.reset()
         this.title = ''
         this.selectedOption = null
         this.$refs.titleInput.resetValidation()
