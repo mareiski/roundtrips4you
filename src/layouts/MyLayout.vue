@@ -169,14 +169,17 @@
           <h3 class="footer-title">Infos</h3>
           <router-link
             class="footer-link"
+            rel="nofollow"
             to="/impressum"
           >Impressum</router-link>
           <router-link
+            rel="nofollow"
             class="footer-link"
             to="/haftungsausschluss"
           >Haftungsausschluss</router-link>
           <router-link
             class="footer-link"
+            rel="nofollow"
             to="/datenschutz"
           >Datenschutz</router-link>
         </div>

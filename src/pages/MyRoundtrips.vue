@@ -776,12 +776,12 @@ export default {
 
             results.data.data.forEach(city => {
               if (originSearch) {
-                this.originOptions.push(this.capitalize(city.name))
+                this.originOptions.push(this.capitalize(city.detailedName))
                 this.originCodes.push(city.iataCode)
               } else {
-                this.destinationOptions.push(this.capitalize(city.name))
+                this.destinationOptions.push(this.capitalize(city.detailedName))
                 this.destinationCodes.push(city.iataCode)
-                this.destinationAddresses.push(this.capitalize(city.address.cityName))
+                this.destinationAddresses.push(this.capitalize(city.address.name))
               }
             })
           })
@@ -795,34 +795,35 @@ export default {
     },
     getAirports (val) {
       return new Promise((resolve, reject) => {
-        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
+        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
 
         const headers = {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
 
         const data = querystring.stringify({
-          grant_type: 'client_credentials', // gave the values directly for testing
-          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-          client_secret: '5NLWAdMXnOyNxWnk'
+          grant_type: 'client_credentials',
+          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+          client_secret: 'lHQlUheyyAZtGQDA'
         })
 
         axios.post(url, data, {
           headers: headers,
           form: {
             'grant_type': 'client_credentials',
-            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-            'client_secret': '5NLWAdMXnOyNxWnk'
+            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+            'client_secret': 'lHQlUheyyAZtGQDA'
           }
         }).then(function (response) {
           let token = response.data.access_token
           const tokenString = 'Bearer ' + token
 
-          axios.get('https://test.api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
+          axios.get('https://api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
             headers: {
               'Authorization': tokenString
             }
           }).then(function (response) {
+            console.log(response)
             resolve(response)
           }).catch(function (error) {
             console.log('Error' + error)
