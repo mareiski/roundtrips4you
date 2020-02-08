@@ -77,7 +77,10 @@
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
-        <h4 style="text-align:center;">Registriere dich jetzt und nutze unser ganzes Angebot komplett kostenlos</h4>
+        <h4 style="text-align:center;">Registriere dich jetzt und nutze unser ganzes <a
+            style="text-decoration:underline;"
+            @click="scrollTo('tools')"
+          >Angebot</a> komplett kostenlos</h4>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
@@ -119,6 +122,70 @@
           </router-link>
         </div>
       </div>
+      <h4
+        ref="tools"
+        style="text-align:center;"
+      >Diese Tools helfen dir bei der Erstellung deiner Reise</h4>
+      <ol class="create-roundtrip-ol">
+        <li>
+          <div>
+            <h2>Flugsuche</h2>
+            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu buchen.</p>
+            <p>Du musst dafür nur einmal deine Daten eingeben und kannst dir dafür die verschieden Angebote der Anbieter ansehen.</p>
+          </div>
+          <div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h2>Städtevorschläge</h2>
+            <p>Zusätzlich schlagen dir automatisch die schönsten Städte in dem gewählten Land deine Reise vor.</p>
+            <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst und kannst diese mit einem Klick zu deiner Reise hizufügen.</p>
+          </div>
+          <div>
+            <q-img
+              style="width:1000px;"
+              src="../statics/cities.png"
+            />
+          </div>
+        </li>
+        <li>
+          <div>
+            <h2>Rundreise automatisch zusammenstellen</h2>
+            <p>Nachdem du die Städte deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
+            <p>Die Route wird so berechnet, dass du immer am wenigsten Zeit zwischen den Orten benötigst.</p>
+          </div>
+          <div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <h2>Vorschlag von Sehenswürdigkeiten</h2>
+            <p>Die besten Sehenswürdigkeiten zu finden ist schwierig, deshalb unterstützen wir dich mit unseren automatischen Vorschlägen.</p>
+            <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern.</p>
+          </div>
+          <div>
+            <q-img
+              style="width:1000px;"
+              src="../statics/pois.png"
+            />
+          </div>
+        </li>
+
+        <li>
+          <div>
+            <h2>Karte</h2>
+            <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>
+            <p>Wir übernehmen die Kartenerstellung komplett für dich, sodass du nur auf den entsprechenden Reiter klicken musst um alle deine Stopps zu sehen.</p>
+          </div>
+          <div>
+            <q-img
+              style="width:1000px;"
+              src="../statics/map.png"
+            />
+          </div>
+        </li>
+      </ol>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
         <h3>Erstelle jetzt ganz einfach und kostenlos deine individuelle Traumreise nach deinen Wünschen!</h3>
@@ -159,34 +226,6 @@
           </router-link>
         </div>
       </div>
-      <h4 style="text-align:center;">Deine eigene Rundreise erstellen: so einfach geht's!</h4>
-      <ol class="create-roundtrip-ol">
-        <li>
-          <q-icon name="info" />
-          <h2>Allgemeine Infos angeben</h2>
-          <p>Gib als Erstes das Land, den Titel und die Anzahl der Reisenden auf deiner Rundreise an.</p>
-          <p>Damit hast du auch schon das Grundgerüst für deine eigene Traumreise fertiggestellt.</p>
-        </li>
-        <li>
-          <q-icon name="location_on" />
-          <h2>Orte und Art der Stopps festlegen</h2>
-          <p>Nun kannst du jeden einzelnen Ort auf deine Reise anlegen und die Art des Stopps (Zwischenstopp oder Hotel) auswählen.</p>
-          <p>Solltest du noch hilfe bei der Auswahl der Orte brauchen, kannst du dich von unseren Städtevorschlägen inspirieren lassen.</p>
-        </li>
-        <li>
-          <q-icon name="build" />
-          <h2>Lass dich von unseren Tools unterstützen</h2>
-          <p>Durch eine Vielzahl von Funktionen, wie der automatischen Kartenerstellung und Routenberechnung unterstützen wir dich bei deiner Planung.</p>
-          <p>Zusätzlich zeigen wir dir wichtige Informationen, wie z.B. die Kontaktdaten und Adresse deines Hotels.</p>
-        </li>
-
-        <li>
-          <q-icon name="share" />
-          <h2>Teile deine Rundreise</h2>
-          <p>Schmücke deine Rundreise mit Bildern, Highlights und vielen weiteren Informationen aus, um deine Rundreise mit der Welt zu teilen.</p>
-        </li>
-      </ol>
-      <!-- Unsere automatisierten Funktionen -->
       <div class="register-container">
         <h4 style="text-align:center;">Registriere dich jetzt und nutze unser ganzes Angebot komplett kostenlos</h4>
         <q-btn
