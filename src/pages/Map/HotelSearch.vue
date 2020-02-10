@@ -33,10 +33,7 @@
         </q-item>
       </q-list>
     </q-card>
-    <q-dialog
-      persistent
-      v-model="showAddHotelDialog"
-    >
+    <q-dialog v-model="showAddHotelDialog">
       <q-stepper
         v-model="step"
         vertical

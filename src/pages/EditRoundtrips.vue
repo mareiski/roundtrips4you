@@ -101,6 +101,7 @@
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
                 :firstStop="index === 0"
+                :galeryImgUrls="galeryImgUrls"
               ></Stop>
               <Duration
                 :key="stop"
@@ -166,6 +167,7 @@
                           <q-date
                             v-model="date"
                             today-btn
+                            @input="updateCheckOutDate($event)"
                             mask="DD.MM.YYYY HH:mm"
                           />
                           <!--  :options="dateOptions" -->
@@ -1132,7 +1134,7 @@ export default {
         })
         initDate.setDate(initDate.getDate() + 1)
       })
-      this.loadRoundtripDetails(this.$route.params.id)
+      this.loadRoundtripDetails(this.$route.params.id, false)
       this.loadSingleRoundtrip(this.$route.params.id)
     },
     getShortestRoute () {
@@ -1190,7 +1192,7 @@ export default {
 
       try {
         this.addStop(this.date, this.selectedOption)
-        this.loadRoundtripDetails(this.$route.params.id)
+        this.loadRoundtripDetails(this.$route.params.id, true)
 
         this.$q.notify({
           color: 'green-4',
@@ -1712,8 +1714,8 @@ export default {
         this.hotelContact = hotel.contact
       }
     },
-    loadRoundtripDetails (RTId) {
-      this.stops = []
+    loadRoundtripDetails (RTId, refreshAll) {
+      if (refreshAll) this.stops = []
       this.selectedCountry = this.country
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')
@@ -1744,7 +1746,7 @@ export default {
               this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
 
               // add one day
-              const defaultCheckOutDate = new Date()
+              const defaultCheckOutDate = initDate
               defaultCheckOutDate.setDate(initDate.getDate() + 1)
 
               this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
@@ -1797,6 +1799,17 @@ export default {
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
         })
+    },
+    updateCheckOutDate (val) {
+      const dateTimeParts = val.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const timeParts = dateTimeParts[1].split(':')
+      const checkInDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+
+      const defaultCheckOutDate = checkInDate
+      defaultCheckOutDate.setDate(checkInDate.getDate() + 2)
+
+      this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
     msToTime (duration) {
       var minutes = Math.floor((duration / (1000 * 60)) % 60),
@@ -2097,7 +2110,7 @@ export default {
                       }
                     })
 
-                    this.loadRoundtripDetails(doc.id)
+                    this.loadRoundtripDetails(doc.id, true)
                     this.loadSingleRoundtrip(doc.id)
                   })
                 })
@@ -2144,7 +2157,7 @@ export default {
           let isPublic = snapshot.docs[0].data().Public === true
 
           if (isCreator) {
-            this.loadRoundtripDetails(RTId)
+            this.loadRoundtripDetails(RTId, false)
             this.loadSingleRoundtrip(RTId)
             this.loadCategories()
           } else if (isPublic) {

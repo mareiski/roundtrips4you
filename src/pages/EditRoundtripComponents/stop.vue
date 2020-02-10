@@ -182,7 +182,7 @@
             v-if="editor"
             size="3px"
             clickable
-            :icon="sight.category === 'RESTAURANT' ? 'restaurant_menu' : 'account_balance'"
+            :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
           >{{sight.name}}</q-chip>
         </a>
         <a
@@ -226,9 +226,38 @@
           icon: $q.iconSet.editor.formatting,
           label: 'Format bei Kopie ' + (this.preventPasting ? 'aus' : 'an'),
           handler: formatOn
+        },
+        image: {
+          top: 'Bild hinzufügen',
+          icon: 'add_photo_alternate',
+          label: this.galeryImgUrls.length > 0 ? 'Bild hinzufügen' : 'keine Bilder vorhanden',
+          handler: this.galeryImgUrls.length > 0 ? chooseImg : null
         }
         }"
       />
+      <q-dialog
+        v-if="galeryImgUrls.length > 0"
+        v-model="chooseImgDialog"
+      >
+        <div
+          class="uploader"
+          v-for="url in galeryImgUrls"
+          :key="url"
+        >
+          <q-img
+            style="height:100%;"
+            :src="url"
+          ></q-img>
+          <q-btn
+            round
+            color="primary"
+            icon="add"
+            style="position: absolute;"
+            @click="addImageToEditor(url)"
+          >
+          </q-btn>
+        </div>
+      </q-dialog>
     </div>
     <template v-slot:subtitle>
       <span class="q-timeline__title">
@@ -238,7 +267,6 @@
           ref="qDateProxy"
           transition-show="scale"
           transition-hide="scale"
-          @hide="hideDialog()"
         >
           <q-date
             v-model="date"
@@ -263,7 +291,6 @@
           ref="qTimeProxy"
           transition-show="scale"
           transition-hide="scale"
-          @hide="hideDialog()"
         >
           <q-time
             v-model="date"
@@ -311,7 +338,8 @@ export default {
     adults: Number,
     childrenAges: Array,
     rooms: Number,
-    firstStop: Boolean
+    firstStop: Boolean,
+    galeryImgUrls: Array
   },
   data () {
     return {
@@ -320,13 +348,14 @@ export default {
       generalLinkText: '',
       showDateEntry: true,
       showTimeEntry: false,
-      preventPasting: true,
+      preventPasting: false,
       editParkingPlace: false,
       tempParkingPlace: {},
       editLocation: false,
       tempLocation: {},
       savedEditorContent: this.editorPlaceholder,
       sights: null,
+      chooseImgDialog: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -401,14 +430,13 @@ export default {
           }
         ],
         ['quote', 'unordered', 'ordered', 'outdent', 'indent'],
-        ['format'],
+        ['format', 'image'],
         ['undo', 'redo']
       ]
     }
   },
   methods: {
     saveDate (value) {
-      console.log(value)
       let dateTimeParts = value.split(' ')
       let dateParts = dateTimeParts[0].split('.')
       let timeParts = dateTimeParts[1].split(':')
@@ -417,6 +445,7 @@ export default {
       db.collection('RoundtripDetails').doc(this.docId).update({
         'InitDate': initDate
       })
+      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, true)
     },
     getChildrenText () {
       let text = '&group_children=' + this.childrenAges.length
@@ -424,9 +453,6 @@ export default {
         text += '&age=' + child
       })
       return text
-    },
-    hideDialog () {
-      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id)
     },
     saveData (field, value) {
       console.log(this.docId)
@@ -440,7 +466,7 @@ export default {
           textColor: 'white',
           icon: 'check_circle'
         })
-        this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id)
+        this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
       } catch (e) {
         console.log(e)
       }
@@ -482,7 +508,7 @@ export default {
         if (evt.originalEvent && evt.originalEvent.clipboardData.getData) {
           text = evt.originalEvent.clipboardData.getData('text/plain')
           this.$refs.editor_ref.runCmd('insertText', text)
-        } else if (evt.clipboardData && evt.clipboardData.getData) {
+        } else if (evt.clipboardData && evt.clipboardData.getData()) {
           text = evt.clipboardData.getData('text/plain')
           this.$refs.editor_ref.runCmd('insertText', text)
         } else if (window.clipboardData && window.clipboardData.getData) {
@@ -493,6 +519,12 @@ export default {
           onPasteStripFormattingIEPaste = false
         }
       }
+    },
+    chooseImg () {
+      this.chooseImgDialog = true
+    },
+    addImageToEditor (src) {
+      this.$refs.editor_ref.runCmd('insertImage', src)
     },
     deleteEntry () {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
@@ -512,7 +544,7 @@ export default {
           icon: 'check_circle',
           message: 'Eintrag wurde gelöscht'
         })
-        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id)
+        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
       }).catch(function (error) {
         console.log(error)
         context.$q.notify({

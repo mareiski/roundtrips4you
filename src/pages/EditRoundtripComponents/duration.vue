@@ -105,7 +105,7 @@ export default {
           icon: 'check_circle'
         })
         let parent = this.getParent('EditRoundtrips')
-        parent.loadRoundtripDetails(this.$route.params.id)
+        parent.loadRoundtripDetails(this.$route.params.id, false)
         parent.loadSingleRoundtrip(this.$route.params.id)
       } catch (e) {
         console.log(e)
