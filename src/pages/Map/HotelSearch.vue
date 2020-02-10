@@ -23,16 +23,99 @@
     <q-card>
       <q-list>
         <q-item
-          :clickable="hotel !== null"
-          @click="[hotelName = hotel.hotel.name, hideHotelList(), $emit('update', hotel)]"
+          clickable
+          @click="hotel !== null ? [hotelName = hotel.hotel.name, hideHotelList(), $emit('update', hotel)] : showAddHotelDialog = true"
           v-show="hotelListVisible"
           v-for="hotel in hotels"
           :key="hotel"
         >
-          {{hotel !== null ? hotel.hotel.name : 'Es konnten keine Hotels gefunden werden'}}
+          {{hotel !== null ? hotel.hotel.name : 'Keine Ergebnisse. Klicken um dieses Hotel hinzuzufügen'}}
         </q-item>
       </q-list>
     </q-card>
+    <q-dialog
+      persistent
+      v-model="showAddHotelDialog"
+    >
+      <q-stepper
+        v-model="step"
+        vertical
+        color="primary"
+        animated
+        flat
+        style="width:400px"
+        keep-alive
+      >
+        <q-step
+          :name="1"
+          title="Name & Adresse angeben"
+          icon="settings"
+          :done="step > 1"
+        >
+          <q-input
+            v-model="hotelName"
+            :rules="[val => val !== null &&  val !== ''  || 'Bitte gib den Exakten Namen an']"
+            label="Exakter Hotel Name"
+            outlined
+            style="margin:auto; margin-top:20px; margin-left:0;"
+          >
+            <template v-slot:prepend>
+              <q-icon name="title" />
+            </template>
+          </q-input>
+          <CitySearch
+            ref="citySearch"
+            :parkingPlaceSearch="false"
+            :defaultLocation="null"
+            @update="updateLocation($event)"
+          ></CitySearch>
+          <q-stepper-navigation>
+            <q-btn
+              @click="step = 2"
+              color="primary"
+              label="Weiter"
+              :disable="!hotelName || !tempLocation"
+            />
+          </q-stepper-navigation>
+        </q-step>
+        <q-step
+          :name="2"
+          title="Bewertung & Email eingeben"
+          icon="settings"
+        >
+          <q-rating
+            class="stars"
+            v-model="hotelStars"
+            size="15px"
+            color="gold"
+            style="margin:20px 0 15px 0;"
+          />
+          <q-input
+            v-model="hotelEmail"
+            outlined
+            type="email"
+            lazy-rules
+            :rules="[val => reg.test(val) || 'Bitte gib eine richtige Email an']"
+            label="Email des Hotels (optional)"
+          />
+          <q-stepper-navigation>
+            <q-btn
+              color="primary"
+              label="Fertig"
+              :disable="!hotelStars"
+              @click="addHotel()"
+            />
+            <q-btn
+              flat
+              @click="step = 1"
+              color="primary"
+              label="Zurück"
+              class="q-ml-sm"
+            />
+          </q-stepper-navigation>
+        </q-step>
+      </q-stepper>
+    </q-dialog>
   </div>
 </template>
 <style lang="less" scoped>
@@ -40,6 +123,7 @@
 </style>
 <script>
 import axios from 'axios'
+import CitySearch from './CitySearch'
 var querystring = require('querystring')
 
 export default {
@@ -48,8 +132,17 @@ export default {
       hotelName: '',
       hotels: [],
       searchingForHotels: false,
-      hotelListVisible: false
+      hotelListVisible: false,
+      showAddHotelDialog: false,
+      tempLocation: {},
+      hotelStars: 3,
+      reg: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+      hotelEmail: null,
+      step: 1
     }
+  },
+  components: {
+    CitySearch
   },
   props: {
     lat: String,
@@ -74,8 +167,37 @@ export default {
         this.searchingForHotels = false
       })
     },
+    addHotel () {
+      let hotel = {
+        hotel: {
+          latitude: this.tempLocation.lat,
+          longitude: this.tempLocation.lng,
+          address: {
+            lines: [this.tempLocation.label]
+          },
+          rating: this.hotelStars,
+          name: this.hotelName,
+          contact: { email: this.hotelEmail }
+        }
+      }
+      this.$emit('update', hotel)
+      this.hideHotelList()
+      this.showAddHotelDialog = false
+      this.tempLocation = {}
+      this.hotelStars = 3
+      this.hotelEmail = null
+      this.step = 1
+    },
     hideHotelList () {
       this.hotelListVisible = false
+    },
+    updateLocation (event) {
+      this.tempLocation = {
+        lat: event.y,
+        lng: event.x,
+        label: event.label
+      }
+      console.log(event)
     },
     clear () {
       this.hotelName = ''
