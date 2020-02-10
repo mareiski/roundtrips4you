@@ -168,16 +168,19 @@
         <div class="footer-infos">
           <h3 class="footer-title">Infos</h3>
           <router-link
+            v-if="!isOnNetlifyPage"
             class="footer-link"
             rel="nofollow"
             to="/impressum"
           >Impressum</router-link>
           <router-link
+            v-if="!isOnNetlifyPage"
             rel="nofollow"
             class="footer-link"
             to="/haftungsausschluss"
           >Haftungsausschluss</router-link>
           <router-link
+            v-if="!isOnNetlifyPage"
             class="footer-link"
             rel="nofollow"
             to="/datenschutz"
@@ -185,8 +188,11 @@
         </div>
         <div class="footer-contact">
           <h3 class="footer-title">Kontakt</h3>
-          <a class="footer-link contact-link-box">
-            <span class="footer-text">roundtrips4you GbR</span>
+          <a
+            class="footer-link contact-link-box"
+            v-if="!isOnNetlifyPage"
+          >
+            <span class="footer-text">roundtrips4you</span>
             <span class="footer-text">Am See 20</span>
             <span class="footer-text">85077 Manching</span>
           </a>
@@ -255,7 +261,8 @@ export default {
   data () {
     return {
       showPreload: true,
-      onLine: navigator.onLine
+      onLine: navigator.onLine,
+      isOnNetlifyPage: false
     }
   },
   computed: {
@@ -281,6 +288,9 @@ export default {
         type
       } = e
       this.onLine = type === 'online'
+    },
+    getHost () {
+      return location.host
     }
   },
   watch: {
@@ -314,6 +324,9 @@ export default {
     this.$storyblok.init({
       accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
     })
+
+    this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.com' || this.getHost === 'www.roundtrips4you.netlify.com')
+
     auth.authRef().onAuthStateChanged((user) => {
       let title
       if (this.$router.currentRoute.path.substr(1)) {
