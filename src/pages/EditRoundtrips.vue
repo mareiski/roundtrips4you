@@ -102,6 +102,7 @@
                 :rooms="parseInt(rooms)"
                 :firstStop="index === 0"
                 :galeryImgUrls="galeryImgUrls"
+                :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
               ></Stop>
               <Duration
                 :key="stop"

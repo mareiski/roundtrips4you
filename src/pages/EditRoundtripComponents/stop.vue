@@ -226,23 +226,19 @@
           icon: $q.iconSet.editor.formatting,
           label: 'Format bei Kopie ' + (this.preventPasting ? 'aus' : 'an'),
           handler: formatOn
-        },
-        image: {
-          top: 'Bild hinzufügen',
-          icon: 'add_photo_alternate',
-          label: this.galeryImgUrls.length > 0 ? 'Bild hinzufügen' : 'keine Bilder vorhanden',
-          handler: this.galeryImgUrls.length > 0 ? chooseImg : null
         }
         }"
       />
-      <q-dialog
-        v-if="galeryImgUrls.length > 0"
-        v-model="chooseImgDialog"
+      <div
+        class="flex"
+        v-if="stopImages"
+        style="margin-top:10px;"
       >
         <div
           class="uploader"
-          v-for="url in galeryImgUrls"
+          v-for="url in stopImages"
           :key="url"
+          style="margin-right:8px;"
         >
           <q-img
             style="height:100%;"
@@ -252,11 +248,65 @@
             round
             color="primary"
             icon="add"
-            style="position: absolute;"
-            @click="addImageToEditor(url)"
+            style="position: absolute; transform: rotate(45deg)"
+            @click="removeImg()"
           >
           </q-btn>
         </div>
+      </div>
+      <div
+        style="margin-top:10px;"
+        class="uploader"
+        v-if="galeryImgUrls.length > 0 && editor"
+      >
+        <q-img
+          style="height:100%;"
+          src="/statics/dummy-image-landscape-1-150x150.jpg"
+        ></q-img>
+        <q-btn
+          round
+          color="primary"
+          icon="add"
+          style="position: absolute;"
+          @click="chooseImgDialog = true"
+        >
+        </q-btn>
+      </div>
+      <q-dialog
+        v-if="galeryImgUrls.length > 0"
+        v-model="chooseImgDialog"
+      >
+        <q-card>
+          <q-card-section class="row items-center">
+            <div
+              class="uploader"
+              v-for="url in galeryImgUrls"
+              :key="url"
+            >
+              <q-img
+                style="height:100%;"
+                :src="url"
+              ></q-img>
+              <q-btn
+                round
+                color="primary"
+                icon="add"
+                style="position: absolute;"
+                @click="addImageToStop(url)"
+              >
+              </q-btn>
+            </div>
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="Fertig"
+              color="primary"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
       </q-dialog>
     </div>
     <template v-slot:subtitle>
@@ -339,7 +389,8 @@ export default {
     childrenAges: Array,
     rooms: Number,
     firstStop: Boolean,
-    galeryImgUrls: Array
+    galeryImgUrls: Array,
+    stopImages: Array
   },
   data () {
     return {
@@ -520,11 +571,17 @@ export default {
         }
       }
     },
-    chooseImg () {
-      this.chooseImgDialog = true
+    addImageToStop (src) {
+      if (!this.stopImages) this.stopImages = []
+      this.stopImages.push(src)
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        'StopImages': this.stopImages
+      })
+      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
     },
-    addImageToEditor (src) {
-      this.$refs.editor_ref.runCmd('insertImage', src)
+    removeImg (src) {
+      if (!this.stopImages) return
+      this.stopImages.splice(this.stopImages.indexOf(src) - 1, 1)
     },
     deleteEntry () {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
@@ -623,7 +680,6 @@ export default {
         })
       })
     }
-
   },
   mounted () {
     if (this.lastItem) {

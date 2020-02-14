@@ -135,6 +135,8 @@
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
+                :galeryImgUrls="galeryImgUrls"
+                :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
               ></Stop>
               <Duration
                 :key="stop"
