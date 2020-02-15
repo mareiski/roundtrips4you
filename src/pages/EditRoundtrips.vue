@@ -16,7 +16,7 @@
       >
         <q-input
           v-model="title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
           dense
         />
       </q-popup-edit>
@@ -170,6 +170,7 @@
                             today-btn
                             @input="updateCheckOutDate($event)"
                             mask="DD.MM.YYYY HH:mm"
+                            v-close-popup
                           />
                           <!--  :options="dateOptions" -->
                         </q-popup-proxy>
@@ -628,7 +629,7 @@
             <q-select
               outlined
               v-model="inputProfile"
-              :options="['zu Fuß', 'Fahrrad', 'Auto']"
+              :options="['zu Fuß', 'Fahrrad', 'Auto', 'Bus']"
               label="Reisemittel"
               use-input
               :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
@@ -1519,11 +1520,12 @@ export default {
 
             results.data.data.forEach(city => {
               if (originSearch) {
-                this.originOptions.push(this.capitalize(city.detailedName))
+                this.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                 this.originCodes.push(city.iataCode)
               } else {
-                this.destinationOptions.push(this.capitalize(city.detailedName))
+                this.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                 this.destinationCodes.push(city.iataCode)
+                this.destinationAddresses.push(this.capitalize(city.address.cityName))
               }
             })
           })
@@ -2124,13 +2126,13 @@ export default {
       return new Promise((resolve, reject) => {
         value = value.toLowerCase()
         value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.replace(/ /g, '')
+        value = value.trim()
         let roundtripsRef = db.collection('Roundtrips')
           .where('Title', '==', value)
           .limit(1)
         roundtripsRef.get()
           .then(snapshot => {
-            resolve(snapshot.size === 0)
+            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
           })
       })
     }

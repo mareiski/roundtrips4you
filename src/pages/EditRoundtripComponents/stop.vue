@@ -582,6 +582,10 @@ export default {
     removeImg (src) {
       if (!this.stopImages) return
       this.stopImages.splice(this.stopImages.indexOf(src) - 1, 1)
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        'StopImages': this.stopImages
+      })
+      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
     },
     deleteEntry () {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {

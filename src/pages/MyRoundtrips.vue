@@ -119,7 +119,7 @@
                 >
                   <q-input
                     v-model="title"
-                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val =>  val.indexOf(' ') === -1 || 'Der Titel darf keine Leerzeichen enthalten']"
+                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
                     label="Titel"
                     outlined
                     ref="titleInput"
@@ -247,6 +247,8 @@
                           v-model="depatureDate"
                           today-btn
                           mask="DD.MM.YYYY"
+                          v-close-popup
+                          @input="updateReturnDate()"
                         />
                       </q-popup-proxy>
                       <template v-slot:prepend>
@@ -272,6 +274,7 @@
                           v-model="returnDate"
                           today-btn
                           mask="DD.MM.YYYY"
+                          v-close-popup
                         />
                       </q-popup-proxy>
                       <template v-slot:prepend>
@@ -562,7 +565,8 @@ export default {
     addRoundtrip (Title, Location) {
       Title = Title.toLowerCase()
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
-      Title = Title.replace(/ /g, '')
+      // Title = Title.replace(/ /g, '')
+      Title = Title.trim()
 
       try {
         let timeStamp = Date.now()
@@ -684,6 +688,14 @@ export default {
         console.log('Error' + error)
       })
     },
+    updateReturnDate () {
+      let dateParts = this.depatureDate.split('.')
+      let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      let returnDate = depatureDate
+      returnDate.setDate(depatureDate.getDate() + 1)
+
+      this.returnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
+    },
     saveArrivalDepature (RTDocId) {
       this.submitting = true
 
@@ -732,7 +744,8 @@ export default {
       return new Promise((resolve, reject) => {
         value = value.toLowerCase()
         value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.replace(/ /g, '')
+        value = value.trim()
+        // value = value.replace(/ /g, '')
         let roundtripsRef = db.collection('Roundtrips')
           .where('Title', '==', value)
           .limit(1)
@@ -776,12 +789,12 @@ export default {
 
             results.data.data.forEach(city => {
               if (originSearch) {
-                this.originOptions.push(this.capitalize(city.detailedName))
+                this.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                 this.originCodes.push(city.iataCode)
               } else {
-                this.destinationOptions.push(this.capitalize(city.detailedName))
+                this.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                 this.destinationCodes.push(city.iataCode)
-                this.destinationAddresses.push(this.capitalize(city.address.name))
+                this.destinationAddresses.push(this.capitalize(city.address.cityName))
               }
             })
           })
@@ -833,19 +846,6 @@ export default {
           console.log('Error on Authentication' + error)
           resolve(null)
         })
-      })
-    },
-    isUniqueTitel (value) {
-      return new Promise((resolve, reject) => {
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.replace(/ /g, '')
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          })
       })
     }
   },

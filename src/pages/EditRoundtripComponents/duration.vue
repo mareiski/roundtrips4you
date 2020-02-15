@@ -19,7 +19,7 @@
           <q-select
             outlined
             v-model="inputProfile"
-            :options="['zu Fuß', 'Fahrrad', 'Auto']"
+            :options="['zu Fuß', 'Fahrrad', 'Auto', 'Bus']"
             label="Reisemittel"
             use-input
             :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
