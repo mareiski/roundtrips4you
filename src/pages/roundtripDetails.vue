@@ -352,114 +352,114 @@ export default {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
           })
       })
-    }
-  },
-  checkDisableEditBtn (val) {
-    this.isUniqueTitle(val).then(uniqueTitle => {
-      if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
-      this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
-    }
-    )
-  },
-  getDuration (startLocation, endLocation, title, stop, index) {
-    var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-    let context = this
-
-    axios.get(url)
-      .then(response => {
-        var data = response.data.routes[0]
-
-        context.getDays(stop, index, data.duration * 1000, title)
-
-        let duration = context.msToTime(data.duration * 1000)
-
-        let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-        if (distance !== '') distance = ' (' + distance + ')'
-
-        context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
-      })
-  },
-  msToTime (duration) {
-    if (duration === 0) return null
-
-    var minutes = Math.floor((duration / (1000 * 60)) % 60),
-      hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
-
-    let returnVal
-    if (hours === 0 && minutes === 0) returnVal = null
-    else if (hours === 0) returnVal = minutes + ' min'
-    else if (minutes === 0) returnVal = hours + ' h'
-    else returnVal = hours + ' h ' + minutes + ' min'
-
-    return returnVal
-  },
-  getProfile (profile) {
-    switch (profile) {
-      case 'zu Fuß':
-        return 'walking'
-      case 'Fahrrad':
-        return 'cycling'
-      default:
-        return 'driving'
-    }
-  },
-  getStringProfile (profile) {
-    switch (profile) {
-      case 'walking':
-        return 'zu Fuß'
-      case 'cycling':
-        return 'Fahrrad'
-      default:
-        return 'Auto'
-    }
-  },
-  getDays (stop, index, duration) {
-    let days = null
-
-    if (index < this.stops.length - 1) {
-      let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
-      let dateTimeParts = formattedDate.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-      formattedDate = date.formatDate(new Date(this.stops[index + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
-      dateTimeParts = formattedDate.split(' ')
-      dateParts = dateTimeParts[0].split('.')
-      timeParts = dateTimeParts[1].split(':')
-      let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-      let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
-      days = this.msToTime(dateDistance)
-    }
-    this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
-  },
-  loadGaleryImgs () {
-    const context = this
-    let fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
-    fileRef.listAll().then(function (res) {
-      res.items.forEach(function (itemRef) {
-        fileRef = storage.ref().child(itemRef.fullPath)
-        context.galeryImgUrls = []
-        fileRef.getDownloadURL().then(function (url) {
-          context.galeryImgUrls.push(url)
-          if (context.galeryImgUrls.length === 1) context.slide = url
-        })
-      })
-    }).catch(function (error) {
-      console.log(error)
-    })
-  },
-  getParent (name) {
-    let p = this.$parent
-    while (typeof p !== 'undefined') {
-      if (p.$options.name === name) {
-        return p
-      } else {
-        p = p.$parent
+    },
+    checkDisableEditBtn (val) {
+      this.isUniqueTitle(val).then(uniqueTitle => {
+        if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
+        this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
       }
+      )
+    },
+    getDuration (startLocation, endLocation, title, stop, index) {
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      let context = this
+
+      axios.get(url)
+        .then(response => {
+          var data = response.data.routes[0]
+
+          context.getDays(stop, index, data.duration * 1000, title)
+
+          let duration = context.msToTime(data.duration * 1000)
+
+          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+          if (distance !== '') distance = ' (' + distance + ')'
+
+          context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+        })
+    },
+    msToTime (duration) {
+      if (duration === 0) return null
+
+      var minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+
+      let returnVal
+      if (hours === 0 && minutes === 0) returnVal = null
+      else if (hours === 0) returnVal = minutes + ' min'
+      else if (minutes === 0) returnVal = hours + ' h'
+      else returnVal = hours + ' h ' + minutes + ' min'
+
+      return returnVal
+    },
+    getProfile (profile) {
+      switch (profile) {
+        case 'zu Fuß':
+          return 'walking'
+        case 'Fahrrad':
+          return 'cycling'
+        default:
+          return 'driving'
+      }
+    },
+    getStringProfile (profile) {
+      switch (profile) {
+        case 'walking':
+          return 'zu Fuß'
+        case 'cycling':
+          return 'Fahrrad'
+        default:
+          return 'Auto'
+      }
+    },
+    getDays (stop, index, duration) {
+      let days = null
+
+      if (index < this.stops.length - 1) {
+        let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        let dateTimeParts = formattedDate.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        let timeParts = dateTimeParts[1].split(':')
+        let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+        formattedDate = date.formatDate(new Date(this.stops[index + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        dateTimeParts = formattedDate.split(' ')
+        dateParts = dateTimeParts[0].split('.')
+        timeParts = dateTimeParts[1].split(':')
+        let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+        let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
+        days = this.msToTime(dateDistance)
+      }
+      this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
+    },
+    loadGaleryImgs () {
+      const context = this
+      let fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
+      fileRef.listAll().then(function (res) {
+        res.items.forEach(function (itemRef) {
+          fileRef = storage.ref().child(itemRef.fullPath)
+          context.galeryImgUrls = []
+          fileRef.getDownloadURL().then(function (url) {
+            context.galeryImgUrls.push(url)
+            if (context.galeryImgUrls.length === 1) context.slide = url
+          })
+        })
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },
+    getParent (name) {
+      let p = this.$parent
+      while (typeof p !== 'undefined') {
+        if (p.$options.name === name) {
+          return p
+        } else {
+          p = p.$parent
+        }
+      }
+      return false
     }
-    return false
   },
   created () {
     const params = this.$route.params.id

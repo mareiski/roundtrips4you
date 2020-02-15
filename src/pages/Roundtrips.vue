@@ -96,7 +96,7 @@
           </q-select>
           <a
             class="button"
-            @click="$router.push('/rundreisen/' + country); loadRoundtrips(); getRTCount()"
+            @click="$router.push('/rundreisen/' + country); getRoundtrips(); getRTCount()"
           >Suchen</a>
         </div>
         <div class="filter-card">
@@ -485,7 +485,7 @@
             :max="paginationMax"
             :max-pages="6"
             :boundary-numbers="true"
-            @input="loadRoundtrips()"
+            @input="getRoundtrips()"
           >
           </q-pagination>
         </div>
@@ -591,243 +591,242 @@ export default {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
           })
       })
-    }
-  },
-  checkDisableEditBtn (val) {
-    this.isUniqueTitle(val).then(uniqueTitle => {
-      if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
-      this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
-    }
-    )
-  },
-  filterRoundtrips () {
-    this.filterRoundtripArr = []
-    this.roundtrips = []
-
-    this.selectedCountry = this.country
-    this.visible = true
-    this.showSimulatedReturnData = false
-    originalRoundtripArr.length = 0
-
-    let dateParts = this.OfferPeriod.split('.')
-    let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
-
-    let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
-    if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
-
-    let roundtripsRef = db.collection('Roundtrips')
-      .where('Location', '==', this.country)
-      .where('Public', '==', true)
-
-    if (this.dayModel !== null && this.dayModel.length > 0) roundtripsRef = roundtripsRef.where('Days', '==', this.dayModel)
-
-    if (this.filteredRoundtripAttr.length > 0) roundtripsRef = roundtripsRef.where('Highlights', 'array-contains-any', this.filteredRoundtripAttr)
-
-    this.filteredTripKinds.forEach(profile => {
-      roundtripsRef = roundtripsRef.where('Profile', '==', profile)
-    })
-
-    this.filteredRoundtripCategories.forEach(cat => {
-      roundtripsRef = roundtripsRef.where('Category', '==', cat)
-    })
-
-    roundtripsRef = roundtripsRef.orderBy('createdAt').startAt(searchCreatedAt).limit(20)
-
-    roundtripsRef.get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
-            let roundtrip = doc.data()
-            let isInPriceRange = this.step.max >= Number(roundtrip.Price) && this.step.min <= Number(roundtrip.Price)
-            let isInFilter = this.includesArray(roundtrip.Highlights, this.filteredRoundtripAttr)
-
-            if (isInFilter && isInPriceRange) this.filterRoundtripArr.push(roundtrip)
-          }
-        })
-
-        this.roundtrips = []
-        this.roundtrips = this.roundtrips.concat(this.filterRoundtripArr)
-        this.roundtripCount = this.roundtrips.length
-
-        this.visible = false
-        this.showSimulatedReturnData = true
+    },
+    checkDisableEditBtn (val) {
+      this.isUniqueTitle(val).then(uniqueTitle => {
+        if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
+        this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
       })
-  },
-  includesArray (array1, array2) {
-    if (array1.lenght === 0 || array2.length === 0) return true
-    let returnVal = true
-    array2.forEach(element => {
-      if (!array1.includes(element)) returnVal = false
-    })
-    return returnVal
-  },
-  removeRoundtrip (roundtrip) {
-    this.filterRoundtripArr.splice(this.filterRoundtripArr.indexOf(roundtrip), 1)
-  },
-  loadUserImage (UserId) {
-    let users = []
-    let userRef = db.collection('User')
-      .where('UserUID', '==', UserId)
-      .limit(1)
-    userRef.get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          users.push(doc.data())
-          this.userImages.push(users[0].UserImage)
-        })
-      })
-  },
-  loadTitleImg (docId, RTId) {
-    let context = this
-    storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg').getDownloadURL().then(function (url) {
-      context.TitleImgs.push(url)
-      context.RTIds.push(RTId)
-    })
-  },
-  loadRoundtrips () {
-    this.selectedCountry = this.country
-    this.visible = true
-    this.showSimulatedReturnData = false
-    roundtripArr = []
-    originalRoundtripArr.length = 0
+    },
+    filterRoundtrips () {
+      this.filterRoundtripArr = []
+      this.roundtrips = []
 
-    let dateParts = this.OfferPeriod.split('.')
-    let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
+      this.selectedCountry = this.country
+      this.visible = true
+      this.showSimulatedReturnData = false
+      originalRoundtripArr.length = 0
 
-    let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
-    if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
+      let dateParts = this.OfferPeriod.split('.')
+      let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
 
-    // reset filer
+      let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
+      if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
 
-    this.filteredRoundtripAttr = []
-
-    this.filteredTripKinds = []
-
-    this.filteredRoundtripCategories = []
-
-    let roundtripsRef = db.collection('Roundtrips')
-      .where('Location', '==', this.country)
-      .where('Public', '==', true)
-      .orderBy('createdAt')
-      .startAt(searchCreatedAt)
-      .limit(20)
-    if (this.dayModel !== null && this.dayModel.length > 0) {
-      roundtripsRef = db.collection('Roundtrips')
+      let roundtripsRef = db.collection('Roundtrips')
         .where('Location', '==', this.country)
         .where('Public', '==', true)
-        .where('Days', '==', this.dayModel)
-        .startAt(searchCreatedAt)
+
+      if (this.dayModel !== null && this.dayModel.length > 0) roundtripsRef = roundtripsRef.where('Days', '==', this.dayModel)
+
+      if (this.filteredRoundtripAttr.length > 0) roundtripsRef = roundtripsRef.where('Highlights', 'array-contains-any', this.filteredRoundtripAttr)
+
+      this.filteredTripKinds.forEach(profile => {
+        roundtripsRef = roundtripsRef.where('Profile', '==', profile)
+      })
+
+      this.filteredRoundtripCategories.forEach(cat => {
+        roundtripsRef = roundtripsRef.where('Category', '==', cat)
+      })
+
+      roundtripsRef = roundtripsRef.orderBy('createdAt').startAt(searchCreatedAt).limit(20)
+
+      roundtripsRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
+              let roundtrip = doc.data()
+              let isInPriceRange = this.step.max >= Number(roundtrip.Price) && this.step.min <= Number(roundtrip.Price)
+              let isInFilter = this.includesArray(roundtrip.Highlights, this.filteredRoundtripAttr)
+
+              if (isInFilter && isInPriceRange) this.filterRoundtripArr.push(roundtrip)
+            }
+          })
+
+          this.roundtrips = []
+          this.roundtrips = this.roundtrips.concat(this.filterRoundtripArr)
+          this.roundtripCount = this.roundtrips.length
+
+          this.visible = false
+          this.showSimulatedReturnData = true
+        })
+    },
+    includesArray (array1, array2) {
+      if (array1.lenght === 0 || array2.length === 0) return true
+      let returnVal = true
+      array2.forEach(element => {
+        if (!array1.includes(element)) returnVal = false
+      })
+      return returnVal
+    },
+    removeRoundtrip (roundtrip) {
+      this.filterRoundtripArr.splice(this.filterRoundtripArr.indexOf(roundtrip), 1)
+    },
+    loadUserImage (UserId) {
+      let users = []
+      let userRef = db.collection('User')
+        .where('UserUID', '==', UserId)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            users.push(doc.data())
+            this.userImages.push(users[0].UserImage)
+          })
+        })
+    },
+    loadTitleImg (docId, RTId) {
+      let context = this
+      storage.ref().child('Images/Roundtrips/' + docId + '/Title/titleImg').getDownloadURL().then(function (url) {
+        context.TitleImgs.push(url)
+        context.RTIds.push(RTId)
+      })
+    },
+    getRoundtrips () {
+      this.selectedCountry = this.country
+      this.visible = true
+      this.showSimulatedReturnData = false
+      roundtripArr = []
+      originalRoundtripArr.length = 0
+
+      let dateParts = this.OfferPeriod.split('.')
+      let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
+
+      let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
+      if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
+
+      // reset filer
+
+      this.filteredRoundtripAttr = []
+
+      this.filteredTripKinds = []
+
+      this.filteredRoundtripCategories = []
+
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('Location', '==', this.country)
+        .where('Public', '==', true)
         .orderBy('createdAt')
+        .startAt(searchCreatedAt)
         .limit(20)
-    }
+      if (this.dayModel !== null && this.dayModel.length > 0) {
+        roundtripsRef = db.collection('Roundtrips')
+          .where('Location', '==', this.country)
+          .where('Public', '==', true)
+          .where('Days', '==', this.dayModel)
+          .startAt(searchCreatedAt)
+          .orderBy('createdAt')
+          .limit(20)
+      }
 
-    roundtripsRef.get()
-      .then(snapshot => {
+      roundtripsRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
+              roundtripArr.push(doc.data())
+              originalRoundtripArr.push(doc.data())
+              this.loadTitleImg(doc.id, doc.data().RTId)
+            }
+          })
+          this.roundtrips = roundtripArr
+
+          // load filter
+          let price = 0
+          let tripKind = []
+          let roundtripAttr = []
+          let category = []
+
+          // read all posible values for filter
+          roundtripArr.forEach((roundtrip) => {
+            if (price < roundtrip.Price) price = roundtrip.Price
+            if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
+            if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
+            if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
+
+            // load userImages
+            // this.loadUserImage(roundtrip.UserId)
+          })
+
+          this.step.max = price
+          this.maxPrice = price
+
+          this.tripKind = tripKind
+          this.roundtripAttr = roundtripAttr
+          this.roundtripCategories = category
+
+          this.visible = false
+          this.showSimulatedReturnData = true
+        })
+        .catch(err => {
+          console.log('Error getting Roundtrips', err)
+          this.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
+          })
+        })
+    },
+    getParamsDate (dateString) {
+      let dateParts = dateString.split('.')
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00').getTime()
+    },
+    getRTCount () {
+      const counterRef = db.collection('Roundtrips')
+        .where('Location', '==', this.country)
+        .where('Public', '==', true)
+        .orderBy('createdAt')
+
+      this.roundtripCount = 0
+
+      counterRef.get().then(snapshot => {
+        this.paginationMax = Math.ceil(snapshot.docs.length / 20)
         snapshot.forEach(doc => {
-          if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
-            roundtripArr.push(doc.data())
-            originalRoundtripArr.push(doc.data())
-            this.loadTitleImg(doc.id, doc.data().RTId)
-          }
-        })
-        this.roundtrips = roundtripArr
-
-        // load filter
-        let price = 0
-        let tripKind = []
-        let roundtripAttr = []
-        let category = []
-
-        // read all posible values for filter
-        roundtripArr.forEach((roundtrip) => {
-          if (price < roundtrip.Price) price = roundtrip.Price
-          if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
-          if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
-          if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
-          if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
-          if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
-
-          // load userImages
-          // this.loadUserImage(roundtrip.UserId)
-        })
-
-        this.step.max = price
-        this.maxPrice = price
-
-        this.tripKind = tripKind
-        this.roundtripAttr = roundtripAttr
-        this.roundtripCategories = category
-
-        this.visible = false
-        this.showSimulatedReturnData = true
-      })
-      .catch(err => {
-        console.log('Error getting Roundtrips', err)
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
+          this.roundtripCount++
+          createdAts.push(doc.data().createdAt)
         })
       })
-  },
-  getParamsDate (dateString) {
-    let dateParts = dateString.split('.')
-    return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00').getTime()
-  },
-  getRTCount () {
-    const counterRef = db.collection('Roundtrips')
-      .where('Location', '==', this.country)
-      .where('Public', '==', true)
-      .orderBy('createdAt')
-
-    this.roundtripCount = 0
-
-    counterRef.get().then(snapshot => {
-      this.paginationMax = Math.ceil(snapshot.docs.length / 20)
-      snapshot.forEach(doc => {
-        this.roundtripCount++
-        createdAts.push(doc.data().createdAt)
-      })
-    })
-  },
-  sortRoundtrips (value) {
-    switch (value) {
-      case 'Preis aufsteigend':
-        this.roundtrips.sort((a, b) => parseFloat(a.Price) - parseFloat(b.Price))
-        break
-      case 'Preis absteigend':
-        this.roundtrips.sort((a, b) => parseFloat(b.Price) - parseFloat(a.Price))
-        break
-      case 'Hotelbewertung aufsteigend':
-        this.roundtrips.sort((a, b) => parseFloat(a.Stars) - parseFloat(b.Stars))
-        break
-      case 'Hotelbewertung absteigend':
-        this.roundtrips.sort((a, b) => parseFloat(b.Stars) - parseFloat(a.Stars))
-        break
-      case 'Reisedauer aufsteigend':
-        this.roundtrips.sort((a, b) => parseFloat(a.Days) - parseFloat(b.Days))
-        break
-      case 'Reisedauer absteigend':
-        this.roundtrips.sort((a, b) => parseFloat(b.Days) - parseFloat(a.Days))
-        break
-      case 'Erstellungsdatum':
-        this.roundtrips = []
-        this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
-        break
+    },
+    sortRoundtrips (value) {
+      switch (value) {
+        case 'Preis aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Price) - parseFloat(b.Price))
+          break
+        case 'Preis absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Price) - parseFloat(a.Price))
+          break
+        case 'Hotelbewertung aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Stars) - parseFloat(b.Stars))
+          break
+        case 'Hotelbewertung absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Stars) - parseFloat(a.Stars))
+          break
+        case 'Reisedauer aufsteigend':
+          this.roundtrips.sort((a, b) => parseFloat(a.Days) - parseFloat(b.Days))
+          break
+        case 'Reisedauer absteigend':
+          this.roundtrips.sort((a, b) => parseFloat(b.Days) - parseFloat(a.Days))
+          break
+        case 'Erstellungsdatum':
+          this.roundtrips = []
+          this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
+          break
+      }
+    },
+    loadBookingComWidget () {
+      (function (d, sc, u) {
+        var s = d.createElement(sc), p = d.getElementsByTagName(sc)[0]
+        s.type = 'text/javascript'
+        s.async = true
+        s.src = u + '?v=' + (+new Date())
+        p.parentNode.insertBefore(s, p)
+      })(document, 'script', '//aff.bstatic.com/static/affiliate_base/js/flexiproduct.js')
     }
-  },
-  loadBookingComWidget () {
-    (function (d, sc, u) {
-      var s = d.createElement(sc), p = d.getElementsByTagName(sc)[0]
-      s.type = 'text/javascript'
-      s.async = true
-      s.src = u + '?v=' + (+new Date())
-      p.parentNode.insertBefore(s, p)
-    })(document, 'script', '//aff.bstatic.com/static/affiliate_base/js/flexiproduct.js')
   },
   created () {
-    this.loadRoundtrips()
+    this.getRoundtrips()
     this.getRTCount()
     // this.loadBookingComWidget()
   },
