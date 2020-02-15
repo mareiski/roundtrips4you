@@ -147,15 +147,16 @@ export default {
       }).catch(function (error) {
         console.log(error)
       })
+    },
+    createUserEntry (user) {
+      console.log(user)
+      db.collection('User').add({
+        Reputation: 0,
+        UserImage: user.photoURL,
+        UserName: user.displayName,
+        UserUID: user.uid
+      })
     }
-  },
-  createUserEntry (user) {
-    db.collection('User').add({
-      Reputation: 0,
-      UserImage: user.photoURL,
-      UserName: user.displayName,
-      UserUID: user.uid
-    })
   }
 }
 </script>

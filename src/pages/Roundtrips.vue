@@ -444,12 +444,13 @@
             <div class="card-right-col">
               <div class="card-row ">
                 <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
-                <!-- <q-avatar
+                <q-avatar
                   size="50px"
                   style="width: 50px; margin:auto 10px auto 10px;"
                 >
-                  <q-img :src="userImages[0]"></q-img>
-                </q-avatar> -->
+                  <q-img :src="userImages[roundtrips.indexOf(roundtrip)]"></q-img>
+                  <q-tooltip>von {{userNames[roundtrips.indexOf(roundtrip)]}}</q-tooltip>
+                </q-avatar>
               </div>
               <div class="card-bottom-row">
                 <router-link
@@ -543,6 +544,7 @@ export default {
       TitleImgs: [],
       RTIds: [],
       userImages: [],
+      userNames: [],
       maxPrice: 0,
       currentPage: 1,
       paginationMax: 1,
@@ -672,6 +674,7 @@ export default {
           snapshot.forEach(doc => {
             users.push(doc.data())
             this.userImages.push(users[0].UserImage)
+            this.userNames.push(users[0].UserName)
           })
         })
     },
@@ -746,7 +749,7 @@ export default {
             if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
 
             // load userImages
-            // this.loadUserImage(roundtrip.UserId)
+            this.loadUserImage(roundtrip.UserId)
           })
 
           this.step.max = price
