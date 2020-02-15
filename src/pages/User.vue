@@ -190,7 +190,7 @@
 </template>
 
 <script>
-import { auth, storage } from '../firebaseInit'
+import { auth, storage, db } from '../firebaseInit'
 
 export default {
   metaInfo: {
@@ -251,6 +251,8 @@ export default {
         photoURL: this.titleImgUrl
       }).then(function () {
         // user.updateEmail(context.UserEmail).then(function () {
+
+        context.updateDBEntry(user.uid)
         // Update successful
         context.$q.notify({
           color: 'green-4',
@@ -276,6 +278,21 @@ export default {
           message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
         })
       })
+    },
+    updateDBEntry (uid) {
+      let context = this
+      let roundtripsRef = db.collection('User')
+        .where('UserUID', '==', uid)
+        .limit(1)
+      roundtripsRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            db.collection('User').doc(doc.id).update({
+              UserImage: context.titleImgUrl,
+              UserName: context.UserDisplayName
+            })
+          })
+        })
     },
     onSaveUserPass () {
       let context = this

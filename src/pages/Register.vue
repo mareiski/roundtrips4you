@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import { auth } from '../firebaseInit'
+import { auth, db } from '../firebaseInit'
 import firebase from 'firebase'
 
 export default {
@@ -110,6 +110,7 @@ export default {
       let mail = this.userEmail
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
+          this.createUserEntry(user)
           context.$q.notify({
             color: 'green-4',
             textColor: 'white',
@@ -147,6 +148,14 @@ export default {
         console.log(error)
       })
     }
+  },
+  createUserEntry (user) {
+    db.collection('User').add({
+      Reputation: 0,
+      UserImage: user.photoURL,
+      UserName: user.displayName,
+      UserUID: user.uid
+    })
   }
 }
 </script>
