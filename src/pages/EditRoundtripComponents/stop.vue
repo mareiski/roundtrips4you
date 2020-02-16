@@ -187,12 +187,13 @@
             size="3px"
             clickable
             :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
-          >{{sight.name}}</q-chip>
+          >{{sight.name}}
+          </q-chip>
         </a>
         <a
           target="_blank"
           style="text-decoration:none;"
-          :href="'https://www.google.com/search?q=' + location.label.split(',')[0]"
+          :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
         >weitere anzeigen</a>
       </div>
       <q-chip
@@ -201,6 +202,36 @@
         clickable
         @click="searchSights()"
       >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
+      <q-select
+        v-if="editor"
+        label="Sehenswürdigkeiten hinzufügen"
+        filled
+        v-model="addedSights"
+        use-input
+        use-chips
+        multiple
+        hide-dropdown-icon
+        input-debounce="0"
+        new-value-mode="add-unique"
+        style="margin:10px 0 10px 0;"
+        @input="saveSights()"
+      />
+      <div
+        class="flex"
+        v-else-if="addedSights && typeof addedSights !== 'undefined'"
+      >
+        <span
+          class="flex justify-center"
+          style="flex-direction:column;"
+        >Highlights:</span>
+        <q-chip
+          v-for="sight in addedSights"
+          :key="sight"
+          size="3px"
+          clickable
+          @click="openInNewTab('https://www.google.com/search?q=' + sight + ' ' + location.label.split(',')[0])"
+        >{{sight}}</q-chip>
+      </div>
       <div
         style="margin-top:10px;"
         v-if="!editor"
@@ -394,7 +425,8 @@ export default {
     rooms: Number,
     firstStop: Boolean,
     galeryImgUrls: Array,
-    stopImages: Array
+    stopImages: Array,
+    addedSights: Array
   },
   data () {
     return {
@@ -508,6 +540,9 @@ export default {
         text += '&age=' + child
       })
       return text
+    },
+    saveSights () {
+      this.saveData('Sights', this.addedSights)
     },
     saveData (field, value) {
       console.log(this.docId)

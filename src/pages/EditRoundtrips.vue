@@ -103,6 +103,7 @@
                 :firstStop="index === 0"
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
+                :addedSights="stop.Sights ? stop.Sights : []"
               ></Stop>
               <Duration
                 :key="stop"
