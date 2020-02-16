@@ -69,7 +69,7 @@ export const countries = [
   'Gibraltar',
   'Grenada',
   'Griechenland',
-  'Großbritannien',
+  'Vereinigtes Königreich',
   'Grönland',
   'Guadeloupe',
   'Guam',

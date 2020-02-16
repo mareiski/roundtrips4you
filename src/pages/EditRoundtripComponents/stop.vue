@@ -75,16 +75,20 @@
       <q-dialog
         v-if="editor"
         v-model="editLocation"
-        persistent
       >
         <q-card>
-          <q-card-section>
+          <q-card-section class="editLocationCard">
             <CitySearch
               ref="citySearch"
               :parkingPlaceSearch="false"
               :defaultLocation="location"
               @update="updateLocation($event)"
             ></CitySearch>
+            <p>oder</p>
+            <q-btn
+              color="primary"
+              @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
+            >auf google anzeigen</q-btn>
           </q-card-section>
           <q-card-actions align="right">
             <q-btn

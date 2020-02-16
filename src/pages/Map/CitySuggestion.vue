@@ -161,7 +161,13 @@ export default {
       let context = this
       axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
       ).then(function (response) {
-        context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
+        if (response.data.hits[0]) context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
+        else {
+          axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName, {}
+          ).then(function (response) {
+            context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
+          })
+        }
       })
     },
     openInNewTab (link) {
