@@ -218,7 +218,7 @@
       />
       <div
         class="flex"
-        v-else-if="addedSights && typeof addedSights !== 'undefined'"
+        v-else-if="addedSights && typeof addedSights !== 'undefined' && addedSights.length > 0"
       >
         <span
           class="flex justify-center"
