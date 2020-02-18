@@ -202,28 +202,43 @@
         clickable
         @click="searchSights()"
       >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
-      <q-select
+      <div
         v-if="editor"
-        label="Sehenswürdigkeiten hinzufügen"
-        filled
-        v-model="addedSights"
-        use-input
-        use-chips
-        multiple
-        hide-dropdown-icon
-        input-debounce="0"
-        new-value-mode="add-unique"
-        style="margin:10px 0 10px 0;"
-        @input="saveSights()"
-      />
+        class="flex"
+        style="flex-wrap"
+      >
+        <q-select
+          label="Sehenswürdigkeiten hinzufügen"
+          filled
+          v-model="addedSights"
+          use-input
+          use-chips
+          multiple
+          hide-dropdown-icon
+          input-debounce="0"
+          new-value-mode="add-unique"
+          style="margin:10px 10px 10px 0; width:260px;"
+        />
+        <div
+          class="flex justify-center"
+          style="flex-direction:column;"
+        >
+          <q-btn
+            color="primary"
+            @click="saveSights()"
+            label="Speichern"
+            style="height:20px;"
+          />
+        </div>
+      </div>
       <div
         class="flex"
         v-else-if="addedSights && typeof addedSights !== 'undefined' && addedSights.length > 0"
       >
-        <span
+        <b
           class="flex justify-center"
           style="flex-direction:column;"
-        >Highlights:</span>
+        >Highlights:</b>
         <q-chip
           v-for="sight in addedSights"
           :key="sight"
@@ -231,6 +246,12 @@
           clickable
           @click="openInNewTab('https://www.google.com/search?q=' + sight + ' ' + location.label.split(',')[0])"
         >{{sight}}</q-chip>
+        <a
+          class="flex justify-center"
+          style="flex-direction:column; text-decoration:none;"
+          target="_blank"
+          :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
+        >weitere anzeigen</a>
       </div>
       <div
         style="margin-top:10px;"
@@ -247,7 +268,7 @@
         toolbar-toggle-color="primary"
         :fonts="editorFonts"
         @paste.native="evt => pasteCapture(evt)"
-        style="margin-top:10px;"
+        style="margin-top:10px; margin-bottom:10px;"
         :definitions="{
         save: {
           tip: 'Die Beschreibung Speichern',
@@ -267,7 +288,6 @@
       <div
         class="flex"
         v-if="stopImages"
-        style="margin-top:10px;"
       >
         <div
           class="uploader"
@@ -287,8 +307,39 @@
             @click="removeImg()"
           >
           </q-btn>
+          <q-btn
+            round
+            color="primary"
+            icon="filter"
+            style="position: absolute; margin-top:-60px; margin-left:65px;"
+            @click="showImgDialog(url)"
+          >
+          </q-btn>
         </div>
       </div>
+      <q-dialog v-model="imgDialogVisible">
+        <q-card style="width:100%; max-width:100vh; overflow:hidden;">
+          <q-card-section
+            class="row flex justify-end q-pb-none"
+            style="z-index:100;"
+          >
+            <q-btn
+              icon="close"
+              flat
+              round
+              dense
+              v-close-popup
+            />
+          </q-card-section>
+          <q-card-section style="margin-top:-35px;">
+            <q-img
+              style="width:100%;"
+              :src="dialogImgSrc"
+            ></q-img>
+          </q-card-section>
+        </q-card>
+
+      </q-dialog>
       <div
         style="margin-top:10px;"
         class="uploader"
@@ -331,6 +382,35 @@
               >
               </q-btn>
             </div>
+          </q-card-section>
+          <q-card-section class="row items-center flex">
+            <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br>
+              <br>
+              <a
+                style="text-decoration:underline;"
+                @click="openInNewTab('https://www.google.com/search?q=' + (!hotelLocation ||  typeof hotelLocation === 'undefined' ?  location.label : capitalize(hotelName + ', ' + hotelLocation.label)) + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
+              >Vorschläge auf Google</a>
+              <br>
+              <br>
+            </span>
+            <q-input
+              filled
+              label="Bild per Link einfügen"
+              v-model="tempImgLink"
+              :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
+              lazy-rules
+              bottom-slots
+              outlined
+              style="padding:0"
+            ></q-input>
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              style="margin-left:10px;"
+              :disable="!validURL(tempImgLink)"
+              @click="addImageToStop(tempImgLink)"
+            />
           </q-card-section>
 
           <q-card-actions align="right">
@@ -443,6 +523,9 @@ export default {
       savedEditorContent: this.editorPlaceholder,
       sights: null,
       chooseImgDialog: false,
+      tempImgLink: null,
+      dialogImgSrc: null,
+      imgDialogVisible: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -534,6 +617,15 @@ export default {
       })
       this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, true)
     },
+    validURL (str) {
+      var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+      return !!pattern.test(str)
+    },
     getChildrenText () {
       let text = '&group_children=' + this.childrenAges.length
       this.childrenAges.forEach(child => {
@@ -542,10 +634,9 @@ export default {
       return text
     },
     saveSights () {
-      this.saveData('Sights', this.addedSights)
+      this.saveData('Sights', this.addedSights, false)
     },
-    saveData (field, value) {
-      console.log(this.docId)
+    saveData (field, value, updateParent) {
       try {
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
@@ -556,13 +647,13 @@ export default {
           textColor: 'white',
           icon: 'check_circle'
         })
-        this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
+        if (updateParent) this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
       } catch (e) {
         console.log(e)
       }
     },
     saveWork () {
-      this.saveData('Description', this.descriptionInput)
+      this.saveData('Description', this.descriptionInput, true)
       this.savedEditorContent = this.descriptionInput
     },
     updateLocation (event) {
@@ -609,6 +700,10 @@ export default {
           onPasteStripFormattingIEPaste = false
         }
       }
+    },
+    showImgDialog (src) {
+      this.dialogImgSrc = src
+      this.imgDialogVisible = true
     },
     addImageToStop (src) {
       if (!this.stopImages) this.stopImages = []
