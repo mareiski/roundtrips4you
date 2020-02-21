@@ -5,7 +5,7 @@
       style="max-height:450px; margin-bottom: 20px;"
       src="https://images.unsplash.com/photo-1528837516156-0a7225a43641?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1491&q=80"
     ></q-img>
-    <span>Wir sind ein kleines Startup aus Ingolstadt, welches sich auf die Rundreisenvermittlung & Erstellung spezialisiert hat.</span>
+    <span>Wir sind ein kleines Startup aus Ingolstadt, welches sich auf die Reisenvermittlung & Erstellung spezialisiert hat.</span>
     <br><br>
     <span>Wir möchten aber nicht, dass du irgendeine Rundreise buchst, weil sie dir vorgeschlagen wurde.</span>
     <br>

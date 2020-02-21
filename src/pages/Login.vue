@@ -1,7 +1,7 @@
 <template>
   <div class="login q-px-lg q-pb-md">
     <h2>Log in</h2>
-    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um zu deinen Rundreisen zu kommen</p>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um zu deinen Reisen zu kommen</p>
     <q-form
       @submit="onUserLogin"
       bordered

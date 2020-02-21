@@ -355,7 +355,7 @@
               <q-card style="min-width: 350px">
                 <q-card-section>
                   <div class="text-h6">Rundreise bearbeiten</div>
-                  <span>Diese Rundreise wird zu deinen eigenen Rundreisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
+                  <span>Diese Rundreise wird zu deinen eigenen Reisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
                 </q-card-section>
 
                 <q-card-section>
@@ -513,7 +513,7 @@ let createdAts = []
 export default {
   metaInfo: {
     meta: [
-      { name: 'description', content: 'Lass dich von vorgefertigten Rundreisen Inspirieren und bearbeite diese nach deinen Wünschen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+      { name: 'description', content: 'Lass dich von vorgefertigten Reisen Inspirieren und bearbeite diese nach deinen Wünschen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
     ]
   },
   data () {

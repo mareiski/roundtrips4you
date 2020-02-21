@@ -393,24 +393,29 @@
               <br>
               <br>
             </span>
-            <q-input
-              filled
-              label="Bild per Link einfügen"
-              v-model="tempImgLink"
-              :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
-              lazy-rules
-              bottom-slots
-              outlined
-              style="padding:0"
-            ></q-input>
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              style="margin-left:10px;"
-              :disable="!validURL(tempImgLink)"
-              @click="addImageToStop(tempImgLink)"
-            />
+            <div
+              class="flex"
+              style="width:100%;"
+            >
+              <q-input
+                filled
+                label="Bild per Link einfügen"
+                v-model="tempImgLink"
+                :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
+                lazy-rules
+                bottom-slots
+                outlined
+                style="padding:0; width:80%; margin-bottom:10px;"
+              ></q-input>
+              <q-btn
+                round
+                color="primary"
+                icon="add"
+                style="margin-left:10px; margin-top:5px;"
+                :disable="!validURL(tempImgLink)"
+                @click="addImageToStop(tempImgLink)"
+              />
+            </div>
           </q-card-section>
 
           <q-card-actions align="right">

@@ -66,8 +66,9 @@
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
+        <p v-if="countries.length > 1">Momentan schlagen wir dir nur Städte für dein Haupland (1. Land in der Liste) vor</p>
         <CitySuggestion
-          :country="country"
+          :country="countries[0]"
           :dates="initDates"
           :RTId="$route.params.id"
         ></CitySuggestion>
@@ -563,32 +564,73 @@
                 Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten
               </q-tooltip>
             </q-toggle>
-            <q-select
-              outlined
-              v-model="country"
-              use-input
-              hide-selected
-              fill-input
-              input-debounce="0"
-              :options="countryOptions"
-              label="Land auswählen"
-              @filter="filterFn"
-              :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-              style="padding-bottom: 32px"
+            <div
+              v-if="Array.isArray(countries)"
+              style="padding-bottom: 10px;"
             >
-              <template v-slot:prepend>
-                <q-icon name="explore" />
-              </template>
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    Keine Ergebnisse
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
+              <div
+                v-for="(countryNum, index) in countries"
+                :key="countryNum"
+                class="flex"
+              >
+                <q-select
+                  @filter="filterFn"
+                  outlined
+                  v-model="countries[index]"
+                  :options="countryOptions"
+                  label="Land"
+                  clearable
+                  class="input-item"
+                  use-input
+                  style="margin-top:10px; margin-right:10px; padding:0;"
+                  :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="explore" />
+                  </template>
+                </q-select>
+                <div
+                  class="add-country-container"
+                  style="padding:0;"
+                >
+                  <q-btn
+                    v-if="parseInt(index ) !== 0"
+                    @click="countries.splice(index, 1)"
+                    round
+                    icon="add"
+                    side
+                    style="transform:rotate(45deg);"
+                  />
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              <q-select
+                @filter="filterFn"
+                outlined
+                v-model="countries"
+                :options="countryOptions"
+                label="Land"
+                clearable
+                class="input-item"
+                use-input
+                style="margin-top:10px; margin-right:10px; padding:0;"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="explore" />
+                </template>
+              </q-select>
+            </div>
+            <q-btn
+              v-if="Array.isArray(countries)"
+              @click="countries.push('')"
+              label="Land hinzufügen"
+              style="margin-bottom:30px;"
+            />
             <RegionSearch
-              :country="country"
+              v-if="countries.length === 1"
+              :country="countries[0]"
               :defaultRegion="region"
               @update="updateRegion($event)"
             ></RegionSearch>
@@ -1032,7 +1074,7 @@ export default {
       publish: false,
       addExpanded: false,
       title: '',
-      country: '',
+      countries: [],
       submitting: false,
       offersSubmitting: false,
       deleting: false,
@@ -1394,7 +1436,7 @@ export default {
       let offerEndPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
 
       if (this.saveData('Public', this.publish) &&
-        this.saveData('Location', this.country) &&
+        this.saveData('Location', this.countries) &&
         this.saveData('Category', this.category) &&
         this.saveData('Stars', this.stars) &&
         this.saveData('Description', this.descriptionInput) &&
@@ -1593,7 +1635,7 @@ export default {
           })
           this.title = roundtrip[0].Title
           this.publish = roundtrip[0].Public
-          this.country = roundtrip[0].Location
+          this.countries = roundtrip[0].Location
           this.stars = roundtrip[0].Stars
           this.category = roundtrip[0].Category
           this.descriptionInput = roundtrip[0].Description
@@ -1720,7 +1762,6 @@ export default {
     },
     loadRoundtripDetails (RTId, refreshAll) {
       if (refreshAll) this.stops = []
-      this.selectedCountry = this.country
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')
         .where('RTId', '==', RTId)

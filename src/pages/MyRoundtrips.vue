@@ -1,6 +1,6 @@
 <template>
   <div class="my-roundtrips  q-px-lg q-pb-md">
-    <h3 id="Title">Meine Rundreisen</h3>
+    <h3 id="Title">Meine Reisen</h3>
     <q-list
       bordered
       padding
@@ -20,7 +20,7 @@
           </q-avatar>
         </q-item-section>
         <q-item-section side>
-          <q-item-label lines="2">Du hast leider noch keine Rundreisen erstellt. <br>
+          <q-item-label lines="2">Du hast leider noch keine Reisen erstellt. <br>
             Klicke einfach auf den Button unten um deine erste Rundreise zu erstellen.</q-item-label>
         </q-item-section>
       </q-item>
@@ -44,7 +44,7 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label lines="1">{{roundtrip.Title}} - {{roundtrip.Location}}</q-item-label>
+          <q-item-label lines="1">{{roundtrip.Title}} - {{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}</q-item-label>
           <q-item-label
             caption
             style="width:100px;"
@@ -129,29 +129,49 @@
                       <q-icon name="title" />
                     </template>
                   </q-input>
-                  <q-select
-                    @filter="filterFn"
-                    outlined
-                    v-model="selectedOption"
-                    :options="countryOptions"
-                    label="Land"
-                    clearable
-                    class="input-item"
-                    use-input
-                    ref="countrySelect"
-                    style="margin:auto; margin-top:10px;"
-                    :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                  <div
+                    v-for="(countryNum, index) in parseInt(countryAmount)"
+                    :key="countryNum"
+                    class="flex"
+                    style="justify-content:center;"
                   >
-                    <template v-slot:prepend>
-                      <q-icon name="explore" />
-                    </template>
-                  </q-select>
+                    <q-select
+                      @filter="filterFn"
+                      outlined
+                      v-model="countries[index]"
+                      :options="countryOptions"
+                      label="Land"
+                      clearable
+                      class="input-item"
+                      use-input
+                      style="margin-top:10px; margin-right:10px;"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="explore" />
+                      </template>
+                    </q-select>
+                    <div class="add-country-container">
+                      <q-btn
+                        v-if="parseInt(index ) !== 0"
+                        @click="[countries.splice(index, 1), countryAmount = parseInt(countryAmount) - 1]"
+                        round
+                        icon="add"
+                        side
+                        style="transform:rotate(45deg)"
+                      />
+                    </div>
+                  </div>
+                  <q-btn
+                    @click="countryAmount = parseInt(countryAmount) + 1"
+                    label="Land hinzufügen"
+                  />
                   <q-stepper-navigation>
                     <q-btn
                       @click="step = 2"
                       color="primary"
                       label="Weiter"
-                      :disable="!title || !selectedOption"
+                      :disable="!title || !countries"
                     />
                   </q-stepper-navigation>
                 </q-step>
@@ -312,6 +332,7 @@
                   </div>
                   <div v-else>
                     <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+                    <p>Bitte gib hier den Ersten Ort deiner Reise an</p>
                     <CitySearch
                       ref="citySearch"
                       :parkingPlaceSearch="false"
@@ -466,7 +487,7 @@ export default {
       title: '',
       addExpanded: false,
       addButtonActive: false,
-      selectedOption: null,
+      countries: [],
       countryOptions: countries,
       RTIds: [],
       showNoRoundtripsText: false,
@@ -488,7 +509,8 @@ export default {
       destinationCodes: [],
       originCode: null,
       destinationCode: null,
-      destinationAddresses: []
+      destinationAddresses: [],
+      countryAmount: 1
     }
   },
   watch: {
@@ -502,7 +524,7 @@ export default {
         this.addButtonActive = false
         this.showNoRoundtripsText = false
 
-        if (this.title && this.selectedOption && this.arrivalDepatureProfile && this.rooms && this.adults) {
+        if (this.title && this.countries && this.arrivalDepatureProfile && this.rooms && this.adults) {
           if (this.arrivalDepatureProfile === 'Flugzeug' && !this.origin && !this.destination && !this.depatureDate && !this.returnDate && !this.travelClass && !this.nonStop) {
             this.$q.notify({
               color: 'red-5',
@@ -511,7 +533,7 @@ export default {
               message: 'Bitte überprüfe deine Angaben'
             })
           } else {
-            if (this.addRoundtrip(this.title, this.selectedOption)) {
+            if (this.addRoundtrip(this.title, this.countries)) {
               this.$q.notify({
                 color: 'green-4',
                 textColor: 'white',
@@ -568,6 +590,7 @@ export default {
       // Title = Title.replace(/ /g, '')
       Title = Title.trim()
 
+      console.log(Location)
       try {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
@@ -629,9 +652,8 @@ export default {
           })
         this.$refs.addRoundtripForm.reset()
         this.title = ''
-        this.selectedOption = null
+        this.countries = []
         this.$refs.titleInput.resetValidation()
-        this.$refs.countrySelect.resetValidation()
       } catch (error) {
         console.log(error)
         this.$q.notify({
@@ -727,6 +749,13 @@ export default {
           return false
         }
       }
+    },
+    getLocationString (locations) {
+      let locationString = ''
+      locations.forEach((location, index) => {
+        locationString = locationString + (index !== 0 ? ', ' : '') + location
+      })
+      return locationString
     },
     saveData (field, value, roundtripDocId) {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false

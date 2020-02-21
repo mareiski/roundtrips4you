@@ -86,7 +86,7 @@
           color="primary"
         >JETZT REGISTRIEREN</q-btn>
       </div>
-      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir bereits erstellte Rundreisen an</p>
+      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir mit unserem kostenlosen Reiseplaner erstellte Rundreisen an</p>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
@@ -125,7 +125,7 @@
       <h4
         ref="tools"
         style="text-align:center;"
-      >Diese Tools helfen dir bei der Erstellung deiner Reise</h4>
+      >Diese Tools helfen dir bei der Planung deiner Reise</h4>
       <ol class="create-roundtrip-ol">
         <li>
           <div>
@@ -188,9 +188,9 @@
       </ol>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
-        <h3>Erstelle jetzt ganz einfach und kostenlos deine individuelle Traumreise nach deinen Wünschen!</h3>
+        <h3>Plane jetzt ganz einfach, kostenlos und online deine individuelle Traumreise nach deinen Wünschen!</h3>
         <router-link to="/registrieren">
-          <button>Jetzt kostenlos beginnen</button>
+          <button>Reise kostenlos planen</button>
         </router-link>
       </div>
       <h4 style="text-align:center;">Noch nicht überzeugt ? <br> Hier sind unsere Features:</h4>
@@ -222,12 +222,12 @@
           >
             <q-icon name="edit" />
             <h3>Bearbeiten</h3>
-            <span>Bearbeite vorgefertigte Rundreisen und schaffe somit deine ganz eigene Traumreise</span>
+            <span>Bearbeite vorgefertigte Reisen und schaffe somit deine ganz eigene Traumreise</span>
           </router-link>
         </div>
       </div>
       <div class="register-container">
-        <h4 style="text-align:center;">Registriere dich jetzt und nutze unser ganzes Angebot komplett kostenlos</h4>
+        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Reiseplaners kostenlos</h4>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"

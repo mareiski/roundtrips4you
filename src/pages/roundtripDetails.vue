@@ -11,7 +11,7 @@
         icon="edit"
         @click="editRTDialog = true"
       >
-        <q-tooltip>Diese Rundreise bearbeiten</q-tooltip>
+        <q-tooltip>Diese Reise bearbeiten</q-tooltip>
       </q-btn>
       <q-dialog
         v-model="editRTDialog"
@@ -19,8 +19,8 @@
       >
         <q-card style="min-width: 350px">
           <q-card-section>
-            <div class="text-h6">Rundreise bearbeiten</div>
-            <span>Diese Rundreise wird zu deinen eigenen Rundreisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
+            <div class="text-h6">Reise bearbeiten</div>
+            <span>Diese Reise wird zu deinen eigenen Reisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
           </q-card-section>
 
           <q-card-section>

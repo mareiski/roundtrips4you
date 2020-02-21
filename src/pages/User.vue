@@ -165,7 +165,7 @@
       >
         <q-card>
           <q-card-section class="row items-center">
-            <span class="q-ml-sm">Willst du wirklich deinen Konto und alle deine Rundreisen löschen ? Dies kann nicht mehr rückgängig gemacht werden.</span>
+            <span class="q-ml-sm">Willst du wirklich deinen Konto und alle deine Reisen löschen ? Dies kann nicht mehr rückgängig gemacht werden.</span>
           </q-card-section>
 
           <q-card-actions align="right">

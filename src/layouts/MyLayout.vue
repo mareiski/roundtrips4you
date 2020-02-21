@@ -78,7 +78,7 @@
                   @click="$router.push('/meine-rundreisen')"
                 >
                   <q-item-section>
-                    Meine Rundreisen
+                    Meine Reisen
                   </q-item-section>
                 </q-item>
                 <q-item
@@ -159,7 +159,7 @@
           <router-link
             class="footer-link"
             to="/rundreisen-uebersicht"
-          >Rundreisen</router-link>
+          >Reisen</router-link>
           <router-link
             class="footer-link"
             to="/ueber"
@@ -191,10 +191,9 @@
           <a
             class="footer-link contact-link-box"
             v-if="!isOnNetlifyPage"
+            href="https://roundtrips4you.de"
           >
             <span class="footer-text">roundtrips4you</span>
-            <span class="footer-text">Am See 20</span>
-            <span class="footer-text">85077 Manching</span>
           </a>
           <a
             class="footer-link"
