@@ -113,7 +113,7 @@
                 :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
                 :editor="true"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-                :doc-id="documentIds[index]"
+                :doc-id="documentIds[durations.findIndex(x => x.title === stop.Title)]"
               ></Duration>
             </template>
           </div>
@@ -673,7 +673,7 @@
             <q-select
               outlined
               v-model="inputProfile"
-              :options="['zu Fuß', 'Fahrrad', 'Auto', 'Bus']"
+              :options="['zu Fuß', 'Fahrrad', 'Auto']"
               label="Reisemittel"
               use-input
               :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
@@ -1688,7 +1688,7 @@ export default {
 
           this.durations = []
           this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, stop.Profile, this.stops[index - 1], index - 1)
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1].Profile, this.stops[index - 1], index - 1)
           })
 
           this.loadInitImgs()
@@ -1774,7 +1774,7 @@ export default {
           documentIds = []
           snapshot.forEach(doc => {
             details.push(doc.data())
-            documentIds.push(doc.id)
+            documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
           })
 
           this.documentIds = documentIds
@@ -1872,7 +1872,9 @@ export default {
     },
     getDuration (startLocation, endLocation, title, stopProfile, stop, index) {
       let profile = this.profile
+
       if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
@@ -1880,14 +1882,14 @@ export default {
         .then(response => {
           var data = response.data.routes[0]
 
-          context.getDays(stop, index, data.duration * 1000)
-
           if (data !== null && typeof data !== 'undefined') {
             let duration = context.msToTime(data.duration * 1000)
+
             let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
             if (distance !== '') distance = ' (' + distance + ')'
 
             context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+            context.getDays(stop, index, data.duration * 1000)
           }
         })
     },
@@ -1900,7 +1902,9 @@ export default {
 
         let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
         days = this.msToTime(dateDistance)
+        console.log(dateDistance)
       }
+
       this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
     },
     saveData (field, value) {

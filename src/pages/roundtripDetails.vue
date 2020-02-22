@@ -242,6 +242,7 @@ export default {
       childrenAges: [],
       adults: 0,
       rooms: 0,
+      Profile: '',
       checkOutDate: null
     }
   },
@@ -267,6 +268,7 @@ export default {
           this.rooms = roundtrip[0].Rooms
           this.adults = roundtrip[0].Adults
           this.roundtrip = roundtrip
+          this.profile = this.getProfile(roundtrip[0].Profile)
 
           this.loadGaleryImgs()
         })
@@ -328,7 +330,7 @@ export default {
           this.stops = details
 
           this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1)
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1, this.stops[index - 1].Profile)
           })
           let context = this
           setTimeout(function () {
@@ -361,22 +363,29 @@ export default {
       }
       )
     },
-    getDuration (startLocation, endLocation, title, stop, index) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+    getDuration (startLocation, endLocation, title, stop, index, stopProfile) {
+      let profile = this.profile
+
+      if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+      console.log(profile)
+
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
       axios.get(url)
         .then(response => {
           var data = response.data.routes[0]
 
-          context.getDays(stop, index, data.duration * 1000, title)
+          if (data !== null && typeof data !== 'undefined') {
+            context.getDays(stop, index, data.duration * 1000, title)
 
-          let duration = context.msToTime(data.duration * 1000)
+            let duration = context.msToTime(data.duration * 1000)
 
-          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-          if (distance !== '') distance = ' (' + distance + ')'
+            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+            if (distance !== '') distance = ' (' + distance + ')'
 
-          context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+            context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+          }
         })
     },
     msToTime (duration) {
@@ -473,8 +482,8 @@ export default {
       userDate = params.split('&')[1]
     }
 
-    this.loadRoundtripDetails(RTId, parseInt(userDate))
     this.loadSingleRoundtrip(RTId)
+    this.loadRoundtripDetails(RTId, parseInt(userDate))
   }
 }
 </script>
