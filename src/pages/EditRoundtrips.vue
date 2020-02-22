@@ -1240,6 +1240,7 @@ export default {
       try {
         this.addStop(this.date, this.selectedOption)
         this.loadRoundtripDetails(this.$route.params.id, true)
+        this.loadSingleRoundtrip(this.$route.params.id)
 
         this.$q.notify({
           color: 'green-4',
