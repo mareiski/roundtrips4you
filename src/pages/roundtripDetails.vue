@@ -418,6 +418,7 @@ export default {
 
       if (index < this.stops.length - 1) {
         let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        console.log(stop.InitDate)
         let dateTimeParts = formattedDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
         let timeParts = dateTimeParts[1].split(':')

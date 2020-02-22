@@ -101,7 +101,7 @@
               flat
               label="OK"
               color="primary"
-              @click="saveData('Location', tempLocation)"
+              @click="saveData('Location', tempLocation, true)"
               v-close-popup
             />
           </q-card-actions>
@@ -455,7 +455,7 @@
         class="q-timeline__title"
         style="padding-right:10px;"
       >
-        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}{{days !== null && !editor ? ', ca. ' + days + ' Aufenthalt' : null}}
+        {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}
         <q-popup-proxy
           v-if="editor"
           ref="qTimeProxy"
@@ -475,6 +475,7 @@
           name="access_time"
         />
       </span>
+      <span class="q-timeline__title">{{days !== null ? 'ca. ' + days + ' Aufenthalt' : null}}</span>
     </template>
   </q-timeline-entry>
 </template>

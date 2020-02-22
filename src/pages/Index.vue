@@ -73,7 +73,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Erstelle deine eigene Reise mit einem Reiseplaner der zu dir passt!</h1>
+        <h1>Erstelle deine eigene Reise mit einem Routenplaner der zu dir passt!</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -227,7 +227,7 @@
         </div>
       </div>
       <div class="register-container">
-        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Reiseplaners kostenlos</h4>
+        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Routenplaners kostenlos</h4>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
@@ -249,7 +249,7 @@ const { getScrollTarget, setScrollPosition } = scroll
 export default {
   metaInfo: {
     meta: [
-      { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Routenplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
     ]
   },
   name: 'PageIndex',

@@ -335,7 +335,7 @@ export default {
         else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
         else if (title === 'ueber') title = 'über uns'
       } else {
-        title = 'roundtrips4you - der Reiseplaner für deine individuellen Traumreisen'
+        title = 'roundtrips4you - der Routenplaner für deine individuellen Traumreisen'
       }
       document.title = title
 
@@ -347,7 +347,7 @@ export default {
           else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
           else if (title === 'ueber') title = 'über uns'
         } else {
-          title = 'roundtrips4you - der Reiseplaner für deine individuellen Traumreisen'
+          title = 'roundtrips4you - der Routenplaner für deine individuellen Traumreisen'
         }
 
         document.title = title

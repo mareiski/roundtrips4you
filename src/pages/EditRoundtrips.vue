@@ -105,6 +105,7 @@
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
+                :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
               ></Stop>
               <Duration
                 :key="stop"
@@ -1132,7 +1133,8 @@ export default {
       originCode: null,
       destinationCode: null,
       initDates: [],
-      showAutoRoutedialog: false
+      showAutoRoutedialog: false,
+      days: []
 
     }
   },
@@ -1686,7 +1688,7 @@ export default {
 
           this.durations = []
           this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, stop.Profile)
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, stop.Profile, this.stops[index - 1], index - 1)
           })
 
           this.loadInitImgs()
@@ -1868,7 +1870,7 @@ export default {
 
       return returnVal
     },
-    getDuration (startLocation, endLocation, title, stopProfile) {
+    getDuration (startLocation, endLocation, title, stopProfile, stop, index) {
       let profile = this.profile
       if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
@@ -1878,6 +1880,8 @@ export default {
         .then(response => {
           var data = response.data.routes[0]
 
+          context.getDays(stop, index, data.duration * 1000)
+
           if (data !== null && typeof data !== 'undefined') {
             let duration = context.msToTime(data.duration * 1000)
             let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
@@ -1886,6 +1890,18 @@ export default {
             context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
           }
         })
+    },
+    getDays (stop, index, duration) {
+      let days = null
+
+      if (index < this.stops.length - 1) {
+        let currentInitDate = new Date(stop.InitDate)
+        let nextInitDate = new Date(this.stops[index + 1].InitDate)
+
+        let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
+        days = this.msToTime(dateDistance)
+      }
+      this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
     },
     saveData (field, value) {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
