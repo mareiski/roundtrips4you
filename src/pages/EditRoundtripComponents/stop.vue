@@ -475,7 +475,7 @@
           name="access_time"
         />
       </span>
-      <span class="q-timeline__title">{{days !== null ? 'ca. ' + days + ' Aufenthalt' : null}}</span>
+      <span class="q-timeline__title">{{days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem ? '' : 'keine Verbleibende Zeit für den Aufenthalt') }}</span>
     </template>
   </q-timeline-entry>
 </template>

@@ -7,8 +7,13 @@
       v-if="cities.length === 0"
       color="primary"
       style="width:200px;"
+      :loading="loading"
       @click="getCities(country)"
-    >Städte vorschlagen</q-btn>
+    >Städte vorschlagen
+      <template v-slot:loading>
+        <q-spinner />
+      </template>
+    </q-btn>
     <div class="flex justify-between cards-container">
       <q-card
         class="city-card"
@@ -69,7 +74,8 @@ export default {
   data () {
     return {
       cities: [],
-      images: []
+      images: [],
+      loading: false
     }
   },
   props: {
@@ -79,6 +85,7 @@ export default {
   },
   methods: {
     getCities (country) {
+      this.loading = true
       const context = this
       axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
         headers: {
@@ -92,18 +99,21 @@ export default {
               'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
             }
           }).then(function (response) {
-            context.cities = response.data.data
+            context.cities = response.data.dataf
             context.cities.forEach(city => {
               setTimeout(function () {
                 context.getCityImage(city.name, city.country)
               }, 1000)
             })
+            this.loading = true
           }).catch(function (error) {
             console.log('Error' + error)
+            this.loading = true
           })
         }, 2000)
       }).catch(function (error) {
         console.log('Error' + error)
+        this.loading = true
       })
     },
     addStop (city) {

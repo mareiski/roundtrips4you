@@ -66,7 +66,7 @@
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
-        <p v-if="countries.length > 1">Momentan schlagen wir dir nur Städte für dein Haupland (1. Land in der Liste) vor</p>
+        <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Haupland ({{countries[0]}}) vorschlagen</p>
         <CitySuggestion
           :country="countries[0]"
           :dates="initDates"
@@ -346,7 +346,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <p>Insgesamt {{getTripDuration()}} Tage und {{getTripDistance()}} km</p>
+        <!-- <p>Insgesamt {{getTripDuration()}} Tage und {{getTripDistance()}} km</p> -->
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1898,13 +1898,19 @@ export default {
     getDays (stop, index, duration) {
       let days = null
 
-      if (index < this.stops.length - 1) {
-        let currentInitDate = new Date(stop.InitDate)
-        let nextInitDate = new Date(this.stops[index + 1].InitDate)
+      let dateTimeParts = stop.InitDate.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
 
-        let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
-        days = this.msToTime(dateDistance)
-      }
+      dateTimeParts = this.stops[index + 1].InitDate.split(' ')
+      dateParts = dateTimeParts[0].split('.')
+      timeParts = dateTimeParts[1].split(':')
+      let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+
+      let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
+
+      days = this.msToTime(dateDistance)
 
       this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
     },
