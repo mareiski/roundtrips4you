@@ -419,7 +419,7 @@
                   class="card-icon"
                 >
                 </q-icon>
-                <span class="country-title">{{roundtrip.Location }}{{ roundtrip.Region && typeof roundtrip.Region !== 'undefined' ? ', ' + roundtrip.Region : null}}</span>
+                <span class="country-title">{{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}{{ roundtrip.Region && typeof roundtrip.Region !== 'undefined' ? ', ' + roundtrip.Region : null}}</span>
               </div>
               <div class="card-row">
                 <q-icon
@@ -616,7 +616,7 @@ export default {
       if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
 
       let roundtripsRef = db.collection('Roundtrips')
-        .where('Location', '==', this.country)
+        .where('Location', 'array-contains', this.country)
         .where('Public', '==', true)
 
       if (this.dayModel !== null && this.dayModel.length > 0) roundtripsRef = roundtripsRef.where('Days', '==', this.dayModel)
@@ -707,14 +707,14 @@ export default {
       this.filteredRoundtripCategories = []
 
       let roundtripsRef = db.collection('Roundtrips')
-        .where('Location', '==', this.country)
+        .where('Location', 'array-contains', this.country)
         .where('Public', '==', true)
         .orderBy('createdAt')
         .startAt(searchCreatedAt)
         .limit(20)
       if (this.dayModel !== null && this.dayModel.length > 0) {
         roundtripsRef = db.collection('Roundtrips')
-          .where('Location', '==', this.country)
+          .where('Location', 'array-contains', this.country)
           .where('Public', '==', true)
           .where('Days', '==', this.dayModel)
           .startAt(searchCreatedAt)
@@ -778,7 +778,7 @@ export default {
     },
     getRTCount () {
       const counterRef = db.collection('Roundtrips')
-        .where('Location', '==', this.country)
+        .where('Location', 'array-contains', this.country)
         .where('Public', '==', true)
         .orderBy('createdAt')
 
@@ -817,6 +817,13 @@ export default {
           this.roundtrips = this.roundtrips.concat(originalRoundtripArr)
           break
       }
+    },
+    getLocationString (locations) {
+      let locationString = ''
+      locations.forEach((location, index) => {
+        locationString = locationString + (index !== 0 ? ', ' : '') + location
+      })
+      return locationString
     },
     loadBookingComWidget () {
       (function (d, sc, u) {

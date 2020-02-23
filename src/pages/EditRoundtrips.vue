@@ -346,6 +346,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
+        <p>Insgesamt {{getTripDuration()}} Tage und {{getTripDistance()}} km</p>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1903,7 +1904,6 @@ export default {
 
         let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
         days = this.msToTime(dateDistance)
-        console.log(dateDistance)
       }
 
       this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
@@ -2184,6 +2184,22 @@ export default {
           })
       }
       )
+    },
+    getTripDuration () {
+      let startDate = new Date(this.stops[0].InitDate)
+      // startDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+
+      let stopDate = new Date(this.stops[this.stops.length - 2].InitDate)
+      // stopDate = new Date(stopDate.getFullYear(), stopDate.getMonth(), stopDate.getDate())
+      const oneDay = 24 * 60 * 60 * 1000
+
+      const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
+      console.log(startDate)
+      console.log(stopDate)
+      return diffDays
+    },
+    getTripDistance () {
+
     },
     isUniqueTitle (value) {
       return new Promise((resolve, reject) => {
