@@ -79,7 +79,69 @@
             Reiseverlauf
           </q-timeline-entry>
 
-          <div class="stop-list">
+          <template v-if="!stopsLoaded">
+            <template v-for="n in 2">
+              <q-timeline-entry :key="n">
+                <template v-slot:subtitle>
+                  <q-skeleton
+                    width="300px"
+                    height="10px"
+                    type="rect"
+                    style="margin-bottom:10px;"
+                  />
+                </template>
+                <q-skeleton
+                  width="100px"
+                  height="15px"
+                  type="rect"
+                  style="margin-bottom:10px;"
+                />
+                <div
+                  class="flex"
+                  style="margin-bottom:10px;"
+                >
+                  <q-skeleton
+                    v-for="n in 2"
+                    :key="n"
+                    height="25px"
+                    width="60px"
+                    type="QChip"
+                    style="margin-right:10px;"
+                  />
+                </div>
+                <q-skeleton
+                  width="90%"
+                  height="150px"
+                  type="rect"
+                />
+              </q-timeline-entry>
+
+              <q-timeline-entry
+                icon="speed"
+                :key="n"
+              >
+                <template v-slot:subtitle>
+                  <q-skeleton
+                    width="300px"
+                    height="10px"
+                    type="rect"
+                    style="margin-bottom:20px;"
+                  />
+                </template>
+                <q-skeleton
+                  height="25px"
+                  width="60px"
+                  type="QChip"
+                  style="margin-bottom:10px;"
+                />
+              </q-timeline-entry>
+            </template>
+          </template>
+
+          <div
+            class="stop-list"
+            v-show="stopsLoaded"
+          >
             <template v-for="(stop, index) in stops">
               <Stop
                 :key="index"
@@ -1135,8 +1197,8 @@ export default {
       destinationCode: null,
       initDates: [],
       showAutoRoutedialog: false,
-      days: []
-
+      days: [],
+      stopsLoaded: false
     }
   },
   methods: {
@@ -1838,6 +1900,7 @@ export default {
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
+          this.stopsLoaded = true
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)

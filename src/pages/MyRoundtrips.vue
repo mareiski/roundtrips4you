@@ -24,52 +24,85 @@
             Klicke einfach auf den Button unten um deine erste Rundreise zu erstellen.</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item
-        clickable
-        @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
-        v-ripple
-        v-for="(roundtrip, index) in roundtrips"
-        :key="roundtrip"
-      >
-        <q-item-section
-          avatar
-          top
+      <div v-if="showRoundtrips">
+        <q-item
+          clickable
+          @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
+          v-ripple
+          v-for="(roundtrip, index) in roundtrips"
+          :key="roundtrip"
         >
-          <q-avatar
-            color="primary"
-            text-color="white"
+          <q-item-section
+            avatar
+            top
           >
-            <img :src="TitleImgs[index]">
-          </q-avatar>
-        </q-item-section>
+            <q-avatar
+              color="primary"
+              text-color="white"
+            >
+              <img :src="TitleImgs[index]">
+            </q-avatar>
+          </q-item-section>
 
-        <q-item-section>
-          <q-item-label lines="1">{{roundtrip.Title}} - {{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}</q-item-label>
-          <q-item-label
-            caption
-            style="width:100px;"
+          <q-item-section>
+            <q-item-label lines="1">{{roundtrip.Title}} - {{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}</q-item-label>
+            <q-item-label
+              caption
+              style="width:100px;"
+            >
+              {{ getCreatedAtDate(roundtrip.createdAt) }}
+              <q-tooltip>
+                Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
+              </q-tooltip>
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side>
+            <q-item-label
+              lines="1"
+              :style="[roundtrip.Public ? {'color': 'green'} : {'color': 'red'}]"
+            >{{roundtrip.Public ? 'veröffentlicht' : 'privat'}}</q-item-label>
+          </q-item-section>
+
+          <q-item-section side>
+            <q-icon
+              name="keyboard_arrow_right"
+              color="primary"
+            />
+          </q-item-section>
+        </q-item>
+      </div>
+      <div v-else>
+        <q-item
+          v-for="n in 3"
+          :key="n"
+        >
+          <q-item-section
+            avatar
+            top
+            style="padding:8px 10px;"
           >
-            {{ getCreatedAtDate(roundtrip.createdAt) }}
-            <q-tooltip>
-              Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
-            </q-tooltip>
-          </q-item-label>
-        </q-item-section>
+            <q-skeleton
+              size="40px"
+              type="QAvatar"
+            />
+          </q-item-section>
 
-        <q-item-section side>
-          <q-item-label
-            lines="1"
-            :style="[roundtrip.Public ? {'color': 'green'} : {'color': 'red'}]"
-          >{{roundtrip.Public ? 'veröffentlicht' : 'privat'}}</q-item-label>
-        </q-item-section>
-
-        <q-item-section side>
-          <q-icon
-            name="keyboard_arrow_right"
-            color="primary"
-          />
-        </q-item-section>
-      </q-item>
+          <q-item-section>
+            <q-skeleton
+              width="300px"
+              style="margin-bottom:10px;"
+              type="rect"
+            />
+            <q-item-label caption>
+              <q-skeleton
+                width="80px"
+                type="rect"
+              />
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </div>
     </q-list>
     <q-list
       bordered
@@ -510,7 +543,8 @@ export default {
       originCode: null,
       destinationCode: null,
       destinationAddresses: [],
-      countryAmount: 1
+      countryAmount: 1,
+      showRoundtrips: false
     }
   },
   watch: {
@@ -691,6 +725,7 @@ export default {
             })
           })
           this.showNoRoundtripsText = snapshot.docs.length === 0
+          this.showRoundtrips = true
         }).catch(function (error) {
           console.log(error)
         })
