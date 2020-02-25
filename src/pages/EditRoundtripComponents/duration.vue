@@ -93,20 +93,22 @@ export default {
       return false
     },
     saveData (field, value) {
-      console.log(value)
+      let context = this
       try {
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
+        }).then(function () {
+          context.$q.notify({
+            message: 'Deine Änderungen wurde gespeichert',
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle'
+          })
+          context.defaultProfile = context.inputProfile
+          // let parent = context.getParent('EditRoundtrips')
+          // parent.loadRoundtripDetails(context.$route.params.id, false)
+          // parent.loadSingleRoundtrip(context.$route.params.id)
         })
-        this.$q.notify({
-          message: 'Deine Änderungen wurde gespeichert',
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle'
-        })
-        let parent = this.getParent('EditRoundtrips')
-        parent.loadRoundtripDetails(this.$route.params.id, false)
-        parent.loadSingleRoundtrip(this.$route.params.id)
       } catch (e) {
         console.log(e)
       }
