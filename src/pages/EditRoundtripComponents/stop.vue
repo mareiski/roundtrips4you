@@ -58,7 +58,6 @@
       <q-chip
         v-if="!hotelLocation ||  typeof hotelLocation === 'undefined'"
         icon="location_on"
-        size="3px"
         clickable
         @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
       >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
@@ -67,7 +66,6 @@
       <q-chip
         v-else
         icon="house"
-        size="3px"
         :clickable="hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined'"
         @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
       >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelName + ', ' + hotelLocation.label) :  'kein Ort angegeben'}}
@@ -110,7 +108,6 @@
       <q-chip
         v-if="parkingPlace || editor"
         icon="local_parking"
-        size="3px"
         :clickable="editor"
         @click="editParkingPlace = true"
       >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
@@ -159,7 +156,6 @@
       <q-chip
         v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
         icon="email"
-        size="3px"
         clickable
         @click="openInNewTab('mailto:' + hotelContact.email)"
       >{{ hotelContact.email}}
@@ -167,7 +163,6 @@
       <q-chip
         icon="phone"
         v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
-        size="3px"
         clickable
         @click="openInNewTab('tel:' + hotelContact.phone)"
       >{{hotelContact.phone}}
@@ -184,7 +179,6 @@
         >
           <q-chip
             v-if="editor"
-            size="3px"
             clickable
             :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
           >{{sight.name}}
@@ -198,7 +192,6 @@
       </div>
       <q-chip
         v-else-if="editor && (!hotelName || typeof hotelName === 'undefined')"
-        size="3px"
         clickable
         @click="searchSights()"
       >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
@@ -227,7 +220,6 @@
             color="primary"
             @click="saveSights()"
             label="Speichern"
-            style="height:20px;"
           />
         </div>
       </div>
@@ -242,7 +234,6 @@
         <q-chip
           v-for="sight in addedSights"
           :key="sight"
-          size="3px"
           clickable
           @click="openInNewTab('https://www.google.com/search?q=' + sight + ' ' + location.label.split(',')[0])"
         >{{sight}}</q-chip>
@@ -411,7 +402,7 @@
                 round
                 color="primary"
                 icon="add"
-                style="margin-left:10px; margin-top:5px;"
+                style="margin-left:10px; margin-top:5px; height:45px;"
                 :disable="!validURL(tempImgLink)"
                 @click="addImageToStop(tempImgLink)"
               />
