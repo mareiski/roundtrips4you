@@ -5,7 +5,6 @@
   >
     <q-chip
       icon="commute"
-      size="3px"
       :clickable="editor"
       @click="editStopProfile = true"
     >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}</q-chip>

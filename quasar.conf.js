@@ -83,7 +83,8 @@ module.exports = function (ctx) {
         'QBadge',
         'QStepper',
         'QStep',
-        'QStepperNavigation'
+        'QStepperNavigation',
+        'QSkeleton'
       ],
 
       directives: [

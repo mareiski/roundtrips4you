@@ -15,7 +15,7 @@
   "dependencies": {
     "@google/maps": "^1.0.1",
     "@mapbox/mapbox-gl-geocoder": "^4.5.0",
-    "@quasar/extras": "^1.0.0",
+    "@quasar/extras": "^1.5.2",
     "axios": "^0.19.0",
     "express-throttle-bandwidth": "^1.0.1",
     "file": "^0.2.2",
@@ -27,7 +27,7 @@
     "leaflet-geosearch": "^2.7.0",
     "leaflet-routing-machine": "^3.2.12",
     "mapbox-gl": "^1.4.1",
-    "quasar": "^1.0.0",
+    "quasar": "^1.9.4",
     "storyblok-vue": "^1.0.5",
     "v-click-outside": "^2.1.4",
     "vue-backtotop": "^1.6.1",
@@ -36,12 +36,14 @@
     "vue-mapbox": "^0.4.1",
     "vue-mapbox-geocoder": "^0.2.0",
     "vue-meta": "^2.3.2",
+    "vue-template-compiler": "^2.6.11",
     "vue2-leaflet": "^2.2.1",
     "vue2-leaflet-geosearch": "^1.0.6",
-    "vuefire": "^2.0.0-alpha.24"
+    "vuefire": "^2.0.0-alpha.24",
+    "vue": "^2.6.11"
   },
   "devDependencies": {
-    "@quasar/app": "^1.0.0",
+    "@quasar/app": "^1.5.8",
     "@vue/eslint-config-standard": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.10.0",

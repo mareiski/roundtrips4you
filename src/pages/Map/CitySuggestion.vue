@@ -99,7 +99,7 @@ export default {
               'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
             }
           }).then(function (response) {
-            context.cities = response.data.dataf
+            context.cities = response.data.data
             context.cities.forEach(city => {
               setTimeout(function () {
                 context.getCityImage(city.name, city.country)

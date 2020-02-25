@@ -397,6 +397,14 @@ h2 {
     flex-direction: column;
 }
 
+.q-avatar .q-icon {
+    &.notranslate {
+        &:not(.material-icons) {
+            display: none;
+        }
+    }
+}
+
 @media @tablet,
 @mobile {
     .right-col {
