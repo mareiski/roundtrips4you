@@ -609,10 +609,12 @@ export default {
       let timeParts = dateTimeParts[1].split(':')
       let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
+      let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'InitDate': initDate
+      }).then(function () {
+        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
       })
-      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, true)
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -635,16 +637,18 @@ export default {
     },
     saveData (field, value, updateParent) {
       try {
+        let context = this
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
+        }).then(function () {
+          context.$q.notify({
+            message: 'Deine Änderungen wurde gespeichert',
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle'
+          })
+          if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
         })
-        this.$q.notify({
-          message: 'Deine Änderungen wurde gespeichert',
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle'
-        })
-        if (updateParent) this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
       } catch (e) {
         console.log(e)
       }
@@ -705,18 +709,22 @@ export default {
     addImageToStop (src) {
       if (!this.stopImages) this.stopImages = []
       this.stopImages.push(src)
+      let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
+      }).then(function () {
+        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
       })
-      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
     },
     removeImg (src) {
       if (!this.stopImages) return
       this.stopImages.splice(this.stopImages.indexOf(src) - 1, 1)
+      let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
+      }).then(function () {
+        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
       })
-      this.getParent('EditRoundtrips').loadRoundtripDetails(this.$route.params.id, false)
     },
     deleteEntry () {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {

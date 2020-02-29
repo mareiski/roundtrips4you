@@ -1198,7 +1198,8 @@ export default {
       initDates: [],
       showAutoRoutedialog: false,
       days: [],
-      stopsLoaded: false
+      stopsLoaded: false,
+      firstLoad: true
     }
   },
   methods: {
@@ -1827,6 +1828,12 @@ export default {
       }
     },
     loadRoundtripDetails (RTId, refreshAll) {
+      if (!this.firstLoad && refreshAll) {
+        Loading.show({
+          spinnerColor: 'primary'
+        })
+      }
+      this.firstLoad = false
       if (refreshAll) this.stops = []
       this.showSimulatedReturnData = false
       let roundtripsRef = db.collection('RoundtripDetails')
@@ -1900,7 +1907,6 @@ export default {
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
-          this.stopsLoaded = true
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1976,6 +1982,8 @@ export default {
       days = this.msToTime(dateDistance)
 
       this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
+
+      this.stopsLoaded = true
     },
     saveData (field, value) {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
