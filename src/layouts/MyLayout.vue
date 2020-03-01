@@ -140,71 +140,92 @@
       <router-view />
     </q-page-container>
     <footer>
-      <div class="left-footer-col">
-        <a href="/">
-          <img
-            alt="logo"
-            style="width:auto; max-height:200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  border-radius: 50%;"
-            src="../statics/submark.png"
-          />
-        </a>
+      <div
+        id="SocialMediaContainer"
+        class="flex"
+      >
+        <q-icon
+          style="color: #1f892f"
+          name="fab fa-tripadvisor"
+          @click="openInNewTab('https://www.tripadvisor.de/Profile/Roundtrips4you')"
+        />
+        <q-icon
+          style="color: #d73532"
+          name="fab fa-pinterest-p"
+          @click="openInNewTab('https://www.pinterest.de/roundtrips4you/')"
+        />
+        <q-icon
+          style="color: #C13584"
+          name="fab fa-instagram"
+          @click="openInNewTab('https://www.instagram.com/roundtrips4you/')"
+        />
+        <q-icon
+          style="color: #3b5999"
+          name="fab fa-facebook-f"
+          @click="openInNewTab('https://www.facebook.com/roundtrips4you/')"
+        />
       </div>
-      <div class="right-footer-col">
-        <div class="footer-menu">
-          <h3 class="footer-title">Menü</h3>
-          <router-link
-            class="footer-link"
-            to="/"
-          >Home</router-link>
-          <router-link
-            class="footer-link"
-            to="/rundreisen-uebersicht"
-          >Reisen</router-link>
-          <router-link
-            class="footer-link"
-            to="/ueber"
-          >Über uns</router-link>
-        </div>
-        <div class="footer-infos">
-          <h3 class="footer-title">Infos</h3>
-          <router-link
-            v-if="!isOnNetlifyPage"
-            class="footer-link"
-            rel="nofollow"
-            to="/impressum"
-          >Impressum</router-link>
-          <router-link
-            v-if="!isOnNetlifyPage"
-            rel="nofollow"
-            class="footer-link"
-            to="/haftungsausschluss"
-          >Haftungsausschluss</router-link>
-          <router-link
-            v-if="!isOnNetlifyPage"
-            class="footer-link"
-            rel="nofollow"
-            to="/datenschutz"
-          >Datenschutz</router-link>
-        </div>
-        <div class="footer-contact">
-          <h3 class="footer-title">Kontakt</h3>
-          <a
-            class="footer-link contact-link-box"
-            v-if="!isOnNetlifyPage"
-            href="https://roundtrips4you.de"
-          >
-            <span class="footer-text">roundtrips4you</span>
+      <div class="main-footer">
+        <div class="left-footer-col">
+          <a href="/">
+            <img
+              alt="logo"
+              style="width:auto; max-height:200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  border-radius: 50%;"
+              src="../statics/submark.png"
+            />
           </a>
-          <a
-            class="footer-link"
-            href="https://www.instagram.com/roundtrips4you/"
-            target="_blank"
-          >
-            <q-icon name="thumb_up_alt" /> roundtrips4you auf Instagram</a>
-          <a
-            class="footer-link"
-            href="mailto:hello@roundtrips4you.de"
-          >hello@roundtrips4you.de</a>
+        </div>
+        <div class="right-footer-col">
+          <div class="footer-menu">
+            <h3 class="footer-title">Menü</h3>
+            <router-link
+              class="footer-link"
+              to="/"
+            >Home</router-link>
+            <router-link
+              class="footer-link"
+              to="/rundreisen-uebersicht"
+            >Reisen</router-link>
+            <router-link
+              class="footer-link"
+              to="/ueber"
+            >Über uns</router-link>
+          </div>
+          <div class="footer-infos">
+            <h3 class="footer-title">Infos</h3>
+            <router-link
+              v-if="!isOnNetlifyPage"
+              class="footer-link"
+              rel="nofollow"
+              to="/impressum"
+            >Impressum</router-link>
+            <router-link
+              v-if="!isOnNetlifyPage"
+              rel="nofollow"
+              class="footer-link"
+              to="/haftungsausschluss"
+            >Haftungsausschluss</router-link>
+            <router-link
+              v-if="!isOnNetlifyPage"
+              class="footer-link"
+              rel="nofollow"
+              to="/datenschutz"
+            >Datenschutz</router-link>
+          </div>
+          <div class="footer-contact">
+            <h3 class="footer-title">Kontakt</h3>
+            <a
+              class="footer-link contact-link-box"
+              v-if="!isOnNetlifyPage"
+              href="https://roundtrips4you.de"
+            >
+              <span class="footer-text">roundtrips4you</span>
+            </a>
+            <a
+              class="footer-link"
+              href="mailto:hello@roundtrips4you.de"
+            >hello@roundtrips4you.de</a>
+          </div>
         </div>
       </div>
       <CookieBanner></CookieBanner>
@@ -290,6 +311,9 @@ export default {
     },
     getHost () {
       return location.host
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     }
   },
   watch: {
