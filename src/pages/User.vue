@@ -280,6 +280,7 @@ export default {
       })
     },
     updateDBEntry (uid) {
+      console.log(uid)
       let context = this
       let roundtripsRef = db.collection('User')
         .where('UserUID', '==', uid)

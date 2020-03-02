@@ -436,9 +436,9 @@
                 <p class="card-description">{{roundtrip.Description}}</p>
               </div>
               <div class="card-bottom-row">
-                <q-chip size="10px">{{roundtrip.Highlights[0]}}</q-chip>
-                <q-chip size="10px">{{roundtrip.Highlights[1]}}</q-chip>
-                <q-chip size="10px">{{roundtrip.Highlights[2]}}</q-chip>
+                <q-chip>{{roundtrip.Highlights[0]}}</q-chip>
+                <q-chip>{{roundtrip.Highlights[1]}}</q-chip>
+                <q-chip>{{roundtrip.Highlights[2]}}</q-chip>
               </div>
             </div>
             <div class="card-right-col">
@@ -449,7 +449,7 @@
                   style="width: 50px; margin:auto 10px auto 10px;"
                 >
                   <q-img :src="userImages[roundtrips.indexOf(roundtrip)]"></q-img>
-                  <q-tooltip>von {{userNames[roundtrips.indexOf(roundtrip)]}}</q-tooltip>
+                  <q-tooltip v-if="userNames[roundtrips.indexOf(roundtrip)]">von {{userNames[roundtrips.indexOf(roundtrip)]}}</q-tooltip>
                 </q-avatar>
               </div>
               <div class="card-bottom-row">

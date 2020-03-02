@@ -11,14 +11,16 @@
       <q-popup-edit
         v-model="title"
         buttons
-        label-set="ok"
-        @save="saveData('Title', title)"
+        label-set="Speichern"
+        @save="title !== null && title !== ''  && title[0] !== ' ' ? saveTitle(title) : showWrongTitleNotify()"
       >
         <q-input
           v-model="title"
           :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
           dense
-        />
+          autofocus
+        >
+        </q-input>
       </q-popup-edit>
     </h3>
     <q-tabs
@@ -1985,6 +1987,16 @@ export default {
 
       this.stopsLoaded = true
     },
+    saveTitle (val) {
+      this.isUniqueTitle(val).then(uniqueTitle => {
+        console.log(uniqueTitle)
+        if (uniqueTitle !== 'Dieser Titel ist bereits vergeben') {
+          this.saveData('Title', val)
+        } else {
+          this.showWrongTitleNotify()
+        }
+      })
+    },
     saveData (field, value) {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
       try {
@@ -2169,6 +2181,14 @@ export default {
           return 'Auto'
       }
     },
+    showWrongTitleNotify () {
+      this.$q.notify({
+        color: 'red-5',
+        textColor: 'white',
+        icon: 'error',
+        message: 'Bitte gib einen anderen Titel ein'
+      })
+    },
     scrollTo (el) {
       const target = getScrollTarget(el)
       const offset = el.offsetTop
@@ -2177,7 +2197,7 @@ export default {
     },
     copyRT (originalRT, UserId, newTitle) {
       this.isUniqueTitle(newTitle).then(uniqueTitle => {
-        if (newTitle === null || newTitle === '' || !uniqueTitle || newTitle.indexOf(' ') !== -1) {
+        if (newTitle === null || newTitle === '' || uniqueTitle === 'Dieser Titel ist bereits vergeben' || newTitle.indexOf(' ') !== -1) {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
@@ -2251,10 +2271,10 @@ export default {
                         lat: docData.Location.lat,
                         label: docData.Location.label
                       }
+                    }).then(result => {
+                      // refresh page
+                      this.$router.go()
                     })
-
-                    this.loadRoundtripDetails(doc.id, true)
-                    this.loadSingleRoundtrip(doc.id)
                   })
                 })
             })

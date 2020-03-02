@@ -138,6 +138,8 @@ export default {
         var token = result.credential.accessToken
         const credential = firebase.auth.GoogleAuthProvider().credential(token)
 
+        this.createUserEntry(result.user)
+
         // Sign in with credential from the Google user.
         auth.signInWithCredential(credential).then(function () {
           context.$router.replace('meine-rundreisen')
@@ -152,9 +154,9 @@ export default {
       console.log(user)
       db.collection('User').add({
         Reputation: 0,
-        UserImage: user.photoURL,
-        UserName: user.displayName,
-        UserUID: user.uid
+        UserImage: user.user.photoURL,
+        UserName: user.user.displayName,
+        UserUID: user.user.uid
       })
     }
   }
