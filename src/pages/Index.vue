@@ -167,7 +167,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="../statics/pois.png"
+              src="/src/statics/pois.png"
             />
           </div>
         </li>
@@ -181,7 +181,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="../statics/map.png"
+              src="/src/statics/map.png"
             />
           </div>
         </li>
