@@ -143,9 +143,9 @@
             <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst und kannst diese mit einem Klick zu deiner Reise hizufügen.</p>
           </div>
           <div>
-            <q-img
+            <img
               style="width:1000px;"
-              src="../statics/cities.png"
+              src="../statics/cities.PNG"
             />
           </div>
         </li>
@@ -165,7 +165,7 @@
             <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern.</p>
           </div>
           <div>
-            <q-img
+            <img
               style="width:1000px;"
               src="../statics/pois.png"
             />
@@ -179,7 +179,7 @@
             <p>Wir übernehmen die Kartenerstellung komplett für dich, sodass du nur auf den entsprechenden Reiter klicken musst um alle deine Stopps zu sehen.</p>
           </div>
           <div>
-            <q-img
+            <img
               style="width:1000px;"
               src="../statics/map.png"
             />
