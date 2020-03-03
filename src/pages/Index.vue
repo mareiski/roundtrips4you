@@ -145,7 +145,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="/src/statics/cities.png"
+              src="https://roundtrips4you.de/statics/cities.png"
             />
           </div>
         </li>
@@ -167,7 +167,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="/src/statics/pois.png"
+              src="https://roundtrips4you.de/statics/pois.png"
             />
           </div>
         </li>
@@ -181,7 +181,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="/src/statics/map.png"
+              src="https://roundtrips4you.de/statics/map.png"
             />
           </div>
         </li>
