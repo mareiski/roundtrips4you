@@ -145,7 +145,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="../statics/cities.png"
+              src="/src/statics/cities.png"
             />
           </div>
         </li>
