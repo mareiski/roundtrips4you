@@ -625,9 +625,10 @@
               v-model="publish"
               label="Rundreise veröffentlichen"
               icon="share"
+              :disable="!user.displayName"
             >
               <q-tooltip>
-                Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten
+                {{user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
               </q-tooltip>
             </q-toggle>
             <div
@@ -1202,6 +1203,11 @@ export default {
       days: [],
       stopsLoaded: false,
       firstLoad: true
+    }
+  },
+  computed: {
+    user () {
+      return this.$store.getters['user/user']
     }
   },
   methods: {

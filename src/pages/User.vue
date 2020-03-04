@@ -18,8 +18,9 @@
         <q-input
           v-model="UserDisplayName"
           outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Benutzernamen']"
+          :rules="[val => val !== null && val !== '' && (user.displayName === val || uniqueUserName(val)) || 'Bitte wähle einen Benutzernamen']"
           label="Benutzername"
+          lazy-rules
         />
         <!--
         <q-input
@@ -245,22 +246,32 @@ export default {
     },
     onSaveUserSettings () {
       let user = auth.user()
-      let context = this
-      user.updateProfile({
-        displayName: this.UserDisplayName,
-        photoURL: this.titleImgUrl
-      }).then(function () {
-        // user.updateEmail(context.UserEmail).then(function () {
+      if (user.displayName === this.UserDisplayName || this.uniqueUserName(this.UserDisplayName)) {
+        let context = this
+        user.updateProfile({
+          displayName: this.UserDisplayName,
+          photoURL: this.titleImgUrl
+        }).then(function () {
+          // user.updateEmail(context.UserEmail).then(function () {
 
-        context.updateDBEntry(user.uid)
-        // Update successful
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Einstellungen wurden erfolgreich gespeichert'
-        })
-        /* }).catch(function (error) {
+          context.updateDBEntry(user.uid)
+          // Update successful
+          context.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Einstellungen wurden erfolgreich gespeichert'
+          })
+          /* }).catch(function (error) {
+            console.log(error)
+            context.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
+            })
+          }) */
+        }).catch(function (error) {
           console.log(error)
           context.$q.notify({
             color: 'red-5',
@@ -268,16 +279,15 @@ export default {
             icon: 'error',
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
-        }) */
-      }).catch(function (error) {
-        console.log(error)
-        context.$q.notify({
+        })
+      } else {
+        this.$q.notify({
           color: 'red-5',
           textColor: 'white',
           icon: 'error',
-          message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
+          message: 'Bitte gib einen anderen Benutzernamen an'
         })
-      })
+      }
     },
     updateDBEntry (uid) {
       console.log(uid)
@@ -321,6 +331,19 @@ export default {
             message: 'Es ist ein Fehler aufgetreten, bitte versuche es erneut'
           })
         }
+      })
+    },
+    uniqueUserName (value) {
+      return new Promise((resolve, reject) => {
+        value = value.trim()
+
+        let roundtripsRef = db.collection('User')
+          .where('UserName', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0 || 'Dieser Name ist bereits vergeben')
+          })
       })
     },
     deleteAccount () {

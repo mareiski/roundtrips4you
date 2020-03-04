@@ -92,7 +92,7 @@ export default {
     onUserLogin () {
       let context = this
       auth.authRef().signInWithEmailAndPassword(this.userEmail, this.password).then(function () {
-        context.$router.replace('meine-rundreisen')
+        context.$router.replace({ path: '/meine-rundreisen' })
       }).catch(function (error) {
         console.log(error)
         if (error.code === 'auth/user-not-found') {
