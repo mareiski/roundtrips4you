@@ -493,8 +493,6 @@ import { countries } from '../countries'
 import CitySearch from './Map/CitySearch'
 
 let uid = null
-let roundtripDocIds = []
-let roundtripArr = []
 import axios from 'axios'
 var querystring = require('querystring')
 
@@ -701,8 +699,9 @@ export default {
       return true
     },
     getUserRoundtrips () {
-      roundtripArr = []
-      roundtripDocIds = []
+      let roundtripArr = []
+      let roundtripDocIds = []
+      this.roundtrips = []
 
       var context = this
       let roundtripsRef = db.collection('Roundtrips')
