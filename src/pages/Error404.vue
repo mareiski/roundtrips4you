@@ -4,7 +4,10 @@
         src="~assets/sad.svg"
         style="width:30vw;max-width:150px;"
       > -->
-    <div class="island-img">
+    <div
+      @mousemove="mouseMove($event)"
+      class="island-img"
+    >
     </div>
     <div
       v-for="cloud in clouds"
@@ -33,7 +36,7 @@
         </filter>
       </svg>
     </div>
-    <p class="text-faded">Oh nein, da ist wohl was verloren gegangen...<strong>(404)</strong></p>
+    <p class="text-faded">Oh nein, dieser Ort konnte nicht gefunden werden... <strong>(404)</strong></p>
     <q-btn
       color="secondary"
       style="width:200px;"
@@ -71,11 +74,27 @@ export default {
   name: 'Error404',
   data () {
     return {
-      clouds: [{ width: 400, height: 200, top: -320, left: -320 }, { width: 300, height: 150, top: -120, left: 20 }]
+      clouds: [{ width: 400, height: 200, top: -320, left: -320 }, { width: 400, height: 200, top: -20, left: -320 }, { width: 300, height: 150, top: -120, left: 20 }, { width: 500, height: 250, top: -220, left: 500 }, { width: 400, height: 200, top: -400, left: 200 }]
     }
   },
   created () {
     Loading.hide()
+  },
+  methods: {
+    mouseMove (event) {
+      var width = window.outerWidth
+      var height = window.outerHeight
+      let offsetX = 0.5 - event.clientX / width
+      let offsetY = 0.5 - event.clientY / height
+
+      let cloudCircles = Array.from(document.getElementsByClassName('cloud-circle'))
+      cloudCircles.forEach(function (el, index) {
+        var offset = parseInt(el.offsetTop)
+        console.log(offset)
+        let translate = 'translate3d(' + Math.round(offsetX * offset) + 'px,' + Math.round(offsetY * offset) + 'px,0px)'
+        el.style.transform = translate
+      })
+    }
   },
   metaInfo: {
     meta: [
