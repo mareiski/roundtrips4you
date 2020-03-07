@@ -131,7 +131,7 @@ export default {
   watch: {
     'stops': function (val, oldVal) {
       if (val !== oldVal) {
-        this.loadMap()
+        this.loadMap(null)
       }
     }
   },
@@ -203,7 +203,7 @@ export default {
         }
       })
 
-      if (map) map.fitBounds(new Mapbox.LngLatBounds(bounds))
+      if (map && map !== null) map.fitBounds(new Mapbox.LngLatBounds(bounds))
     },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile

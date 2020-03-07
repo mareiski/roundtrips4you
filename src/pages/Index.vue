@@ -5,7 +5,10 @@
         id="flyingPlane"
         v-show="imgLoaded"
       >
-        <router-link to="/meine-rundreisen">
+        <router-link
+          to="/meine-rundreisen"
+          style="text-decoration:none;"
+        >
           <q-btn class="banner">Eigene Reise erstellen</q-btn>
         </router-link>
         <span class="line"></span>

@@ -1069,6 +1069,7 @@
           :checkOutDate="checkOutDate"
           :rooms="rooms"
           :adults="adults"
+          ref="map"
         ></Map>
       </q-tab-panel>
     </q-tab-panels>
@@ -1909,6 +1910,9 @@ export default {
             this.saveData('Days', daysString)
           }
           this.saveData('Hotels', hotelCount)
+
+          // load Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
 
           this.stops = details
 
