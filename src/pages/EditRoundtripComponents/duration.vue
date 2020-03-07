@@ -104,9 +104,8 @@ export default {
             icon: 'check_circle'
           })
           context.defaultProfile = context.inputProfile
-          // let parent = context.getParent('EditRoundtrips')
-          // parent.loadRoundtripDetails(context.$route.params.id, false)
-          // parent.loadSingleRoundtrip(context.$route.params.id)
+          let parent = context.getParent('EditRoundtrips')
+          parent.loadRoundtripDetails(context.$route.params.id, false)
         })
       } catch (e) {
         console.log(e)

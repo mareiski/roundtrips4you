@@ -7,7 +7,13 @@
       <q-icon name="keyboard_arrow_left"></q-icon>
       zurück zu meinen Rundreisen
     </router-link>
-    <h3>{{title}}
+    <h3 v-if="!stopsLoaded">
+      <q-skeleton
+        width="200px"
+        type="text"
+      />
+    </h3>
+    <h3 v-else>{{title}}
       <q-popup-edit
         v-model="title"
         buttons
@@ -1759,11 +1765,6 @@ export default {
 
           this.getGeneralProfile()
 
-          this.durations = []
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1].Profile, this.stops[index - 1], index - 1)
-          })
-
           this.loadInitImgs()
         })
         .catch(err => {
@@ -1915,6 +1916,11 @@ export default {
           if (this.$refs.map) this.$refs.map.loadMap(null)
 
           this.stops = details
+
+          this.durations = []
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1].Profile, this.stops[index - 1], index - 1)
+          })
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
