@@ -87,6 +87,7 @@
 <script>
 import { auth, db } from '../firebaseInit'
 import firebase from 'firebase'
+let timeStamp = Date.now()
 
 export default {
   metaInfo: {
@@ -159,7 +160,8 @@ export default {
         Reputation: 0,
         UserImage: user.user.photoURL,
         UserName: user.user.displayName,
-        UserUID: user.user.uid
+        UserUID: user.user.uid,
+        createdAt: new Date(timeStamp)
       })
     }
   }

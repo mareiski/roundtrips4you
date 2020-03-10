@@ -1,0 +1,48 @@
+.public-user-profile {
+    padding-top: 10px;
+
+    .user-name {
+        margin-bottom: 10px;
+        margin-top: 10px;
+
+        &>* {
+            margin-right: 5px;
+        }
+    }
+
+    .details-container {
+        padding: 0 20px 0 0;
+
+        h3 {
+            margin: 5px 0 10px 0
+        }
+
+        &>div {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+
+    .badge-container {
+        font-size: 25px;
+
+        &>div {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+
+            .q-badge {
+                width: fit-content;
+                margin: 5px;
+                font-size: 18px;
+                height: 23px;
+                cursor: pointer !important;
+            }
+        }
+    }
+
+    .roundtrip-container {
+        margin-bottom: 10px;
+    }
+}

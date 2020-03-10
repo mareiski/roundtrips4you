@@ -248,6 +248,7 @@
       <router-link
         class="footer-link"
         to="/registrieren"
+        style="text-decoration:none;"
       >
         <q-btn
           color="primary"

@@ -90,7 +90,6 @@ export default {
       let cloudCircles = Array.from(document.getElementsByClassName('cloud-circle'))
       cloudCircles.forEach(function (el, index) {
         var offset = parseInt(el.offsetTop)
-        console.log(offset)
         let translate = 'translate3d(' + Math.round(offsetX * offset) + 'px,' + Math.round(offsetY * offset) + 'px,0px)'
         el.style.transform = translate
       })

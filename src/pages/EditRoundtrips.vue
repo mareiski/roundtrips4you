@@ -2291,6 +2291,22 @@ export default {
                         label: docData.Location.label
                       }
                     }).then(result => {
+                      // everything succeeded
+
+                      // add new copy entry to user
+                      let userRef = db.collection('User')
+                        .where('UserUID', '==', UserId)
+                        .limit(1)
+                      userRef.get()
+                        .then(snapshot => {
+                          snapshot.forEach(doc => {
+                            let userRTEdited = doc.data().RTEdited
+                            db.collection('User').doc(UserId).update({
+                              'RTEdited': (userRTEdited + 1)
+                            })
+                          })
+                        })
+
                       // refresh page
                       this.$router.go()
                     })
