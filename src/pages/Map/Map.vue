@@ -105,6 +105,11 @@ import {
 import axios from 'axios'
 
 export default {
+  meta: {
+    link: {
+      material: { rel: 'stylesheet', href: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' }
+    }
+  },
   name: 'Map',
   components: {
     MglMap,
