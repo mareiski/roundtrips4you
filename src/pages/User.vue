@@ -194,10 +194,12 @@
 import { auth, storage, db } from '../firebaseInit'
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Dein Profil auf roundtrips4you. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
+  meta: {
+    title: 'Profil',
+    meta: {
+      robot: { name: 'description', content: 'Dein Profil auf roundtrips4you. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+
+    }
   },
   name: 'user',
   data () {

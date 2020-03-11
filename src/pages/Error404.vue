@@ -95,10 +95,12 @@ export default {
       })
     }
   },
-  metaInfo: {
-    meta: [
-      { name: 'robot', content: 'noIndex' }
-    ]
+  meta: {
+    title: '404',
+    meta: {
+      robot: { name: 'robot', content: 'noIndex' }
+
+    }
   }
 }
 </script>

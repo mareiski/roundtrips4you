@@ -96,7 +96,8 @@ module.exports = function (ctx) {
       plugins: [
         'Notify',
         'AddressbarColor',
-        'Cookies'
+        'Cookies',
+        'Meta'
       ]
     },
 

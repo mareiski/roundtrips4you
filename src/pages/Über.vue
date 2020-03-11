@@ -27,11 +27,12 @@
 </style>
 <script>
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Logge dich bei roundtrips4you ein und erstelle oder bearbeite deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' },
-      { name: 'robot', content: 'noIndex' }
-    ]
+  meta: {
+    title: 'Über uns',
+    meta: {
+      robot: { name: 'robot', content: 'noIndex' }
+
+    }
   }
 }
 </script>

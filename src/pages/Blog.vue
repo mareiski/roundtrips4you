@@ -74,15 +74,19 @@
 
 <script>
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
-  },
   data () {
     return {
       story: {},
-      loading: false
+      loading: false,
+      title: 'Blog'
+    }
+  },
+  meta () {
+    return {
+      title: this.title,
+      meta: {
+        description: { name: 'description', content: 'Reise auf Roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      }
     }
   },
   created: function () {
@@ -109,6 +113,7 @@ export default {
         }
         this.$nextTick(() => {
           this.story = data.story
+          this.title = this.story.content.Titel
           this.loading = false
         })
       }, (error) => {

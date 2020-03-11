@@ -105,10 +105,11 @@
 </template>
 <script>
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'robot', content: 'noIndex' }
-    ]
+  meta: {
+    title: 'Datenschutz',
+    meta: {
+      robot: { name: 'robot', content: 'noIndex' }
+    }
   }
 }
 </script>

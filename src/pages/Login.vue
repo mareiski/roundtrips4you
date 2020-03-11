@@ -71,10 +71,11 @@ import { auth } from '../firebaseInit'
 import firebase from 'firebase'
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: '' }
-    ]
+  meta: {
+    title: 'Login',
+    meta: {
+      description: { name: 'description', content: 'Jetzt bei deinem Reiseplaner Roundtrips4you anmelden. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    }
   },
   name: 'login',
   data () {

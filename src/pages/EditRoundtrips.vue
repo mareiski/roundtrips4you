@@ -1122,11 +1122,6 @@ let roundtripDocId = ''
 let galeryImgId = 0
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Reise auf roundtrips4you jetzt bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
-  },
   name: 'EditRoundtrips',
   components: {
     Stop,
@@ -1139,6 +1134,7 @@ export default {
   },
   data () {
     return {
+      pageTitle: 'Reise bearbeiten',
       options: ['Stopp', 'Hotel'],
       category: null,
       categoryOptions: [],
@@ -1209,6 +1205,14 @@ export default {
       days: [],
       stopsLoaded: false,
       firstLoad: true
+    }
+  },
+  meta () {
+    return {
+      title: this.pageTitle,
+      meta: {
+        description: { name: 'description', content: 'Reise auf roundtrips4you jetzt bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      }
     }
   },
   computed: {
@@ -1731,6 +1735,8 @@ export default {
           this.adults = roundtrip[0].Adults
           this.children = roundtrip[0].ChildrenAges.length
           this.childrenAges = roundtrip[0].ChildrenAges
+
+          this.pageTitle = this.title + ' bearbeiten'
 
           this.arrivalDepatureProfile = roundtrip[0].TransportProfile ? roundtrip[0].TransportProfile : 'Flugzeug'
           this.origin = roundtrip[0].Origin

@@ -90,10 +90,11 @@ import firebase from 'firebase'
 let timeStamp = Date.now()
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Registriere dich jetzt kostenlos bei roundtrips4you und erstelle selbst deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
-    ]
+  meta: {
+    title: 'Registrieren',
+    meta: {
+      description: { name: 'description', content: 'Registriere dich jetzt kostenlos bei roundtrips4you und erstelle selbst deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+    }
   },
   name: 'Register',
   data () {

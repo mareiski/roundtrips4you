@@ -502,10 +502,11 @@ let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Deine Reisen auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
+  meta: {
+    title: 'Meine Rundreisen',
+    meta: {
+      description: { name: 'description', content: 'Deine Reisen auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+    }
   },
   components: {
     CitySearch

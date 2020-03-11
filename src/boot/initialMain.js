@@ -5,7 +5,6 @@ import { AddressbarColor, Loading } from 'quasar'
 import vClickOutside from 'v-click-outside'
 import vue from 'vue'
 import StoryblokVue from 'storyblok-vue'
-import VueMeta from 'vue-meta'
 
 // "async" is optional
 export default async ({ app, store, router }) => {
@@ -20,10 +19,6 @@ export default async ({ app, store, router }) => {
     shadowUrl: require('leaflet/dist/images/marker-shadow.png')
   })
   AddressbarColor.set('#D56026')
-
-  vue.use(VueMeta, {
-    refreshOnceOnNavigation: true
-  })
 
   vue.use(vClickOutside)
   vue.use(StoryblokVue)

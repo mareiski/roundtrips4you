@@ -196,11 +196,6 @@ import { db, storage } from '../firebaseInit'
 import { date } from 'quasar'
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Profil auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
-  },
   data () {
     return {
       userName: null,
@@ -213,7 +208,16 @@ export default {
       TitleImgs: [],
       RTIds: [],
       userSince: null,
-      trustedUser: false
+      trustedUser: false,
+      title: 'User'
+    }
+  },
+  meta () {
+    return {
+      title: 'Profil von ' + this.title,
+      meta: {
+        description: { name: 'description', content: 'Profil von ' + this.title + ' auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      }
     }
   },
   created () {
@@ -230,6 +234,7 @@ export default {
           this.userRTEdited = doc.data().RTEdited
           this.userSince = this.getCreatedAtDate(doc.data().createdAt)
           this.trustedUser = !!doc.data().TrustedUser
+          this.title = this.userName
         })
       })
     this.getPublishedRoundtrips(UserId)

@@ -36,7 +36,6 @@
     "vue-lazyload": "^1.3.3",
     "vue-mapbox": "^0.4.1",
     "vue-mapbox-geocoder": "^0.2.0",
-    "vue-meta": "^2.3.2",
     "vue-template-compiler": "^2.6.11",
     "vue2-leaflet": "^2.2.1",
     "vue2-leaflet-geosearch": "^1.0.6",

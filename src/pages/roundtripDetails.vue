@@ -215,11 +215,6 @@ let roundtrip = []
 let roundtripDocId = null
 
 export default {
-  metaInfo: {
-    meta: [
-      { name: 'description', content: 'Reise auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-    ]
-  },
   components: {
     Stop,
     Map,
@@ -243,7 +238,8 @@ export default {
       adults: 0,
       rooms: 0,
       Profile: '',
-      checkOutDate: null
+      checkOutDate: null,
+      pageTitle: 'User'
     }
   },
   computed: {
@@ -251,6 +247,15 @@ export default {
       return this.$store.getters['user/user']
     }
   },
+  meta () {
+    return {
+      title: 'Reise ansehen',
+      meta: {
+        description: { name: 'description', content: 'Reise auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      }
+    }
+  },
+
   methods: {
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
