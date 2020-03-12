@@ -260,11 +260,8 @@
   </q-layout>
 </template>
 
-<style lang="less">
-@import url("../css/site.less");
-</style>
-
 <script>
+import(/* webpackPreload: true */ '../css/site.less')
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
 import CookieBanner from '../pages/CookieBanner/CookieBanner'

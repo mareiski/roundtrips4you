@@ -494,10 +494,8 @@
     </div>
   </div>
 </template>
-<style lang="less">
-@import "../css/roundtrips.less";
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { date } from 'quasar'
 import { db, storage } from '../firebaseInit'
 import { countries } from '../countries'

@@ -188,10 +188,8 @@
     </div>
   </div>
 </template>
-<style lang="less" scoped>
-@import url("../css/publicUserProfile");
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/publicUserProfile.less')
 import { db, storage } from '../firebaseInit'
 import { date } from 'quasar'
 

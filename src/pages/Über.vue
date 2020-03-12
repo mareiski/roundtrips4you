@@ -22,10 +22,8 @@
     <span>Wir freuen uns über alle Vorschläge !</span>
   </div>
 </template>
-<style lang="less">
-@import url("../css/about.less");
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/about.less')
 export default {
   meta: {
     title: 'Über uns',

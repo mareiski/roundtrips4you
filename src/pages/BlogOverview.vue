@@ -25,11 +25,8 @@
   </q-page>
 </template>
 
-<style lang="less">
-@import "../css/blog.less";
-</style>
-
 <script>
+import(/* webpackPrefetch: true */ '../css/blog.less')
 export default {
   meta: {
     title: 'Blog',

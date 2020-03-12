@@ -80,10 +80,8 @@
     </q-list>
   </div>
 </template>
-<style lang="less" scoped>
-@import url("../css/public-users.less");
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/public-users.less')
 import { db } from '../firebaseInit'
 import { date } from 'quasar'
 

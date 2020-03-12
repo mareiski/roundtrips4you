@@ -483,10 +483,8 @@
     </q-list>
   </div>
 </template>
-<style lang="less">
-@import "../css/my-roundtrips.less";
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/my-roundtrips.less')
 import { db, auth, storage } from '../firebaseInit'
 import { date, scroll } from 'quasar'
 import { countries } from '../countries'

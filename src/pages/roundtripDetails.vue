@@ -198,10 +198,8 @@
     </q-tab-panels>
   </div>
 </template>
-<style lang="less">
-@import "../css/editRoundtrips.less";
-</style>
 <script>
+import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'

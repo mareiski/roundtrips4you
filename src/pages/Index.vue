@@ -240,11 +240,8 @@
   </q-page>
 </template>
 
-<style lang="less">
-@import "../css/home.less";
-</style>
-
 <script>
+import(/* webpackPrefetch: true */ '../css/home.less')
 import { countries } from '../countries'
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
