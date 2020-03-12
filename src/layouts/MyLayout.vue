@@ -361,31 +361,7 @@ export default {
     this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.com' || this.getHost === 'www.roundtrips4you.netlify.com')
 
     auth.authRef().onAuthStateChanged((user) => {
-      // let title
-      // if (this.$router.currentRoute.path.substr(1)) {
-      //   title = this.$router.currentRoute.path.substr(1) + ' | roundtrips4you'
-      //   if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
-      //   else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
-      //   else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
-      //   else if (title === 'ueber') title = 'über uns'
-      // } else {
-      //   title = 'roundtrips4you - der Routenplaner für deine individuellen Traumreisen'
-      // }
-      // document.title = title
-
       this.$router.beforeEach((to, from, next) => {
-        // if (to.path.substr(1)) {
-        //   title = to.path.substr(1) + ' | roundtrips4you'
-        //   if (title.includes('rundreisen/')) title = title.substr(title.indexOf('/') + 1, title.length)
-        //   else if (title.includes('rundreisen-details/')) title = 'rundreisen-details'
-        //   else if (title.includes('rundreise-bearbeiten/')) title = 'rundreise-bearbeiten'
-        //   else if (title === 'ueber') title = 'über uns'
-        // } else {
-        //   title = 'roundtrips4you - der Routenplaner für deine individuellen Traumreisen'
-        // }
-
-        // document.title = title
-
         let loggedIn = auth.user() !== null
         let verified = auth.user() ? auth.user().emailVerified : false
         forEachCalled = true

@@ -1,4 +1,4 @@
-<template>
+<template functional>
   <div class="haftungsausschluss  q-px-lg q-pb-md">
     <h3>Haftungsausschluss</h3>
     <h4>Inhalt des Onlineangebotes</h4>

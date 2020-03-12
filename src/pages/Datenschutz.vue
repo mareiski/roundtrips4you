@@ -1,4 +1,4 @@
-<template>
+<template functional>
   <div class="datenschutz  q-px-lg q-pb-md">
     <h5>Datenschutzerkl&auml;rung</h5>
     <h4>1. Datenschutz auf einen Blick</h4>

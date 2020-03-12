@@ -10,15 +10,15 @@ const routes = [
       },
       {
         path: 'rundreisen-uebersicht',
-        component: () => import('pages/RoundtripOverview.vue')
+        component: () => import(/* webpackChunkName: "roundtrips" */ 'pages/RoundtripOverview.vue')
       },
       {
         path: 'rundreisen/:country',
-        component: () => import('pages/Roundtrips.vue')
+        component: () => import(/* webpackChunkName: "roundtrips" */ 'pages/Roundtrips.vue')
       },
       {
         path: 'rundreisen-details/:id',
-        component: () => import('pages/roundtripDetails.vue')
+        component: () => import(/* webpackChunkName: "roundtrips" */ 'pages/roundtripDetails.vue')
       },
       {
         path: 'login',
@@ -61,22 +61,22 @@ const routes = [
       },
       {
         path: 'blog',
-        component: () => import('pages/BlogOverview.vue')
+        component: () => import(/* webpackChunkName: "blog" */ 'pages/BlogOverview.vue')
       },
       {
         path: 'blog/:name',
-        component: () => import('pages/Blog.vue')
+        component: () => import(/* webpackChunkName: "blog" */ 'pages/Blog.vue')
       },
       {
         path: 'impressum',
-        component: () => import('pages/Impressum.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Impressum.vue')
       }, {
         path: 'datenschutz',
-        component: () => import('pages/Datenschutz.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Datenschutz.vue')
       },
       {
         path: 'haftungsausschluss',
-        component: () => import('pages/Haftungsausschluss.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Haftungsausschluss.vue')
       },
       {
         path: 'rundreise-bearbeiten/:id',
@@ -87,11 +87,11 @@ const routes = [
       },
       {
         path: 'benutzerprofil/:id',
-        component: () => import('pages/PublicUserProfile.vue')
+        component: () => import(/* webpackChunkName: "publicUser" */ 'pages/PublicUserProfile.vue')
       },
       {
         path: 'benutzer',
-        component: () => import('pages/PublicUsers.vue')
+        component: () => import(/* webpackChunkName: "publicUser" */ 'pages/PublicUsers.vue')
       }
     ]
   }

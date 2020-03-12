@@ -148,7 +148,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="https://roundtrips4you.de/statics/cities.jp2"
+              src="https://roundtrips4you.de/statics/cities.jpeg"
             />
           </div>
         </li>

@@ -1,4 +1,4 @@
-<template>
+<template functional>
   <div class="impressum  q-px-lg q-pb-md">
     <h3>Impressum</h3>
 

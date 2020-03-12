@@ -62,7 +62,7 @@
 .island-img {
   height: 72vh;
   width: 80%;
-  background: center url("../statics/tom-winckels-I7oLRdM9YIw-unsplash.jpg");
+  background: center url("../statics/island.jpeg");
   box-shadow: inset 0px 0px 40px 40px #fff;
   background-size: cover;
 }
