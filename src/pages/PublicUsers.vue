@@ -81,7 +81,7 @@
   </div>
 </template>
 <script>
-import(/* webpackPreload: true */ '../css/public-users.less')
+import(/* webpackPrefetch: true */ '../css/public-users.less')
 import { db } from '../firebaseInit'
 import { date } from 'quasar'
 

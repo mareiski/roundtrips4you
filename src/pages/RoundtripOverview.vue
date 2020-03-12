@@ -38,7 +38,7 @@
   </q-page>
 </template>
 <script>
-import(/* webpackPreload: true */ '../css/roundtrips.less')
+import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { db } from '../firebaseInit'
 export default {
   meta: {

@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import(/* webpackPreload: true */ '../css/blog.less')
+import(/* webpackPrefetch: true */ '../css/blog.less')
 export default {
   meta: {
     title: 'Blog',

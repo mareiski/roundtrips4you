@@ -261,7 +261,7 @@
 </template>
 
 <script>
-import(/* webpackPreload: true */ '../css/site.less')
+import(/* webpackPrefetch: true */ '../css/site.less')
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
 

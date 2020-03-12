@@ -23,7 +23,7 @@
   </div>
 </template>
 <script>
-import(/* webpackPreload: true */ '../css/about.less')
+import(/* webpackPrefetch: true */ '../css/about.less')
 export default {
   meta: {
     title: 'Über uns',
