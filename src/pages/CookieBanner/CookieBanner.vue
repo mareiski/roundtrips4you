@@ -14,7 +14,7 @@
   </div>
 </template>
 <script>
-import(/* webpackPrefetch: true */ '../../css/cookie.less')
+import(/* webpackPreload: true */ '../../css/cookie.less')
 export default {
   data () {
     return {

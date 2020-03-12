@@ -264,8 +264,6 @@
 import(/* webpackPreload: true */ '../css/site.less')
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
-import CookieBanner from '../pages/CookieBanner/CookieBanner'
-import BackToTop from 'vue-backtotop'
 
 let forEachCalled = false
 let redirected = false
@@ -273,8 +271,8 @@ let redirected = false
 export default {
   name: 'MyLayout',
   components: {
-    CookieBanner,
-    BackToTop
+    CookieBanner: () => import('../pages/CookieBanner/CookieBanner'),
+    BackToTop: () => import('vue-backtotop')
   },
   data () {
     return {

@@ -241,7 +241,7 @@
 </template>
 
 <script>
-import(/* webpackPrefetch: true */ '../css/home.less')
+import(/* webpackPreload: true */ '../css/home.less')
 import { countries } from '../countries'
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll

@@ -199,7 +199,7 @@
   </div>
 </template>
 <script>
-import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
+import(/* webpackPreload: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'
