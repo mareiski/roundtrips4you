@@ -1,43 +1,34 @@
-// to ensure better performence directly pass global media queries
-@desktop: ~"only screen and (min-width: 960px) and (max-width: 1199px)";
-@tablet: ~"only screen and (min-width: 720px) and (max-width: 959px)";
-@mobile: ~"only screen and (min-width: 0px) and (max-width: 719px)";
+   @import (reference) "./imports.less";
 
-@primary-orange: #D56026;
-@primary-gray: #707070;
-
-@primary-font: Segoe UI;
-@primary-number-font: Raleway;
-
-.cookie-banner {
-    position: fixed;
-    bottom: 0;
-    background-color: @primary-gray;
-    width: 100%;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    z-index: 9700;
-    flex-wrap: wrap;
+   .cookie-banner {
+       position: fixed;
+       bottom: 0;
+       background-color: @primary-gray;
+       width: 100%;
+       height: 50px;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+       z-index: 9700;
+       flex-wrap: wrap;
 
 
-    .q-btn {
-        margin: 0;
-        margin-left: 5px;
-    }
-}
+       .q-btn {
+           margin: 0;
+           margin-left: 5px;
+       }
+   }
 
-@media @mobile {
-    .cookie-banner {
-        min-height: 50px;
-        height: auto;
+   @media @mobile {
+       .cookie-banner {
+           min-height: 50px;
+           height: auto;
 
 
-        .q-btn {
-            margin-top: 5px;
-            margin-bottom: 5px;
-        }
-    }
-}
+           .q-btn {
+               margin-top: 5px;
+               margin-bottom: 5px;
+           }
+       }
+   }

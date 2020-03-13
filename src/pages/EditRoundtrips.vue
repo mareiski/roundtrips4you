@@ -960,7 +960,7 @@
               ref="galeryUpload"
               @added="fileAdded($event, 'galery')"
             />
-            <span>weiter Bilder</span>
+            <span>weitere Bilder</span>
             <div class="galeryImgUploaderContainer">
               <div
                 class="uploader"

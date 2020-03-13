@@ -1,24 +1,16 @@
-@desktop: ~"only screen and (min-width: 960px) and (max-width: 1199px)";
-@tablet: ~"only screen and (min-width: 720px) and (max-width: 959px)";
-@mobile: ~"only screen and (min-width: 0px) and (max-width: 719px)";
+   @import (reference) "./imports.less";
 
-@primary-orange: #D56026;
-@primary-gray: #707070;
+   .q-input {
+       width: 300px;
+   }
 
-@primary-font: Segoe UI;
-@primary-number-font: Raleway;
+   h2 {
+       text-align: center;
+   }
 
-.q-input {
-    width: 300px;
-}
-
-h2 {
-    text-align: center;
-}
-
-.google-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-}
+   .google-form {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       padding: 20px;
+   }
