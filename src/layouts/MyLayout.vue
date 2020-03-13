@@ -57,6 +57,7 @@
                 :value="true"
                 self="center middle"
                 content-style="font-size: 14px; right:2%; left:unset;"
+                style="left:unset;"
               >
                 {{user ? 'Hallo, ' + user.displayName : 'Anmelden'}}
               </q-tooltip>
