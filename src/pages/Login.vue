@@ -67,6 +67,7 @@
 </template>
 
 <script>
+import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth } from '../firebaseInit'
 import firebase from 'firebase'
 
@@ -134,7 +135,3 @@ export default {
   }
 }
 </script>
-
-<style>
-@import "../css/login.less";
-</style>

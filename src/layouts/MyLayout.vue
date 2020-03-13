@@ -54,10 +54,11 @@
             >
             <div style="pointer-events: none;">
               <q-tooltip
-                :value="true"
                 self="center middle"
-                content-style="font-size: 14px; right:2%; left:unset;"
-                style="left:unset;"
+                anchor="center middle"
+                :value="true"
+                content-style="font-size: 14px;"
+                content-class="tooltip"
               >
                 {{user ? 'Hallo, ' + user.displayName : 'Anmelden'}}
               </q-tooltip>

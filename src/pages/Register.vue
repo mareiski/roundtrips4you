@@ -85,6 +85,7 @@
 </template>
 
 <script>
+import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit'
 import firebase from 'firebase'
 let timeStamp = Date.now()
@@ -168,7 +169,3 @@ export default {
   }
 }
 </script>
-
-<style>
-@import "../css/login.less";
-</style>
