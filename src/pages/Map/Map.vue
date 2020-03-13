@@ -94,9 +94,9 @@
 }
 </style>
 <script>
+const MglMap = (MglMap) => import('vue-mapbox')
 
 import {
-  MglMap,
   MglPopup,
   MglMarker,
   MglNavigationControl
