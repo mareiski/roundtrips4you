@@ -95,7 +95,6 @@
 </style>
 <script>
 
-import Mapbox from 'mapbox-gl'
 import {
   MglMap,
   MglPopup,
@@ -130,7 +129,8 @@ export default {
     return {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
-      addedRoutes: []
+      addedRoutes: [],
+      Mapbox: () => import('mapbox-gl')
     }
   },
   watch: {
@@ -208,7 +208,7 @@ export default {
         }
       })
 
-      if (map && map !== null) map.fitBounds(new Mapbox.LngLatBounds(bounds))
+      if (map && map !== null) map.fitBounds(new this.Mapbox.LngLatBounds(bounds))
     },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile
@@ -276,7 +276,7 @@ export default {
     }
   },
   created () {
-    this.mapbox = Mapbox
+    this.mapbox = this.Mapbox
   }
 }
 
