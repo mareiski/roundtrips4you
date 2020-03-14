@@ -201,9 +201,7 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
-import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'
-import Duration from '../pages/EditRoundtripComponents/duration'
 import axios from 'axios'
 
 let details = []
@@ -213,9 +211,9 @@ let roundtripDocId = null
 
 export default {
   components: {
-    Stop,
+    Stop: () => import('../pages/EditRoundtripComponents/stop'),
     Map: () => import('../pages/Map/Map'),
-    Duration
+    Duration: () => import('../pages/EditRoundtripComponents/duration')
   },
   data () {
     return {

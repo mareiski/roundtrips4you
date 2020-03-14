@@ -488,7 +488,6 @@ import(/* webpackPrefetch: true */ '../css/my-roundtrips.less')
 import { db, auth, storage } from '../firebaseInit'
 import { date, scroll } from 'quasar'
 import { countries } from '../countries'
-import CitySearch from './Map/CitySearch'
 
 let uid = null
 import axios from 'axios'
@@ -507,7 +506,7 @@ export default {
     }
   },
   components: {
-    CitySearch
+    CitySearch: () => import('./Map/CitySearch')
   },
   name: 'myRoundtrips',
   data () {

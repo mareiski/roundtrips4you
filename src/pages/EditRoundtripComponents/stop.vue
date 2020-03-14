@@ -472,13 +472,12 @@
 </template>
 <script>
 import { db } from '../../firebaseInit'
-import CitySearch from '../Map/CitySearch'
 var querystring = require('querystring')
 import axios from 'axios'
 
 export default {
   components: {
-    CitySearch
+    CitySearch: () => import('../Map/CitySearch')
   },
   props: {
     title: String,

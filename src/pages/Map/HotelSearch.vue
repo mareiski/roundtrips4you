@@ -120,7 +120,6 @@
 </style>
 <script>
 import axios from 'axios'
-import CitySearch from './CitySearch'
 var querystring = require('querystring')
 
 export default {
@@ -139,7 +138,7 @@ export default {
     }
   },
   components: {
-    CitySearch
+    CitySearch: () => import('./CitySearch')
   },
   props: {
     lat: String,

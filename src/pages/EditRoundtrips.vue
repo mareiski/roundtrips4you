@@ -1087,12 +1087,6 @@
 </style>
 <script>
 import { date, scroll, Loading } from 'quasar'
-import Stop from '../pages/EditRoundtripComponents/stop'
-import Duration from '../pages/EditRoundtripComponents/duration'
-import CitySearch from '../pages/Map/CitySearch'
-import HotelSearch from '../pages/Map/HotelSearch'
-import RegionSearch from '../pages/Map/RegionSearch'
-import CitySuggestion from '../pages/Map/CitySuggestion'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import axios from 'axios'
@@ -1123,13 +1117,13 @@ let galeryImgId = 0
 export default {
   name: 'EditRoundtrips',
   components: {
-    Stop,
-    CitySearch,
+    Stop: () => import('../pages/EditRoundtripComponents/stop'),
+    CitySearch: () => import('../pages/Map/CitySearch'),
     Map: () => import('../pages/Map/Map'),
-    Duration,
-    HotelSearch,
-    RegionSearch,
-    CitySuggestion
+    Duration: () => import('../pages/EditRoundtripComponents/duration'),
+    HotelSearch: () => import('../pages/Map/HotelSearch'),
+    RegionSearch: () => import('../pages/Map/RegionSearch'),
+    CitySuggestion: () => import('../pages/Map/CitySuggestion')
   },
   data () {
     return {
