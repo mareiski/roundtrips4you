@@ -102,7 +102,7 @@ import {
   MglPopup
 } from 'vue-mapbox'
 
-const getAxios = import('axios')
+const getAxios = () => import('axios')
 
 export default {
   meta: {

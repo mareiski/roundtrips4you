@@ -69,7 +69,7 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth } from '../firebaseInit'
-const getFirebase = import('firebase')
+const getFirebase = () => import('firebase')
 
 export default {
   meta: {

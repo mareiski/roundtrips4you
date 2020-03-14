@@ -473,7 +473,7 @@
 <script>
 import { db } from '../../firebaseInit'
 var querystring = require('querystring')
-const getAxios = import('axios')
+const getAxios = () => import('axios')
 
 export default {
   components: {

@@ -1,17 +1,17 @@
 import { auth } from 'app/src/firebaseInit'
-const getLeaflet = import('leaflet')
+const getLeaflet = () => import('leaflet')
 import { AddressbarColor, Loading } from 'quasar'
 import vue from 'vue'
 import StoryblokVue from 'storyblok-vue'
-const getClickOutside = import('v-click-outside')
-import(/* webpackPrefetch: true */ 'leaflet/dist/leaflet.css')
+const getClickOutside = () => import('v-click-outside')
+// import(/* webpackPreload: true */ 'leaflet/dist/leaflet.css')
 
 // "async" is optional
 export default async ({ app, store, router }) => {
   Loading.show({ spinnerColor: 'primary' })
   auth.init(app, store, router)
 
-  getLeaflet.then(L => {
+  getLeaflet().then(L => {
     delete L.Icon.Default.prototype._getIconUrl
 
     L.Icon.Default.mergeOptions({
@@ -22,6 +22,6 @@ export default async ({ app, store, router }) => {
   })
   AddressbarColor.set('#D56026')
 
-  getClickOutside.then(vClickOutside => vue.use(vClickOutside))
+  getClickOutside().then(vClickOutside => vue.use(vClickOutside))
   vue.use(StoryblokVue)
 }

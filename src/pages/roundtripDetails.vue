@@ -202,7 +202,7 @@
 import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import { db, storage } from '../firebaseInit'
-const getAxios = import('axios')
+const getAxios = () => import('axios')
 
 let details = []
 let roundtrip = []

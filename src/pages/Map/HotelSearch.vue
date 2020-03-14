@@ -119,7 +119,7 @@
 @import url("../../css/hotelRegionSearch.less");
 </style>
 <script>
-const getAxios = import('axios')
+const getAxios = () => import('axios')
 var querystring = require('querystring')
 
 export default {

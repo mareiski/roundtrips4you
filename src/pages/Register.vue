@@ -87,7 +87,7 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit'
-const getFirebase = import('firebase')
+const getFirebase = () => import('firebase')
 let timeStamp = Date.now()
 
 export default {
