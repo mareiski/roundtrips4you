@@ -170,7 +170,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="https://roundtrips4you.de/statics/pois.png"
+              src="https://roundtrips4you.de/statics/pois.jpeg"
             />
           </div>
         </li>
@@ -184,7 +184,7 @@
           <div>
             <q-img
               style="width:1000px;"
-              src="https://roundtrips4you.de/statics/map.png"
+              src="https://roundtrips4you.de/statics/map.jpeg"
             />
           </div>
         </li>

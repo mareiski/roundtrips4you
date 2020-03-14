@@ -10,7 +10,7 @@
           <a href="/">
             <img
               alt="logo"
-              src="../statics/headerSubmark.png"
+              src="../statics/headerSubmark.jpeg"
             />
           </a>
           <span class="beta-span cursor-pointer">[beta]
@@ -23,7 +23,7 @@
           <a href="/">
             <img
               alt="text logo"
-              src="../statics/textLogo.png"
+              src="../statics/textLogo.jpeg"
             />
           </a>
         </div>
@@ -173,7 +173,7 @@
             <img
               alt="logo"
               style="width:auto; max-height:200px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  border-radius: 50%;"
-              src="../statics/submark.png"
+              src="../statics/submark.jpeg"
             />
           </a>
         </div>
