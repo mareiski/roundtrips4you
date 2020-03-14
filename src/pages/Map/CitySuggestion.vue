@@ -26,6 +26,7 @@
         >
 
           <q-img
+            :alt="'Bild von'  + city.name"
             v-if="images[images.findIndex(x => x.cityName === city.name)]"
             :src="images[images.findIndex(x => x.cityName === city.name)].url"
             style="height:170px;"

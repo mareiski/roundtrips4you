@@ -15,6 +15,7 @@
         <img
           class="plane"
           rel="preload"
+          alt="flugzeug"
           @load="imgLoaded = true"
           src="../statics/plane.png"
         />
@@ -148,6 +149,7 @@
           <div>
             <q-img
               style="width:1000px;"
+              alt="Städtevorschläge"
               src="https://roundtrips4you.de/statics/cities.jpeg"
             />
           </div>
@@ -170,6 +172,7 @@
           <div>
             <q-img
               style="width:1000px;"
+              alt="Vorschlag von Sehenswürdigkeiten"
               src="https://roundtrips4you.de/statics/pois.jpeg"
             />
           </div>
@@ -184,6 +187,7 @@
           <div>
             <q-img
               style="width:1000px;"
+              alt="Karte"
               src="https://roundtrips4you.de/statics/map.jpeg"
             />
           </div>

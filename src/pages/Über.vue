@@ -2,6 +2,7 @@
   <div class="about q-px-lg q-pb-md">
     <h3 style="padding-top:10px;">Hallo, schön dass du hergefunden hast !</h3>
     <q-img
+      alt="Island"
       style="max-height:450px; margin-bottom: 20px;"
       src="https://images.unsplash.com/photo-1528837516156-0a7225a43641?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1491&q=80"
     ></q-img>

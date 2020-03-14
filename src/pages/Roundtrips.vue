@@ -397,6 +397,7 @@
           >
             <div class="card-left-col">
               <q-img
+                :alt="'Titelbild der Rundreise ' + roundtrip.Title"
                 class="card-image"
                 :src="TitleImgs[RTIds.indexOf(roundtrip.RTId)]"
               ></q-img>
