@@ -473,7 +473,7 @@
 <script>
 import { db } from '../../firebaseInit'
 var querystring = require('querystring')
-import axios from 'axios'
+const getAxios = import('axios')
 
 export default {
   components: {
@@ -793,32 +793,34 @@ export default {
           client_secret: 'lHQlUheyyAZtGQDA'
         })
 
-        axios.post(url, data, {
-          headers: headers,
-          form: {
-            'grant_type': 'client_credentials',
-            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-            'client_secret': 'lHQlUheyyAZtGQDA'
-          }
-        }).then(function (response) {
-          let token = response.data.access_token
-          const tokenString = 'Bearer ' + token
-
-          console.log(token)
-
-          axios.get('https://api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=10&page[limit]=5&page[offset]=0&categories=SIGHTS', {
-            headers: {
-              'Authorization': tokenString
+        getAxios().then(axios => {
+          axios.post(url, data, {
+            headers: headers,
+            form: {
+              'grant_type': 'client_credentials',
+              'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+              'client_secret': 'lHQlUheyyAZtGQDA'
             }
           }).then(function (response) {
-            resolve(response)
+            let token = response.data.access_token
+            const tokenString = 'Bearer ' + token
+
+            console.log(token)
+
+            axios.get('https://api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=10&page[limit]=5&page[offset]=0&categories=SIGHTS', {
+              headers: {
+                'Authorization': tokenString
+              }
+            }).then(function (response) {
+              resolve(response)
+            }).catch(function (error) {
+              console.log('Error' + error)
+              resolve(null)
+            })
           }).catch(function (error) {
-            console.log('Error' + error)
+            console.log('Error on Authentication' + error)
             resolve(null)
           })
-        }).catch(function (error) {
-          console.log('Error on Authentication' + error)
-          resolve(null)
         })
       })
     }

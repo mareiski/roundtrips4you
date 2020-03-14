@@ -354,7 +354,6 @@ export default {
     this.$storyblok.init({
       accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
     })
-
     this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.com' || this.getHost === 'www.roundtrips4you.netlify.com')
 
     auth.authRef().onAuthStateChanged((user) => {

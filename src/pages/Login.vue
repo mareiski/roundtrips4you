@@ -69,7 +69,7 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth } from '../firebaseInit'
-import firebase from 'firebase'
+const getFirebase = import('firebase')
 
 export default {
   meta: {
@@ -115,21 +115,23 @@ export default {
       })
     },
     signUpWithGoogle () {
-      var provider = new firebase.auth.GoogleAuthProvider()
-      let context = this
-      auth.authRef().signInWithPopup(provider).then(function (result) {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        var token = result.credential.accessToken
-        const credential = firebase.auth.GoogleAuthProvider().credential(token)
+      getFirebase.then(firebase => {
+        var provider = new firebase.auth.GoogleAuthProvider()
+        let context = this
+        auth.authRef().signInWithPopup(provider).then(function (result) {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = result.credential.accessToken
+          const credential = firebase.auth.GoogleAuthProvider().credential(token)
 
-        // Sign in with credential from the Google user.
-        auth.signInWithCredential(credential).then(function () {
-          context.$router.replace('meine-rundreisen')
+          // Sign in with credential from the Google user.
+          auth.signInWithCredential(credential).then(function () {
+            context.$router.replace('meine-rundreisen')
+          }).catch(function (error) {
+            console.log(error)
+          })
         }).catch(function (error) {
           console.log(error)
         })
-      }).catch(function (error) {
-        console.log(error)
       })
     }
   }

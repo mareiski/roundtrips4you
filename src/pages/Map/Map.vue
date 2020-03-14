@@ -102,7 +102,7 @@ import {
   MglPopup
 } from 'vue-mapbox'
 
-import axios from 'axios'
+const getAxios = import('axios')
 
 export default {
   meta: {
@@ -217,63 +217,65 @@ export default {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
-      axios.get(url)
-        .then(response => {
-          var data = response.data.routes[0]
-          var route = data.geometry.coordinates
-          var geojson = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: route
-            }
-          }
-
-          let id = 'route' + index
-          let color = this.getRandomColor()
-
-          let geojsonCoords = geojson.geometry.coordinates
-          let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
-
-          let duration = context.msToTime(data.duration * 1000)
-
-          let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
-
-          if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
-
-          // if the route already exists on the map, reset it using setData
-          if (map.getSource(id)) {
-            map.getSource(id).setData(geojson)
-          } else { // otherwise, make a new request
-            map.addLayer({
-              'id': id,
-              'type': 'line',
-              'source': {
-                'type': 'geojson',
-                'data': {
-                  'type': 'Feature',
-                  'properties': {},
-                  'geometry': {
-                    'type': 'LineString',
-                    'coordinates': geojson
-                  }
-                }
-              },
-              'layout': {
-                'line-join': 'round',
-                'line-cap': 'round'
-              },
-              'paint': {
-                'line-color': color,
-                'line-width': 5,
-                'line-opacity': 0.75
+      getAxios().then(axios => {
+        axios.get(url)
+          .then(response => {
+            var data = response.data.routes[0]
+            var route = data.geometry.coordinates
+            var geojson = {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: route
               }
-            })
-            map.getSource(id).setData(geojson)
-          }
-          // add turn instructions here at the end
-        })
+            }
+
+            let id = 'route' + index
+            let color = this.getRandomColor()
+
+            let geojsonCoords = geojson.geometry.coordinates
+            let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
+
+            let duration = context.msToTime(data.duration * 1000)
+
+            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
+
+            if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
+
+            // if the route already exists on the map, reset it using setData
+            if (map.getSource(id)) {
+              map.getSource(id).setData(geojson)
+            } else { // otherwise, make a new request
+              map.addLayer({
+                'id': id,
+                'type': 'line',
+                'source': {
+                  'type': 'geojson',
+                  'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                      'type': 'LineString',
+                      'coordinates': geojson
+                    }
+                  }
+                },
+                'layout': {
+                  'line-join': 'round',
+                  'line-cap': 'round'
+                },
+                'paint': {
+                  'line-color': color,
+                  'line-width': 5,
+                  'line-opacity': 0.75
+                }
+              })
+              map.getSource(id).setData(geojson)
+            }
+            // add turn instructions here at the end
+          })
+      })
     }
   },
   created () {

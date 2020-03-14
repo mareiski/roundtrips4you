@@ -38,7 +38,7 @@
 @import url("../../css/hotelRegionSearch.less");
 </style>
 <script>
-import axios from 'axios'
+const getAxios = import('axios')
 
 export default {
   data () {
@@ -77,27 +77,29 @@ export default {
     },
     getRegions (country, regionPref) {
       return new Promise((resolve, reject) => {
-        axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
-          headers: {
-            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
-          }
-        }).then(function (response) {
-          // wait 2 secs because only 1 request per sec is allowed
-          setTimeout(function () {
-            axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries/' + response.data.data[0].code + '/regions?limit=5&offset=0&languageCode=de&namePrefix=' + regionPref, {
-              headers: {
-                'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
-              }
-            }).then(function (response) {
-              resolve(response)
-            }).catch(function (error) {
-              console.log('Error' + error)
-              resolve(null)
-            })
-          }, 2000)
-        }).catch(function (error) {
-          console.log('Error' + error)
-          resolve(null)
+        getAxios().then(axios => {
+          axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
+            headers: {
+              'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+            }
+          }).then(function (response) {
+            // wait 2 secs because only 1 request per sec is allowed
+            setTimeout(function () {
+              axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries/' + response.data.data[0].code + '/regions?limit=5&offset=0&languageCode=de&namePrefix=' + regionPref, {
+                headers: {
+                  'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+                }
+              }).then(function (response) {
+                resolve(response)
+              }).catch(function (error) {
+                console.log('Error' + error)
+                resolve(null)
+              })
+            }, 2000)
+          }).catch(function (error) {
+            console.log('Error' + error)
+            resolve(null)
+          })
         })
       })
     }

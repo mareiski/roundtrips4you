@@ -42,7 +42,7 @@ import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { db } from '../firebaseInit'
 export default {
   meta: {
-    title: 'Registrieren',
+    title: 'Rundreisenübersicht',
     meta: {
       description: { name: 'description', content: 'Länder auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
 
