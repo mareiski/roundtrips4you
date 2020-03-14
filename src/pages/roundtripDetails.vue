@@ -203,7 +203,6 @@ import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import Stop from '../pages/EditRoundtripComponents/stop'
 import { db, storage } from '../firebaseInit'
-import Map from '../pages/Map/Map'
 import Duration from '../pages/EditRoundtripComponents/duration'
 import axios from 'axios'
 
@@ -215,7 +214,7 @@ let roundtripDocId = null
 export default {
   components: {
     Stop,
-    Map,
+    Map: () => import('../pages/Map/Map'),
     Duration
   },
   data () {

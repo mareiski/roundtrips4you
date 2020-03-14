@@ -94,13 +94,14 @@
 }
 </style>
 <script>
-const MglMap = (MglMap) => import('vue-mapbox')
+const MglMap = () => import('vue-mapbox')
 
 import {
-  MglPopup,
   MglMarker,
-  MglNavigationControl
+  MglNavigationControl,
+  MglPopup
 } from 'vue-mapbox'
+
 import axios from 'axios'
 
 export default {

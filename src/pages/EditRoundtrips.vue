@@ -1095,7 +1095,6 @@ import RegionSearch from '../pages/Map/RegionSearch'
 import CitySuggestion from '../pages/Map/CitySuggestion'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
-import Map from '../pages/Map/Map'
 import axios from 'axios'
 var querystring = require('querystring')
 
@@ -1126,7 +1125,7 @@ export default {
   components: {
     Stop,
     CitySearch,
-    Map,
+    Map: () => import('../pages/Map/Map'),
     Duration,
     HotelSearch,
     RegionSearch,
