@@ -60,6 +60,7 @@
             v-model="OfferPeriod"
             label="Zeitraum"
             class="input-item rounded-borders"
+            style="padding-bottom:20px;"
           >
             <q-popup-proxy
               ref="qDateProxy"
@@ -404,7 +405,10 @@
             </div>
             <div class="card-center-col">
               <div class="card-row">
-                <span class="card-category">{{roundtrip.Category}}</span>
+                <span
+                  class="card-category"
+                  style="font-size:13px;"
+                >{{roundtrip.Category}}</span>
                 <h2 class="country-title">{{roundtrip.Title}}</h2>
               </div>
               <div class="card-row">
@@ -449,7 +453,9 @@
                   size="50px"
                   style="width: 50px; margin:auto 10px auto 10px;"
                 >
-                  <q-img :src="userImages[roundtrips.indexOf(roundtrip)]"></q-img>
+                  <router-link :to="'/benutzerprofil/'">
+                    <q-img :src="userImages[roundtrips.indexOf(roundtrip)]"></q-img>
+                  </router-link>
                   <q-tooltip v-if="userNames[roundtrips.indexOf(roundtrip)]">von {{userNames[roundtrips.indexOf(roundtrip)]}}</q-tooltip>
                 </q-avatar>
               </div>
