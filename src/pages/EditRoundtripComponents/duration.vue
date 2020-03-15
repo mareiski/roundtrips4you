@@ -18,7 +18,7 @@
           <q-select
             outlined
             v-model="inputProfile"
-            :options="['zu Fuß', 'Fahrrad', 'Auto']"
+            :options="['zu Fuß', 'Fahrrad', 'Auto', 'Flugzeug']"
             label="Reisemittel"
             use-input
             :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
@@ -75,6 +75,9 @@ export default {
         case 'Fahrrad':
           this.profile = 'cycling'
           break
+        case 'Flugzeug':
+          this.profile = 'plane'
+          break
         default:
           this.profile = 'driving'
           break
@@ -92,6 +95,7 @@ export default {
       return false
     },
     saveData (field, value) {
+      if (!value) return
       let context = this
       try {
         db.collection('RoundtripDetails').doc(this.docId).update({

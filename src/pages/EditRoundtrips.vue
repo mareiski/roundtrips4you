@@ -179,8 +179,8 @@
               ></Stop>
               <Duration
                 :key="stop"
-                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
-                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+                v-if="index !== stops.length - 1"
+                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration ? (durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance) : null"
                 :editor="true"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
                 :doc-id="documentIds[durations.findIndex(x => x.title === stop.Title)]"
@@ -631,10 +631,10 @@
               v-model="publish"
               label="Rundreise veröffentlichen"
               icon="share"
-              :disable="!user.displayName"
+              :disable="!user || !user.displayName"
             >
               <q-tooltip>
-                {{user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
+                {{user && user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
               </q-tooltip>
             </q-toggle>
             <div
@@ -1256,8 +1256,8 @@ export default {
         })
         initDate.setDate(initDate.getDate() + 1)
       })
-      this.loadRoundtripDetails(this.$route.params.id, false)
       this.loadSingleRoundtrip(this.$route.params.id)
+      this.loadRoundtripDetails(this.$route.params.id, false)
     },
     getShortestRoute () {
       let stopsTaken = [this.stops[0]]
@@ -1314,8 +1314,9 @@ export default {
 
       try {
         this.addStop(this.date, this.selectedOption)
-        this.loadRoundtripDetails(this.$route.params.id, true)
         this.loadSingleRoundtrip(this.$route.params.id)
+
+        this.loadRoundtripDetails(this.$route.params.id, true)
 
         this.$q.notify({
           color: 'green-4',
@@ -1762,6 +1763,7 @@ export default {
             }
           }
 
+          // get the default profile of the roundtrip
           this.getGeneralProfile()
 
           this.loadInitImgs()
@@ -1918,11 +1920,16 @@ export default {
 
           this.durations = []
           this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1].Profile, this.stops[index - 1], index - 1)
+            if (index >= 1) {
+              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            }
           })
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
+          this.stopsLoaded = true
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1959,26 +1966,38 @@ export default {
     },
     getDuration (startLocation, endLocation, title, stopProfile, stop, index) {
       let profile = this.profile
+      if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
-      if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+      if (profile !== 'plane') {
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        let context = this
 
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-      let context = this
+        axios.get(url)
+          .then(response => {
+            var data = response.data.routes[0]
+            console.log(data)
 
-      axios.get(url)
-        .then(response => {
-          var data = response.data.routes[0]
+            if (data !== null && typeof data !== 'undefined') {
+              let duration = context.msToTime(data.duration * 1000)
 
-          if (data !== null && typeof data !== 'undefined') {
-            let duration = context.msToTime(data.duration * 1000)
+              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+              if (distance !== '') distance = ' (' + distance + ')'
 
-            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-            if (distance !== '') distance = ' (' + distance + ')'
-
-            context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
-            context.getDays(stop, index, data.duration * 1000)
-          }
-        })
+              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+              context.getDays(stop, index, data.duration * 1000)
+            } else {
+              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+              context.stopsLoaded = true
+            }
+          }).catch(exception => {
+            context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+            console.log(exception)
+            context.stopsLoaded = true
+          })
+      } else {
+        this.durations.splice(this.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+        this.stopsLoaded = true
+      }
     },
     getDays (stop, index, duration) {
       let days = null
@@ -2100,7 +2119,10 @@ export default {
       var fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Title/titleImg')
       fileRef.getDownloadURL().then(function (url) {
         context.titleImgUrl = url
+      }).catch(function (error) {
+        console.log(error)
       })
+
       fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
       fileRef.listAll().then(function (res) {
         res.items.forEach(function (itemRef) {
@@ -2195,6 +2217,8 @@ export default {
           return 'zu Fuß'
         case 'cycling':
           return 'Fahrrad'
+        case 'plane':
+          return 'Flugzeug'
         default:
           return 'Auto'
       }
@@ -2370,8 +2394,8 @@ export default {
           let isPublic = snapshot.docs[0].data().Public === true
 
           if (isCreator) {
-            this.loadRoundtripDetails(RTId, false)
             this.loadSingleRoundtrip(RTId)
+            this.loadRoundtripDetails(RTId, false)
             this.loadCategories()
           } else if (isPublic) {
             this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)

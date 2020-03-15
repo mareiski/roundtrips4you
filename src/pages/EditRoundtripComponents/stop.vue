@@ -30,7 +30,6 @@
         >
           <q-chip
             icon="link"
-            size="1px"
             dense
             class="linkChip"
             clickable
@@ -40,7 +39,6 @@
         <q-chip
           icon="hotel"
           v-if="hotelName && typeof hotelName !== 'undefined'"
-          size="1px"
           dense
           class="linkChip"
           clickable

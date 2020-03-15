@@ -367,28 +367,29 @@ export default {
       let profile = this.profile
 
       if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
-      console.log(profile)
 
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-      let context = this
+      if (profile !== 'plane') {
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        let context = this
 
-      getAxios().then(axios => {
-        axios.get(url)
-          .then(response => {
-            var data = response.data.routes[0]
+        getAxios().then(axios => {
+          axios.get(url)
+            .then(response => {
+              var data = response.data.routes[0]
 
-            if (data !== null && typeof data !== 'undefined') {
-              context.getDays(stop, index, data.duration * 1000, title)
+              if (data !== null && typeof data !== 'undefined') {
+                context.getDays(stop, index, data.duration * 1000, title)
 
-              let duration = context.msToTime(data.duration * 1000)
+                let duration = context.msToTime(data.duration * 1000)
 
-              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-              if (distance !== '') distance = ' (' + distance + ')'
+                let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+                if (distance !== '') distance = ' (' + distance + ')'
 
-              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
-            }
-          })
-      })
+                context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+              }
+            })
+        })
+      }
     },
     msToTime (duration) {
       if (duration === 0) return null
@@ -410,6 +411,8 @@ export default {
           return 'walking'
         case 'Fahrrad':
           return 'cycling'
+        case 'Flugzeug':
+          return 'plane'
         default:
           return 'driving'
       }
@@ -420,6 +423,8 @@ export default {
           return 'zu Fuß'
         case 'cycling':
           return 'Fahrrad'
+        case 'plane':
+          return 'Flugzeug'
         default:
           return 'Auto'
       }

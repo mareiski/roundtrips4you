@@ -62,7 +62,7 @@
         </MglMarker>
       </div>
       <MglMarker
-        v-for="route in addedRoutes"
+        v-for="(route, index) in addedRoutes"
         :key="route"
         :coordinates="route.location"
         :color="route.color"
@@ -73,13 +73,16 @@
           name="speed"
         />
         <MglPopup>
-          <VCard>
-            <div>{{route.duration}} bis {{route.destination}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+          <VCard v-if="route.duration">
+            <div>{{route.duration}} bis {{route.destination}} von {{ route[index - 1].destination }} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
             <a
               target="_blank"
               v-if="route.origin !== route.destination"
               :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination"
             >auf Google ansehen</a>
+          </VCard>
+          <VCard v-else>
+            <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} von {{ route[index - 1].destination }}</div>
           </VCard>
         </MglPopup>
       </MglMarker>
@@ -124,20 +127,20 @@ export default {
     checkOutDate: String,
     adults: Number,
     rooms: Number
-
   },
   data () {
     return {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
       addedRoutes: [],
-      Mapbox: () => import('mapbox-gl')
+      Mapbox: () => import('mapbox-gl'),
+      map: null
     }
   },
   watch: {
     'stops': function (val, oldVal) {
       if (val !== oldVal) {
-        this.loadMap(null)
+        this.loadMap(this.map)
       }
     }
   },
@@ -145,6 +148,7 @@ export default {
     onMapLoaded (event) {
       const map = event.map
       this.loadMap(map)
+      this.map = map
     },
     openInNewTab (link) {
       window.open(link, '_blank')
@@ -187,6 +191,7 @@ export default {
       let bounds = []
 
       this.stops.forEach((stop, index) => {
+        console.log(stop)
         let previousStopLng = 0
         let previousStopLat = 0
         if (index >= 1) {
@@ -200,82 +205,150 @@ export default {
         }
 
         if (stop.HotelStop && stop.HotelLocation) {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, stop.Profile)
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, this.stops[index - 1].Profile)
 
           bounds.push([stop.HotelLocation.lng, stop.HotelLocation.lat])
         } else {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, stop.Profile)
+          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
           bounds.push([stop.Location.lng, stop.Location.lat])
         }
       })
 
       if (map && map !== null) map.fitBounds(new this.Mapbox.LngLatBounds(bounds))
     },
+    getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
+      var R = 6371 // Radius of the earth in km
+      var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
+      var dLon = this.deg2rad(lon2 - lon1)
+      var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      var d = R * c // Distance in km
+      return d
+    },
+    deg2rad (deg) {
+      return deg * (Math.PI / 180)
+    },
     getRoute (startLocation, endLocation, map, index, stopProfile) {
       let profile = this.profile
-      if (stopProfile && stop.Profile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-      let context = this
+      if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
-      getAxios().then(axios => {
-        axios.get(url)
-          .then(response => {
-            var data = response.data.routes[0]
-            var route = data.geometry.coordinates
-            var geojson = {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'LineString',
-                coordinates: route
+      // get id for route
+      let id = 'route' + index
+
+      // get color for route
+      let color = this.getRandomColor()
+
+      if (profile !== 'plane') {
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        let context = this
+
+        getAxios().then(axios => {
+          axios.get(url)
+            .then(response => {
+              var data = response.data.routes[0]
+              var route = data.geometry.coordinates
+              var geojson = {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: route
+                }
+              }
+
+              // calculate coordinates of route marker
+              let geojsonCoords = geojson.geometry.coordinates
+              let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
+
+              let duration = context.msToTime(data.duration * 1000)
+
+              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
+
+              // add route marker
+              if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
+
+              // if the route already exists on the map, reset it using setData
+              if (map.getSource(id)) {
+                map.getSource(id).setData(geojson)
+              } else { // otherwise, make a new request
+                map.addLayer({
+                  'id': id,
+                  'type': 'line',
+                  'source': {
+                    'type': 'geojson',
+                    'data': {
+                      'type': 'Feature',
+                      'properties': {},
+                      'geometry': {
+                        'type': 'LineString',
+                        'coordinates': geojson
+                      }
+                    }
+                  },
+                  'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                  },
+                  'paint': {
+                    'line-color': color,
+                    'line-width': 5,
+                    'line-opacity': 0.75
+                  }
+                })
+                map.getSource(id).setData(geojson)
+              }
+            })
+        })
+      } else {
+        var geojson = {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates: [[startLocation[0], startLocation[1]], [endLocation[0], endLocation[1]]]
+          }
+        }
+
+        // calculate coordinates of route marker
+        let geojsonCoords = geojson.geometry.coordinates
+        let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
+
+        let distance = this.getDistanceFromLatLonInKm(startLocation[0], startLocation[1], endLocation[0], endLocation[1])
+        let avgDistance = Math.floor(distance / 1000) > 0 ? Math.floor(distance / 1000) + ' km' : null
+
+        // add route marker
+        this.addedRoutes.push({ location: centerLocation, duration: null, distance: avgDistance, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })
+
+        map.addLayer({
+          'id': id,
+          'type': 'line',
+          'source': {
+            'type': 'geojson',
+            'data': {
+              'type': 'Feature',
+              'properties': {},
+              'geometry': {
+                'type': 'LineString',
+                'coordinates': geojson
               }
             }
-
-            let id = 'route' + index
-            let color = this.getRandomColor()
-
-            let geojsonCoords = geojson.geometry.coordinates
-            let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
-
-            let duration = context.msToTime(data.duration * 1000)
-
-            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
-
-            if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
-
-            // if the route already exists on the map, reset it using setData
-            if (map.getSource(id)) {
-              map.getSource(id).setData(geojson)
-            } else { // otherwise, make a new request
-              map.addLayer({
-                'id': id,
-                'type': 'line',
-                'source': {
-                  'type': 'geojson',
-                  'data': {
-                    'type': 'Feature',
-                    'properties': {},
-                    'geometry': {
-                      'type': 'LineString',
-                      'coordinates': geojson
-                    }
-                  }
-                },
-                'layout': {
-                  'line-join': 'round',
-                  'line-cap': 'round'
-                },
-                'paint': {
-                  'line-color': color,
-                  'line-width': 5,
-                  'line-opacity': 0.75
-                }
-              })
-              map.getSource(id).setData(geojson)
-            }
-            // add turn instructions here at the end
-          })
-      })
+          },
+          'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+          },
+          'paint': {
+            'line-color': color,
+            'line-width': 5,
+            'line-opacity': 0.75
+          }
+        })
+        map.getSource(id).setData(geojson)
+      }
     }
   },
   created () {
