@@ -449,15 +449,15 @@
             <div class="card-right-col">
               <div class="card-row ">
                 <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
-                <q-avatar
-                  size="50px"
-                  style="width: 50px; margin:auto 10px auto 10px;"
-                >
-                  <router-link :to="'/benutzerprofil/'">
-                    <q-img :src="userImages[roundtrips.indexOf(roundtrip)]"></q-img>
-                  </router-link>
-                  <q-tooltip v-if="userNames[roundtrips.indexOf(roundtrip)]">von {{userNames[roundtrips.indexOf(roundtrip)]}}</q-tooltip>
-                </q-avatar>
+                <router-link :to="'/benutzerprofil/' + roundtrip.UserId">
+                  <q-avatar
+                    size="50px"
+                    style="width: 50px; margin:auto 10px auto 10px;"
+                  >
+                    <q-img :src="userImages[RTIds.indexOf(roundtrip.RTId)]"></q-img>
+                    <q-tooltip v-if="userNames[RTIds.indexOf(roundtrip.RTId)]">von {{userNames[RTIds.indexOf(roundtrip.RTId)]}}</q-tooltip>
+                  </q-avatar>
+                </router-link>
               </div>
               <div class="card-bottom-row">
                 <router-link
@@ -551,8 +551,6 @@ export default {
       filterRoundtripArr: [],
       TitleImgs: [],
       RTIds: [],
-      userImages: [],
-      userNames: [],
       maxPrice: 0,
       currentPage: 1,
       paginationMax: 1,
@@ -564,7 +562,9 @@ export default {
       // 'Reisedauer aufsteigend', 'Reisedauer absteigend' missing in sort opt
       title: null,
       editRTDialog: false,
-      disableEditBtn: true
+      disableEditBtn: true,
+      userImages: [],
+      userNames: []
     }
   },
   name: 'Roundtrips',
@@ -672,8 +672,9 @@ export default {
     removeRoundtrip (roundtrip) {
       this.filterRoundtripArr.splice(this.filterRoundtripArr.indexOf(roundtrip), 1)
     },
-    loadUserImage (UserId) {
+    loadUserData (UserId) {
       let users = []
+      let context = this
       let userRef = db.collection('User')
         .where('UserUID', '==', UserId)
         .limit(1)
@@ -681,8 +682,8 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             users.push(doc.data())
-            this.userImages.push(users[0].UserImage)
-            this.userNames.push(users[0].UserName)
+            context.userNames.push(users[0].UserName)
+            context.userImages.push(users[0].UserImage)
           })
         })
     },
@@ -706,14 +707,6 @@ export default {
       let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
       if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
 
-      // reset filer
-
-      this.filteredRoundtripAttr = []
-
-      this.filteredTripKinds = []
-
-      this.filteredRoundtripCategories = []
-
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', 'array-contains', this.country)
         .where('Public', '==', true)
@@ -730,42 +723,49 @@ export default {
           .limit(20)
       }
 
+      // reset filer
+      this.filteredRoundtripAttr = []
+      this.filteredTripKinds = []
+      this.filteredRoundtripCategories = []
+
+      // filter vars
+      let price = 0
+      let tripKind = []
+      let roundtripAttr = []
+      let category = []
+
+      // read all posible values for filter
+      roundtripArr.forEach((roundtrip, index) => {
+        if (price < roundtrip.Price) price = roundtrip.Price
+        if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
+        if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
+        if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
+        if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
+        if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
+      })
+
+      this.roundtrips = roundtripArr
+
+      this.step.max = price
+      this.maxPrice = price
+
+      this.tripKind = tripKind
+      this.roundtripAttr = roundtripAttr
+      this.roundtripCategories = category
+
       roundtripsRef.get()
         .then(snapshot => {
           snapshot.forEach(doc => {
             if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
-              roundtripArr.push(doc.data())
               originalRoundtripArr.push(doc.data())
               this.loadTitleImg(doc.id, doc.data().RTId)
+
+              // load user data
+              this.loadUserData(doc.data().UserId)
+
+              roundtripArr.push(doc.data())
             }
           })
-          this.roundtrips = roundtripArr
-
-          // load filter
-          let price = 0
-          let tripKind = []
-          let roundtripAttr = []
-          let category = []
-
-          // read all posible values for filter
-          roundtripArr.forEach((roundtrip) => {
-            if (price < roundtrip.Price) price = roundtrip.Price
-            if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
-            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
-            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
-            if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
-            if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
-
-            // load userImages
-            this.loadUserImage(roundtrip.UserId)
-          })
-
-          this.step.max = price
-          this.maxPrice = price
-
-          this.tripKind = tripKind
-          this.roundtripAttr = roundtripAttr
-          this.roundtripCategories = category
 
           this.visible = false
           this.showSimulatedReturnData = true
