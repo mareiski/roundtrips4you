@@ -17,22 +17,25 @@
           v-for="item in story.content.Text.content"
           :key="item"
         >
-          <div v-if="item.content && item.type === 'paragraph' && item.content[0].type === 'text'">
-            <div v-if="item.content[0].marks && item.content[0].marks[0].type === 'link'">
-              <a
-                :href="item.content[0].marks[0].attrs.href"
-                :target="item.content[0].marks[0].attrs.target"
-              >
-                {{item.content[0].text}}
-              </a>
-            </div>
-            <div v-else>
-              <span
-                v-for="paragraph in item.content"
-                :key="paragraph"
-                :style="paragraph.marks ? getStyle(paragraph) : null"
-              >{{paragraph.text}}</span>
-            </div>
+          <div v-if="item.content && item.type === 'paragraph'">
+            <span
+              v-for="subItem in item.content"
+              :key="subItem"
+            >
+              <template v-if="subItem.type === 'text'">
+                <template v-if="subItem.marks && subItem.marks[0].type === 'link'">
+                  <a
+                    :href="subItem.marks[0].attrs.href"
+                    :target="subItem.marks[0].attrs.target"
+                  >
+                    {{subItem.text}}
+                  </a>
+                </template>
+                <template v-else>
+                  <span :style="subItem.marks ? getStyle(subItem) : null">{{subItem.text}}</span>
+                </template>
+              </template>
+            </span>
           </div>
           <div v-else-if="item.content && item.type === 'heading'">
             <h1 v-if="item.attrs.level === 1">{{item.content[0].text}}</h1>
@@ -110,6 +113,8 @@ export default {
         }
         this.$nextTick(() => {
           this.story = data.story
+          console.log(this.story)
+
           this.title = this.story.content.Titel
           this.loading = false
         })

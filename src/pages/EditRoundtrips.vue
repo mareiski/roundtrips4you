@@ -416,7 +416,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <!-- <p>Insgesamt {{getTripDuration()}} Tage und {{getTripDistance()}} km</p> -->
+        <p style="padding-top:10px;">Insgesamt {{getTripDuration()}} Tage</p>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1215,13 +1215,16 @@ export default {
   },
   methods: {
     dateOptions (date) {
-      const dateTimeParts = formattedDate.split(' ')
-      const dateParts = dateTimeParts[0].split('.')
-      const timeParts = dateTimeParts[1].split(':')
-      const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      let compareDate = this.getDateFromString(formattedDate)
       const currentDate = new Date(date)
 
       return currentDate >= compareDate
+    },
+    getDateFromString (val) {
+      const dateTimeParts = val.split(' ')
+      const dateParts = dateTimeParts[0].split('.')
+      const timeParts = dateTimeParts[1].split(':')
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
     },
     scheduleDateOptions (date) {
       const dateTimeParts = this.OfferStartPeriod.split(' ')
@@ -1391,11 +1394,7 @@ export default {
     addStop (DateString, HotelStop) {
       RTId = this.$route.params.id
 
-      const dateTimeParts = DateString.split(' ')
-      const dateParts = dateTimeParts[0].split('.')
-      const timeParts = dateTimeParts[1].split(':')
-
-      let InitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+      let InitDate = this.getDateFromString(DateString)
 
       GeneralLink = this.generalTempLink
       this.generalTempLink = null
@@ -1942,10 +1941,7 @@ export default {
         })
     },
     updateCheckOutDate (val) {
-      const dateTimeParts = val.split(' ')
-      const dateParts = dateTimeParts[0].split('.')
-      const timeParts = dateTimeParts[1].split(':')
-      const checkInDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      const checkInDate = this.getDateFromString(val)
 
       const defaultCheckOutDate = checkInDate
       defaultCheckOutDate.setDate(checkInDate.getDate() + 2)
@@ -1975,7 +1971,6 @@ export default {
         axios.get(url)
           .then(response => {
             var data = response.data.routes[0]
-            console.log(data)
 
             if (data !== null && typeof data !== 'undefined') {
               let duration = context.msToTime(data.duration * 1000)
@@ -2022,7 +2017,6 @@ export default {
     },
     saveTitle (val) {
       this.isUniqueTitle(val).then(uniqueTitle => {
-        console.log(uniqueTitle)
         if (uniqueTitle !== 'Dieser Titel ist bereits vergeben') {
           this.saveData('Title', val)
         } else {
@@ -2341,16 +2335,12 @@ export default {
       )
     },
     getTripDuration () {
-      let startDate = new Date(this.stops[0].InitDate)
-      // startDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate())
+      let startDate = this.getDateFromString(this.stops[0].InitDate)
 
-      let stopDate = new Date(this.stops[this.stops.length - 2].InitDate)
-      // stopDate = new Date(stopDate.getFullYear(), stopDate.getMonth(), stopDate.getDate())
+      let stopDate = this.getDateFromString(this.stops[this.stops.length - 1].InitDate)
       const oneDay = 24 * 60 * 60 * 1000
 
       const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
-      console.log(startDate)
-      console.log(stopDate)
       return diffDays
     },
     getTripDistance () {
