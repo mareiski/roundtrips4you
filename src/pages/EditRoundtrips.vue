@@ -416,7 +416,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <p style="padding-top:10px;">Insgesamt {{getTripDuration()}} Tage</p>
+        <p style="padding-top:10px;">Insgesamt {{tripDuration}} Tage</p>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1102,11 +1102,9 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 let BookingComLink = '',
   DateDistance = '',
   ExpediaLink = '',
-  GeneralLink = '',
   ImageUrl = '',
   Price = 0,
-  RTId = 0,
-  Location = {}
+  RTId = 0
 
 let details = []
 let documentIds = []
@@ -1197,7 +1195,8 @@ export default {
       showAutoRoutedialog: false,
       days: [],
       stopsLoaded: false,
-      firstLoad: true
+      firstLoad: true,
+      tripDuration: 0
     }
   },
   meta () {
@@ -1316,17 +1315,7 @@ export default {
       this.addButtonActive = false
 
       try {
-        this.addStop(this.date, this.selectedOption)
-        this.loadSingleRoundtrip(this.$route.params.id)
-
-        this.loadRoundtripDetails(this.$route.params.id, true)
-
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Eintrag wurde erstellt'
-        })
+        this.addStop(this.date, this.selectedOption, this.location, this.generalTempLink, this.parkingPlace)
       } catch (e) {
         console.log(e)
         this.$q.notify({
@@ -1391,46 +1380,57 @@ export default {
       let dateParts = dateString.split('.')
       return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     },
-    addStop (DateString, HotelStop) {
-      RTId = this.$route.params.id
+    addStop (DateString, HotelStop, Location, GeneralLink, parking) {
+      return new Promise((resolve, reject) => {
+        RTId = this.$route.params.id
 
-      let InitDate = this.getDateFromString(DateString)
+        let InitDate = this.getDateFromString(DateString)
 
-      GeneralLink = this.generalTempLink
-      this.generalTempLink = null
-      if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
+        this.generalTempLink = null
+        if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
 
-      HotelStop = HotelStop === 'Hotel'
+        HotelStop = HotelStop === 'Hotel'
 
-      Location = this.location
+        db.collection('RoundtripDetails').add({
+          BookingComLink,
+          DateDistance,
+          Description: 'Beschreibung zu ' + Location.label.split(',')[0],
+          ExpediaLink,
+          GeneralLink,
+          HotelStop,
+          ImageUrl,
+          InitDate,
+          Price,
+          RTId,
+          Title: HotelStop && this.hotelName ? 'Hotel ' + this.hotelName : HotelStop ? 'Hotel in ' + Location.label.split(',')[0] : 'Zwischenstopp in ' + Location.label.split(',')[0],
+          Location,
+          Parking: parking,
+          HotelLocation: HotelStop ? this.hotelLocation : null,
+          HotelStars: HotelStop ? this.hotelStars : null,
+          HotelContact: HotelStop ? this.hotelContact : null,
+          HotelName: HotelStop ? this.hotelName : null
+        }).then(results => {
+          // clear all values
+          this.$refs.addEntryForm.reset()
+          this.selectedOption = null
+          this.generalTempLink = null
+          this.location = {}
+          this.$refs.citySearch.clear()
+          this.$refs.parkingPlaceSearch.clear()
 
-      db.collection('RoundtripDetails').add({
-        BookingComLink,
-        DateDistance,
-        Description: 'Beschreibung zu ' + Location.label.split(',')[0],
-        ExpediaLink,
-        GeneralLink,
-        HotelStop,
-        ImageUrl,
-        InitDate,
-        Price,
-        RTId,
-        Title: HotelStop && this.hotelName ? 'Hotel ' + this.hotelName : HotelStop ? 'Hotel in ' + Location.label.split(',')[0] : 'Zwischenstopp in ' + Location.label.split(',')[0],
-        Location,
-        Parking: this.parkingPlace,
-        HotelLocation: HotelStop ? this.hotelLocation : null,
-        HotelStars: HotelStop ? this.hotelStars : null,
-        HotelContact: HotelStop ? this.hotelContact : null,
-        HotelName: HotelStop ? this.hotelName : null
+          // refresh page
+          this.loadSingleRoundtrip(this.$route.params.id)
+          this.loadRoundtripDetails(this.$route.params.id, true)
+
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Eintrag wurde erstellt'
+          })
+          resolve(true)
+        })
       })
-
-      // clear all values
-      this.$refs.addEntryForm.reset()
-      this.selectedOption = null
-      this.generalTempLink = null
-      this.location = {}
-      this.$refs.citySearch.clear()
-      this.$refs.parkingPlaceSearch.clear()
     },
     saveRoundtripDaysAndHotels () {
       let daysString = ''
@@ -1845,6 +1845,7 @@ export default {
       this.firstLoad = false
       if (refreshAll) this.stops = []
       this.showSimulatedReturnData = false
+
       let roundtripsRef = db.collection('RoundtripDetails')
         .where('RTId', '==', RTId)
         .orderBy('InitDate')
@@ -1912,7 +1913,7 @@ export default {
           }
           this.saveData('Hotels', hotelCount)
 
-          // load Map
+          // reload Map
           if (this.$refs.map) this.$refs.map.loadMap(null)
 
           this.stops = details
@@ -1925,6 +1926,8 @@ export default {
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
             }
           })
+
+          this.getTripDuration()
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
@@ -2341,7 +2344,7 @@ export default {
       const oneDay = 24 * 60 * 60 * 1000
 
       const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
-      return diffDays
+      this.tripDuration = diffDays
     },
     getTripDistance () {
 

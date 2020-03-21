@@ -90,6 +90,14 @@
           color="primary"
         >JETZT REGISTRIEREN</q-btn>
       </div>
+      <div class="description-container">
+        <p>Wolltest du schon immer mal wissen wie viel Zeit dir in einem Ort zum besichtigen tatsächlich bleibt?</p>
+        <p>Oder hast du dir schonmal überlegt ob deine Reiseroute überhaupt die kürzeste ist?</p>
+        <p>Um alle diese Fragen musst du dich bei uns nicht mehr kümmern, denn wir berechnen dir mit unserem <a @click="scrollTo('tools')">Routenplaner</a> immer alles schon automatisch.</p>
+        <p>Ob es deine Aufenthaltsdauer ist, welche Sehenswürdigkeiten am Schönsten sind oder auch welche Route am kürzesten ist.</p>
+        <p>Zusätzlich erstellen wir automatisch zu deiner Reise eine interaktive <a @click="scrollTo('map')">Karte</a> mit Mapbox, die dir deine Route im Überblick zeigt.
+          <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
+      </div>
       <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir mit unserem kostenlosen Reiseplaner erstellte Rundreisen an</p>
       <div class="card-container">
         <div class="card-wrap left">
@@ -177,8 +185,7 @@
             />
           </div>
         </li>
-
-        <li>
+        <li ref="map">
           <div>
             <h2>Karte</h2>
             <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>

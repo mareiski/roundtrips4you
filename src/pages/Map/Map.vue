@@ -9,6 +9,7 @@
       :mapboxGl="mapbox-gl"
       :attributionControl="false"
       @load="onMapLoaded"
+      @click="mapClicked($event)"
     >
       <MglNavigationControl position="top-right" />
       <MglMarker
@@ -16,6 +17,7 @@
         :key="stop"
         :coordinates="stop.HotelStop && stop.HotelLocation ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
+        @click="onMarkerClicked($event)"
       >
         <MglPopup>
           <VCard>
@@ -46,11 +48,11 @@
       <div
         v-for="stop in stops"
         :key="stop"
+        @click="onMarkerClicked($event)"
       >
         <MglMarker
           v-if="stop.Parking && typeof stop.Parking !== 'undefined'"
-          :key="
-          stop"
+          :key="stop"
           :coordinates="[stop.Parking.lng, stop.Parking.lat]"
           color="#D56026"
         >
@@ -66,6 +68,7 @@
         :key="route"
         :coordinates="route.location"
         :color="route.color"
+        @click="onMarkerClicked($event)"
       >
         <q-icon
           slot="marker"
@@ -74,7 +77,7 @@
         />
         <MglPopup>
           <VCard v-if="route.duration">
-            <div>{{route.duration}} bis {{route.destination}} von {{ route[index - 1].destination }} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+            <div>{{route.duration}} bis {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
             <a
               target="_blank"
               v-if="route.origin !== route.destination"
@@ -82,12 +85,46 @@
             >auf Google ansehen</a>
           </VCard>
           <VCard v-else>
-            <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} von {{ route[index - 1].destination }}</div>
+            <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}}</div>
           </VCard>
         </MglPopup>
       </MglMarker>
-
     </MglMap>
+    <q-dialog v-model="addStopDialog">
+      <q-card>
+        <q-card-section class="row items-center">
+          <span class="q-ml-sm">Möchtest du diesen Punkt zu deiner Reise hinzufügen?</span>
+        </q-card-section>
+
+        <q-input
+          filled
+          v-model="title"
+          lazy-rules
+          :rules="[val => val.length > 0 || 'Bitte gib einen Titel für diesen Stop ein']"
+          class="input-item"
+          outlined
+          label="Titel eingeben"
+          style="width:300px; margin-left:12%;"
+        >
+        </q-input>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Abbrechen"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            label="Punkt hinzufügen"
+            @click="addStop"
+            color="primary"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <style lang="less" scoped>
@@ -98,6 +135,7 @@
 </style>
 <script>
 const MglMap = () => import('vue-mapbox')
+import Mapbox from 'mapbox-gl'
 
 import {
   MglMarker,
@@ -106,6 +144,7 @@ import {
 } from 'vue-mapbox'
 
 const getAxios = () => import('axios')
+import { date } from 'quasar'
 
 export default {
   meta: {
@@ -131,10 +170,12 @@ export default {
   data () {
     return {
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
-      mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
+      mapStyle: 'mapbox://styles/mapbox/streets-v11',
       addedRoutes: [],
-      Mapbox: () => import('mapbox-gl'),
-      map: null
+      addStopDialog: false,
+      lastClickLocation: {},
+      markerClicked: false,
+      title: null
     }
   },
   watch: {
@@ -146,9 +187,42 @@ export default {
   },
   methods: {
     onMapLoaded (event) {
-      const map = event.map
-      this.loadMap(map)
-      this.map = map
+      this.map = event.map
+      this.loadMap(event.map)
+    },
+    mapClicked (event) {
+      if (!this.markerClicked) {
+        this.addStopDialog = true
+        this.lastClickLocation = { lat: event.mapboxEvent.lngLat.lat, lng: event.mapboxEvent.lngLat.lng, label: 'unbekannter Ort' }
+      }
+      this.markerClicked = false
+    },
+    onMarkerClicked (event) {
+      this.markerClicked = true
+      event.map.flyTo({ center: event.component.marker._lngLat, speed: 0.5, curve: 1 })
+    },
+    addStop (event) {
+      this.lastClickLocation.label = this.title
+
+      const timeStamp = Date.now()
+      const formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
+
+      this.getParent('EditRoundtrips').addStop(formattedDate, false, this.lastClickLocation, null, null).then(success => {
+        this.loadMap(this.map).then(success => {
+          this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
+        })
+      })
+    },
+    getParent (name) {
+      let p = this.$parent
+      while (typeof p !== 'undefined') {
+        if (p.$options.name === name) {
+          return p
+        } else {
+          p = p.$parent
+        }
+      }
+      return false
     },
     openInNewTab (link) {
       window.open(link, '_blank')
@@ -188,33 +262,52 @@ export default {
       return s
     },
     loadMap (map) {
-      let bounds = []
+      return new Promise((resolve, reject) => {
+        if (map === null) map = this.map
 
-      this.stops.forEach((stop, index) => {
-        console.log(stop)
-        let previousStopLng = 0
-        let previousStopLat = 0
-        if (index >= 1) {
-          if (this.stops[index - 1].HotelStop && this.stops[index - 1].HotelLocation) {
-            previousStopLng = this.stops[index - 1].HotelLocation.lat
-            previousStopLat = this.stops[index - 1].HotelLocation.lng
-          } else {
-            previousStopLat = this.stops[index - 1].Location.lat
-            previousStopLng = this.stops[index - 1].Location.lng
+        // if map hasn't load yet don't do anything
+        if (map) {
+          let bounds = []
+
+          // delete all routes
+          // this.addedRoutes.forEach(route => {
+          //   map.removeLayer(route.id)
+          // })
+
+          // this.addedRoutes = []
+
+          this.stops.forEach((stop, index) => {
+            let previousStopLng = 0
+            let previousStopLat = 0
+
+            if (index >= 1) {
+              if (this.stops[index - 1].HotelStop && this.stops[index - 1].HotelLocation) {
+                previousStopLng = this.stops[index - 1].HotelLocation.lat
+                previousStopLat = this.stops[index - 1].HotelLocation.lng
+              } else {
+                previousStopLat = this.stops[index - 1].Location.lat
+                previousStopLng = this.stops[index - 1].Location.lng
+              }
+            }
+
+            if (stop.HotelStop && stop.HotelLocation) {
+              if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, this.stops[index - 1].Profile)
+
+              bounds.push([parseFloat(stop.HotelLocation.lng), parseFloat(stop.HotelLocation.lat)])
+            } else {
+              if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
+              bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
+            }
+          })
+          try {
+            map.fitBounds(new Mapbox.LngLatBounds(bounds))
+          } catch (e) {
+            console.log(e)
           }
-        }
 
-        if (stop.HotelStop && stop.HotelLocation) {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, this.stops[index - 1].Profile)
-
-          bounds.push([stop.HotelLocation.lng, stop.HotelLocation.lat])
-        } else {
-          if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
-          bounds.push([stop.Location.lng, stop.Location.lat])
+          resolve(true)
         }
       })
-
-      if (map && map !== null) map.fitBounds(new this.Mapbox.LngLatBounds(bounds))
     },
     getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
       var R = 6371 // Radius of the earth in km
@@ -353,6 +446,7 @@ export default {
   },
   created () {
     this.mapbox = this.Mapbox
+    this.map = null
   }
 }
 
