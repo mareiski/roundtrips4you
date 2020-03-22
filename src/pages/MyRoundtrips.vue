@@ -614,7 +614,6 @@ export default {
       console.log(event)
     },
     addRoundtrip (Title, Location) {
-      Title = Title.toLowerCase()
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       // Title = Title.replace(/ /g, '')
       Title = Title.trim()
