@@ -209,8 +209,9 @@
           input-debounce="0"
           new-value-mode="add-unique"
           style="margin:10px 10px 10px 0; width:260px;"
+          @blur="saveSights()"
         />
-        <div
+        <!-- <div
           class="flex justify-center"
           style="flex-direction:column;"
         >
@@ -219,7 +220,7 @@
             @click="saveSights()"
             label="Speichern"
           />
-        </div>
+        </div> -->
       </div>
       <div
         class="flex"
@@ -520,6 +521,7 @@ export default {
       tempImgLink: null,
       dialogImgSrc: null,
       imgDialogVisible: false,
+      oldAddedSights: [],
 
       editorFonts: {
         arial: 'Arial',
@@ -630,7 +632,10 @@ export default {
       return text
     },
     saveSights () {
-      this.saveData('Sights', this.addedSights, false)
+      if (this.addedSights !== this.oldAddedSights) {
+        this.oldAddedSights = this.addedSights
+        this.saveData('Sights', this.addedSights, false)
+      }
     },
     saveData (field, value, updateParent) {
       try {
@@ -651,6 +656,7 @@ export default {
       }
     },
     saveWork () {
+      this.saveSights()
       this.saveData('Description', this.descriptionInput, true)
       this.savedEditorContent = this.descriptionInput
     },
@@ -822,6 +828,9 @@ export default {
         })
       })
     }
+  },
+  created () {
+    this.oldAddedSights = this.addedSights
   },
   mounted () {
     if (this.lastItem) {
