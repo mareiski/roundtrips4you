@@ -90,7 +90,10 @@
         </MglPopup>
       </MglMarker>
     </MglMap>
-    <q-dialog v-model="addStopDialog">
+    <q-dialog
+      v-if="editor"
+      v-model="addStopDialog"
+    >
       <q-card>
         <q-card-section class="row items-center">
           <span class="q-ml-sm">Möchtest du diesen Punkt zu deiner Reise hinzufügen?</span>
@@ -165,7 +168,8 @@ export default {
     childrenAges: Array,
     checkOutDate: String,
     adults: Number,
-    rooms: Number
+    rooms: Number,
+    editor: Boolean
   },
   data () {
     return {
