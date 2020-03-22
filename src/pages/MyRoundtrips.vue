@@ -624,6 +624,7 @@ export default {
       try {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
+
         db.collection('Roundtrips').add({
           Category: 'Gruppenreise',
           Days: '< 5 Tage',
@@ -657,6 +658,10 @@ export default {
               db.collection('Roundtrips').doc(doc.id).update({
                 'RTId': doc.id
               })
+
+              let dateParts = this.depatureDate.split('.')
+              let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
               db.collection('RoundtripDetails').add({
                 BookingComLink: '',
                 DateDistance: '',
@@ -665,7 +670,7 @@ export default {
                 GeneralLink: '',
                 HotelStop: false,
                 ImageUrl: '',
-                InitDate: new Date(timeStamp),
+                InitDate: depatureDate || new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
                 Title: 'Titel des 1. Stopps',
