@@ -224,6 +224,7 @@
                     v-model="date"
                     error-message="Bitte gib ein richtiges Datum an"
                     :error="!isDateTimeValid()"
+                    lazy-rules
                     bottom-slots
                     style="width:300px"
                     class="input-item"
@@ -274,6 +275,7 @@
                     :options="options"
                     label="Eintrag"
                     class="input-item"
+                    lazy-rules
                     :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
                     style="width:300px"
                   >
@@ -1223,7 +1225,7 @@ export default {
       const dateTimeParts = val.split(' ')
       const dateParts = dateTimeParts[0].split('.')
       const timeParts = dateTimeParts[1].split(':')
-      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
     },
     scheduleDateOptions (date) {
       const dateTimeParts = this.OfferStartPeriod.split(' ')
