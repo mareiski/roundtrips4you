@@ -272,6 +272,7 @@
                       :options="destinationOptions"
                       @filter="getDestinations"
                       style="width:300px;"
+                      @input="destinationChanged($event)"
                       :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
                     >
                       <template v-slot:no-option>
@@ -543,11 +544,6 @@ export default {
       showRoundtrips: false
     }
   },
-  watch: {
-    'destination': function (val, oldVal) {
-      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
-    }
-  },
   methods: {
     onAddRoundtrip () {
       if (this.roundtrips.length < 20) {
@@ -596,6 +592,9 @@ export default {
           message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
         })
       }
+    },
+    destinationChanged (val) {
+      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
     },
     scrollOnAddButtonClicked () {
       this.addExpanded ? scrollTo(document.getElementById('AddRTCard')) : scrollTo(document.getElementById('Title'))
