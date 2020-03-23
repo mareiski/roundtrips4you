@@ -5,45 +5,113 @@
   >
     <div class="stop-container">
       <div class="flex">
-        <h6 class="q-timeline__title">{{titleInput}}
-          <q-popup-edit
-            v-model="titleInput"
-            v-if="editor"
-            @save="saveData('Title', titleInput)"
-            buttons
-            label-set="ok"
-          >
-            <q-input
+        <div class="flex">
+          <h6 class="q-timeline__title">{{titleInput}}
+            <q-popup-edit
               v-model="titleInput"
-              dense
+              v-if="editor"
+              @save="saveData('Title', titleInput)"
+              buttons
+              label-set="ok"
+            >
+              <q-input
+                v-model="titleInput"
+                dense
+              />
+            </q-popup-edit>
+            <q-icon
+              v-if="editor"
+              name="edit"
             />
-          </q-popup-edit>
-          <q-icon
-            v-if="editor"
-            name="edit"
-          />
-        </h6>
-        <div
-          @mouseover="generalLinkText = 'Hotel link'"
-          @mouseleave="generalLinkText = ''"
-          v-if="generalLink && generalLink.length > 0"
-        >
+          </h6>
           <q-chip
-            icon="link"
-            dense
-            class="linkChip"
+            size="20"
             clickable
-            @click="openInNewTab(generalLink)"
-          >{{ generalLinkText}}</q-chip>
+            @click="addHotel = true"
+            v-if="editor && !hotelName"
+          >Hotel hinzufügen</q-chip>
         </div>
-        <q-chip
-          icon="hotel"
-          v-if="hotelName && typeof hotelName !== 'undefined'"
-          dense
-          class="linkChip"
-          clickable
-          @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
-        >auf booking.com ansehen</q-chip>
+        <q-dialog
+          v-if="editor"
+          v-model="addHotel"
+        >
+          <q-card>
+            <q-card-section class="row items-center">
+              <q-input
+                filled
+                label="Check Out Datum"
+                v-model="checkOutDate"
+                :rules="[date || 'Bitte gib ein richtiges Datum ein']"
+                bottom-slots
+                style="width:300px"
+                class="input-item"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon
+                    name="event"
+                    class="cursor-pointer"
+                  >
+                    <q-popup-proxy
+                      transition-show="scale"
+                      transition-hide="scale"
+                    >
+                      <q-date
+                        v-model="checkOutDate"
+                        today-btn
+                        mask="DD.MM.YYYY"
+                      />
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
+            </q-card-section>
+            <q-card-section>
+              <HotelSearch
+                :disabled="!checkOutDate"
+                :lat="location.lng"
+                :long="location.lat"
+                :checkInDate="date"
+                :checkOutDate="checkOutDate"
+                :roomAmount="rooms"
+                :adults="adults"
+                :childrenAges="childrenAges"
+                @update="updateHotelData($event)"
+                ref="hotelSearch"
+              ></HotelSearch>
+            </q-card-section>
+            <q-card-section>
+              <q-input
+                v-model="generalTempLink"
+                ref="urlInput"
+                type="url"
+                style="width:300px;"
+                :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+                label="Hotel link (optional)"
+                outlined
+              >
+                <template v-slot:prepend>
+                  <q-icon name="link" />
+                </template>
+              </q-input>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="Abbrechen"
+                color="primary"
+                v-close-popup
+              />
+              <q-btn
+                flat
+                label="Hotel hinzufügen"
+                @click="addHotelToStop()"
+                color="primary"
+                v-close-popup
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </div>
       <q-icon
         v-if="editor && !firstStop"
@@ -54,19 +122,11 @@
     </div>
     <div>
       <q-chip
-        v-if="!hotelLocation ||  typeof hotelLocation === 'undefined'"
         icon="location_on"
         clickable
         @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
       >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
         <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
-      </q-chip>
-      <q-chip
-        v-else
-        icon="house"
-        :clickable="hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined'"
-        @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
-      >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelName + ', ' + hotelLocation.label) :  'kein Ort angegeben'}}
       </q-chip>
       <q-dialog
         v-if="editor"
@@ -109,63 +169,38 @@
         :clickable="editor"
         @click="editParkingPlace = true"
       >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
-      <q-dialog
-        v-if="editor"
-        v-model="editParkingPlace"
-        persistent
-      >
-        <q-card>
-          <q-card-section>
-            <CitySearch
-              ref="parkingPlaceSearch"
-              :parkingPlaceSearch="true"
-              :defaultLocation="parkingPlace"
-              @update="updateParkLocation($event)"
-            ></CitySearch>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn
-              flat
-              label="Abbrechen"
-              color="primary"
-              v-close-popup
-            />
-            <q-btn
-              flat
-              label="OK"
-              color="primary"
-              @click="saveData('Parking', tempParkingPlace)"
-              v-close-popup
-            />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-      <q-rating
-        v-if="hotelStars && !isNaN(hotelStars)"
-        class="stars"
-        v-model="hotelStars"
-        readonly
-        size="15px"
-        color="gold"
-        style="margin-right:10px;"
-      />
     </div>
-    <div v-if="hotelContact && typeof hotelContact !== 'undefined'">
-      <q-chip
-        v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
-        icon="email"
-        clickable
-        @click="openInNewTab('mailto:' + hotelContact.email)"
-      >{{ hotelContact.email}}
-      </q-chip>
-      <q-chip
-        icon="phone"
-        v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
-        clickable
-        @click="openInNewTab('tel:' + hotelContact.phone)"
-      >{{hotelContact.phone}}
-      </q-chip>
-    </div>
+    <q-dialog
+      v-if="editor"
+      v-model="editParkingPlace"
+      persistent
+    >
+      <q-card>
+        <q-card-section>
+          <CitySearch
+            ref="parkingPlaceSearch"
+            :parkingPlaceSearch="true"
+            :defaultLocation="parkingPlace"
+            @update="updateParkLocation($event)"
+          ></CitySearch>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Abbrechen"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            label="OK"
+            color="primary"
+            @click="saveData('Parking', tempParkingPlace)"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <div>
       <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
         <a
@@ -211,16 +246,6 @@
           style="margin:10px 10px 10px 0; width:260px;"
           @blur="saveSights()"
         />
-        <!-- <div
-          class="flex justify-center"
-          style="flex-direction:column;"
-        >
-          <q-btn
-            color="primary"
-            @click="saveSights()"
-            label="Speichern"
-          />
-        </div> -->
       </div>
       <div
         class="flex"
@@ -243,13 +268,106 @@
           :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
         >weitere anzeigen</a>
       </div>
+      <!-- Hotel data here -->
+      <div>
+        <q-list
+          bordered
+          padding
+          class="rounded-borders"
+          v-if="hotelName"
+        >
+          <q-item>
+            <q-item-section
+              avatar
+              top
+            >
+              <q-avatar
+                color="secondary"
+                text-color="white"
+                font-size="20px"
+                icon="hotel"
+              >
+              </q-avatar>
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label lines="1">
+                {{capitalize(hotelName)}}
+                <q-rating
+                  v-if="hotelStars && !isNaN(hotelStars)"
+                  class="stars"
+                  v-model="hotelStars"
+                  readonly
+                  size="15px"
+                  color="gold"
+                  style="margin-right:10px;"
+                />
+              </q-item-label>
+              <q-item-label caption>
+                <a @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))">{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+              </q-item-label>
+            </q-item-section>
+
+            <q-item-section>
+              <div v-if="generalLink && generalLink.length > 0">
+                <q-chip
+                  icon="link"
+                  dense
+                  class="linkChip"
+                  clickable
+                  @click="openInNewTab(generalLink)"
+                >Hotelwebsite</q-chip>
+              </div>
+              <q-chip
+                icon="house"
+                v-if="hotelName && typeof hotelName !== 'undefined'"
+                dense
+                style="width:175px;"
+                class="linkChip"
+                clickable
+                @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+              > Hotel auf booking.com</q-chip>
+            </q-item-section>
+
+            <q-item-section
+              side
+              v-if="hotelContact && typeof hotelContact !== 'undefined'"
+            >
+              <div>
+                <q-chip
+                  v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
+                  icon="email"
+                  clickable
+                  @click="openInNewTab('mailto:' + hotelContact.email)"
+                >{{ hotelContact.email}}
+                </q-chip>
+                <q-chip
+                  icon="phone"
+                  v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+                  clickable
+                  @click="openInNewTab('tel:' + hotelContact.phone)"
+                >{{hotelContact.phone}}
+                </q-chip>
+              </div>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-icon
+                name="clear"
+                color="primary"
+                @click="removeHotel()"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
       <div
         style="margin-top:10px;"
         v-if="!editor"
         v-html="descriptionInput"
       ></div>
       <q-editor
-        v-else-if="!hotelName"
+        v-else
         v-model="descriptionInput"
         min-height="5rem"
         ref="editor_ref"
@@ -306,6 +424,9 @@
           >
           </q-btn>
         </div>
+      </div>
+      <div v-if="editor">
+        <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
       </div>
       <q-dialog v-model="imgDialogVisible">
         <q-card style="width:100%; max-width:100vh; overflow:hidden;">
@@ -378,7 +499,7 @@
               <br>
               <a
                 style="text-decoration:underline;"
-                @click="openInNewTab('https://www.google.com/search?q=' + (!hotelLocation ||  typeof hotelLocation === 'undefined' ?  location.label : capitalize(hotelName + ', ' + hotelLocation.label)) + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
+                @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
               >Vorschläge auf Google</a>
               <br>
               <br>
@@ -476,7 +597,8 @@ const getAxios = () => import('axios')
 
 export default {
   components: {
-    CitySearch: () => import('../Map/CitySearch')
+    CitySearch: () => import('../Map/CitySearch'),
+    HotelSearch: () => import('../Map/HotelSearch')
   },
   props: {
     title: String,
@@ -507,7 +629,6 @@ export default {
     return {
       titleInput: this.title,
       descriptionInput: this.editorPlaceholder,
-      generalLinkText: '',
       showDateEntry: true,
       showTimeEntry: false,
       preventPasting: false,
@@ -522,6 +643,8 @@ export default {
       dialogImgSrc: null,
       imgDialogVisible: false,
       oldAddedSights: [],
+      addHotel: false,
+      generalTempLink: '',
 
       editorFonts: {
         arial: 'Arial',
@@ -630,6 +753,64 @@ export default {
         text += '&age=' + child
       })
       return text
+    },
+    updateHotelData (event) {
+      if (event !== null) {
+        let hotel = event.hotel
+
+        let hotelLat = hotel.latitude
+        let hotelLng = hotel.longitude
+
+        // capitalize cityName
+        let hotelLocationLabel = hotel.address.lines[0]
+
+        this.hotelLocation = {
+          lng: hotelLat,
+          lat: hotelLng,
+          label: hotelLocationLabel
+        }
+
+        typeof hotel.rating !== 'undefined' ? this.hotelStars = hotel.rating : this.hotelStars = null
+
+        this.hotelName = hotel.name
+
+        this.hotelContact = hotel.contact
+      }
+    },
+    addHotelToStop () {
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        HotelLocation: this.hotelLocation,
+        HotelStars: this.hotelStars,
+        HotelContact: this.hotelContact,
+        HotelName: this.hotelName,
+        GeneralLink: this.generalTempLink
+
+      }).then(results => {
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Hotel wurde hinzugefügt'
+        })
+      })
+    },
+    removeHotel () {
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        HotelLocation: null,
+        HotelStars: null,
+        HotelContact: null,
+        HotelName: null,
+        GeneralLink: null
+
+      }).then(results => {
+        this.hotelName = null
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Hotel wurde entfernt'
+        })
+      })
     },
     saveSights () {
       if (this.addedSights !== this.oldAddedSights) {

@@ -269,27 +269,13 @@
                       </q-icon>
                     </template>
                   </q-input>
-                  <q-select
-                    outlined
-                    v-model="selectedOption"
-                    :options="options"
-                    label="Eintrag"
-                    class="input-item"
-                    lazy-rules
-                    :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
-                    style="width:300px"
-                  >
-                    <template v-slot:prepend>
-                      <q-icon name="list" />
-                    </template>
-                  </q-select>
                   <CitySearch
                     ref="citySearch"
                     :parkingPlaceSearch="false"
                     :defaultLocation="null"
                     @update="updateLocation($event)"
                   ></CitySearch>
-                  <q-input
+                  <!-- <q-input
                     v-if="selectedOption === 'Hotel'"
                     filled
                     label="Check Out Datum"
@@ -329,14 +315,14 @@
                     :childrenAges="childrenAges"
                     @update="updateHotelData($event)"
                     ref="hotelSearch"
-                  ></HotelSearch>
+                  ></HotelSearch> -->
                   <CitySearch
                     ref="parkingPlaceSearch"
                     :parkingPlaceSearch="true"
                     @update="updateParkingPlace($event)"
                     :defaultLocation="null"
                   ></CitySearch>
-                  <div v-if="selectedOption === 'Hotel'">
+                  <!-- <div v-if="selectedOption === 'Hotel'">
                     <q-input
                       v-model="generalTempLink"
                       ref="urlInput"
@@ -350,7 +336,8 @@
                         <q-icon name="link" />
                       </template>
                     </q-input>
-                  </div>
+                  </div> -->
+                  <!-- ##################################################################################### -->
                   <!--<div
                 v-if="selectedOption === 'Hotel'"
                 class="flex"
@@ -1077,6 +1064,7 @@
           :checkOutDate="checkOutDate"
           :rooms="rooms"
           :adults="adults"
+          :editor="true"
           ref="map"
         ></Map>
       </q-tab-panel>
@@ -1121,17 +1109,15 @@ export default {
     CitySearch: () => import('../pages/Map/CitySearch'),
     Map: () => import('../pages/Map/Map'),
     Duration: () => import('../pages/EditRoundtripComponents/duration'),
-    HotelSearch: () => import('../pages/Map/HotelSearch'),
+    // HotelSearch: () => import('../pages/Map/HotelSearch'),
     RegionSearch: () => import('../pages/Map/RegionSearch'),
     CitySuggestion: () => import('../pages/Map/CitySuggestion')
   },
   data () {
     return {
       pageTitle: 'Reise bearbeiten',
-      options: ['Stopp', 'Hotel'],
       category: null,
       categoryOptions: [],
-      selectedOption: null,
       date: formattedDate,
       addButtonActive: false,
       publish: false,
@@ -1317,7 +1303,7 @@ export default {
       this.addButtonActive = false
 
       try {
-        this.addStop(this.date, this.selectedOption, this.location, this.generalTempLink, this.parkingPlace)
+        this.addStop(this.date, this.location, this.generalTempLink, this.parkingPlace)
       } catch (e) {
         console.log(e)
         this.$q.notify({
@@ -1382,7 +1368,7 @@ export default {
       let dateParts = dateString.split('.')
       return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     },
-    addStop (DateString, HotelStop, Location, GeneralLink, parking) {
+    addStop (DateString, Location, GeneralLink, parking) {
       return new Promise((resolve, reject) => {
         RTId = this.$route.params.id
 
@@ -1391,30 +1377,26 @@ export default {
         this.generalTempLink = null
         if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
 
-        HotelStop = HotelStop === 'Hotel'
-
         db.collection('RoundtripDetails').add({
           BookingComLink,
           DateDistance,
           Description: 'Beschreibung zu ' + Location.label.split(',')[0],
           ExpediaLink,
           GeneralLink,
-          HotelStop,
           ImageUrl,
           InitDate,
           Price,
           RTId,
-          Title: HotelStop && this.hotelName ? 'Hotel ' + this.hotelName : HotelStop ? 'Hotel in ' + Location.label.split(',')[0] : 'Zwischenstopp in ' + Location.label.split(',')[0],
+          Title: 'Zwischenstopp in ' + Location.label.split(',')[0],
           Location,
-          Parking: parking,
-          HotelLocation: HotelStop ? this.hotelLocation : null,
-          HotelStars: HotelStop ? this.hotelStars : null,
-          HotelContact: HotelStop ? this.hotelContact : null,
-          HotelName: HotelStop ? this.hotelName : null
+          Parking: parking
+          // HotelLocation: HotelStop ? this.hotelLocation : null,
+          // HotelStars: HotelStop ? this.hotelStars : null,
+          // HotelContact: HotelStop ? this.hotelContact : null,
+          // HotelName: HotelStop ? this.hotelName : null
         }).then(results => {
           // clear all values
           this.$refs.addEntryForm.reset()
-          this.selectedOption = null
           this.generalTempLink = null
           this.location = {}
           this.$refs.citySearch.clear()
@@ -1844,6 +1826,9 @@ export default {
           spinnerColor: 'primary'
         })
       }
+
+      let lastScrollPos = document.documentElement
+
       this.firstLoad = false
       if (refreshAll) this.stops = []
       this.showSimulatedReturnData = false
@@ -1930,6 +1915,8 @@ export default {
           })
 
           this.getTripDuration()
+
+          this.scrollTo(lastScrollPos)
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
