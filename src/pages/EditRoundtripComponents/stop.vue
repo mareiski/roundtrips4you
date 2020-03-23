@@ -27,6 +27,7 @@
           <q-chip
             size="20"
             clickable
+            icon="add"
             @click="addHotel = true"
             v-if="editor && !hotelName"
           >Hotel hinzufügen</q-chip>

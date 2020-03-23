@@ -1082,7 +1082,7 @@ import { countries } from '../countries'
 import axios from 'axios'
 var querystring = require('querystring')
 
-const { getScrollTarget, setScrollPosition } = scroll
+const { setScrollPosition } = scroll
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -1821,17 +1821,16 @@ export default {
       }
     },
     loadRoundtripDetails (RTId, refreshAll) {
+      let lastScrollPos = document.documentElement.scrollTop
+
       if (!this.firstLoad && refreshAll) {
         Loading.show({
           spinnerColor: 'primary'
         })
       }
 
-      let lastScrollPos = document.documentElement
-
       this.firstLoad = false
       if (refreshAll) this.stops = []
-      this.showSimulatedReturnData = false
 
       let roundtripsRef = db.collection('RoundtripDetails')
         .where('RTId', '==', RTId)
@@ -1916,11 +1915,18 @@ export default {
 
           this.getTripDuration()
 
-          this.scrollTo(lastScrollPos)
+          console.log(lastScrollPos)
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
           this.stopsLoaded = true
+
+          if (!this.firstLoad && refreshAll) {
+            let context = this
+            setTimeout(function () {
+              context.scrollTo(lastScrollPos)
+            }, 500)
+          }
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -2217,11 +2223,10 @@ export default {
         message: 'Bitte gib einen anderen Titel ein'
       })
     },
-    scrollTo (el) {
-      const target = getScrollTarget(el)
-      const offset = el.offsetTop
+    scrollTo (offset) {
+      console.log('scrollNow')
       const duration = 400
-      setScrollPosition(target, offset, duration)
+      setScrollPosition(document.documentElement, offset, duration)
     },
     copyRT (originalRT, UserId, newTitle) {
       this.isUniqueTitle(newTitle).then(uniqueTitle => {
