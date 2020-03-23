@@ -167,7 +167,7 @@
                 :hotelName="stop.HotelName"
                 :hotelLocation="stop.HotelLocation"
                 :hotelContact="stop.HotelContact"
-                :checkOutDate="checkOutDate"
+                :checkOutDate="stop.CheckOutDate"
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
@@ -242,7 +242,6 @@
                           <q-date
                             v-model="date"
                             today-btn
-                            @input="updateCheckOutDate($event)"
                             mask="DD.MM.YYYY HH:mm"
                             v-close-popup
                           />
@@ -1061,7 +1060,6 @@
           :profile="profile"
           :stops="stops"
           :childrenAges="childrenAges"
-          :checkOutDate="checkOutDate"
           :rooms="rooms"
           :adults="adults"
           :editor="true"
@@ -1161,7 +1159,6 @@ export default {
       adults: 0,
       children: 0,
       childrenAges: [],
-      checkOutDate: formattedScheduleDate,
       hotelName: null,
       hotelLocation: {},
       hotelStars: 0,
@@ -1858,12 +1855,6 @@ export default {
 
             if (details.indexOf(stop) === details.length - 1) {
               this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-
-              // add one day
-              const defaultCheckOutDate = initDate
-              defaultCheckOutDate.setDate(initDate.getDate() + 1)
-
-              this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
             }
 
             if (stop.HotelStop) hotelCount++
@@ -1915,8 +1906,6 @@ export default {
 
           this.getTripDuration()
 
-          console.log(lastScrollPos)
-
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
           this.stopsLoaded = true
@@ -1937,14 +1926,6 @@ export default {
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
         })
-    },
-    updateCheckOutDate (val) {
-      const checkInDate = this.getDateFromString(val)
-
-      const defaultCheckOutDate = checkInDate
-      defaultCheckOutDate.setDate(checkInDate.getDate() + 2)
-
-      this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
     msToTime (duration) {
       var minutes = Math.floor((duration / (1000 * 60)) % 60),
@@ -2224,7 +2205,6 @@ export default {
       })
     },
     scrollTo (offset) {
-      console.log('scrollNow')
       const duration = 400
       setScrollPosition(document.documentElement, offset, duration)
     },

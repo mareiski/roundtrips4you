@@ -394,6 +394,12 @@
         }
         }"
       />
+      <!-- <q-chip
+        v-if="editor"
+        icon="add"
+        clickable
+        @click="openInNewTab('mailto:' + hotelContact.email)"
+      >Tagesausflug hinzufügen</q-chip> -->
       <div
         class="flex"
         v-if="stopImages"
@@ -553,9 +559,22 @@
           <q-date
             v-model="date"
             today-btn
-            @input="saveDate($event)"
             mask="DD.MM.YYYY HH:mm"
           />
+          <div
+            class="flex justify-between"
+            style="width:100%"
+          >
+            <q-btn
+              style="margin:10px;"
+              v-close-popup
+            >abbrechen</q-btn>
+            <q-btn
+              color="primary"
+              style="margin:10px;"
+              @click="saveDate(false)"
+            >weiter</q-btn>
+          </div>
         </q-popup-proxy>
         <q-icon
           v-if="editor"
@@ -578,8 +597,21 @@
             v-model="date"
             mask="DD.MM.YYYY HH:mm"
             format24h
-            @input="saveDate($event)"
           />
+          <div
+            class="flex justify-between"
+            style="width:100%"
+          >
+            <q-btn
+              style="margin:10px;"
+              v-close-popup
+            >abbrechen</q-btn>
+            <q-btn
+              color="primary"
+              style="margin:10px;"
+              @click="saveDate(true)"
+            >fertig</q-btn>
+          </div>
         </q-popup-proxy>
         <q-icon
           v-if="editor"
@@ -593,8 +625,11 @@
 </template>
 <script>
 import { db } from '../../firebaseInit'
+import { date } from 'quasar'
 var querystring = require('querystring')
 const getAxios = () => import('axios')
+
+let timeStamp = Date.now()
 
 export default {
   components: {
@@ -646,6 +681,7 @@ export default {
       oldAddedSights: [],
       addHotel: false,
       generalTempLink: '',
+      formattedDate: date.formatDate(timeStamp, 'DD.MM.YYYY'),
 
       editorFonts: {
         arial: 'Arial',
@@ -726,8 +762,8 @@ export default {
     }
   },
   methods: {
-    saveDate (value) {
-      let dateTimeParts = value.split(' ')
+    saveDate (refresh) {
+      let dateTimeParts = this.date.split(' ')
       let dateParts = dateTimeParts[0].split('.')
       let timeParts = dateTimeParts[1].split(':')
       let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
@@ -736,7 +772,7 @@ export default {
       db.collection('RoundtripDetails').doc(this.docId).update({
         'InitDate': initDate
       }).then(function () {
-        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
+        if (refresh) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
       })
     },
     validURL (str) {
@@ -784,9 +820,11 @@ export default {
         HotelStars: this.hotelStars,
         HotelContact: this.hotelContact,
         HotelName: this.hotelName,
-        GeneralLink: this.generalTempLink
+        GeneralLink: this.generalTempLink,
+        CheckOutDate: this.checkOutDate
 
       }).then(results => {
+        this.generalLink = this.generalTempLink
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -1013,6 +1051,19 @@ export default {
   },
   created () {
     this.oldAddedSights = this.addedSights
+
+    if (!this.checkOutDate) {
+      let dateTimeParts = this.date.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      // add one day
+      const defaultCheckOutDate = initDate
+      defaultCheckOutDate.setDate(initDate.getDate() + 1)
+
+      this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
+    }
   },
   mounted () {
     if (this.lastItem) {
