@@ -432,10 +432,13 @@
           </q-btn>
         </div>
       </div>
-      <div v-if="editor">
+      <div v-else-if="editor">
         <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
       </div>
-      <q-dialog v-model="imgDialogVisible">
+      <q-dialog
+        keep-alive
+        v-model="imgDialogVisible"
+      >
         <q-card style="width:100%; max-width:100vh; overflow:hidden;">
           <q-card-section
             class="row flex justify-end q-pb-none"
@@ -1052,7 +1055,7 @@ export default {
   created () {
     this.oldAddedSights = this.addedSights
 
-    if (!this.checkOutDate) {
+    if (!this.checkOutDate || typeof this.checkOutDate === 'undefined') {
       let dateTimeParts = this.date.split(' ')
       let dateParts = dateTimeParts[0].split('.')
       let timeParts = dateTimeParts[1].split(':')
