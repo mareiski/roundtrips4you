@@ -1834,88 +1834,7 @@ export default {
         .orderBy('InitDate')
       roundtripsRef.get()
         .then(snapshot => {
-          details = []
-          documentIds = []
-          snapshot.forEach(doc => {
-            details.push(doc.data())
-            documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
-          })
-
-          this.documentIds = documentIds
-
-          let daysString = ''
-          let days = 1
-          let initDates = []
-          let hotelCount = 0
-
-          // get dates
-          details.forEach((stop) => {
-            const initDate = new Date(stop.InitDate.seconds * 1000)
-            stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-
-            if (details.indexOf(stop) === details.length - 1) {
-              this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-            }
-
-            if (stop.HotelStop) hotelCount++
-
-            if (!initDates.includes(initDate)) initDates.push(initDate)
-            if (stop.HotelStop) hotelCount++
-          })
-
-          if (initDates.length > 0) {
-            let maxDate = new Date(Math.max.apply(null, initDates))
-            let minDate = new Date(Math.min.apply(null, initDates))
-
-            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
-          }
-
-          this.initDates = initDates
-
-          if (days < 5) {
-            daysString = '< 5 Tage'
-          } else if (days >= 5 && days <= 8) {
-            daysString = '5-8 Tage'
-          } else if (days >= 9 && days <= 11) {
-            daysString = '9-11 Tage'
-          } else if (days >= 12 && days <= 15) {
-            daysString = '12-15 Tage'
-          } else if (days > 15) {
-            daysString = '> 15 Tage'
-          }
-
-          // save days and hotels
-          if (daysString.length > 0) {
-            this.saveData('Days', daysString)
-          }
-          this.saveData('Hotels', hotelCount)
-
-          // reload Map
-          if (this.$refs.map) this.$refs.map.loadMap(null)
-
-          this.stops = details
-
-          this.durations = []
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) {
-              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
-                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
-            }
-          })
-
-          this.getTripDuration()
-
-          this.saveRoundtripDaysAndHotels()
-          Loading.hide()
-          this.stopsLoaded = true
-
-          if (!this.firstLoad && refreshAll) {
-            let context = this
-            setTimeout(function () {
-              context.scrollTo(lastScrollPos)
-            }, 500)
-          }
+          this.prepareFromRoundtripDetails(snapshot, lastScrollPos, refreshAll, false, null)
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1926,6 +1845,95 @@ export default {
             message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
           })
         })
+    },
+    prepareFromRoundtripDetails (snapshot, lastScrollPos, refreshAll, simulatedRequest, documentIds) {
+      details = []
+      documentIds = []
+      snapshot.forEach(doc => {
+        if (!simulatedRequest) {
+          details.push(doc.data())
+          documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
+        } else {
+          details.push(doc)
+          documentIds.splice(documentIds)
+        }
+      })
+
+      this.documentIds = documentIds
+
+      let daysString = ''
+      let days = 1
+      let initDates = []
+      let hotelCount = 0
+
+      // get dates
+      details.forEach((stop) => {
+        const initDate = new Date(stop.InitDate.seconds * 1000)
+        stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+
+        if (details.indexOf(stop) === details.length - 1) {
+          this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+        }
+
+        if (stop.HotelStop) hotelCount++
+
+        if (!initDates.includes(initDate)) initDates.push(initDate)
+        if (stop.HotelStop) hotelCount++
+      })
+
+      if (initDates.length > 0) {
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      this.initDates = initDates
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+
+      // save days and hotels
+      if (daysString.length > 0) {
+        this.saveData('Days', daysString)
+      }
+      this.saveData('Hotels', hotelCount)
+
+      // reload Map
+      if (this.$refs.map) this.$refs.map.loadMap(null)
+
+      this.stops = details
+
+      this.durations = []
+      this.stops.forEach((stop, index) => {
+        if (index >= 1) {
+          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+        }
+      })
+
+      this.getTripDuration()
+
+      this.saveRoundtripDaysAndHotels()
+      Loading.hide()
+      this.stopsLoaded = true
+
+      if (!this.firstLoad && refreshAll) {
+        let context = this
+        setTimeout(function () {
+          context.scrollTo(lastScrollPos)
+        }, 500)
+      }
     },
     msToTime (duration) {
       var minutes = Math.floor((duration / (1000 * 60)) % 60),

@@ -435,10 +435,7 @@
       <div v-else-if="editor">
         <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
       </div>
-      <q-dialog
-        keep-alive
-        v-model="imgDialogVisible"
-      >
+      <q-dialog v-model="imgDialogVisible">
         <q-card style="width:100%; max-width:100vh; overflow:hidden;">
           <q-card-section
             class="row flex justify-end q-pb-none"
@@ -481,6 +478,7 @@
       </div>
       <q-dialog
         v-if="galeryImgUrls.length > 0"
+        keep-alive
         v-model="chooseImgDialog"
       >
         <q-card>
@@ -575,7 +573,8 @@
             <q-btn
               color="primary"
               style="margin:10px;"
-              @click="saveDate(false)"
+              @click="[saveDate(false), $refs.qTimeProxy.show()]"
+              v-close-popup
             >weiter</q-btn>
           </div>
         </q-popup-proxy>
