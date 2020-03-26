@@ -3,6 +3,10 @@
     id="BlogOverview"
     class="q-px-lg q-pb-md"
   >
+    <div id="TopContainer">
+      <h2 class="topic">Roundtrips4you - Blog</h2>
+      <p>Hier findet ihr aktuelle Reisetipps für die unterschiedlichsten Ziele auf die ganze Welt</p>
+    </div>
     <div id="BlogBackgroundImg"></div>
     <div id="BlogBackgroundImgPlaceholder">
       <div
@@ -10,16 +14,54 @@
         v-for="story in stories"
         :key="story"
       >
-        <!-- :style="{ backgroundImage: 'url('+ country.ImageUrl +')' }" -->
-        <router-link
-          class="story-card"
-          :to="'/blog/' + story.slug"
-          :style="story.content.TitelBild ? { backgroundImage: 'url('+ story.content.TitelBild +')' } : null"
-        >
-          <h2 class="story-title">{{story.name}}</h2>
-          <span class="story-date">{{story.first_published_at.split('T')[0]}}</span>
-          <span class="story-author">{{story.content.Country}}</span>
-        </router-link>
+        <q-card class="story-card">
+          <q-card-section>
+            <h2 class="story-title">{{story.name}}</h2>
+            <div class="author-container">
+              <p>Von Roundtrips4you</p>
+              <p>
+                <span class="story-date">{{story.first_published_at.split('T')[0]}}</span>
+                <span class="story-author"> aus {{story.content.Country}}</span>
+              </p>
+            </div>
+            <div class="card-row">
+              <div>
+                <q-img :src="story.content.TitelBild" />
+              </div>
+              <div style="padding-left:15px;">
+                <template v-for="(item, index) in story.content.Text.content">
+                  <div
+                    v-if="index < 3"
+                    :key="item"
+                  >
+                    <div v-if="item.content && item.type === 'paragraph'">
+                      <span
+                        v-for="subItem in item.content"
+                        :key="subItem"
+                      >
+                        <template v-if="subItem.type === 'text'">
+                          <span>{{subItem.text}}</span>
+                        </template>
+                      </span>
+                    </div>
+                    <br>
+                  </div>
+                  <div
+                    :key="'A' + item"
+                    v-if="index === 4"
+                  >
+                    <router-link :to="'/blog/' + story.slug">
+                      <q-btn
+                        color="primary"
+                        style="text-decoration:none;"
+                      >weiterlesen</q-btn>
+                    </router-link>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
       </div>
     </div>
   </q-page>
