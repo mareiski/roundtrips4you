@@ -77,7 +77,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Erstelle deine eigene Reise mit einem Routenplaner der zu dir passt!</h1>
+        <h1>Plane deine eigene Reise online mit einem Routenplaner der zu dir passt!</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -103,12 +103,12 @@
         <div class="card-wrap left">
           <router-link
             class="card"
-            to="/rundreisen/Vietnam"
+            to="/rundreisen/Portugal"
             itemtype="http://schema.org/Offer"
           >
-            <div id="VietnamImg"></div>
-            <h3>Vietnam</h3>
-            <span>Erlebe einzigartige Landschaften</span>
+            <div id="PortugalImg"></div>
+            <h3>Portugal</h3>
+            <span>Erlebe einzigartige Landschaften und fazinierende Städte</span>
           </router-link>
         </div>
         <div class="card-wrap">
