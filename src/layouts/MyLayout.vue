@@ -15,7 +15,7 @@
           </a>
           <span class="beta-span cursor-pointer">[beta]
             <q-tooltip @click="$event.show()">
-              Wir befinden uns derzeit noch in der Beta Phase
+              Wir befinden uns derzeit in der Beta Phase, deshalb kann es leider noch zu bugs kommen
             </q-tooltip>
           </span>
         </div>
@@ -38,8 +38,8 @@
           >rundreisen</router-link>
           <router-link
             class="header-page-link"
-            to="/ueber"
-          >über uns</router-link>
+            to="/blog"
+          >blog</router-link>
           <span v-if="!user"></span>
           <q-avatar
             size="50px"
@@ -190,6 +190,10 @@
             >Reisen</router-link>
             <router-link
               class="footer-link"
+              to="/blog"
+            >Blog</router-link>
+            <router-link
+              class="footer-link"
               to="/ueber"
             >Über uns</router-link>
           </div>
@@ -241,7 +245,11 @@
         round
         color="primary"
         icon="airplanemode_active"
-      />
+      >
+        <q-tooltip>
+          Nach oben
+        </q-tooltip>
+      </q-btn>
     </back-to-top>
     <div
       class="register-btn"
@@ -286,7 +294,7 @@ export default {
   meta () {
     return {
       title: 'Home',
-      titleTemplate: title => `${title} | Roundtrips4you - der Routenplaner für deine individuellen Traumreisen`,
+      titleTemplate: title => `${title} | Roundtrips4you - der kostenlose Reiseplaner | Plane deine Route online`,
       meta: {
         equiv: { 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' }
       }
