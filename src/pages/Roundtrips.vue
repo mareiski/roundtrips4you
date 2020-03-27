@@ -18,7 +18,7 @@
         v-model="sort"
         input-debounce="0"
         :options="sortOptions"
-        label="Land auswählen"
+        label="Filter"
         style="padding:0 10px 0 0"
         @input="sortRoundtrips($event)"
       >
@@ -639,7 +639,8 @@ export default {
         roundtripsRef = roundtripsRef.where('Category', '==', cat)
       })
 
-      roundtripsRef = roundtripsRef.orderBy('createdAt').startAt(searchCreatedAt).limit(20)
+      roundtripsRef = roundtripsRef.orderBy('createdAt')
+      roundtripsRef = roundtripsRef.startAt(searchCreatedAt).limit(20)
 
       roundtripsRef.get()
         .then(snapshot => {
@@ -718,8 +719,8 @@ export default {
           .where('Location', 'array-contains', this.country)
           .where('Public', '==', true)
           .where('Days', '==', this.dayModel)
-          .startAt(searchCreatedAt)
           .orderBy('createdAt')
+          .startAt(searchCreatedAt)
           .limit(20)
       }
 
@@ -734,25 +735,6 @@ export default {
       let roundtripAttr = []
       let category = []
 
-      // read all posible values for filter
-      roundtripArr.forEach((roundtrip, index) => {
-        if (price < roundtrip.Price) price = roundtrip.Price
-        if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
-        if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
-        if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
-        if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
-        if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
-      })
-
-      this.roundtrips = roundtripArr
-
-      this.step.max = price
-      this.maxPrice = price
-
-      this.tripKind = tripKind
-      this.roundtripAttr = roundtripAttr
-      this.roundtripCategories = category
-
       roundtripsRef.get()
         .then(snapshot => {
           snapshot.forEach(doc => {
@@ -766,6 +748,24 @@ export default {
               roundtripArr.push(doc.data())
             }
           })
+
+          // read all posible values for filter
+          roundtripArr.forEach((roundtrip, index) => {
+            if (price < parseInt(roundtrip.Price)) price = parseInt(roundtrip.Price)
+            if (!tripKind.includes(roundtrip.Profile)) tripKind.push(roundtrip.Profile)
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[0])
+            if (!roundtripAttr.includes(roundtrip.Highlights[1])) roundtripAttr.push(roundtrip.Highlights[1])
+            if (!roundtripAttr.includes(roundtrip.Highlights[2])) roundtripAttr.push(roundtrip.Highlights[2])
+            if (!category.includes(roundtrip.Category)) category.push(roundtrip.Category)
+          })
+
+          this.roundtrips = roundtripArr
+          this.step.max = price
+          this.maxPrice = price
+
+          this.tripKind = tripKind
+          this.roundtripAttr = roundtripAttr
+          this.roundtripCategories = category
 
           this.visible = false
           this.showSimulatedReturnData = true

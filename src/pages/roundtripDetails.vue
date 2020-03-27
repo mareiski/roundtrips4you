@@ -56,6 +56,15 @@
         </q-card>
       </q-dialog>
     </div>
+    <div class="back-link">
+      <a
+        @click="prevRouteParams && prevRouteParams.length > 0 ? $router.go(-1) : $router.push('/rundreisen/'  + roundtrip[0].Location[0])"
+        style="text-decoration:none;"
+      >
+        <q-icon name="keyboard_arrow_left"></q-icon>
+        zurück zu allen Rundreisen
+      </a>
+    </div>
     <q-carousel
       animated
       v-model="slide"
@@ -140,7 +149,7 @@
                 :addedSights="stop.Sights ? stop.Sights : []"
               ></Stop>
               <Duration
-                :key="stop"
+                :key="'A' + stop"
                 v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
                 :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
@@ -234,8 +243,14 @@ export default {
       rooms: 0,
       Profile: '',
       checkOutDate: null,
-      pageTitle: 'User'
+      pageTitle: 'User',
+      prevRouteParams: null
     }
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.prevRouteParams = from.params
+    })
   },
   computed: {
     user () {
@@ -250,7 +265,6 @@ export default {
       }
     }
   },
-
   methods: {
     loadSingleRoundtrip (RTId) {
       let roundtripsRef = db.collection('Roundtrips')
@@ -434,7 +448,6 @@ export default {
 
       if (index < this.stops.length - 1) {
         let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
-        console.log(stop.InitDate)
         let dateTimeParts = formattedDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
         let timeParts = dateTimeParts[1].split(':')
