@@ -257,11 +257,11 @@
           style="flex-direction:column;"
         >Highlights:</b>
         <q-chip
-          v-for="sight in addedSights"
-          :key="sight"
+          v-for="addedSight in addedSights"
+          :key="addedSight"
           clickable
-          @click="openInNewTab('https://www.google.com/search?q=' + sight + ' ' + location.label.split(',')[0])"
-        >{{sight}}</q-chip>
+          @click="openInNewTab('https://www.google.com/search?q=' + addedSight + ' ' + location.label.split(',')[0])"
+        >{{addedSight}}</q-chip>
         <a
           class="flex justify-center"
           style="flex-direction:column; text-decoration:none;"
@@ -363,7 +363,7 @@
         </q-list>
       </div>
       <div
-        style="margin-top:10px;"
+        style="margin-top:10px; margin-bottom:20px;"
         v-if="!editor"
         v-html="descriptionInput"
       ></div>
@@ -406,20 +406,20 @@
       >
         <div
           class="uploader"
-          v-for="url in stopImages"
-          :key="url"
+          v-for="(stopImage, index) in stopImages"
+          :key="stopImage"
           style="margin-right:8px;"
         >
           <q-img
             style="height:100%;"
-            :src="url"
+            :src="stopImage"
           ></q-img>
           <q-btn
             round
             color="primary"
             icon="add"
             style="position: absolute; transform: rotate(45deg)"
-            @click="removeImg()"
+            @click="removeImg(index)"
           >
           </q-btn>
           <q-btn
@@ -427,7 +427,7 @@
             color="primary"
             icon="filter"
             style="position: absolute; margin-top:-60px; margin-left:65px;"
-            @click="showImgDialog(url)"
+            @click="showImgDialog(stopImage)"
           >
           </q-btn>
         </div>
@@ -612,6 +612,7 @@
               color="primary"
               style="margin:10px;"
               @click="saveDate(true)"
+              v-close-popup
             >fertig</q-btn>
           </div>
         </q-popup-proxy>
@@ -627,9 +628,11 @@
 </template>
 <script>
 import { db } from '../../firebaseInit'
-import { date } from 'quasar'
+import { date, scroll } from 'quasar'
+
 var querystring = require('querystring')
 const getAxios = () => import('axios')
+const { setScrollPosition } = scroll
 
 let timeStamp = Date.now()
 
@@ -765,17 +768,23 @@ export default {
   },
   methods: {
     saveDate (refresh) {
-      let dateTimeParts = this.date.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+      let newInitDate = this.getDateFromString(this.date)
 
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
-        'InitDate': initDate
+        'InitDate': newInitDate
       }).then(function () {
-        if (refresh) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
+        if (refresh) {
+          // resort stops and prepare views with new array
+          context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.title)
+        }
       })
+    },
+    getDateFromString (value) {
+      let dateTimeParts = value.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -827,6 +836,16 @@ export default {
 
       }).then(results => {
         this.generalLink = this.generalTempLink
+
+        let parentStops = this.getParent('EditRoundtrips').stops
+        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.docId)]
+        parentStop.HotelLocation = this.hotelLocation
+        parentStop.HotelStars = this.hotelStars
+        parentStop.HotelContact = this.hotelContact
+        parentStop.HotelName = this.hotelName
+        parentStop.GeneralLink = this.generalTempLink
+        parentStop.CheckOutDate = this.checkOutDate
+
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -845,6 +864,16 @@ export default {
 
       }).then(results => {
         this.hotelName = null
+
+        let parentStops = this.getParent('EditRoundtrips').stops
+        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.docId)]
+        parentStop.HotelLocation = null
+        parentStop.HotelStars = null
+        parentStop.HotelContact = null
+        parentStop.HotelName = null
+        parentStop.GeneralLink = null
+        parentStop.CheckOutDate = null
+
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
@@ -856,30 +885,52 @@ export default {
     saveSights () {
       if (this.addedSights !== this.oldAddedSights) {
         this.oldAddedSights = this.addedSights
+
+        let parentStops = this.getParent('EditRoundtrips').stops
+        parentStops[parentStops.findIndex(x => x.DocId === this.docId)].Sights = this.addedSights
+
         this.saveData('Sights', this.addedSights, false)
       }
     },
     saveData (field, value, updateParent) {
+      let lastScrollPos = document.documentElement.scrollTop
+
       try {
         let context = this
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
         }).then(function () {
-          context.$q.notify({
-            message: 'Deine Änderungen wurde gespeichert',
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle'
-          })
+          if (field !== 'Description') {
+            context.$q.notify({
+              message: 'Deine Änderungen wurde gespeichert',
+              color: 'green-4',
+              textColor: 'white',
+              icon: 'check_circle'
+            })
+          }
           if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
+          else {
+            setTimeout(function () {
+              context.scrollTo(lastScrollPos)
+            }, 500)
+          }
         })
       } catch (e) {
         console.log(e)
       }
     },
+    scrollTo (offset) {
+      const duration = 400
+      setScrollPosition(document.documentElement, offset, duration)
+    },
     saveWork () {
       this.saveSights()
-      this.saveData('Description', this.descriptionInput, true)
+
+      this.saveData('Description', this.descriptionInput, false)
+
+      let parentStops = this.getParent('EditRoundtrips').stops
+      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].Description = this.descriptionInput
+
       this.savedEditorContent = this.descriptionInput
     },
     updateLocation (event) {
@@ -931,24 +982,37 @@ export default {
       this.dialogImgSrc = src
       this.imgDialogVisible = true
     },
+    // change with images (problem)
     addImageToStop (src) {
       if (!this.stopImages) this.stopImages = []
       this.stopImages.push(src)
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
-      }).then(function () {
-        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
+      }).catch(function (error) {
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Der Eintrag konnte nicht gelöscht werden'
+        })
+        console.log(error)
       })
     },
-    removeImg (src) {
+    removeImg (index) {
       if (!this.stopImages) return
-      this.stopImages.splice(this.stopImages.indexOf(src) - 1, 1)
+      this.stopImages.splice(index, 1)
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
-      }).then(function () {
-        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
+      }).catch(function (error) {
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Der Eintrag konnte nicht gelöscht werden'
+        })
+        console.log(error)
       })
     },
     deleteEntry () {
@@ -1053,19 +1117,6 @@ export default {
   },
   created () {
     this.oldAddedSights = this.addedSights
-
-    if (!this.checkOutDate || typeof this.checkOutDate === 'undefined') {
-      let dateTimeParts = this.date.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-      // add one day
-      const defaultCheckOutDate = initDate
-      defaultCheckOutDate.setDate(initDate.getDate() + 1)
-
-      this.checkOutDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
-    }
   },
   mounted () {
     if (this.lastItem) {

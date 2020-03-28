@@ -109,8 +109,8 @@
                   style="margin-bottom:10px;"
                 >
                   <q-skeleton
-                    v-for="n in 2"
-                    :key="n"
+                    v-for="nu in 2"
+                    :key="nu"
                     height="25px"
                     width="60px"
                     type="QChip"
@@ -126,7 +126,7 @@
 
               <q-timeline-entry
                 icon="speed"
-                :key="n"
+                :key="'A' + n"
               >
                 <template v-slot:subtitle>
                   <q-skeleton
@@ -152,13 +152,13 @@
           >
             <template v-for="(stop, index) in stops">
               <Stop
-                :key="index"
+                :key="stop"
                 :title="stop.Title"
                 :date="stop.InitDate"
                 :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :editor="true"
-                :doc-id="documentIds[index]"
+                :doc-id="stop.DocId"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
@@ -167,7 +167,7 @@
                 :hotelName="stop.HotelName"
                 :hotelLocation="stop.HotelLocation"
                 :hotelContact="stop.HotelContact"
-                :checkOutDate="stop.CheckOutDate"
+                :checkOutDate="stop.CheckOutDate ? stop.CheckOutDate : getDefaultCheckOutDate(stop)"
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
@@ -178,12 +178,12 @@
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
               ></Stop>
               <Duration
-                :key="stop"
+                :key="index"
                 v-if="index !== stops.length - 1"
-                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration ? (durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance) : null"
+                :duration="durations[durations.findIndex(x => x.title === stop.Title)] && durations[durations.findIndex(x => x.title === stop.Title)].duration ? (durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance) : null"
                 :editor="true"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-                :doc-id="documentIds[durations.findIndex(x => x.title === stop.Title)]"
+                :doc-id="stop.DocId"
               ></Duration>
             </template>
           </div>
@@ -1426,7 +1426,7 @@ export default {
         let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
         if (!initDates.includes(initDate)) initDates.push(initDate)
-        if (stop.HotelStop) hotelCount++
+        if (stop.HotelName) hotelCount++
       })
 
       if (initDates.length > 0) {
@@ -1834,7 +1834,88 @@ export default {
         .orderBy('InitDate')
       roundtripsRef.get()
         .then(snapshot => {
-          this.prepareFromRoundtripDetails(snapshot, lastScrollPos, refreshAll, false, null)
+          details = []
+          documentIds = []
+          snapshot.forEach((doc, index) => {
+            details.push(doc.data())
+            details[details.findIndex(x => x.Title === doc.data().Title)].DocId = doc.id
+            documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
+          })
+
+          this.documentIds = documentIds
+
+          let daysString = ''
+          let days = 1
+          let initDates = []
+          let hotelCount = 0
+
+          // get dates
+          details.forEach((stop) => {
+            const initDate = new Date(stop.InitDate.seconds * 1000)
+            stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+
+            if (details.indexOf(stop) === details.length - 1) {
+              this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+            }
+
+            if (stop.HotelName) hotelCount++
+
+            if (!initDates.includes(initDate)) initDates.push(initDate)
+          })
+
+          if (initDates.length > 0) {
+            let maxDate = new Date(Math.max.apply(null, initDates))
+            let minDate = new Date(Math.min.apply(null, initDates))
+
+            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+          }
+
+          this.initDates = initDates
+
+          if (days < 5) {
+            daysString = '< 5 Tage'
+          } else if (days >= 5 && days <= 8) {
+            daysString = '5-8 Tage'
+          } else if (days >= 9 && days <= 11) {
+            daysString = '9-11 Tage'
+          } else if (days >= 12 && days <= 15) {
+            daysString = '12-15 Tage'
+          } else if (days > 15) {
+            daysString = '> 15 Tage'
+          }
+
+          // save days and hotels
+          if (daysString.length > 0) {
+            this.saveData('Days', daysString)
+          }
+          this.saveData('Hotels', hotelCount)
+
+          // reload Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
+
+          this.stops = details
+
+          this.durations = []
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) {
+              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            }
+          })
+
+          this.getTripDuration()
+
+          this.saveRoundtripDaysAndHotels()
+          Loading.hide()
+          this.stopsLoaded = true
+
+          if (!this.firstLoad && refreshAll) {
+            let context = this
+            setTimeout(function () {
+              context.scrollTo(lastScrollPos)
+            }, 500)
+          }
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1846,94 +1927,43 @@ export default {
           })
         })
     },
-    prepareFromRoundtripDetails (snapshot, lastScrollPos, refreshAll, simulatedRequest, documentIds) {
-      details = []
-      documentIds = []
-      snapshot.forEach(doc => {
-        if (!simulatedRequest) {
-          details.push(doc.data())
-          documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
-        } else {
-          details.push(doc)
-          documentIds.splice(documentIds)
-        }
+    resortAndPrepareStops (newInitDate, currentTitle) {
+      let lastScrollPos = document.documentElement.scrollTop
+
+      // update date
+      this.stops[this.stops.findIndex(x => x.Title === currentTitle)].InitDate = newInitDate
+
+      // prepare from resortet stops
+      this.stops.sort(this.compare)
+
+      let newDurations = []
+      let newDays = []
+
+      this.stops.forEach(stop => {
+        let durationIndex = this.durations[this.durations.findIndex(x => x.title === stop.Title)]
+        if (durationIndex) newDurations.push(durationIndex)
+
+        let daysIndex = this.days[this.days.findIndex(x => x.title === stop.Title)]
+        if (daysIndex) newDays.push(daysIndex)
       })
-
-      this.documentIds = documentIds
-
-      let daysString = ''
-      let days = 1
-      let initDates = []
-      let hotelCount = 0
-
-      // get dates
-      details.forEach((stop) => {
-        const initDate = new Date(stop.InitDate.seconds * 1000)
-        stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-
-        if (details.indexOf(stop) === details.length - 1) {
-          this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-        }
-
-        if (stop.HotelStop) hotelCount++
-
-        if (!initDates.includes(initDate)) initDates.push(initDate)
-        if (stop.HotelStop) hotelCount++
-      })
-
-      if (initDates.length > 0) {
-        let maxDate = new Date(Math.max.apply(null, initDates))
-        let minDate = new Date(Math.min.apply(null, initDates))
-
-        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
-      }
-
-      this.initDates = initDates
-
-      if (days < 5) {
-        daysString = '< 5 Tage'
-      } else if (days >= 5 && days <= 8) {
-        daysString = '5-8 Tage'
-      } else if (days >= 9 && days <= 11) {
-        daysString = '9-11 Tage'
-      } else if (days >= 12 && days <= 15) {
-        daysString = '12-15 Tage'
-      } else if (days > 15) {
-        daysString = '> 15 Tage'
-      }
-
-      // save days and hotels
-      if (daysString.length > 0) {
-        this.saveData('Days', daysString)
-      }
-      this.saveData('Hotels', hotelCount)
-
-      // reload Map
-      if (this.$refs.map) this.$refs.map.loadMap(null)
-
-      this.stops = details
-
-      this.durations = []
-      this.stops.forEach((stop, index) => {
-        if (index >= 1) {
-          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
-            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
-        }
-      })
+      this.durations = newDurations
+      this.days = newDays
 
       this.getTripDuration()
 
-      this.saveRoundtripDaysAndHotels()
-      Loading.hide()
-      this.stopsLoaded = true
+      let context = this
+      setTimeout(function () {
+        context.scrollTo(lastScrollPos)
+      }, 200)
+    },
+    compare (a, b) {
+      const initDateA = this.getDateFromString(a.InitDate)
+      const initDateB = this.getDateFromString(b.InitDate)
 
-      if (!this.firstLoad && refreshAll) {
-        let context = this
-        setTimeout(function () {
-          context.scrollTo(lastScrollPos)
-        }, 500)
-      }
+      if (initDateA > initDateB) return 1
+      if (initDateB > initDateA) return -1
+
+      return 0
     },
     msToTime (duration) {
       var minutes = Math.floor((duration / (1000 * 60)) % 60),
@@ -1980,6 +2010,15 @@ export default {
         this.durations.splice(this.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
         this.stopsLoaded = true
       }
+    },
+    getDefaultCheckOutDate (stop) {
+      let initDate = this.getDateFromString(stop.InitDate)
+
+      // add one day
+      const defaultCheckOutDate = initDate
+      defaultCheckOutDate.setDate(initDate.getDate() + 1)
+
+      return date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
     getDays (stop, index, duration) {
       let days = null
