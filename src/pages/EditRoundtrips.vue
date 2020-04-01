@@ -176,6 +176,7 @@
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
+                :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
               ></Stop>
               <Duration
                 :key="index"

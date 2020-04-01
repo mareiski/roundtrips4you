@@ -147,6 +147,7 @@
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
+                :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
               ></Stop>
               <Duration
                 :key="'A' + stop"

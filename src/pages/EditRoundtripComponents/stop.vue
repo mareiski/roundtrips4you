@@ -394,12 +394,6 @@
         }
         }"
       />
-      <!-- <q-chip
-        v-if="editor"
-        icon="add"
-        clickable
-        @click="openInNewTab('mailto:' + hotelContact.email)"
-      >Tagesausflug hinzufügen</q-chip> -->
       <div
         class="flex"
         v-if="stopImages"
@@ -547,7 +541,135 @@
           </q-card-actions>
         </q-card>
       </q-dialog>
+      <div
+        class="daily-trip-container"
+        v-show="dailyTrips.length"
+      >
+        <DailyTrip
+          style="margin-top:10px;"
+          v-for="(dailyTrip, index) in dailyTrips"
+          :key="dailyTrip"
+          :dailyTrip="dailyTrip"
+          :editorToolbar="editorToolbar"
+          :editorFonts="editorFonts"
+          :stopDocId="docId"
+          :index="index"
+          :newDailyTripDate="newDailyTripDate(dailyTrip.date)"
+          :duration="dailyTrip.duration"
+          :editor="editor"
+        ></DailyTrip>
+      </div>
+      <div>
+        <q-list
+          bordered
+          class="rounded-borders daily-trip-list"
+        >
+          <q-item
+            clickable
+            v-ripple
+            class="flex justify-center"
+            @click="addDailyTripDialogVisible = true"
+          >
+            <q-btn
+              class="add-daily-trip-button"
+              side
+              color="primary"
+              icon="add"
+            >Tagesausflug hinzufügen
+            </q-btn>
+          </q-item>
+        </q-list>
+      </div>
     </div>
+    <!-- Place for add daily trip dialog -->
+    <q-dialog v-model="addDailyTripDialogVisible">
+      <q-card style="width:100%; max-width:100vh; overflow:hidden;">
+        <q-card-section class="daily-trip-dialog-section">
+          <q-input
+            filled
+            v-model="tempDailyTripDate"
+            error-message="Bitte gib ein richtiges Datum an"
+            :error="!isDateTimeValid()"
+            lazy-rules
+            bottom-slots
+            style="width:300px"
+            class="input-item"
+            outlined
+          >
+            <template v-slot:prepend>
+              <q-icon
+                name="event"
+                class="cursor-pointer"
+              >
+                <q-popup-proxy
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="tempDailyTripDate"
+                    today-btn
+                    mask="DD.MM.YYYY HH:mm"
+                    v-close-popup
+                  />
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+
+            <template v-slot:append>
+              <q-icon
+                name="access_time"
+                class="cursor-pointer"
+              >
+                <q-popup-proxy
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-time
+                    v-model="tempDailyTripDate"
+                    mask="DD.MM.YYYY HH:mm"
+                    format24h
+                  />
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+          <CitySearch
+            ref="citySearch"
+            :parkingPlaceSearch="false"
+            @update="updateDailyTripLocation($event)"
+          ></CitySearch>
+          <q-select
+            outlined
+            v-model="dailyTripProfile"
+            :options="['zu Fuß', 'Fahrrad', 'Auto']"
+            label="Reisemittel"
+            use-input
+            :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+            class="input-item"
+          >
+            <template v-slot:prepend>
+              <q-icon name="commute" />
+            </template>
+          </q-select>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Abbrechen"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            label="Hizufügen"
+            color="primary"
+            @click="addDailyTrip()"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+
+    </q-dialog>
     <template v-slot:subtitle>
       <span class="q-timeline__title">
         {{date !== null && date.length > 0 ? date.split(' ')[0]: date}}
@@ -629,17 +751,21 @@
 <script>
 import { db } from '../../firebaseInit'
 import { date, scroll } from 'quasar'
+import axios from 'axios'
 
 var querystring = require('querystring')
 const getAxios = () => import('axios')
 const { setScrollPosition } = scroll
 
 let timeStamp = Date.now()
+let lastDailyTripDate = null
 
 export default {
+  name: 'stop',
   components: {
     CitySearch: () => import('../Map/CitySearch'),
-    HotelSearch: () => import('../Map/HotelSearch')
+    HotelSearch: () => import('../Map/HotelSearch'),
+    DailyTrip: () => import('./dailyTrip')
   },
   props: {
     title: String,
@@ -664,7 +790,8 @@ export default {
     firstStop: Boolean,
     galeryImgUrls: Array,
     stopImages: Array,
-    addedSights: Array
+    addedSights: Array,
+    dailyTrips: Array
   },
   data () {
     return {
@@ -687,6 +814,11 @@ export default {
       addHotel: false,
       generalTempLink: '',
       formattedDate: date.formatDate(timeStamp, 'DD.MM.YYYY'),
+      addDailyTripDialogVisible: false,
+      tempDailyTripLocation: {},
+      tempDailyTripDate: this.date,
+      dailyTripProfile: null,
+      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
 
       editorFonts: {
         arial: 'Arial',
@@ -779,6 +911,63 @@ export default {
           context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.title)
         }
       })
+    },
+    getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel) {
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      let context = this
+
+      axios.get(url)
+        .then(response => {
+          var data = response.data.routes[0]
+
+          if (data !== null && typeof data !== 'undefined') {
+            let duration = context.msToTime(data.duration * 1000)
+
+            let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
+            if (distance !== '') distance = ' (' + distance + ')'
+
+            this.dailyTrips[index].duration = { duration: duration, distance: distance, cityFromLabel: cityFromLabel, defaultCityLabel: defaultCityLabel }
+          } else {
+            this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
+          }
+        }).catch(exception => {
+          console.log(exception)
+          this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
+        })
+    },
+    msToTime (duration) {
+      var minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+
+      let returnVal
+      if (hours === 0 && minutes === 0) returnVal = null
+      else if (hours === 0) returnVal = minutes + ' min'
+      else if (minutes === 0) returnVal = hours + ' h'
+      else returnVal = hours + ' h ' + minutes + ' min'
+
+      return returnVal
+    },
+    isDateTimeValid () {
+      var testDate = this.date
+      if (testDate === null || testDate.length === 0) return false
+      var matches = testDate.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/)
+      if (matches === null) return false
+      var year = parseInt(matches[3], 10)
+      var month = parseInt(matches[2], 10) - 1
+      var day = parseInt(matches[1], 10)
+      var hour = parseInt(matches[4], 10)
+      var minute = parseInt(matches[5], 10)
+      var date = new Date(year, month, day, hour, minute)
+      if (date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day ||
+        date.getHours() !== hour ||
+        date.getMinutes() !== minute
+      ) {
+        return false
+      } else {
+        return true
+      }
     },
     getDateFromString (value) {
       let dateTimeParts = value.split(' ')
@@ -882,6 +1071,57 @@ export default {
         })
       })
     },
+    addDailyTrip () {
+      if (this.tempDailyTripDate && this.tempDailyTripLocation && this.dailyTripProfile) {
+        let createdStop = { date: this.tempDailyTripDate, location: this.tempDailyTripLocation, descriptionInput: 'Tagesausflug nach ' + this.tempDailyTripLocation.label.split(',')[0], profile: this.getDailyTripProfile() }
+        this.dailyTrips.push(createdStop)
+
+        this.dailyTrips.forEach((dailyTrip, index) => {
+          if (index === 0) {
+            this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+          } else {
+            this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+          }
+        })
+        this.dailyTrips.sort(this.compare)
+
+        db.collection('RoundtripDetails').doc(this.docId).update({
+          DailyTrips: this.dailyTrips
+
+        }).then(results => {
+          this.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Tagesausflug wurde hinzugefügt'
+          })
+        })
+      }
+    },
+    deleteDailyTrip (index) {
+      if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Der Eintrag konnte nicht gelöscht werden'
+        })
+        return false
+      }
+      this.dailyTrips.splice(index, 1)
+      db.collection('RoundtripDetails').doc(this.docId).update({
+        DailyTrips: this.dailyTrips
+
+      }).then(results => {
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Tagesausflug wurde gelöscht'
+        })
+        return true
+      })
+    },
     saveSights () {
       if (this.addedSights !== this.oldAddedSights) {
         this.oldAddedSights = this.addedSights
@@ -891,6 +1131,17 @@ export default {
 
         this.saveData('Sights', this.addedSights, false)
       }
+    },
+    newDailyTripDate (dateToCheck) {
+      if (lastDailyTripDate === null || dateToCheck.split(' ')[0] !== lastDailyTripDate.split(' ')[0]) {
+        lastDailyTripDate = dateToCheck
+        return true
+      }
+      return false
+    },
+    saveDailyTrips (index, description) {
+      this.dailyTrips[index].descriptionInput = description
+      this.saveData('DailyTrips', this.dailyTrips, false)
     },
     saveData (field, value, updateParent) {
       let lastScrollPos = document.documentElement.scrollTop
@@ -951,6 +1202,25 @@ export default {
         }
       }
     },
+    updateDailyTripLocation (event) {
+      if (event !== null) {
+        this.tempDailyTripLocation = {
+          lng: event.x,
+          lat: event.y,
+          label: event.label
+        }
+      }
+    },
+    getDailyTripProfile () {
+      switch (this.dailyTripProfile) {
+        case 'zu Fuß':
+          return 'walking'
+        case 'Fahrrad':
+          return 'cycling'
+        default:
+          return 'driving'
+      }
+    },
     capitalize (s) {
       s = s.toLowerCase()
       s = s.charAt(0).toUpperCase() + s.slice(1)
@@ -982,7 +1252,6 @@ export default {
       this.dialogImgSrc = src
       this.imgDialogVisible = true
     },
-    // change with images (problem)
     addImageToStop (src) {
       if (!this.stopImages) this.stopImages = []
       this.stopImages.push(src)
@@ -1113,10 +1382,28 @@ export default {
           })
         })
       })
+    },
+    compare (a, b) {
+      const dateA = this.getDateFromString(a.date)
+      const dateB = this.getDateFromString(b.date)
+
+      if (dateA > dateB) return 1
+      if (dateB > dateA) return -1
+
+      return 0
     }
   },
   created () {
     this.oldAddedSights = this.addedSights
+
+    this.dailyTrips.sort(this.compare)
+    this.dailyTrips.forEach((dailyTrip, index) => {
+      if (index === 0) {
+        this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+      } else {
+        this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+      }
+    })
   },
   mounted () {
     if (this.lastItem) {

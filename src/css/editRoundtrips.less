@@ -75,6 +75,41 @@
     .flight-container>* {
         padding-bottom: 32px;
     }
+
+}
+
+.daily-trip-list {
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    &>div {
+        padding: 10px;
+    }
+}
+
+.daily-trip-container {
+    border-left: solid 0.5px @primary-gray;
+    padding-left: 10px;
+    padding-bottom: 15px;
+    margin-top: 10px;
+
+    .divider {
+        display: flex;
+        flex-wrap: nowrap;
+
+        hr {
+            width: 100%;
+        }
+
+        span {
+            margin-top: -4px;
+            padding-left: 5px;
+        }
+    }
+
+    .q-list {
+        margin-top: 10px;
+    }
 }
 
 .editLocationCard {
@@ -152,6 +187,13 @@
 
 .q-timeline__subtitle {
     text-transform: none;
+}
+
+
+.daily-trip-dialog-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 @media @mobile {
