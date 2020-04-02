@@ -90,54 +90,43 @@
           color="primary"
         >JETZT REGISTRIEREN</q-btn>
       </div>
-      <div class="description-container">
-        <p>Wolltest du schon immer mal wissen wie viel Zeit dir in einem Ort zum besichtigen tatsächlich bleibt?</p>
-        <p>Oder hast du dir schonmal überlegt ob deine Reiseroute überhaupt die kürzeste ist?</p>
-        <p>Um alle diese Fragen musst du dich bei uns nicht mehr kümmern, denn wir berechnen dir mit unserem <a @click="scrollTo('tools')">Routenplaner</a> immer alles schon automatisch.</p>
-        <p>Ob es deine Aufenthaltsdauer ist, welche Sehenswürdigkeiten am Schönsten sind oder auch welche Route am kürzesten ist.</p>
-        <p>Zusätzlich erstellen wir automatisch zu deiner Reise eine interaktive <a @click="scrollTo('map')">Karte</a> mit Mapbox, die dir deine Route im Überblick zeigt.
-          <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
-      </div>
-      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir mit unserem kostenlosen Reiseplaner erstellte Rundreisen an</p>
+      <h4 style="text-align:center;">Unsere Features minimieren deinen Planungsaufwand:</h4>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
             class="card"
-            to="/rundreisen/Portugal"
-            itemtype="http://schema.org/Offer"
+            to="/meine-rundreisen"
           >
-            <div id="PortugalImg"></div>
-            <h3>Portugal</h3>
-            <span>Erlebe einzigartige Landschaften und fazinierende Städte</span>
+            <q-icon name="share" />
+            <h3>Teilen</h3>
+            <span>Teile deine eigenen Rundreisen mit der ganzen Welt und in einer übersichtlichen Ansicht</span>
           </router-link>
         </div>
         <div class="card-wrap">
           <router-link
             class="card"
-            to="/rundreisen/USA"
-            itemtype="http://schema.org/Offer"
+            to="/meine-rundreisen"
           >
-            <div id="USAImg"></div>
-            <h3>USA</h3>
-            <span>Erlebe das Land der unbegrenzten Möglichkeiten</span>
+            <q-icon name="explore" />
+            <h3>Planen</h3>
+            <span>Plane deine Reise bis ins kleinste Detail ganz ohne Aufwand und in kürzester Zeit</span>
           </router-link>
         </div>
         <div class="card-wrap right">
           <router-link
             class="card"
-            to="/rundreisen/Italien"
-            itemtype="http://schema.org/Offer"
+            to="/rundreisen-uebersicht"
           >
-            <div id="ItalyImg"></div>
-            <h3>Italien</h3>
-            <span>Erlebe la dolce Vita in Venedig</span>
+            <q-icon name="edit" />
+            <h3>Bearbeiten</h3>
+            <span>Bearbeite vorgefertigte Reisen und schaffe somit deine ganz eigene Traumreise</span>
           </router-link>
         </div>
       </div>
       <h4
         ref="tools"
         style="text-align:center;"
-      >Diese Tools helfen dir bei der Planung deiner Reise</h4>
+      >Mit diesen Tools planst du deine eigene Reise in unter 5 Minuten</h4>
       <ol class="create-roundtrip-ol">
         <li>
           <div>
@@ -207,38 +196,49 @@
           <button>Reise kostenlos planen</button>
         </router-link>
       </div>
-      <h4 style="text-align:center;">Noch nicht überzeugt ? <br> Hier sind unsere Features:</h4>
+      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem kostenlosen Reiseplaner erstellte Rundreisen an</p>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
             class="card"
-            to="/rundreisen-uebersicht"
+            to="/rundreisen/Portugal"
+            itemtype="http://schema.org/Offer"
           >
-            <q-icon name="compare_arrows" />
-            <h3>Vergleichen</h3>
-            <span>Vergleiche eine Vielzahl von top Reisen auf der ganzen Welt mit wenigen Klicks</span>
+            <div id="PortugalImg"></div>
+            <h3>Portugal</h3>
+            <span>Erlebe einzigartige Landschaften und fazinierende Städte</span>
           </router-link>
         </div>
         <div class="card-wrap">
           <router-link
             class="card"
-            to="/meine-rundreisen"
+            to="/rundreisen/USA"
+            itemtype="http://schema.org/Offer"
           >
-            <q-icon name="add_circle_outline" />
-            <h3>Erstellen</h3>
-            <span>Erstelle deine eigene individuelle Rundreise und teile sie mit der ganzen Welt</span>
+            <div id="USAImg"></div>
+            <h3>USA</h3>
+            <span>Erlebe das Land der unbegrenzten Möglichkeiten</span>
           </router-link>
         </div>
         <div class="card-wrap right">
           <router-link
             class="card"
-            to="/rundreisen-uebersicht"
+            to="/rundreisen/Italien"
+            itemtype="http://schema.org/Offer"
           >
-            <q-icon name="edit" />
-            <h3>Bearbeiten</h3>
-            <span>Bearbeite vorgefertigte Reisen und schaffe somit deine ganz eigene Traumreise</span>
+            <div id="ItalyImg"></div>
+            <h3>Italien</h3>
+            <span>Erlebe la dolce Vita in Venedig</span>
           </router-link>
         </div>
+      </div>
+      <div class="description-container">
+        <p>Wolltest du schon immer mal wissen wie viel Zeit dir in einem Ort zum besichtigen tatsächlich bleibt?</p>
+        <p>Oder hast du dir schonmal überlegt ob deine Reiseroute überhaupt die kürzeste ist?</p>
+        <p>Um alle diese Fragen musst du dich bei uns nicht mehr kümmern, denn wir berechnen dir mit unserem <a @click="scrollTo('tools')">Routenplaner</a> immer alles schon automatisch.</p>
+        <p>Ob es deine Aufenthaltsdauer ist, welche Sehenswürdigkeiten am Schönsten sind oder auch welche Route am kürzesten ist.</p>
+        <p>Zusätzlich erstellen wir automatisch zu deiner Reise eine interaktive <a @click="scrollTo('map')">Karte</a> mit Mapbox, die dir deine Route im Überblick zeigt.
+          <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
       </div>
       <div class="register-container">
         <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Routenplaners kostenlos</h4>
