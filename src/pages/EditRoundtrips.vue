@@ -834,7 +834,7 @@
             </q-input>
             <q-input
               v-model="price"
-              label="Preis"
+              label="Pauschalpreis ohne Freizeitgestaltung"
               type="number"
               outlined
               :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"

@@ -448,7 +448,10 @@
             </div>
             <div class="card-right-col">
               <div class="card-row ">
-                <a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>
+                <a class="button price-button">
+                  <span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span>
+                  <q-tooltip>Schätzwert des Reisenden, ohne Freizeitgestaltung</q-tooltip>
+                </a>
                 <router-link :to="'/benutzerprofil/' + roundtrip.UserId">
                   <q-avatar
                     size="50px"
