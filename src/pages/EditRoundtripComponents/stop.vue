@@ -426,9 +426,6 @@
           </q-btn>
         </div>
       </div>
-      <div v-else-if="editor">
-        <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
-      </div>
       <q-dialog v-model="imgDialogVisible">
         <q-card style="width:100%; max-width:100vh; overflow:hidden;">
           <q-card-section
@@ -469,6 +466,9 @@
           @click="chooseImgDialog = true"
         >
         </q-btn>
+      </div>
+      <div v-else-if="editor">
+        <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
       </div>
       <q-dialog
         v-if="galeryImgUrls.length > 0"
@@ -900,6 +900,7 @@ export default {
   },
   methods: {
     saveDate (refresh) {
+      let lastScrollPos = document.documentElement.scrollTop
       let newInitDate = this.getDateFromString(this.date)
 
       let context = this
@@ -910,6 +911,9 @@ export default {
           // resort stops and prepare views with new array
           context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.title)
         }
+        setTimeout(function () {
+          context.scrollTo(lastScrollPos)
+        }, 500)
       })
     },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel) {
@@ -1144,8 +1148,6 @@ export default {
       this.saveData('DailyTrips', this.dailyTrips, false)
     },
     saveData (field, value, updateParent) {
-      let lastScrollPos = document.documentElement.scrollTop
-
       try {
         let context = this
         db.collection('RoundtripDetails').doc(this.docId).update({
@@ -1160,11 +1162,6 @@ export default {
             })
           }
           if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
-          else {
-            setTimeout(function () {
-              context.scrollTo(lastScrollPos)
-            }, 500)
-          }
         })
       } catch (e) {
         console.log(e)
