@@ -411,7 +411,6 @@
         <div class="arrival-depature-container">
           <h4>An-/Abreise</h4>
           <q-form
-            @submit="onSaveArrivalDepature"
             bordered
             class="q-gutter-md rounded-borders"
           >
@@ -423,6 +422,7 @@
               label="Reisemittel"
               :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
               style="padding-bottom: 32px"
+              @blur="onSaveArrivalDepature"
             >
               <template v-slot:prepend>
                 <q-icon name="commute" />
@@ -446,6 +446,7 @@
                 :options="originOptions"
                 @filter="getOrigins"
                 style="width:300px;"
+                @blur="onSaveArrivalDepature"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
               >
                 <template v-slot:no-option>
@@ -474,6 +475,7 @@
                 @filter="getDestinations"
                 style="width:300px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+                @blur="onSaveArrivalDepature"
               >
                 <template v-slot:no-option>
                   <q-item>
@@ -491,6 +493,7 @@
                 v-model="depatureDate"
                 label="Abflugsdatum"
                 class="input-item rounded-borders"
+                @blur="onSaveArrivalDepature"
               >
                 <q-popup-proxy
                   ref="qDateProxy1"
@@ -516,6 +519,7 @@
                 v-model="returnDate"
                 label="Rückflugsdatum"
                 class="input-item rounded-borders"
+                @blur="onSaveArrivalDepature"
               >
                 <q-popup-proxy
                   ref="qDateProxy1"
@@ -543,6 +547,7 @@
                 :options="['Economy', 'Premium Economy', 'Business', 'First']"
                 label="Reiseklasse auswählen"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
+                @blur="onSaveArrivalDepature"
               >
                 <template v-slot:prepend>
                   <q-icon name="star" />
@@ -555,6 +560,7 @@
                 :options="['Ja', 'Nein']"
                 label="Non Stop"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Option']"
+                @blur="onSaveArrivalDepature"
               >
                 <template v-slot:prepend>
                   <q-icon name="flight" />
@@ -565,7 +571,7 @@
               <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
             </div>
             <!-- price -->
-            <div class="row justify-between">
+            <div class="column">
               <q-btn
                 @click="openBookingComFlights()"
                 class="q-mt-md"
@@ -573,33 +579,17 @@
                 text-color="white"
                 :disable="!destination"
                 v-if="arrivalDepatureProfile === 'Flugzeug'"
-                label="Flüge auf Booking.com buchen"
+                label="Flüge auf Booking.com ansehen"
               ></q-btn>
-              <!-- <q-btn
-                v-if="validOfferSearchData()"
-                :loading="offersSubmitting"
-                @click="searchOffers()"
-                label="Angebote suchen"
-                class="q-mt-md"
-                color="primary"
-                text-color="white"
-              >
-                <template v-slot:loading>
-                  <q-spinner />
-                </template>
-              </q-btn> -->
               <q-btn
-                type="submit"
-                :loading="submitting"
-                label="Speichern"
+                @click="openFluegeDeFlights()"
                 class="q-mt-md"
                 color="primary"
                 text-color="white"
-              >
-                <template v-slot:loading>
-                  <q-spinner />
-                </template>
-              </q-btn>
+                :disable="!destination"
+                v-if="arrivalDepatureProfile === 'Flugzeug'"
+                label="Flüge auf fluege.de ansehen"
+              ></q-btn>
             </div>
           </q-form>
         </div>
@@ -1229,6 +1219,30 @@ export default {
       let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?aid=1632674&type=ROUNDTRIP&adults=' + this.adults +
         '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getDepatureReturnDate(this.depatureDate) + '&return=' + this.getDepatureReturnDate(this.returnDate) + '&sort=BEST'
       window.open(url, '_blank')
+    },
+    openFluegeDeFlights () {
+      let babies = 0
+      let children = 0
+
+      this.childrenAges.forEach((childAge, index) => {
+        if (parseInt(childAge) < 2) babies++
+      })
+      children = this.childrenAges.length - babies
+
+      let cabinClass = this.getFluegeDeClass(this.travelClass)
+
+      let url = 'https://www.fluege.de/flight/wait/?sFlightInput%5BflightType%5D=RT&sFlightInput%5BstoreSearch%5D=true&sFlightInput%5Bf0%5D%5BdepLocation%5D=' + this.originCode +
+        '&sFlightInput%5Bf0%5D%5BaccMultiAirportDep%5D=&sFlightInput%5Bf0%5D%5BdepAirport%5D=' + this.originCode +
+        '&sFlightInput%5Bf0%5D%5BarrLocation%5D=' + this.destinationCode + ' &sFlightInput%5Bf0%5D%5BaccMultiAirportArr%5D=' + this.destinationCode +
+        '&sFlightInput%5Bf0%5D%5BarrAirport%5D=' + this.destinationCode + '&sFlightInput%5Bf0%5D%5Bdate%5D=' + this.getDepatureReturnDate(this.depatureDate) +
+        '&sFlightInput%5Bf1%5D%5Bdate%5D=' + this.getDepatureReturnDate(this.returnDate) + '&sFlightInput%5BpaxAdt%5D=' + this.adults + '&sFlightInput%5BpaxChd%5D=' + children +
+        '&sFlightInput%5BpaxInf%5D=' + babies + '&sFlightInput%5BcabinClass%5D=' + cabinClass + '&sFlightInput%5BdepAirline%5D=&sFlightInput%5BareaSearch%5D=TRUE&pop%5Bf24%5D=on&sFlightInput%5Bf0%5D%5BtimeRange%5D=2&sFlightInput%5Bf1%5D%5BtimeRange%5D=2'
+      window.open(url, '_blank')
+    },
+    getFluegeDeClass (travelClass) {
+      if (travelClass === 'Economy' || travelClass === 'Premium Economy') return 'y'
+      else if (travelClass === 'Business') return 'C'
+      else return 'F'
     },
     setToShortestRoute () {
       let suggestedStops = this.getShortestRoute()

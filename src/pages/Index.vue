@@ -31,7 +31,7 @@
           id="OfferContainer"
         >
           <div>
-            <p>Starte jetzt in dein eigenes Abenteuer und erstelle kostenlos deine eigene Reise!</p>
+            <p>Plane jetzt kostenlos deine eigene Reise, ganz ohne Aufwand und unter 5 Minuten!</p>
             <q-btn
               @click="$router.push('/registrieren')"
               color="primary"
@@ -39,7 +39,7 @@
             >Los geht's</q-btn>
           </div>
           <div>
-            <p>Lasse dich durch bereits erstellte Reisen inspirieren!</p>
+            <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
             <q-select
               filled
               use-input

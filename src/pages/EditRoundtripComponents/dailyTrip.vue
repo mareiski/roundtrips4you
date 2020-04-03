@@ -28,16 +28,10 @@
               :toolbar="editorToolbar"
               toolbar-toggle-color="primary"
               :fonts="editorFonts"
+              @blur="saveWork()"
               @paste.native="evt => pasteCapture(evt)"
               style="margin-top:10px; margin-bottom:10px;"
               :definitions="{
-        save: {
-          tip: 'Die Beschreibung Speichern',
-          icon: 'save',
-          color: this.savedEditorContent !== dailyTrip.descriptionInput ? 'red' : '#707070',
-          label: this.savedEditorContent !== dailyTrip.descriptionInput ? 'nicht gespeichert' : 'alles gespeichert',
-          handler: saveWork
-        },
           format: {
           top: 'Formatierung bei Kopieren beibehaten',
           icon: $q.iconSet.editor.formatting,

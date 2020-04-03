@@ -329,6 +329,15 @@ export default {
     },
     openInNewTab (link) {
       window.open(link, '_blank')
+    },
+    leaving () {
+      window.addEventListener('beforeunload', (event) => {
+        if (document.activeElement.querySelector('#q-app') === null) {
+          // any element is still in focus
+
+          event.returnValue = 'You have unfinished changes!'
+        }
+      })
     }
   },
   watch: {
@@ -358,7 +367,9 @@ export default {
     window.removeEventListener('online', this.updateOnlineStatus)
     window.removeEventListener('offline', this.updateOnlineStatus)
   },
+
   created () {
+    this.leaving()
     this.$storyblok.init({
       accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
     })

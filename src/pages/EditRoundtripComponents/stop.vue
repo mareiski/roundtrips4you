@@ -376,16 +376,10 @@
         :toolbar="editorToolbar"
         toolbar-toggle-color="primary"
         :fonts="editorFonts"
+        @blur="saveWork()"
         @paste.native="evt => pasteCapture(evt)"
         style="margin-top:10px; margin-bottom:10px;"
         :definitions="{
-        save: {
-          tip: 'Die Beschreibung Speichern',
-          icon: 'save',
-          color: this.savedEditorContent !== descriptionInput ? 'red' : '#707070',
-          label: this.savedEditorContent !== descriptionInput ? 'nicht gespeichert' : 'alles gespeichert',
-          handler: saveWork
-        },
         format: {
           top: 'Formatierung bei Kopieren beibehaten',
           icon: $q.iconSet.editor.formatting,
@@ -840,7 +834,6 @@ export default {
             options: ['left', 'center', 'right', 'justify']
           }
         ],
-        ['save'],
         ['bold', 'italic', 'strike', 'underline', 'subscript', 'superscript'],
         ['token', 'hr', 'link', 'custom_btn'],
         ['fullscreen'],
