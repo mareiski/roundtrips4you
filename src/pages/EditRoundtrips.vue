@@ -597,7 +597,6 @@
       <q-tab-panel name="settings">
         <h4>Allgemeine Einstellungen</h4>
         <q-form
-          @submit="onSaveRoundtrip"
           bordered
           class="q-gutter-md rounded-borders"
         >
@@ -611,6 +610,7 @@
               label="Rundreise veröffentlichen"
               icon="share"
               :disable="!user || !user.displayName"
+              @input="onSaveRoundtrip"
             >
               <q-tooltip>
                 {{user && user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
@@ -636,6 +636,7 @@
                   use-input
                   style="margin-top:10px; margin-right:10px; padding:0;"
                   :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                  @blur="onSaveRoundtrip"
                 >
                   <template v-slot:prepend>
                     <q-icon name="explore" />
@@ -652,6 +653,7 @@
                     icon="add"
                     side
                     style="transform:rotate(45deg);"
+                    @blur="onSaveRoundtrip"
                   />
                 </div>
               </div>
@@ -668,6 +670,7 @@
                 use-input
                 style="margin-top:10px; margin-right:10px; padding:0;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                @blur="onSaveRoundtrip"
               >
                 <template v-slot:prepend>
                   <q-icon name="explore" />
@@ -679,12 +682,14 @@
               @click="countries.push('')"
               label="Land hinzufügen"
               style="margin-bottom:30px;"
+              @blur="onSaveRoundtrip"
             />
             <RegionSearch
               v-if="countries.length === 1"
               :country="countries[0]"
               :defaultRegion="region"
               @update="updateRegion($event)"
+              @blur="onSaveRoundtrip"
             ></RegionSearch>
             <q-select
               outlined
@@ -694,6 +699,7 @@
               use-input
               :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Kategorie']"
               class="input-item"
+              @blur="onSaveRoundtrip"
             >
               <template v-slot:prepend>
                 <q-icon name="access_time" />
@@ -707,6 +713,7 @@
                 color="gold"
                 :readonly="!isNaN(hotelRatingAvg())"
                 style="margin-right:10px;"
+                @blur="onSaveRoundtrip"
               />
               <q-item-label>Durchschittliche Hotelbewertung {{!isNaN(hotelRatingAvg()) ? '(errechnet)' : ''}}</q-item-label>
             </div>
@@ -715,6 +722,7 @@
               outlined
               autogrow
               label="Kurze Beschreibung"
+              @blur="onSaveRoundtrip"
               :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
           val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
             > <template v-slot:prepend>
@@ -730,6 +738,7 @@
               :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
               class="input-item"
               @input="getGeneralProfile()"
+              @blur="onSaveRoundtrip"
             >
               <template v-slot:prepend>
                 <q-icon name="commute" />
@@ -739,6 +748,7 @@
               v-model="highlight1"
               label="Highlight 1"
               outlined
+              @blur="onSaveRoundtrip"
               :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
             > <template v-slot:prepend>
                 <q-icon name="star" />
@@ -747,6 +757,7 @@
               v-model="highlight2"
               label="Highlight 2"
               outlined
+              @blur="onSaveRoundtrip"
               :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
             > <template v-slot:prepend>
                 <q-icon name="star" />
@@ -756,6 +767,7 @@
               label="Highlight 3"
               outlined
               :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+              @blur="onSaveRoundtrip"
             > <template v-slot:prepend>
                 <q-icon name="star" />
               </template></q-input>
@@ -764,6 +776,7 @@
               v-model="wholeYearOffer"
               label="Ganzes Jahr"
               icon="event"
+              @input="onSaveRoundtrip"
             >
             </q-toggle>
             <q-input
@@ -772,6 +785,7 @@
               v-model="OfferStartPeriod"
               label="von"
               class="input-item rounded-borders"
+              @blur="onSaveRoundtrip"
             >
               <q-popup-proxy
                 ref="qDateProxy1"
@@ -795,6 +809,7 @@
               </template>
             </q-input>
             <q-input
+              @blur="onSaveRoundtrip"
               :disable="wholeYearOffer"
               outlined
               v-model="OfferEndPeriod"
@@ -823,6 +838,7 @@
               </template>
             </q-input>
             <q-input
+              @blur="onSaveRoundtrip"
               v-model="price"
               label="Pauschalpreis ohne Freizeitgestaltung"
               type="number"
@@ -840,6 +856,7 @@
                 v-model="rooms"
                 label="Zimmer"
                 type="number"
+                @blur="onSaveRoundtrip"
                 :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib eine Zimmeranzahl an']"
                 outlined
               >
@@ -851,6 +868,7 @@
                 v-model="adults"
                 label="Erwachsene"
                 type="number"
+                @blur="onSaveRoundtrip"
                 :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
                 outlined
               >
@@ -862,6 +880,7 @@
                 v-model="children"
                 label="Kinder"
                 type="number"
+                @blur="parseInt(children) === 0 ? onSaveRoundtrip() : null"
                 @input="childrenAges.length = parseInt(children)"
                 :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
                 outlined
@@ -880,6 +899,7 @@
                   v-model="childrenAges[childNum - 1]"
                   :label="'Alter Kind ' + childNum"
                   type="number"
+                  @blur="onSaveRoundtrip"
                   style="margin-right:10px;"
                   :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib das Alter des Kindes an']"
                   outlined
@@ -1538,7 +1558,7 @@ export default {
           color: 'red-5',
           textColor: 'white',
           icon: 'error',
-          message: 'Die Rundreise konnte nicht gespeichert werden'
+          message: 'Bitte überprüfe deine Angaben'
         })
       }
     },
@@ -2066,7 +2086,8 @@ export default {
       })
     },
     saveData (field, value) {
-      if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
+      if (roundtripDocId === null || roundtripDocId === '' || typeof roundtripDocId === 'undefined') return false
+      if (value === null || value === '' || typeof value === 'undefined') return false
       try {
         db.collection('Roundtrips').doc(roundtripDocId).update({
           ['' + field]: value
