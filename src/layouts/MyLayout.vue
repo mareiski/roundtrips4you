@@ -269,9 +269,11 @@
     </div>
   </q-layout>
 </template>
-
+<style lang="less">
+@import "../css/site.less";
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/site.less')
+// import(/* webpackPrefetch: true */ '../css/site.less')
 import { auth } from '../firebaseInit'
 import { Loading } from 'quasar'
 
