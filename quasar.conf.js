@@ -126,7 +126,15 @@ module.exports = function (ctx) {
           new PrerenderSPAPlugin({
             staticDir: path.join(__dirname, 'dist'),
             // Required - Routes to render.
-            routes: ['/', '/about', '/some/deep/nested/route']
+            routes: ['/', '/ueber', '/rundreisen-uebersicht', '/rundreisen/:country', '/rundreisen-details/:id', '/login', '/registrieren',
+              '/meine-rundreisen', '/blog', '/blog/:name', '/rundreise-bearbeiten/:id'],
+            minify: {
+              collapseBooleanAttributes: true,
+              collapseWhitespace: true,
+              decodeEntities: true,
+              keepClosingSlash: true,
+              sortAttributes: true
+            }
           }))
         if (typeof cfg.output !== 'undefined') {
           // copy _redirects file & robots.txt
