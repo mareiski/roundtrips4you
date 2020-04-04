@@ -126,8 +126,8 @@ module.exports = function (ctx) {
           new PrerenderSPAPlugin({
             staticDir: path.join(__dirname, 'dist'),
             // Required - Routes to render.
-            routes: ['/', '/ueber', '/rundreisen-uebersicht', '/rundreisen/:country', '/rundreisen-details/:id', '/login', '/registrieren',
-              '/meine-rundreisen', '/blog', '/blog/:name', '/rundreise-bearbeiten/:id'],
+            routes: ['/', '/ueber', '/rundreisen-uebersicht', '/login', '/registrieren',
+              '/meine-rundreisen', '/blog'],
             minify: {
               collapseBooleanAttributes: true,
               collapseWhitespace: true,
