@@ -334,7 +334,7 @@ export default {
     },
     leaving () {
       window.addEventListener('beforeunload', (event) => {
-        if (this.user && document.activeElement.querySelector('#q-app') === null) {
+        if (this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) {
           // any element is still in focus
           event.returnValue = 'You have unfinished changes!'
         }
