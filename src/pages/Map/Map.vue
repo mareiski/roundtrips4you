@@ -14,58 +14,61 @@
       <MglNavigationControl position="top-right" />
       <MglMarker
         v-for="stop in stops"
-        :key="stop"
-        :coordinates="stop.HotelStop && stop.HotelLocation ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
+        :key="stop.DocId"
+        :coordinates="stop.HotelStop && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
         @click="onMarkerClicked($event)"
       >
         <MglPopup>
-          <VCard>
-            <a
-              v-if="stop.HotelStop && stop.HotelName"
-              :href="stop.GeneralLink"
-              target="_blank"
-            >{{stop.Title + ' - ' + capitalize(stop.HotelName)}}</a>
-            <p v-if="!stop.HotelStop || !stop.HotelName">{{stop.Title}}</p>
-            <q-chip
-              icon="hotel"
-              v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
-              size="1px"
-              dense
-              class="linkChip"
-              clickable
-              @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + stop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + stop.InitDate.split('.')[1] + '&checkin_monthday=' + stop.InitDate.split('.')[0] + '&checkout_year=' + stop.CheckOutDate.split('.')[2] + '&checkout_month=' + stop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + stop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
-            >auf booking.com</q-chip>
-            <p>
+          <q-card>
+            <q-card-section>
               <a
+                v-if="stop.HotelStop && stop.HotelName"
+                :href="stop.GeneralLink"
                 target="_blank"
-                :href="!stop.HotelStop || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
-              >{{stop.HotelStop && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
-            </p>
-          </VCard>
+              >{{stop.Title + ' - ' + capitalize(stop.HotelName)}}</a>
+              <p v-if="!stop.HotelStop || !stop.HotelName">{{stop.Title}}</p>
+              <q-chip
+                icon="hotel"
+                v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
+                dense
+                class="linkChip"
+                clickable
+                @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + stop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + stop.InitDate.split('.')[1] + '&checkin_monthday=' + stop.InitDate.split('.')[0] + '&checkout_year=' + stop.CheckOutDate.split('.')[2] + '&checkout_month=' + stop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + stop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+              >auf booking.com</q-chip>
+              <p>
+                <a
+                  target="_blank"
+                  :href="!stop.HotelStop || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
+                >{{stop.HotelStop && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
+              </p>
+            </q-card-section>
+          </q-card>
         </MglPopup>
       </MglMarker>
       <div
         v-for="stop in stops"
-        :key="stop"
+        :key="'StopContainer' + stop.DocId"
         @click="onMarkerClicked($event)"
       >
         <MglMarker
-          v-if="stop.Parking && typeof stop.Parking !== 'undefined'"
-          :key="stop"
+          v-if="stop.Parking && typeof stop.Parking !== 'undefined' && !isNaN(stop.Parking.lng)"
+          :key="'Stop' + stop.DocId"
           :coordinates="[stop.Parking.lng, stop.Parking.lat]"
           color="#D56026"
         >
           <MglPopup>
-            <VCard>
-              <p>{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
-            </VCard>
+            <q-card>
+              <q-card-section>
+                <p>{{ stop.parkingPlace && typeof stop.parkingPlace !== 'undefined' &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
+              </q-card-section>
+            </q-card>
           </MglPopup>
         </MglMarker>
       </div>
       <MglMarker
         v-for="(route, index) in addedRoutes"
-        :key="route"
+        :key="route.color"
         :coordinates="route.location"
         :color="route.color"
         @click="onMarkerClicked($event)"
@@ -76,17 +79,21 @@
           name="speed"
         />
         <MglPopup>
-          <VCard v-if="route.duration">
-            <div>{{route.duration}} bis {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
-            <a
-              target="_blank"
-              v-if="route.origin !== route.destination"
-              :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination"
-            >auf Google ansehen</a>
-          </VCard>
-          <VCard v-else>
-            <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}}</div>
-          </VCard>
+          <q-card v-if="route.duration">
+            <q-card-section>
+              <div>{{route.duration}} bis {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+              <a
+                target="_blank"
+                v-if="route.origin !== route.destination"
+                :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination"
+              >auf Google ansehen</a>
+            </q-card-section>
+          </q-card>
+          <q-card v-else>
+            <q-card-section>
+              <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}}</div>
+            </q-card-section>
+          </q-card>
         </MglPopup>
       </MglMarker>
     </MglMap>

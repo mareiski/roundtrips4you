@@ -307,21 +307,21 @@
           >
             <div
               class="card-center-col"
-              style="justify-content:flex-start;"
+              style="justify-content:flex-start; width:auto;"
             >
               <div class="card-row">
-                <h2 class="country-title">Es wurden leider noch keine Rundreisen für {{selectedCountry}} erstellt</h2>
+                <div class="no-rt-title flex">
+                  <q-icon name="warning" />
+                  <span>Es wurden leider keine Rundreisen für {{selectedCountry}} gefunden</span>
+                </div>
               </div>
               <div class="card-row">
-                <h2
-                  class="country-title"
-                  style="font-size:20px; padding-top:35px;"
-                >Ertelle jetzt als Erster deine eigene Rundreise für {{selectedCountry}}</h2>
+                <span style="font-size:18px; padding-top:35px;">Aber das macht nichts, ertelle einfach selbst deine eigene Rundreise für {{selectedCountry}}</span>
               </div>
             </div>
             <div
               class="card-right-col"
-              style="width:auto; justify-content:flex-end;"
+              style="width:auto; justify-content:flex-end; min-width:190px;"
             >
               <div class="card-bottom-row">
                 <router-link
@@ -334,8 +334,8 @@
         </div>
         <div
           class="roundtrip-card-container"
-          v-for="(roundtrip) in roundtrips"
-          :key="roundtrip"
+          v-for="roundtrip in roundtrips"
+          :key="roundtrip.RTId"
         >
           <div
             class="edit-btn-container"

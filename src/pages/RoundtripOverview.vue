@@ -18,7 +18,7 @@
         <div
           class="country-card-container"
           v-for="country in countries"
-          :key="country"
+          :key="country.Name"
         >
           <router-link
             class="country-card"

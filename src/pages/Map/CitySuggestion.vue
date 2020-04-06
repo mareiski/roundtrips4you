@@ -14,11 +14,11 @@
         <q-spinner />
       </template>
     </q-btn>
-    <div class="flex justify-between cards-container">
+    <div class="flex justify-stretch cards-container">
       <q-card
         class="city-card"
-        v-for="city in cities"
-        :key="city"
+        v-for="(city, index) in cities"
+        :key="index"
       >
         <a
           :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
@@ -176,7 +176,10 @@ export default {
         else {
           axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName, {}
           ).then(function (response) {
-            context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
+            if (response.data.hits[0]) context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
+            else {
+              context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: '../../statics/dummy-image-landscape-1-150x150.jpg', cityName: cityName })
+            }
           })
         }
       })
@@ -184,14 +187,6 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     }
-  },
-  created () {
-    let initDate = null
-    Date(Math.max.apply(null, this.dates.map(function (e) {
-      initDate = e
-      console.log(initDate)
-    })))
-    console.log(initDate)
   }
 }
 </script>

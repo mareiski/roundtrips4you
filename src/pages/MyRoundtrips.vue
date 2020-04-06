@@ -30,7 +30,7 @@
           @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
           v-ripple
           v-for="(roundtrip, index) in roundtrips"
-          :key="roundtrip"
+          :key="roundtrip.RTId"
         >
           <q-item-section
             avatar

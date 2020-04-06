@@ -152,7 +152,7 @@
           >
             <template v-for="(stop, index) in stops">
               <Stop
-                :key="stop"
+                :key="stop.DocId"
                 :title="stop.Title"
                 :date="stop.InitDate"
                 :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
@@ -179,7 +179,7 @@
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
               ></Stop>
               <Duration
-                :key="index"
+                :key="'Stop' + stop.DocId"
                 v-if="index !== stops.length - 1"
                 :duration="durations[durations.findIndex(x => x.title === stop.Title)] && durations[durations.findIndex(x => x.title === stop.Title)].duration ? (durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance) : null"
                 :editor="true"
@@ -964,7 +964,7 @@
               <div
                 class="uploader"
                 v-for="(url, index) in galeryImgUrls"
-                :key="url"
+                :key="index"
               >
                 <q-img
                   style="height:100%;"
@@ -1000,20 +1000,6 @@
                   </q-inner-loading>
                 </q-btn>
               </div>
-            </div>
-            <div class="row justify-end">
-              <q-btn
-                type="submit"
-                :loading="submitting"
-                label="Speichern"
-                class="q-mt-md"
-                color="primary"
-                text-color="white"
-              >
-                <template v-slot:loading>
-                  <q-spinner />
-                </template>
-              </q-btn>
             </div>
           </q-list>
         </q-form>
@@ -1381,7 +1367,6 @@ export default {
               'Authorization': tokenString
             }
           }).then(function (response) {
-            console.log(response)
             resolve(response)
           }).catch(function (error) {
             console.log('Error' + error)
@@ -1704,7 +1689,6 @@ export default {
               'Authorization': tokenString
             }
           }).then(function (response) {
-            console.log(response)
             resolve(response)
           }).catch(function (error) {
             console.log('Error' + error)
@@ -1825,7 +1809,6 @@ export default {
     },
     updateRegion (event) {
       if (event !== null) {
-        console.log(event)
         this.region = event
       }
     },
@@ -2087,7 +2070,7 @@ export default {
     },
     saveData (field, value) {
       if (roundtripDocId === null || roundtripDocId === '' || typeof roundtripDocId === 'undefined') return false
-      if (value === null || value === '' || typeof value === 'undefined') return false
+      // if (value === null || value === '' || typeof value === 'undefined') return false
       try {
         db.collection('Roundtrips').doc(roundtripDocId).update({
           ['' + field]: value

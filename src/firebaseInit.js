@@ -41,11 +41,13 @@ const auth = {
     firebase.auth().onAuthStateChanged((user) => {
       store.dispatch('user/setCurrentUser')
 
-      let requireAuth = this.context.$route.matched.some(record => record.meta.requireAuth)
-      let guestOnly = this.context.$route.matched.some(record => record.meta.guestOnly)
+      if (this.context.$route) {
+        let requireAuth = this.context.$route.matched.some(record => record.meta.requireAuth)
+        let guestOnly = this.context.$route.matched.some(record => record.meta.guestOnly)
 
-      if (requireAuth && !user) router.push('login')
-      else if (guestOnly && user) router.push('meine-rundreisen')
+        if (requireAuth && !user) router.push('login')
+        else if (guestOnly && user) router.push('meine-rundreisen')
+      }
     })
   },
   user () {

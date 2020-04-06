@@ -2,7 +2,7 @@
   <div class="roundtrip-details q-px-lg q-pb-md">
     <div
       class="edit-btn-container"
-      v-if="user !== null && user.uid !== roundtrip[0].UserId"
+      v-if="user !== null && (!roundtrip[0] || user.uid !== roundtrip[0].UserId)"
       style="position:absolute; z-index:1; right:0; padding: 10px"
     >
       <q-btn
@@ -77,14 +77,14 @@
       arrows
     >
       <q-carousel-slide
-        v-for="url in galeryImgUrls"
-        :key="url"
+        v-for="(url, index) in galeryImgUrls"
+        :key="index"
         :name="url"
         :img-src="url"
       />
     </q-carousel>
     <div class="carousel-placeholder">
-      <h3>{{roundtrip[0].Title}}</h3>
+      <h3>{{roundtrip[0] ? roundtrip[0].Title : null}}</h3>
     </div>
     <q-tabs
       v-model="tab"
@@ -127,14 +127,14 @@
           <div class="stop-list">
             <template v-for="(stop, index) in stops">
               <Stop
-                :key="stop"
+                :key="stop.DocId"
                 :title="stop.Title"
                 :date="dates[index]"
                 :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
-                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking.label : null"
+                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking : null"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
                 :hotelStars="parseInt(stop.HotelStars)"
                 :hotelName="stop.HotelName"
@@ -150,7 +150,7 @@
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
               ></Stop>
               <Duration
-                :key="'A' + stop"
+                :key="'Stop' + stop.DocId"
                 v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
                 :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
@@ -172,14 +172,14 @@
           :stops="stops"
           :childrenAges="childrenAges"
           :checkOutDate="checkOutDate"
-          :adults="adults"
-          :rooms="rooms"
+          :adults="parseInt(adults)"
+          :rooms="parseInt(rooms)"
         ></Map>
         <br>
         <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>
       </q-tab-panel>
 
-      <q-tab-panel name="ratings">
+      <!-- <q-tab-panel name="ratings">
         <div class="text-h6">Bewertungen</div>
         <div class="q-pa-md row justify-center">
           <div style="width: 100%; max-width: 400px">
@@ -204,7 +204,7 @@
             />
           </div>
         </div>
-      </q-tab-panel>
+      </q-tab-panel> -->
     </q-tab-panels>
   </div>
 </template>
@@ -245,7 +245,8 @@ export default {
       Profile: '',
       checkOutDate: null,
       pageTitle: 'User',
-      prevRouteParams: null
+      prevRouteParams: null,
+      disableEditBtn: false
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -303,6 +304,7 @@ export default {
           details = []
           snapshot.forEach(doc => {
             details.push(doc.data())
+            details[details.findIndex(x => x.Title === doc.data().Title)].DocId = doc.id
           })
           this.stops = details
 

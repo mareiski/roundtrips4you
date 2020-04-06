@@ -205,8 +205,8 @@
     <div>
       <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
         <a
-          v-for="sight in sights"
-          :key="sight"
+          v-for="(sight, index) in sights"
+          :key="index"
           :href="'https://www.google.com/search?q=' + sight.name + ' ' + location.label.split(',')[0]"
           target="_blank"
           style="text-decoration:none;"
@@ -257,8 +257,8 @@
           style="flex-direction:column;"
         >Highlights:</b>
         <q-chip
-          v-for="addedSight in addedSights"
-          :key="addedSight"
+          v-for="(addedSight, index) in addedSights"
+          :key="index"
           clickable
           @click="openInNewTab('https://www.google.com/search?q=' + addedSight + ' ' + location.label.split(',')[0])"
         >{{addedSight}}</q-chip>
@@ -395,7 +395,7 @@
         <div
           class="uploader"
           v-for="(stopImage, index) in stopImages"
-          :key="stopImage"
+          :key="index"
           style="margin-right:8px;"
         >
           <q-img
@@ -473,8 +473,8 @@
           <q-card-section class="row items-center">
             <div
               class="uploader"
-              v-for="url in galeryImgUrls"
-              :key="url"
+              v-for="(url, index) in galeryImgUrls"
+              :key="index"
             >
               <q-img
                 style="height:100%;"
@@ -506,6 +506,7 @@
             >
               <q-input
                 filled
+                ref="tempImgLinkInput"
                 label="Bild per Link einfügen"
                 v-model="tempImgLink"
                 :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
@@ -542,7 +543,7 @@
         <DailyTrip
           style="margin-top:10px;"
           v-for="(dailyTrip, index) in dailyTrips"
-          :key="dailyTrip"
+          :key="dailyTrip.id"
           :dailyTrip="dailyTrip"
           :editorToolbar="editorToolbar"
           :editorFonts="editorFonts"
@@ -716,6 +717,16 @@
             mask="DD.MM.YYYY HH:mm"
             format24h
           />
+          <br>
+          <!-- <q-toggle
+            v-model="changeAllDates"
+            label="Alle Daten ändern"
+            icon="update"
+          >
+            <q-tooltip>
+              Aktivieren um alle nachfolgenden Daten ebenfalls zu ändern
+            </q-tooltip>
+          </q-toggle> -->
           <div
             class="flex justify-between"
             style="width:100%"
@@ -771,7 +782,7 @@ export default {
     generalLink: String,
     location: Object,
     days: String,
-    parkingPlace: String,
+    parkingPlace: Object,
     lastItem: Boolean,
     hotelStars: Number,
     hotelName: String,
@@ -1070,7 +1081,7 @@ export default {
     },
     addDailyTrip () {
       if (this.tempDailyTripDate && this.tempDailyTripLocation && this.dailyTripProfile) {
-        let createdStop = { date: this.tempDailyTripDate, location: this.tempDailyTripLocation, descriptionInput: 'Tagesausflug nach ' + this.tempDailyTripLocation.label.split(',')[0], profile: this.getDailyTripProfile() }
+        let createdStop = { id: this.dailyTrips.length, date: this.tempDailyTripDate, location: this.tempDailyTripLocation, descriptionInput: 'Tagesausflug nach ' + this.tempDailyTripLocation.label.split(',')[0], profile: this.getDailyTripProfile() }
         this.dailyTrips.push(createdStop)
 
         this.dailyTrips.forEach((dailyTrip, index) => {
@@ -1245,6 +1256,9 @@ export default {
     addImageToStop (src) {
       if (!this.stopImages) this.stopImages = []
       this.stopImages.push(src)
+      this.tempImgLink = ''
+      this.$refs.tempImgLinkInput.resetValidation()
+
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages

@@ -13,58 +13,60 @@
         <div id="TitleImgPlacholder">
           <h1>{{story.content.Titel}}</h1>
         </div>
-        <div
-          v-for="item in story.content.Text.content"
-          :key="item"
-        >
-          <div v-if="item.content && item.type === 'paragraph'">
-            <span
-              v-for="subItem in item.content"
-              :key="subItem"
-            >
-              <template v-if="subItem.type === 'text'">
-                <template v-if="subItem.marks && subItem.marks[0].type === 'link'">
-                  <a
-                    :href="subItem.marks[0].attrs.href"
-                    :target="subItem.marks[0].attrs.target"
-                  >
-                    {{subItem.text}}
-                  </a>
-                </template>
-                <template v-else>
-                  <span :style="subItem.marks ? getStyle(subItem) : null">{{subItem.text}}</span>
-                </template>
-              </template>
-            </span>
-          </div>
-          <div v-else-if="item.content && item.type === 'heading'">
-            <h1 v-if="item.attrs.level === 1">{{item.content[0].text}}</h1>
-            <h2 v-else-if="item.attrs.level === 2">{{item.content[0].text}}</h2>
-            <h3 v-else>{{item.content[0].text}}</h3>
-          </div>
-          <div v-else-if="item.content && (item.type === 'ordered_list' || item.type === 'bullet_list')">
-            <ol v-if="item.type === 'ordered_list'">
-              <li
-                v-for="listItem in item.content"
-                :key="listItem"
+        <div v-if="story.content.Text">
+          <div
+            v-for="(item, index) in story.content.Text.content"
+            :key="index"
+          >
+            <div v-if="item.content && item.type === 'paragraph'">
+              <span
+                v-for="(subItem, index) in item.content"
+                :key="index"
               >
-                {{listItem.content[0].content[0].text}}
-              </li>
-            </ol>
-            <ul v-else>
-              <li
-                v-for="listItem in item.content"
-                :key="listItem"
-              >
-                {{listItem.content[0].content[0].text}}
-              </li>
-            </ul>
+                <template v-if="subItem.type === 'text'">
+                  <template v-if="subItem.marks && subItem.marks[0].type === 'link'">
+                    <a
+                      :href="subItem.marks[0].attrs.href"
+                      :target="subItem.marks[0].attrs.target"
+                    >
+                      {{subItem.text}}
+                    </a>
+                  </template>
+                  <template v-else>
+                    <span :style="subItem.marks ? getStyle(subItem) : null">{{subItem.text}}</span>
+                  </template>
+                </template>
+              </span>
+            </div>
+            <div v-else-if="item.content && item.type === 'heading'">
+              <h1 v-if="item.attrs.level === 1">{{item.content[0].text}}</h1>
+              <h2 v-else-if="item.attrs.level === 2">{{item.content[0].text}}</h2>
+              <h3 v-else>{{item.content[0].text}}</h3>
+            </div>
+            <div v-else-if="item.content && (item.type === 'ordered_list' || item.type === 'bullet_list')">
+              <ol v-if="item.type === 'ordered_list'">
+                <li
+                  v-for="(listItem, index) in item.content"
+                  :key="index"
+                >
+                  {{listItem.content[0].content[0].text}}
+                </li>
+              </ol>
+              <ul v-else>
+                <li
+                  v-for="(listItem, index) in item.content"
+                  :key="index"
+                >
+                  {{listItem.content[0].content[0].text}}
+                </li>
+              </ul>
+            </div>
+            <q-img
+              v-if="item.type === 'blok' && item.attrs.body[0].component === 'image'"
+              :src="item.attrs.body[0].image"
+              :style="{'width': item.attrs.body[0].width + 'px'}"
+            ></q-img>
           </div>
-          <q-img
-            v-if="item.type === 'blok' && item.attrs.body[0].component === 'image'"
-            :src="item.attrs.body[0].image"
-            :style="{'width': item.attrs.body[0].width + 'px'}"
-          ></q-img>
         </div>
       </div>
     </div>
@@ -113,7 +115,6 @@ export default {
         }
         this.$nextTick(() => {
           this.story = data.story
-          console.log(this.story)
 
           this.title = this.story.content.Titel
           this.loading = false

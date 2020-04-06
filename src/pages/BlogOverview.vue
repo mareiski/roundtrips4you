@@ -12,7 +12,7 @@
       <div
         class="story-card-container"
         v-for="story in stories"
-        :key="story"
+        :key="story.id"
       >
         <q-card class="story-card">
           <q-card-section>
@@ -32,12 +32,12 @@
                 <template v-for="(item, index) in story.content.Text.content">
                   <div
                     v-if="index < 3"
-                    :key="item"
+                    :key="index"
                   >
                     <div v-if="item.content && item.type === 'paragraph'">
                       <span
-                        v-for="subItem in item.content"
-                        :key="subItem"
+                        v-for="(subItem, index) in item.content"
+                        :key="index"
                       >
                         <template v-if="subItem.type === 'text'">
                           <span>{{subItem.text}}</span>
@@ -47,14 +47,14 @@
                     <br>
                   </div>
                   <div
-                    :key="'A' + item"
+                    :key="'A' + index"
                     v-if="index === 4"
                   >
-                    <router-link :to="'/blog/' + story.slug">
-                      <q-btn
-                        color="primary"
-                        style="text-decoration:none;"
-                      >weiterlesen</q-btn>
+                    <router-link
+                      :to="'/blog/' + story.slug"
+                      style="text-decoration:none;"
+                    >
+                      <q-btn color="primary">weiterlesen</q-btn>
                     </router-link>
                   </div>
                 </template>
