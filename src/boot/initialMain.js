@@ -3,6 +3,7 @@ const getLeaflet = () => import('leaflet')
 import { AddressbarColor, Loading } from 'quasar'
 import vue from 'vue'
 import StoryblokVue from 'storyblok-vue'
+import VueLazyload from 'vue-lazyload'
 const getClickOutside = () => import('v-click-outside')
 // import(/* webpackPreload: true */ 'leaflet/dist/leaflet.css')
 
@@ -24,4 +25,5 @@ export default async ({ app, store, router }) => {
 
   getClickOutside().then(vClickOutside => vue.use(vClickOutside))
   vue.use(StoryblokVue)
+  vue.use(VueLazyload)
 }

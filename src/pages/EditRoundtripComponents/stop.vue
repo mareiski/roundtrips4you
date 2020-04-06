@@ -470,16 +470,16 @@
         v-model="chooseImgDialog"
       >
         <q-card>
-          <q-card-section class="row items-center">
+          <q-card-section class="row items-center galeryImgUploaderContainer flex justify-between">
             <div
               class="uploader"
               v-for="(url, index) in galeryImgUrls"
               :key="index"
             >
-              <q-img
-                style="height:100%;"
-                :src="url"
-              ></q-img>
+              <img
+                style="width:100%;"
+                v-lazy="url"
+              />
               <q-btn
                 round
                 color="primary"

@@ -7,7 +7,7 @@
       <q-icon name="keyboard_arrow_left"></q-icon>
       zurück zu meinen Rundreisen
     </router-link>
-    <h3 v-if="!stopsLoaded">
+    <h3 v-if="!title">
       <q-skeleton
         width="200px"
         type="text"
