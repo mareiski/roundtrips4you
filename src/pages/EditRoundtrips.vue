@@ -198,6 +198,7 @@
             expand-separator
             v-model="addExpanded"
             class="add-item"
+            :disable="!stopsLoaded"
             @click="addButtonActive = !addButtonActive"
           >
             <template v-slot:header>
@@ -206,6 +207,7 @@
                   class="add-button"
                   side
                   round
+                  :disable="!stopsLoaded"
                   color="primary"
                   icon="add"
                   :class="{ active: addButtonActive }"
@@ -1926,7 +1928,6 @@ export default {
 
           this.saveRoundtripDaysAndHotels()
           Loading.hide()
-          this.stopsLoaded = true
 
           if (!this.firstLoad && refreshAll) {
             let context = this
@@ -2017,7 +2018,7 @@ export default {
               context.getDays(stop, index, data.duration * 1000)
             } else {
               context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
-              context.stopsLoaded = true
+              if (context.stops.indexOf(stop) === context.stops.length - 2) context.stopsLoaded = true
             }
           }).catch(exception => {
             context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
@@ -2057,7 +2058,7 @@ export default {
 
       this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
 
-      this.stopsLoaded = true
+      if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
     },
     saveTitle (val) {
       this.isUniqueTitle(val).then(uniqueTitle => {

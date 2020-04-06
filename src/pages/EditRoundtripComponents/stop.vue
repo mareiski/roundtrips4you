@@ -446,7 +446,7 @@
       <div
         style="margin-top:10px;"
         class="uploader"
-        v-if="galeryImgUrls.length > 0 && editor"
+        v-if="editor"
       >
         <q-img
           style="height:100%;"
@@ -456,13 +456,12 @@
           round
           color="primary"
           icon="add"
+          :disable="galeryImgUrls.length === 0"
           style="position: absolute;"
           @click="chooseImgDialog = true"
         >
+          <q-tooltip v-if="galeryImgUrls.length === 0">Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</q-tooltip>
         </q-btn>
-      </div>
-      <div v-else-if="editor">
-        <span>Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</span>
       </div>
       <q-dialog
         v-if="galeryImgUrls.length > 0"
@@ -1259,6 +1258,9 @@ export default {
       this.tempImgLink = ''
       this.$refs.tempImgLinkInput.resetValidation()
 
+      let parentStops = this.getParent('EditRoundtrips').stops
+      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
+
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
@@ -1275,6 +1277,10 @@ export default {
     removeImg (index) {
       if (!this.stopImages) return
       this.stopImages.splice(index, 1)
+
+      let parentStops = this.getParent('EditRoundtrips').stops
+      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
+
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
