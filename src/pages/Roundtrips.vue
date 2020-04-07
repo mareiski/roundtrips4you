@@ -523,7 +523,7 @@ export default {
     return {
       title: 'Reisen für ' + this.$route.params.country,
       meta: {
-        description: { name: 'description', content: 'Lass dich von vorgefertigten Reisen für ' + this.$route.params.country + ' Inspirieren und bearbeite diese nach deinen Wünschen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+        description: { name: 'description', content: 'Rundreise ' + this.$route.params.country + '. Routen und Tipps zu ' + this.$route.params.country + ' auf Roundtrips4you, dein Reiseplaner und Routenplaner' }
       }
     }
   },

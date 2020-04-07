@@ -261,7 +261,7 @@ export default {
   meta: {
     title: 'Home',
     meta: {
-      description: { name: 'description', content: 'Reise auf roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Routenplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+      description: { name: 'description', content: 'Reise auf Roundtrips4you selbst planen und zusammenstellen, komplett kostenlos und online. Dein Routenplaner und Reiseplaner mit vielen tools für deinen Roadtrip' }
     }
   },
   name: 'PageIndex',
