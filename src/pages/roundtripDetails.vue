@@ -376,7 +376,7 @@ export default {
     checkDisableEditBtn (val) {
       this.isUniqueTitle(val).then(uniqueTitle => {
         if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
-        this.disableEditBtn = val === null || val === '' || !uniqueTitle || val.indexOf(' ') !== -1
+        this.disableEditBtn = val === null || val === '' || !uniqueTitle
       }
       )
     },

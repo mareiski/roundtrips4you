@@ -1775,7 +1775,7 @@ export default {
             color: 'red-5',
             textColor: 'white',
             icon: 'error',
-            message: 'Deine Rundreise konnte nicht richtig geladen werden, bitte versuche es erneut'
+            message: 'Es gibt fehlende Angaben bei deiner Rundreise'
           })
         })
     },
@@ -2277,7 +2277,7 @@ export default {
     },
     copyRT (originalRT, UserId, newTitle) {
       this.isUniqueTitle(newTitle).then(uniqueTitle => {
-        if (newTitle === null || newTitle === '' || uniqueTitle === 'Dieser Titel ist bereits vergeben' || newTitle.indexOf(' ') !== -1) {
+        if (newTitle === null || newTitle === '' || uniqueTitle === 'Dieser Titel ist bereits vergeben') {
           this.$q.notify({
             color: 'red-5',
             textColor: 'white',
@@ -2369,7 +2369,7 @@ export default {
                         })
 
                       // refresh page
-                      this.$router.go()
+                      this.$router.push('/meine-rundreisen')
                     })
                   })
                 })
