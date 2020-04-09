@@ -177,7 +177,7 @@
                       clearable
                       class="input-item"
                       use-input
-                      style="margin-top:10px; margin-right:10px;"
+                      style="margin-top:10px; width:300px;"
                       :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
                     >
                       <template v-slot:prepend>
@@ -293,7 +293,6 @@
                       class="input-item rounded-borders"
                     >
                       <q-popup-proxy
-                        ref="qDateProxy1"
                         transition-show="scale"
                         transition-hide="scale"
                       >
@@ -301,7 +300,6 @@
                           v-model="depatureDate"
                           today-btn
                           mask="DD.MM.YYYY"
-                          v-close-popup
                           @input="updateReturnDate()"
                         />
                       </q-popup-proxy>
@@ -320,7 +318,6 @@
                       class="input-item rounded-borders"
                     >
                       <q-popup-proxy
-                        ref="qDateProxy1"
                         transition-show="scale"
                         transition-hide="scale"
                       >
@@ -328,7 +325,6 @@
                           v-model="returnDate"
                           today-btn
                           mask="DD.MM.YYYY"
-                          v-close-popup
                         />
                       </q-popup-proxy>
                       <template v-slot:prepend>
@@ -611,14 +607,12 @@ export default {
         lng: event.x,
         label: event.label
       }
-      console.log(event)
     },
     addRoundtrip (Title, Location) {
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       // Title = Title.replace(/ /g, '')
       Title = Title.trim()
 
-      console.log(Location)
       try {
         let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
@@ -900,7 +894,6 @@ export default {
               'Authorization': tokenString
             }
           }).then(function (response) {
-            console.log(response)
             resolve(response)
           }).catch(function (error) {
             console.log('Error' + error)

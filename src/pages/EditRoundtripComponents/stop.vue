@@ -548,7 +548,7 @@
           :editorFonts="editorFonts"
           :stopDocId="docId"
           :index="index"
-          :newDailyTripDate="newDailyTripDate(dailyTrip.date)"
+          :newDailyTripDate="dailyTrip.newDate ? dailyTrip.newDate : false"
           :duration="dailyTrip.duration"
           :editor="editor"
         ></DailyTrip>
@@ -1413,6 +1413,7 @@ export default {
       } else {
         this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
       }
+      dailyTrip.newDate = this.newDailyTripDate(dailyTrip.Date)
     })
   },
   mounted () {

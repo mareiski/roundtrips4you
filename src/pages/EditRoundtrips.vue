@@ -246,7 +246,6 @@
                             v-model="date"
                             today-btn
                             mask="DD.MM.YYYY HH:mm"
-                            v-close-popup
                           />
                           <!--  :options="dateOptions" -->
                         </q-popup-proxy>
@@ -2296,85 +2295,77 @@ export default {
         }
 
         let timeStamp = Date.now()
+
+        // create a temporary random id
         let tempRTId = Math.floor(Math.random() * 10000000000000)
-        db.collection('Roundtrips').add({
-          Category: originalRT.Category,
-          Days: originalRT.Days,
-          Description: originalRT.Description,
-          Hotels: originalRT.Hotels,
-          Location: originalRT.Location,
-          Region: originalRT.Region,
-          Price: originalRT.Price,
-          Public: false,
-          RTId: tempRTId,
-          Stars: originalRT.Stars,
-          Profile: originalRT.Profile,
-          Highlights: originalRT.Highlights,
-          Title: newTitle,
-          OfferEndPeriod: originalRT.OfferEndPeriod,
-          OfferStartPeriod: originalRT.OfferStartPeriod,
-          OfferWholeYear: originalRT.OfferWholeYear,
-          UserId: UserId,
-          createdAt: new Date(timeStamp)
-        })
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('RTId', '==', tempRTId)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              db.collection('Roundtrips').doc(doc.id).update({
-                'RTId': doc.id
-              })
 
-              let roundtripDetailsRef = db.collection('RoundtripDetails')
-                .where('RTId', '==', originalRT.RTId)
-              roundtripDetailsRef.get()
-                .then(detailsSnapshot => {
-                  detailsSnapshot.forEach(detailDoc => {
-                    let docData = detailDoc.data()
+        let newRoundtrip = {}
 
-                    db.collection('RoundtripDetails').add({
-                      BookingComLink: docData.BookingComLink,
-                      DateDistance: docData.DateDistance,
-                      Description: docData.Description,
-                      ExpediaLink: docData.ExpediaLink,
-                      GeneralLink: docData.GeneralLink,
-                      HotelStop: docData.HotelStop,
-                      ImageUrl: docData.ImageUrl,
-                      InitDate: docData.InitDate,
-                      Price: docData.Price,
-                      RTId: doc.id,
-                      Title: docData.Title,
-                      Location: {
-                        lng: docData.Location.lng,
-                        lat: docData.Location.lat,
-                        label: docData.Location.label
-                      }
-                    }).then(result => {
-                      // everything succeeded
+        let originalRTId = originalRT.RTId
 
-                      // add new copy entry to user
-                      let userRef = db.collection('User')
-                        .where('UserUID', '==', UserId)
-                        .limit(1)
-                      userRef.get()
-                        .then(snapshot => {
-                          snapshot.forEach(doc => {
-                            let userRTEdited = doc.data().RTEdited
-                            db.collection('User').doc(UserId).update({
-                              'RTEdited': (userRTEdited + 1)
-                            })
-                          })
-                        })
+        // copy all values
+        newRoundtrip = originalRT
 
-                      // refresh page
-                      this.$router.push('/meine-rundreisen')
-                    })
-                  })
-                })
-            })
+        // change all different values here
+        newRoundtrip.RTId = tempRTId
+        newRoundtrip.UserId = UserId
+        newRoundtrip.Public = false
+        newRoundtrip.Title = newTitle
+        newRoundtrip.createdAt = new Date(timeStamp)
+
+        // create new document with original rt data
+        db.collection('Roundtrips').add(newRoundtrip).then(result => {
+          console.log(originalRTId)
+
+          db.collection('Roundtrips').doc(result.id).update({
+            'RTId': result.id
+          }).catch(ex => {
+            console.log(ex)
           })
+
+          // get roundtrip details and update with original rt data
+          let roundtripDetailsRef = db.collection('RoundtripDetails')
+            .where('RTId', '==', originalRTId)
+          roundtripDetailsRef.get()
+            .then(detailsSnapshot => {
+              detailsSnapshot.forEach(detailDoc => {
+                let docData = detailDoc.data()
+
+                // copy all original values
+                let newRoundtripDetails = docData
+
+                // change different values here
+                newRoundtripDetails.RTId = result.id
+
+                db.collection('RoundtripDetails').add(newRoundtripDetails).then(result => {
+                  // -- everything succeeded --
+
+                  // add new copy entry to user
+                  let userRef = db.collection('User')
+                    .where('UserUID', '==', UserId)
+                    .limit(1)
+                  userRef.get()
+                    .then(snapshot => {
+                      snapshot.forEach(doc => {
+                        let userRTEdited = doc.data().RTEdited
+                        db.collection('User').doc(UserId).update({
+                          'RTEdited': (userRTEdited + 1)
+                        })
+                      })
+                    }).catch(ex => {
+                      console.log(ex)
+                    })
+
+                  // refresh page
+                  this.$router.push('/meine-rundreisen')
+                }).catch(ex => {
+                  console.log(ex)
+                })
+              })
+            })
+        }).catch(ex => {
+          console.log(ex)
+        })
       }
       )
     },
