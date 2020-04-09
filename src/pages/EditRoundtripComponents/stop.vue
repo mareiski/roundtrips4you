@@ -821,7 +821,7 @@ export default {
       addDailyTripDialogVisible: false,
       tempDailyTripLocation: {},
       tempDailyTripDate: this.date,
-      dailyTripProfile: null,
+      dailyTripProfile: 'Auto',
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
 
       editorFonts: {
@@ -937,6 +937,9 @@ export default {
           } else {
             this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
           }
+
+          // if its the last item resort daily trips to force a refresh
+          if (index === this.dailyTrips.length - 1) this.dailyTrips.sort(this.compare)
         }).catch(exception => {
           console.log(exception)
           this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
@@ -1083,14 +1086,16 @@ export default {
         let createdStop = { id: this.dailyTrips.length, date: this.tempDailyTripDate, location: this.tempDailyTripLocation, descriptionInput: 'Tagesausflug nach ' + this.tempDailyTripLocation.label.split(',')[0], profile: this.getDailyTripProfile() }
         this.dailyTrips.push(createdStop)
 
+        this.dailyTrips.sort(this.compare)
         this.dailyTrips.forEach((dailyTrip, index) => {
+          dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
+
           if (index === 0) {
             this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
           } else {
             this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
           }
         })
-        this.dailyTrips.sort(this.compare)
 
         db.collection('RoundtripDetails').doc(this.docId).update({
           DailyTrips: this.dailyTrips
@@ -1115,7 +1120,20 @@ export default {
         })
         return false
       }
+
       this.dailyTrips.splice(index, 1)
+
+      this.dailyTrips.sort(this.compare)
+      this.dailyTrips.forEach((dailyTrip, index) => {
+        dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
+
+        if (index === 0) {
+          this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+        } else {
+          this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+        }
+      })
+
       db.collection('RoundtripDetails').doc(this.docId).update({
         DailyTrips: this.dailyTrips
 
@@ -1140,7 +1158,7 @@ export default {
       }
     },
     newDailyTripDate (dateToCheck) {
-      if (lastDailyTripDate === null || dateToCheck.split(' ')[0] !== lastDailyTripDate.split(' ')[0]) {
+      if (!lastDailyTripDate || dateToCheck.split(' ')[0] !== lastDailyTripDate.split(' ')[0]) {
         lastDailyTripDate = dateToCheck
         return true
       }
@@ -1408,12 +1426,12 @@ export default {
 
     this.dailyTrips.sort(this.compare)
     this.dailyTrips.forEach((dailyTrip, index) => {
+      dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
       if (index === 0) {
         this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
       } else {
         this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
       }
-      dailyTrip.newDate = this.newDailyTripDate(dailyTrip.Date)
     })
   },
   mounted () {

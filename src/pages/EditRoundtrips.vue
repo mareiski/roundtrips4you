@@ -375,7 +375,7 @@
           color="primary"
           style="margin-top:30px;"
           text-color="white"
-          :disable="stops.length <= 1"
+          :disable="!stopsLoaded || stops.length <= 1"
           label="automatische Route erstellen"
         >
           <q-tooltip v-if="stops.length <= 1">Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
