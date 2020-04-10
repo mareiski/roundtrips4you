@@ -551,6 +551,8 @@
           :newDailyTripDate="dailyTrip.newDate ? dailyTrip.newDate : false"
           :duration="dailyTrip.duration"
           :editor="editor"
+          :addedSights="dailyTrip.addedSights"
+          :galeryImgUrls="galeryImgUrls"
         ></DailyTrip>
       </div>
       <div>
@@ -1164,8 +1166,14 @@ export default {
       }
       return false
     },
-    saveDailyTrips (index, description) {
-      this.dailyTrips[index].descriptionInput = description
+    saveDailyTrips (index, value, description) {
+      if (description) this.dailyTrips[index].descriptionInput = value
+      else this.dailyTrips[index].addedSights = value
+
+      this.saveData('DailyTrips', this.dailyTrips, false)
+    },
+    saveDailyTripImgs (index, images) {
+      this.dailyTrips[index].stopImages = images
       this.saveData('DailyTrips', this.dailyTrips, false)
     },
     saveData (field, value, updateParent) {
