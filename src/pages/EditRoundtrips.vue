@@ -84,7 +84,14 @@
       <q-tab-panel name="route">
         <q-timeline color="secondary">
           <q-timeline-entry heading>
-            Reiseverlauf
+            <div class="flex justify-between">
+              <span>Reiseverlauf</span>
+              <q-toggle
+                style="font-size:18px"
+                v-model="stopsExpanded"
+                label="Stopps ausklappen"
+              ></q-toggle>
+            </div>
           </q-timeline-entry>
 
           <template v-if="!stopsLoaded">
@@ -177,6 +184,7 @@
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
+                :expanded="stopsExpanded"
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
@@ -1179,7 +1187,8 @@ export default {
       days: [],
       stopsLoaded: false,
       firstLoad: true,
-      tripDuration: 0
+      tripDuration: 0,
+      stopsExpanded: false
     }
   },
   meta () {
