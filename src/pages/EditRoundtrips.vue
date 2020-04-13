@@ -1854,7 +1854,6 @@ export default {
         })
       }
 
-      this.firstLoad = false
       if (refreshAll) this.stops = []
 
       let roundtripsRef = db.collection('RoundtripDetails')
@@ -1943,6 +1942,7 @@ export default {
               context.scrollTo(lastScrollPos)
             }, 500)
           }
+          this.firstLoad = false
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
@@ -1964,17 +1964,23 @@ export default {
       this.stops.sort(this.compare)
 
       let newDurations = []
-      let newDays = []
+      this.days = []
 
-      this.stops.forEach(stop => {
+      this.stops.forEach((stop, index) => {
         let durationIndex = this.durations[this.durations.findIndex(x => x.title === stop.Title)]
         if (durationIndex) newDurations.push(durationIndex)
 
-        let daysIndex = this.days[this.days.findIndex(x => x.title === stop.Title)]
-        if (daysIndex) newDays.push(daysIndex)
+        if (index >= 1) {
+          let getDaysStop = index !== this.stops.length ? this.stops[index - 1] : this.stops[index]
+
+          let nextDuration = this.durations[this.durations.findIndex(x => x.title === getDaysStop.Title)]
+
+          let duration = nextDuration.durationInMs
+
+          this.getDays(getDaysStop, index !== this.stops.length ? index - 1 : index, duration)
+        }
       })
       this.durations = newDurations
-      this.days = newDays
 
       this.getTripDuration()
 
@@ -1997,7 +2003,7 @@ export default {
         hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
 
       let returnVal
-      if (hours === 0 && minutes === 0) returnVal = null
+      if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
       else if (hours === 0) returnVal = minutes + ' min'
       else if (minutes === 0) returnVal = hours + ' h'
       else returnVal = hours + ' h ' + minutes + ' min'
@@ -2022,7 +2028,7 @@ export default {
               let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
               if (distance !== '') distance = ' (' + distance + ')'
 
-              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, durationInMs: data.duration * 1000, distance: distance, title: title })
               context.getDays(stop, index, data.duration * 1000)
             } else {
               context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
@@ -2053,12 +2059,12 @@ export default {
       let dateTimeParts = stop.InitDate.split(' ')
       let dateParts = dateTimeParts[0].split('.')
       let timeParts = dateTimeParts[1].split(':')
-      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
       dateTimeParts = this.stops[index + 1].InitDate.split(' ')
       dateParts = dateTimeParts[0].split('.')
       timeParts = dateTimeParts[1].split(':')
-      let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0] - 1, timeParts[0], timeParts[1], '00')
+      let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
       let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
 
