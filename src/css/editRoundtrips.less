@@ -19,16 +19,6 @@
         }
     }
 
-    .stop-expansion-item {
-        &.error-color .text-caption {
-            color: red;
-        }
-
-        .q-expansion-item__content>* {
-            padding: 10px;
-        }
-    }
-
     .stop-container {
         display: flex;
         justify-content: space-between;
@@ -155,6 +145,16 @@
     margin: 0 !important;
 }
 
+.stop-expansion-item {
+    &.error-color .text-caption {
+        color: red;
+    }
+
+    .q-expansion-item__content>* {
+        padding: 10px;
+    }
+}
+
 .roundtrip-details {
     .q-carousel {
         position: absolute;
@@ -227,5 +227,9 @@
     .q-stepper label {
         width: 120px !important;
         margin: 0;
+    }
+
+    .q-carousel .q-btn {
+        display: block !important;
     }
 }

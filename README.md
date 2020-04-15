@@ -1,6 +1,10 @@
 # roundtrips4you (roundtrips4you)
 
-roundtrips4you
+Roundtrips4you - tripplaner and organizer
+developed by Marco Reisinger
+first commitment 31.07.2019 12:03
+
+following is for quasar config
 
 ## Install the dependencies
 ```bash

@@ -79,9 +79,15 @@
       <q-carousel-slide
         v-for="(url, index) in galeryImgUrls"
         :key="index"
+        style="padding:0;"
         :name="url"
-        :img-src="url"
-      />
+      >
+        <q-img
+          class="full-width full-height"
+          spinner-color="primary"
+          :src="url"
+        />
+      </q-carousel-slide>
     </q-carousel>
     <div class="carousel-placeholder">
       <h3>{{roundtrip[0] ? roundtrip[0].Title : null}}</h3>
@@ -122,7 +128,15 @@
       <q-tab-panel name="overview">
         <q-timeline color="secondary">
           <q-timeline-entry heading>
-            Reiseverlauf
+            <div class="flex justify-between">
+              <span>Reiseverlauf</span>
+              <q-toggle
+                style="font-size:18px"
+                @input="expandAllStops()"
+                v-model="allStopsExpanded"
+                label="Stopps ausklappen"
+              ></q-toggle>
+            </div>
           </q-timeline-entry>
           <div class="stop-list">
             <template v-for="(stop, index) in stops">
@@ -148,6 +162,8 @@
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
+                :expanded="stop.expanded"
+                @expansionChanged="expansionChanged($event)"
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
@@ -246,7 +262,11 @@ export default {
       checkOutDate: null,
       pageTitle: 'User',
       prevRouteParams: null,
-      disableEditBtn: false
+      disableEditBtn: false,
+      allStopsExpanded: false,
+      currentExpansionStates: [],
+      firstLoad: true
+
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -291,6 +311,18 @@ export default {
         .catch(err => {
           console.log('Error getting Roundtrip', err)
         })
+    },
+    expandAllStops () {
+      let context = this
+      this.stops.forEach(stop => {
+        if (context.allStopsExpanded) {
+          stop.expanded = true
+        } else stop.expanded = context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
+      })
+    },
+    expansionChanged (event) {
+      this.allStopsExpanded = false
+      this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
     loadRoundtripDetails (RTId, retrievedDate) {
       this.selectedCountry = this.country
@@ -348,11 +380,24 @@ export default {
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1, this.stops[index - 1].Profile)
+
+            if (this.firstLoad || !this.currentExpansionStates) {
+              stop.expanded = false
+              this.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
+            } else {
+              if (this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
+                stop.expanded = this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
+              } else {
+                // this stop was not already added
+                stop.expanded = false
+              }
+            }
           })
           let context = this
           setTimeout(function () {
             context.getParent('MyLayout').hideLoading()
           }, 500)
+          this.firstLoad = false
         })
         .catch(err => {
           this.getParent('MyLayout').hideLoading()

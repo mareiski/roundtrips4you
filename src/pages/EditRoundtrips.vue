@@ -74,7 +74,7 @@
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
-        <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Haupland ({{countries[0]}}) vorschlagen</p>
+        <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Hauptland ({{countries[0]}}) vorschlagen</p>
         <CitySuggestion
           :country="countries[0]"
           :dates="initDates"
@@ -88,7 +88,9 @@
               <span>Reiseverlauf</span>
               <q-toggle
                 style="font-size:18px"
-                v-model="stopsExpanded"
+                @input="expandAllStops()"
+                v-model="allStopsExpanded"
+                :disable="!stopsLoaded"
                 label="Stopps ausklappen"
               ></q-toggle>
             </div>
@@ -184,7 +186,8 @@
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                :expanded="stopsExpanded"
+                :expanded="stop.expanded"
+                @expansionChanged="expansionChanged($event)"
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
@@ -1188,7 +1191,8 @@ export default {
       stopsLoaded: false,
       firstLoad: true,
       tripDuration: 0,
-      stopsExpanded: false
+      allStopsExpanded: false,
+      currentExpansionStates: []
     }
   },
   meta () {
@@ -1210,6 +1214,18 @@ export default {
       const currentDate = new Date(date)
 
       return currentDate >= compareDate
+    },
+    expandAllStops () {
+      let context = this
+      this.stops.forEach(stop => {
+        if (context.allStopsExpanded) {
+          stop.expanded = true
+        } else stop.expanded = context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
+      })
+    },
+    expansionChanged (event) {
+      this.allStopsExpanded = false
+      this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
     getDateFromString (val) {
       const dateTimeParts = val.split(' ')
@@ -1928,6 +1944,18 @@ export default {
               this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
                 [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            }
+
+            if (this.firstLoad || !this.currentExpansionStates) {
+              stop.expanded = false
+              this.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
+            } else {
+              if (this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
+                stop.expanded = this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
+              } else {
+                // this stop was not already added
+                stop.expanded = false
+              }
             }
           })
 

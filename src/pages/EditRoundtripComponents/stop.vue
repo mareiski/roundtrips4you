@@ -128,7 +128,8 @@
       <q-expansion-item
         expand-separator
         v-model="expanded"
-        :label="addedSights.length + (addedSights.length === 1 ? ' Sehenswürdigkeit' : ' Sehenswürdigkeiten') + (hotelName ? ' & 1 Hotel' : '')"
+        @input="$emit('expansionChanged', { expanded: expanded, docId: docId })"
+        :label="addedSights.length + (addedSights.length === 1 ? ' Sehenswürdigkeit' : ' Sehenswürdigkeiten') + (hotelName ? ' & 1 Hotel' : '') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
         :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
         :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem ? 'error-color' : '' )"
       >
@@ -262,6 +263,7 @@
           <div
             class="flex"
             v-else-if="addedSights && typeof addedSights !== 'undefined' && addedSights.length > 0"
+            style="padding-bottom:10px;"
           >
             <b
               class="flex justify-center"
@@ -415,6 +417,7 @@
               ></q-img>
               <q-btn
                 round
+                v-if="editor"
                 color="primary"
                 icon="add"
                 style="position: absolute; transform: rotate(45deg)"
@@ -459,10 +462,7 @@
             class="uploader"
             v-if="editor"
           >
-            <q-img
-              style="height:100%;"
-              src="/statics/dummy-image-landscape-1-150x150.jpg"
-            ></q-img>
+            <q-img style="height:100%;"></q-img>
             <q-btn
               round
               color="primary"
@@ -566,7 +566,7 @@
               :galeryImgUrls="galeryImgUrls"
             ></DailyTrip>
           </div>
-          <div>
+          <div v-if="editor">
             <q-list
               bordered
               class="rounded-borders daily-trip-list"
