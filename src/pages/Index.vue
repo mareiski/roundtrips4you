@@ -24,21 +24,21 @@
       <div id="MainImgOverlay">
       </div>
       <div id="MainImgPlacholder">
-        <h2 class="main-qoute">Die gr&ouml;&szlig;te Sehensw&uuml;rdigkeit, die es gibt, ist die Welt - sieh sie dir an.</h2>
-        <span class="quote-author">Kurt Tucholsky</span>
+        <h2 class="main-qoute">Damit du deine Reise perfekt geplant und trotzdem individuell bleibt</h2>
+        <span class="quote-subtext">Mit dem Reiseplaner Roundtrips4you kannst du deine Reise ganz leicht zusammenstellen - ganz egal wie exklusiv deine Reise ist</span>
         <div
           class="flex justify-around"
           id="OfferContainer"
         >
           <div>
-            <p>Plane jetzt kostenlos deine eigene Reise, ganz ohne Aufwand und unter 5 Minuten!</p>
+            <p>Plane deine Reise jetzt gleich kostenlos</p>
             <q-btn
               @click="$router.push('/registrieren')"
               color="primary"
               style="margin-top:10px;"
             >Los geht's</q-btn>
           </div>
-          <div>
+          <!-- <div>
             <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
             <q-select
               filled
@@ -65,7 +65,7 @@
                 <q-icon name="search" />
               </template>
             </q-select>
-          </div>
+          </div> -->
         </div>
         <q-icon
           class="scroll-down-icon cursor-pointer"
@@ -77,7 +77,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Plane deine eigene Reise online mit einem Routenplaner der zu dir passt!</h1>
+        <h1>Plane deinen eigenen perfekt auf dich zugeschnittenen Roadtrip!</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -90,7 +90,6 @@
           color="primary"
         >JETZT REGISTRIEREN</q-btn>
       </div>
-      <h4 style="text-align:center;">Unsere Features minimieren deinen Planungsaufwand:</h4>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
@@ -99,7 +98,7 @@
           >
             <q-icon name="share" />
             <h3>Teilen</h3>
-            <span>Teile deine eigenen Rundreisen mit der ganzen Welt und in einer übersichtlichen Ansicht</span>
+            <span>Teile deine eigenen Rundreisen mit der ganzen Welt in einer übersichtlichen Ansicht</span>
           </router-link>
         </div>
         <div class="card-wrap">
@@ -109,7 +108,7 @@
           >
             <q-icon name="explore" />
             <h3>Planen</h3>
-            <span>Plane deine Reise bis ins kleinste Detail ganz ohne Aufwand und in kürzester Zeit</span>
+            <span>Plane deine Reise ganz professionell aber ohne Aufwand und in kürzester Zeit</span>
           </router-link>
         </div>
         <div class="card-wrap right">
@@ -232,14 +231,14 @@
           </router-link>
         </div>
       </div>
-      <div class="description-container">
+      <!-- <div class="description-container">
         <p>Wolltest du schon immer mal wissen wie viel Zeit dir in einem Ort zum besichtigen tatsächlich bleibt?</p>
         <p>Oder hast du dir schonmal überlegt ob deine Reiseroute überhaupt die kürzeste ist?</p>
         <p>Um alle diese Fragen musst du dich bei uns nicht mehr kümmern, denn wir berechnen dir mit unserem <a @click="scrollTo('tools')">Routenplaner</a> immer alles schon automatisch.</p>
         <p>Ob es deine Aufenthaltsdauer ist, welche Sehenswürdigkeiten am Schönsten sind oder auch welche Route am kürzesten ist.</p>
         <p>Zusätzlich erstellen wir automatisch zu deiner Reise eine interaktive <a @click="scrollTo('map')">Karte</a> mit Mapbox, die dir deine Route im Überblick zeigt.
           <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
-      </div>
+      </div> -->
       <div class="register-container">
         <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Routenplaners kostenlos</h4>
         <q-btn
