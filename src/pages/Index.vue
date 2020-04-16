@@ -25,7 +25,7 @@
       </div>
       <div id="MainImgPlacholder">
         <h2 class="main-qoute">Damit deine Reise perfekt geplant und trotzdem individuell bleibt</h2>
-        <span class="quote-subtext">Mit dem Reiseplaner Roundtrips4you kannst du deine Reise ganz leicht zusammenstellen - ganz egal wie exklusiv deine Reise ist</span>
+        <span class="quote-subtext">Mit dem Reiseplaner Roundtrips4you kannst du deine Reise ganz leicht zusammenstellen - ganz egal wie individuell deine Reise ist</span>
         <div
           class="flex justify-around"
           id="OfferContainer"

@@ -1968,7 +1968,6 @@ export default {
                 context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
                 context.$refs[stop.DocId][0].changeExpansion(false)
               } else {
-                console.log(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)])
                 if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
                   context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
                 } else {
@@ -1977,7 +1976,6 @@ export default {
                 }
               }
             })
-            console.log(context.currentExpansionStates)
             Loading.hide()
           }, 500)
           this.firstLoad = false
