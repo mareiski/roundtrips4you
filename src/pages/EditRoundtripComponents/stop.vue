@@ -810,9 +810,7 @@ export default {
     galeryImgUrls: Array,
     stopImages: Array,
     addedSights: Array,
-    dailyTrips: Array,
-    expanded: Boolean
-
+    dailyTrips: Array
   },
   data () {
     return {
@@ -840,6 +838,7 @@ export default {
       tempDailyTripDate: this.date,
       dailyTripProfile: 'Auto',
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
+      expanded: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -1040,6 +1039,9 @@ export default {
 
         this.hotelContact = hotel.contact
       }
+    },
+    changeExpansion (expanded) {
+      this.expanded = expanded
     },
     addHotelToStop () {
       db.collection('RoundtripDetails').doc(this.docId).update({

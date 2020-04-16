@@ -162,8 +162,9 @@
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                :expanded="stop.expanded"
                 @expansionChanged="expansionChanged($event)"
+                :doc-id="stop.DocId"
+                :ref="stop.DocId"
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
@@ -316,8 +317,8 @@ export default {
       let context = this
       this.stops.forEach(stop => {
         if (context.allStopsExpanded) {
-          stop.expanded = true
-        } else stop.expanded = context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
+          context.$refs[stop.DocId][0].changeExpansion(true)
+        } else context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
       })
     },
     expansionChanged (event) {
@@ -380,24 +381,25 @@ export default {
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1, this.stops[index - 1].Profile)
-
-            if (this.firstLoad || !this.currentExpansionStates) {
-              stop.expanded = false
-              this.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
-            } else {
-              if (this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
-                stop.expanded = this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded
-              } else {
-                // this stop was not already added
-                stop.expanded = false
-              }
-            }
           })
           let context = this
           setTimeout(function () {
+            context.stops.forEach(stop => {
+              if (context.firstLoad || !context.currentExpansionStates) {
+                context.$refs[stop.DocId][0].changeExpansion(false)
+                context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
+              } else {
+                if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
+                  context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
+                } else {
+                  // this stop was not already added
+                  context.$refs[stop.DocId][0].changeExpansion(false)
+                }
+              }
+            })
             context.getParent('MyLayout').hideLoading()
+            this.firstLoad = false
           }, 500)
-          this.firstLoad = false
         })
         .catch(err => {
           this.getParent('MyLayout').hideLoading()
