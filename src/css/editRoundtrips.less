@@ -232,4 +232,19 @@
     .q-carousel .q-btn {
         display: block !important;
     }
+
+    .hotel-list {
+        display: flex;
+        flex-direction: column;
+
+        &>.q-item__section {
+
+            &:nth-child(1),
+            &:nth-child(5) {
+                align-items: center;
+            }
+
+            padding-bottom: 15px;
+        }
+    }
 }

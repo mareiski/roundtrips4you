@@ -290,7 +290,7 @@
               class="rounded-borders"
               v-if="hotelName"
             >
-              <q-item>
+              <q-item class="hotel-list">
                 <q-item-section
                   avatar
                   top

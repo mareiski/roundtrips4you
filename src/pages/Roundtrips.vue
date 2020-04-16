@@ -440,14 +440,17 @@
               <div class="card-row description">
                 <p class="card-description">{{roundtrip.Description}}</p>
               </div>
-              <div class="card-bottom-row">
+              <div
+                class="card-bottom-row"
+                style="padding-top:5px;"
+              >
                 <q-chip>{{roundtrip.Highlights[0]}}</q-chip>
                 <q-chip>{{roundtrip.Highlights[1]}}</q-chip>
                 <q-chip>{{roundtrip.Highlights[2]}}</q-chip>
               </div>
             </div>
             <div class="card-right-col">
-              <div class="card-row ">
+              <div class="card-row">
                 <a class="button price-button">
                   <span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span>
                   <q-tooltip>Schätzwert des Reisenden, ohne Freizeitgestaltung</q-tooltip>
@@ -455,7 +458,7 @@
                 <router-link :to="'/benutzerprofil/' + roundtrip.UserId">
                   <q-avatar
                     size="50px"
-                    style="width: 50px; margin:auto 10px auto 10px;"
+                    style="width: 50px; margin:auto 10px auto 10px; padding-top:0;"
                   >
                     <q-img :src="userImages[RTIds.indexOf(roundtrip.RTId)]"></q-img>
                     <q-tooltip v-if="userNames[RTIds.indexOf(roundtrip.RTId)]">von {{userNames[RTIds.indexOf(roundtrip.RTId)]}}</q-tooltip>
