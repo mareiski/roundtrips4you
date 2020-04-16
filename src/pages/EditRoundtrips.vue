@@ -1961,11 +1961,14 @@ export default {
 
           let context = this
           setTimeout(function () {
+            let emptyStates = !context.currentExpansionStates.length
+
             context.stops.forEach(stop => {
-              if (context.firstLoad || !context.currentExpansionStates) {
-                context.$refs[stop.DocId][0].changeExpansion(false)
+              if (emptyStates || !context.currentExpansionStates) {
                 context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
+                context.$refs[stop.DocId][0].changeExpansion(false)
               } else {
+                console.log(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)])
                 if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
                   context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
                 } else {
@@ -1974,9 +1977,10 @@ export default {
                 }
               }
             })
-            this.firstLoad = false
+            console.log(context.currentExpansionStates)
             Loading.hide()
           }, 500)
+          this.firstLoad = false
         })
         .catch(err => {
           console.log('Error getting Roundtrips', err)
