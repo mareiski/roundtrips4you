@@ -97,7 +97,7 @@
           </q-select>
           <a
             class="button"
-            @click="$router.push('/rundreisen/' + country); getRoundtrips(); getRTCount()"
+            @click="$router.push('/rundreisen/' + country); getRoundtrips(false); getRTCount()"
           >Suchen</a>
         </div>
         <div class="filter-card">
@@ -499,7 +499,7 @@
             :max="paginationMax"
             :max-pages="6"
             :boundary-numbers="true"
-            @input="getRoundtrips()"
+            @input="getRoundtrips(false)"
           >
           </q-pagination>
         </div>
@@ -701,7 +701,7 @@ export default {
         context.RTIds.push(RTId)
       })
     },
-    getRoundtrips () {
+    getRoundtrips (initialLoad) {
       this.selectedCountry = this.country
       this.visible = true
       this.showSimulatedReturnData = false
@@ -711,8 +711,10 @@ export default {
       let dateParts = this.OfferPeriod.split('.')
       let offerPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], '00', '00', '00')
 
-      let searchCreatedAt = createdAts[this.currentPage * 20 - 20]
+      let searchCreatedAt = createdAts[(this.currentPage * 20) - 20]
       if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
+
+      if (initialLoad) searchCreatedAt = 0
 
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', 'array-contains', this.country)
@@ -720,6 +722,7 @@ export default {
         .orderBy('createdAt')
         .startAt(searchCreatedAt)
         .limit(20)
+
       if (this.dayModel !== null && this.dayModel.length > 0) {
         roundtripsRef = db.collection('Roundtrips')
           .where('Location', 'array-contains', this.country)
@@ -850,7 +853,8 @@ export default {
     }
   },
   created () {
-    this.getRoundtrips()
+    this.currentPage = 1
+    this.getRoundtrips(true)
     this.getRTCount()
     // this.loadBookingComWidget()
   },
