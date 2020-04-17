@@ -220,7 +220,7 @@
                   :href="'https://www.google.com/search?q=' + dailyTrip.location.label.split(',')[0] + ' sehenswürdigkeiten'"
                 >weitere anzeigen</a>
               </div>
-              <div>{{dailyTrip.descriptionInput}}</div>
+              <div v-html="dailyTrip.descriptionInput"></div>
             </div>
           </q-card-section>
         </q-card>
