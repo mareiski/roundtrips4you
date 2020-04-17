@@ -132,7 +132,7 @@
         </div>
         <div @click="hideMenu()">
           <router-link
-            class="header-page-link"
+            class="mobile-header-page-link"
             to="/blog"
           >blog</router-link>
         </div>
