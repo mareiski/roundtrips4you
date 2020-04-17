@@ -66,6 +66,37 @@
               :src="item.attrs.body[0].image"
               :style="{'width': item.attrs.body[0].width + 'px'}"
             ></q-img>
+            <q-img
+              v-if="item.type === 'blok' && item.attrs.body[0].url && item.attrs.body[0].url.url"
+              :src="item.attrs.body[0].url.url"
+              style="max-width:800px; margin-bottom:40px;"
+            ></q-img>
+            <q-carousel
+              v-if="item.type === 'blok' && item.attrs.body[0].Images"
+              animated
+              v-model="slide[index]"
+              navigation
+              infinite
+              :autoplay="10000"
+              swipeable
+              control-color="white"
+              padding
+              style="max-width:800px; margin-bottom:40px;"
+              arrows
+            >
+              <q-carousel-slide
+                v-for="(image, index) in item.attrs.body[0].Images"
+                :key="index"
+                style="padding:0;"
+                :name="image.url.url"
+              >
+                <q-img
+                  class="full-width full-height"
+                  spinner-color="primary"
+                  :src="image.url.url"
+                />
+              </q-carousel-slide>
+            </q-carousel>
           </div>
         </div>
       </div>
@@ -80,7 +111,8 @@ export default {
     return {
       story: {},
       loading: false,
-      title: 'Blog'
+      title: 'Blog',
+      slide: []
     }
   },
   meta () {
