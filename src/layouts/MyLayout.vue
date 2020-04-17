@@ -132,9 +132,9 @@
         </div>
         <div @click="hideMenu()">
           <router-link
-            class="mobile-header-page-link"
-            to="/ueber"
-          >über uns</router-link>
+            class="header-page-link"
+            to="/blog"
+          >blog</router-link>
         </div>
       </div>
     </div>
