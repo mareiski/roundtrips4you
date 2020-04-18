@@ -193,7 +193,7 @@
           :rooms="parseInt(rooms)"
         ></Map>
         <br>
-        <a @click="$refs.tabPanels.goTo('overview')">zur Rutenübersicht</a>
+        <a @click="$refs.tabPanels.goTo('overview')">zur Routenübersicht</a>
       </q-tab-panel>
 
       <!-- <q-tab-panel name="ratings">

@@ -347,7 +347,7 @@
                   side
                   v-if="hotelContact && typeof hotelContact !== 'undefined'"
                 >
-                  <div>
+                  <div class="hotel-contact">
                     <q-chip
                       v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
                       icon="email"

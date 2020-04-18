@@ -61,6 +61,7 @@
                 </li>
               </ul>
             </div>
+            <hr v-if="item.type === 'horizontal_rule'" />
             <q-img
               v-if="item.type === 'blok' && item.attrs.body[0].component === 'image'"
               :src="item.attrs.body[0].image"
