@@ -1,9 +1,15 @@
 <template>
   <q-page>
     <div class="roundtrips">
-      <h2 class="topic">Alle Traumländer auf einen Blick</h2>
+      <div class="overview-topic">
+        <h2>Eigene Reise erstellen</h2>
+        <span>Gehe zu deinen Reisen und Registriere dich oder melde dich an um deine eigene Reise zu nach deinen Wünschen zusammenzutellen</span>
+      </div>
       <div id="CardBackgroundImg"></div>
-      <div id="CardBackgroundImgPlaceholder">
+      <div
+        id="CardBackgroundImgPlaceholder"
+        style="height:480px; min-height:unset;"
+      >
         <div class="country-card-container">
           <router-link
             class="country-card"
@@ -15,6 +21,13 @@
             </div>
           </router-link>
         </div>
+      </div>
+      <div class="overview-topic">
+        <h2>Vorgefertigte Reisen</h2>
+        <span>Lasse dich hier von den Reisen anderer User inspirieren, oder bearbeite diese wenn du für dich etwas ändern möchtest</span>
+      </div>
+      <div id="CardBackgroundImg"></div>
+      <div id="CardBackgroundImgPlaceholder">
         <div
           class="country-card-container"
           v-for="country in countries"
@@ -42,7 +55,7 @@ import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { db } from '../firebaseInit'
 export default {
   meta: {
-    title: 'Rundreisenübersicht',
+    title: 'Rundreisen',
     meta: {
       description: { name: 'description', content: 'Länder auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
 
