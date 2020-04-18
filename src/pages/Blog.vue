@@ -79,7 +79,7 @@
               infinite
               :autoplay="10000"
               swipeable
-              control-color="white"
+              control-color="primary"
               padding
               style="max-width:800px; margin-bottom:40px;"
               arrows
@@ -94,6 +94,7 @@
                   class="full-width full-height"
                   spinner-color="primary"
                   :src="image.url.url"
+                  contain
                 />
               </q-carousel-slide>
             </q-carousel>
