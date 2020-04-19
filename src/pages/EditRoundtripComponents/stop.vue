@@ -1,7 +1,7 @@
 <template>
   <q-timeline-entry
     :ref="lastItem ? 'lastTimelineEntry' : null"
-    :icon="icon"
+    icon="location_on"
   >
     <div class="stop-container">
       <div class="flex">
@@ -789,7 +789,6 @@ export default {
   props: {
     title: String,
     date: String,
-    icon: String,
     editorPlaceholder: String,
     editor: Boolean,
     docId: String,
@@ -1355,7 +1354,7 @@ export default {
           icon: 'check_circle',
           message: 'Eintrag wurde gelöscht'
         })
-        context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, true)
+        context.getParent('EditRoundtrips').removeEntry(context.docId)
       }).catch(function (error) {
         console.log(error)
         context.$q.notify({

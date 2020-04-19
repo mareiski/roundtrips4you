@@ -164,7 +164,6 @@
                 :key="stop.DocId"
                 :title="stop.Title"
                 :date="stop.InitDate"
-                :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :editor="true"
                 :doc-id="stop.DocId"
@@ -1434,11 +1433,9 @@ export default {
           Title: 'Zwischenstopp in ' + Location.label.split(',')[0],
           Location,
           Parking: parking
-          // HotelLocation: HotelStop ? this.hotelLocation : null,
-          // HotelStars: HotelStop ? this.hotelStars : null,
-          // HotelContact: HotelStop ? this.hotelContact : null,
-          // HotelName: HotelStop ? this.hotelName : null
         }).then(results => {
+          let lastScrollPos = document.documentElement.scrollTop
+
           // clear all values
           this.$refs.addEntryForm.reset()
           this.generalTempLink = null
@@ -1446,9 +1443,98 @@ export default {
           this.$refs.citySearch.clear()
           this.$refs.parkingPlaceSearch.clear()
 
-          // refresh page
-          this.loadSingleRoundtrip(this.$route.params.id)
-          this.loadRoundtripDetails(this.$route.params.id, true)
+          this.addExpanded = false
+
+          let docId = results.id
+          let newStopObject = {
+            BookingComLink: BookingComLink,
+            DateDistance: DateDistance,
+            Description: 'Beschreibung zu ' + Location.label.split(',')[0],
+            ExpediaLink: ExpediaLink,
+            GeneralLink: GeneralLink,
+            ImageUrl: ImageUrl,
+            InitDate: DateString,
+            Price: Price,
+            RTId: RTId,
+            Title: 'Zwischenstopp in ' + Location.label.split(',')[0],
+            Location: Location,
+            Parking: parking,
+            DocId: docId,
+            expanded: false
+          }
+          this.documentIds.push(docId)
+
+          this.stops.push(newStopObject)
+
+          // save all values like in load roundtrip details
+          let initDates = []
+          let hotelCount = 0
+          let days = 0
+          let daysString = ''
+
+          // get dates
+          this.stops.forEach((stop) => {
+            let initDate = stop.InitDate
+            if (stop.InitDate.sceonds) initDate = new Date(stop.InitDate.seconds * 1000)
+
+            if (this.stops.indexOf(stop) === this.stops.length - 1) {
+              this.date = stop.InitDate.sceonds ? date.formatDate(initDate, 'DD.MM.YYYY HH:mm') : initDate
+            }
+
+            if (stop.HotelName) hotelCount++
+
+            if (!initDates.includes(initDate)) initDates.push(initDate)
+          })
+
+          if (initDates.length > 0) {
+            let maxDate = new Date(Math.max.apply(null, initDates))
+            let minDate = new Date(Math.min.apply(null, initDates))
+
+            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+          }
+
+          this.initDates = initDates
+
+          if (days < 5) {
+            daysString = '< 5 Tage'
+          } else if (days >= 5 && days <= 8) {
+            daysString = '5-8 Tage'
+          } else if (days >= 9 && days <= 11) {
+            daysString = '9-11 Tage'
+          } else if (days >= 12 && days <= 15) {
+            daysString = '12-15 Tage'
+          } else if (days > 15) {
+            daysString = '> 15 Tage'
+          }
+
+          // save days and hotels
+          if (daysString.length > 0) {
+            this.saveData('Days', daysString)
+          }
+          this.saveData('Hotels', hotelCount)
+
+          // reload Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
+
+          this.durations = []
+          this.stops.forEach((stop, index) => {
+            if (index >= 1) {
+              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            }
+          })
+
+          this.getTripDuration()
+
+          this.saveRoundtripDaysAndHotels()
+
+          this.currentExpansionStates.push({ docId: docId, expanded: false })
+
+          let context = this
+          setTimeout(function () {
+            context.scrollTo(lastScrollPos)
+          }, 500)
 
           this.$q.notify({
             color: 'green-4',
@@ -1459,6 +1545,83 @@ export default {
           resolve(true)
         })
       })
+    },
+    removeEntry (stopDocId) {
+      let lastScrollPos = document.documentElement.scrollTop
+
+      this.documentIds.splice(this.documentIds.indexOf(stopDocId), 1)
+
+      this.stops.splice(this.stops.findIndex(x => x.DocId === stopDocId), 1)
+
+      // save all values like in load roundtrip details
+      let initDates = []
+      let hotelCount = 0
+      let days = 0
+      let daysString = ''
+
+      // get dates
+      this.stops.forEach((stop) => {
+        let initDate = stop.InitDate
+        if (stop.InitDate.sceonds) initDate = new Date(stop.InitDate.seconds * 1000)
+
+        if (this.stops.indexOf(stop) === this.stops.length - 1) {
+          this.date = stop.InitDate.sceonds ? date.formatDate(initDate, 'DD.MM.YYYY HH:mm') : initDate
+        }
+
+        if (stop.HotelName) hotelCount++
+
+        if (!initDates.includes(initDate)) initDates.push(initDate)
+      })
+
+      if (initDates.length > 0) {
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      this.initDates = initDates
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+
+      // save days and hotels
+      if (daysString.length > 0) {
+        this.saveData('Days', daysString)
+      }
+      this.saveData('Hotels', hotelCount)
+
+      // reload Map
+      if (this.$refs.map) this.$refs.map.loadMap(null)
+
+      this.durations = []
+      this.stops.forEach((stop, index) => {
+        if (index >= 1) {
+          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+        }
+      })
+
+      this.getTripDuration()
+
+      this.saveRoundtripDaysAndHotels()
+
+      this.currentExpansionStates.splice(this.currentExpansionStates.findIndex(x => x.docId === stopDocId), 1)
+
+      let context = this
+      setTimeout(function () {
+        context.scrollTo(lastScrollPos)
+      }, 500)
     },
     saveRoundtripDaysAndHotels () {
       let daysString = ''
