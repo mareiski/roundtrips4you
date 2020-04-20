@@ -961,11 +961,17 @@ export default {
         })
     },
     msToTime (duration) {
-      var minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+      var ms = duration % 1000
+      duration = (duration - ms) / 1000
+
+      var secs = duration % 60
+      duration = (duration - secs) / 60
+
+      var minutes = duration % 60
+      var hours = (duration - minutes) / 60
 
       let returnVal
-      if (hours === 0 && minutes === 0) returnVal = null
+      if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
       else if (hours === 0) returnVal = minutes + ' min'
       else if (minutes === 0) returnVal = hours + ' h'
       else returnVal = hours + ' h ' + minutes + ' min'
@@ -1446,7 +1452,6 @@ export default {
     }
   },
   created () {
-    console.log(this.docId)
     this.oldAddedSights = this.addedSights
 
     this.dailyTrips.sort(this.compare)

@@ -2190,8 +2190,14 @@ export default {
       return 0
     },
     msToTime (duration) {
-      var minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24)
+      var ms = duration % 1000
+      duration = (duration - ms) / 1000
+
+      var secs = duration % 60
+      duration = (duration - secs) / 60
+
+      var minutes = duration % 60
+      var hours = (duration - minutes) / 60
 
       let returnVal
       if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
@@ -2232,6 +2238,7 @@ export default {
           })
       } else {
         this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
+        this.getDays(stop, index, null)
         this.stopsLoaded = true
       }
     },
@@ -2257,7 +2264,9 @@ export default {
       timeParts = dateTimeParts[1].split(':')
       let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-      let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
+      let dateDistance = 0
+      if (duration) dateDistance = (nextInitDate.valueOf() - currentInitDate.valueOf()) - duration
+      else dateDistance = nextInitDate.valueOf() - currentInitDate.valueOf()
 
       days = this.msToTime(dateDistance)
 
