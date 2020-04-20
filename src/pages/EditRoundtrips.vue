@@ -166,7 +166,7 @@
                 :date="stop.InitDate"
                 :editor-placeholder="stop.Description"
                 :editor="true"
-                :doc-id="stop.DocId"
+                :docId="stop.DocId"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
@@ -183,7 +183,7 @@
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
-                :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
+                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
                 :expanded="stop.expanded"
                 @expansionChanged="expansionChanged($event)"
@@ -192,7 +192,7 @@
               <Duration
                 :key="'Stop' + stop.DocId"
                 v-if="index !== stops.length - 1"
-                :duration="durations[durations.findIndex(x => x.title === stop.Title)] && durations[durations.findIndex(x => x.title === stop.Title)].duration ? (durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance) : null"
+                :duration="durations[durations.findIndex(x => x.docId === stop.DocId)] && durations[durations.findIndex(x => x.docId === stop.DocId)].duration ? (durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance) : null"
                 :editor="true"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
                 :doc-id="stop.DocId"
@@ -1219,7 +1219,7 @@ export default {
       let context = this
       this.stops.forEach(stop => {
         if (context.allStopsExpanded) {
-          context.$refs[stop.DocId][0].changeExpansion(true)
+          if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(true)
         } else context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
       })
     },
@@ -1520,7 +1520,7 @@ export default {
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
               this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
             }
           })
@@ -1607,7 +1607,7 @@ export default {
       this.stops.forEach((stop, index) => {
         if (index >= 1) {
           this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
             index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
         }
       })
@@ -2043,10 +2043,10 @@ export default {
         .then(snapshot => {
           details = []
           documentIds = []
-          snapshot.forEach((doc, index) => {
-            details.push(doc.data())
-            details[details.findIndex(x => x.Title === doc.data().Title)].DocId = doc.id
-            documentIds.splice(details.findIndex(x => x.Title === doc.data().Title), 0, doc.id)
+          snapshot.forEach(doc => {
+            let index = details.push(doc.data()) - 1
+            details[index].DocId = doc.id
+            documentIds.splice(details.findIndex(x => x.docId === doc.id), 0, doc.id)
           })
 
           this.documentIds = documentIds
@@ -2106,7 +2106,7 @@ export default {
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
               this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].Title : this.stops[index].Title,
+                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
             }
           })
@@ -2129,7 +2129,7 @@ export default {
             context.stops.forEach(stop => {
               if (emptyStates || !context.currentExpansionStates) {
                 context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
-                context.$refs[stop.DocId][0].changeExpansion(false)
+                if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(false)
               } else {
                 if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
                   context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
@@ -2153,33 +2153,25 @@ export default {
           })
         })
     },
-    resortAndPrepareStops (newInitDate, currentTitle) {
+    resortAndPrepareStops (newInitDate, currentDocId) {
       let lastScrollPos = document.documentElement.scrollTop
 
       // update date
-      this.stops[this.stops.findIndex(x => x.Title === currentTitle)].InitDate = newInitDate
+      this.stops[this.stops.findIndex(x => x.DocId === currentDocId)].InitDate = newInitDate
 
       // prepare from resortet stops
       this.stops.sort(this.compare)
 
-      let newDurations = []
       this.days = []
+      this.durations = []
 
       this.stops.forEach((stop, index) => {
-        let durationIndex = this.durations[this.durations.findIndex(x => x.title === stop.Title)]
-        if (durationIndex) newDurations.push(durationIndex)
-
         if (index >= 1) {
-          let getDaysStop = index !== this.stops.length ? this.stops[index - 1] : this.stops[index]
-
-          let nextDuration = this.durations[this.durations.findIndex(x => x.title === getDaysStop.Title)]
-
-          let duration = nextDuration.durationInMs
-
-          this.getDays(getDaysStop, index !== this.stops.length ? index - 1 : index, duration)
+          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
         }
       })
-      this.durations = newDurations
 
       this.getTripDuration()
 
@@ -2209,7 +2201,7 @@ export default {
 
       return returnVal
     },
-    getDuration (startLocation, endLocation, title, stopProfile, stop, index) {
+    getDuration (startLocation, endLocation, docId, stopProfile, stop, index) {
       let profile = this.profile
       if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
@@ -2227,19 +2219,19 @@ export default {
               let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
               if (distance !== '') distance = ' (' + distance + ')'
 
-              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, durationInMs: data.duration * 1000, distance: distance, title: title })
+              context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, durationInMs: data.duration * 1000, distance: distance, docId: docId })
               context.getDays(stop, index, data.duration * 1000)
             } else {
-              context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+              context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
               if (context.stops.indexOf(stop) === context.stops.length - 2) context.stopsLoaded = true
             }
           }).catch(exception => {
-            context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+            context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
             console.log(exception)
             context.stopsLoaded = true
           })
       } else {
-        this.durations.splice(this.stops.findIndex(x => x.Title === title), 0, { duration: null, distance: null, title: title })
+        this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
         this.stopsLoaded = true
       }
     },
@@ -2269,7 +2261,7 @@ export default {
 
       days = this.msToTime(dateDistance)
 
-      this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
+      this.days.splice(this.stops.findIndex(x => x.DocId === stop.DocId), 0, { days: days, docId: stop.DocId })
 
       if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
     },

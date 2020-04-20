@@ -149,7 +149,7 @@
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking : null"
-                :days="typeof days[days.findIndex(x => x.title === stop.Title)] !== 'undefined' ? days[days.findIndex(x => x.title === stop.Title)].days : null"
+                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :hotelStars="parseInt(stop.HotelStars)"
                 :hotelName="stop.HotelName"
                 :hotelLocation="stop.HotelLocation"
@@ -168,8 +168,8 @@
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
-                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.title === stop.Title)] !== 'undefined' && durations[durations.findIndex(x => x.title === stop.Title)].duration !== null"
-                :duration="durations[durations.findIndex(x => x.title === stop.Title)].duration + durations[durations.findIndex(x => x.title === stop.Title)].distance"
+                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.docId === stop.DocId)] !== 'undefined' && durations[durations.findIndex(x => x.docId === stop.DocId)].duration !== null"
+                :duration="durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance"
                 :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
                 :roundtripProfile="inputProfile"
               ></Duration>
@@ -317,7 +317,7 @@ export default {
       let context = this
       this.stops.forEach(stop => {
         if (context.allStopsExpanded) {
-          context.$refs[stop.DocId][0].changeExpansion(true)
+          if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(true)
         } else context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
       })
     },
@@ -337,7 +337,7 @@ export default {
           details = []
           snapshot.forEach(doc => {
             details.push(doc.data())
-            details[details.findIndex(x => x.Title === doc.data().Title)].DocId = doc.id
+            details[details.findIndex(x => x.docId === doc.data().DocId)].DocId = doc.id
           })
           this.stops = details
 
@@ -386,7 +386,7 @@ export default {
           setTimeout(function () {
             context.stops.forEach(stop => {
               if (context.firstLoad || !context.currentExpansionStates) {
-                context.$refs[stop.DocId][0].changeExpansion(false)
+                if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(false)
                 context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
               } else {
                 if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
@@ -427,7 +427,7 @@ export default {
       }
       )
     },
-    getDuration (startLocation, endLocation, title, stop, index, stopProfile) {
+    getDuration (startLocation, endLocation, docId, stop, index, stopProfile) {
       let profile = this.profile
 
       if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
@@ -442,14 +442,14 @@ export default {
               var data = response.data.routes[0]
 
               if (data !== null && typeof data !== 'undefined') {
-                context.getDays(stop, index, data.duration * 1000, title)
+                context.getDays(stop, index, data.duration * 1000)
 
                 let duration = context.msToTime(data.duration * 1000)
 
                 let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
                 if (distance !== '') distance = ' (' + distance + ')'
 
-                context.durations.splice(context.stops.findIndex(x => x.Title === title), 0, { duration: duration, distance: distance, title: title })
+                context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, distance: distance, docId: docId })
               }
             })
         })
@@ -512,7 +512,7 @@ export default {
         let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
         days = this.msToTime(dateDistance)
       }
-      this.days.splice(this.stops.findIndex(x => x.Title === stop.Title), 0, { days: days, title: stop.Title })
+      this.days.splice(this.stops.findIndex(x => x.DocId === stop.docId), 0, { days: days, docId: stop.DocId })
     },
     loadGaleryImgs () {
       const context = this

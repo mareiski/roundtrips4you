@@ -927,7 +927,7 @@ export default {
       }).then(function () {
         if (refresh) {
           // resort stops and prepare views with new array
-          context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.title)
+          context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.docId)
         }
         setTimeout(function () {
           context.scrollTo(lastScrollPos)
@@ -1446,6 +1446,7 @@ export default {
     }
   },
   created () {
+    console.log(this.docId)
     this.oldAddedSights = this.addedSights
 
     this.dailyTrips.sort(this.compare)
