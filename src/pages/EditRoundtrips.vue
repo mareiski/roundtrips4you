@@ -107,28 +107,20 @@
                     style="margin-bottom:10px;"
                   />
                 </template>
-                <q-skeleton
-                  width="100px"
-                  height="15px"
-                  type="rect"
-                  style="margin-bottom:10px;"
-                />
                 <div
                   class="flex"
                   style="margin-bottom:10px;"
                 >
                   <q-skeleton
-                    v-for="nu in 2"
-                    :key="nu"
-                    height="25px"
-                    width="60px"
-                    type="QChip"
+                    width="400px"
+                    height="15px"
+                    type="rect"
                     style="margin-right:10px;"
                   />
                 </div>
                 <q-skeleton
                   width="90%"
-                  height="150px"
+                  height="50px"
                   type="rect"
                 />
               </q-timeline-entry>

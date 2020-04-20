@@ -138,7 +138,61 @@
               ></q-toggle>
             </div>
           </q-timeline-entry>
-          <div class="stop-list">
+          <template v-if="!stopsLoaded">
+            <template v-for="n in 2">
+              <q-timeline-entry :key="n">
+                <template v-slot:subtitle>
+                  <q-skeleton
+                    width="300px"
+                    height="10px"
+                    type="rect"
+                    style="margin-bottom:10px;"
+                  />
+                </template>
+                <div
+                  class="flex"
+                  style="margin-bottom:10px;"
+                >
+                  <q-skeleton
+                    width="400px"
+                    height="15px"
+                    type="rect"
+                    style="margin-right:10px;"
+                  />
+                </div>
+                <q-skeleton
+                  width="90%"
+                  height="50px"
+                  type="rect"
+                />
+              </q-timeline-entry>
+
+              <q-timeline-entry
+                icon="speed"
+                :key="'A' + n"
+              >
+                <template v-slot:subtitle>
+                  <q-skeleton
+                    width="300px"
+                    height="10px"
+                    type="rect"
+                    style="margin-bottom:20px;"
+                  />
+                </template>
+                <q-skeleton
+                  height="25px"
+                  width="60px"
+                  type="QChip"
+                  style="margin-bottom:10px;"
+                />
+              </q-timeline-entry>
+            </template>
+          </template>
+
+          <div
+            class="stop-list"
+            v-show="stopsLoaded"
+          >
             <template v-for="(stop, index) in stops">
               <Stop
                 :key="stop.DocId"
@@ -266,8 +320,8 @@ export default {
       disableEditBtn: false,
       allStopsExpanded: false,
       currentExpansionStates: [],
-      firstLoad: true
-
+      firstLoad: true,
+      stopsLoaded: false
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -451,6 +505,7 @@ export default {
 
                 context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, distance: distance, docId: docId })
               }
+              context.stopsLoaded = true
             })
         })
       }
@@ -517,6 +572,7 @@ export default {
         days = this.msToTime(dateDistance)
       }
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.docId), 0, { days: days, docId: stop.DocId })
+      if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
     },
     loadGaleryImgs () {
       const context = this
