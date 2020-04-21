@@ -567,10 +567,7 @@
             ></DailyTrip>
           </div>
           <div v-if="editor">
-            <q-list
-              bordered
-              class="rounded-borders daily-trip-list"
-            >
+            <q-list class="rounded-borders daily-trip-list">
               <q-item
                 clickable
                 v-ripple

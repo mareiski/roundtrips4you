@@ -19,14 +19,6 @@
             </q-tooltip>
           </span>
         </div>
-        <div class="center-col">
-          <a href="/">
-            <img
-              alt="text logo"
-              src="../statics/textLogo.jpeg"
-            />
-          </a>
-        </div>
         <div class="right-col">
           <router-link
             class="header-page-link"
@@ -40,8 +32,21 @@
             class="header-page-link"
             to="/blog"
           >blog</router-link>
-          <span v-if="!user"></span>
+          <router-link
+            v-if="!user"
+            class="header-page-link"
+            to="/login"
+          >anmelden</router-link>
+          <router-link
+            v-if="!user"
+            to="/registrieren"
+            class="flex justify-center"
+            style="flex-direction:column; text-decoration:none;"
+          >
+            <q-btn color="primary">registrieren</q-btn>
+          </router-link>
           <q-avatar
+            v-else
             size="50px"
             style="width: 50px; margin:auto 10px auto 10px;"
             :style="user ? 'padding:0;' : 'font-size:60px;'"
