@@ -327,10 +327,10 @@ h2 {
     }
 
     &.active {
-        height: 200px;
+        height: 250px;
 
         .bottom-row {
-            height: 120px;
+            height: 170px;
 
             .mobile-header-page-link {
                 opacity: 1;
@@ -454,11 +454,18 @@ h2 {
     overflow: hidden;
 }
 
+@media @smallHeight {
+    .scroll-down-icon {
+        display: none;
+    }
+}
+
 @media @tablet,
 @mobile {
     .right-col {
         text-align: left;
         align-items: flex-end;
+        justify-content: flex-end !important;
 
         .header-page-link {
             margin: 0;
@@ -488,7 +495,8 @@ h2 {
         display: block !important;
     }
 
-    .header-page-link {
+    .header-page-link,
+    .register-header-link {
         display: none !important;
     }
 

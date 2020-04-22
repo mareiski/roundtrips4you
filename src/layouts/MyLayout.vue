@@ -10,7 +10,7 @@
           <a href="/">
             <img
               alt="logo"
-              src="../statics/headerSubmark.jpeg"
+              src="../statics/headerSubmark.png"
             />
           </a>
           <span class="beta-span cursor-pointer">[beta]
@@ -40,7 +40,7 @@
           <router-link
             v-if="!user"
             to="/registrieren"
-            class="flex justify-center"
+            class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
           >
             <q-btn color="primary">registrieren</q-btn>
@@ -140,6 +140,24 @@
             class="mobile-header-page-link"
             to="/blog"
           >blog</router-link>
+        </div>
+        <div
+          @click="hideMenu()"
+          class="flex justify-end"
+        >
+          <router-link
+            v-if="!user"
+            class="mobile-header-page-link"
+            to="/login"
+          >anmelden</router-link>
+          <router-link
+            v-if="!user"
+            to="/registrieren"
+            class="flex justify-center"
+            style="flex-direction:column; text-decoration:none; margin-right:5px;"
+          >
+            <q-btn color="primary">registrieren</q-btn>
+          </router-link>
         </div>
       </div>
     </div>
