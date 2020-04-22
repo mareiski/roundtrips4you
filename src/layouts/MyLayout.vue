@@ -254,6 +254,22 @@
               class="footer-link"
               href="mailto:hello@roundtrips4you.de"
             >hello@roundtrips4you.de</a>
+            <div
+              class="fb-like"
+              data-href="https://facebook.com/roundtrips4you"
+              data-width="100"
+              data-layout="button"
+              data-action="like"
+              data-size="small"
+              data-share="true"
+              style="margin-top:10px;"
+            ></div>
+            <a
+              class="twitter-follow-button"
+              href="https://twitter.com/TwitterDev"
+              data-size="large"
+            >
+              Follow @TwitterDev</a>
           </div>
         </div>
       </div>
@@ -397,7 +413,7 @@ export default {
     this.$storyblok.init({
       accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
     })
-    this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.com' || this.getHost === 'www.roundtrips4you.netlify.com')
+    this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.app' || this.getHost === 'www.roundtrips4you.netlify.app')
 
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
