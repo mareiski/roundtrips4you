@@ -1,7 +1,7 @@
 <template>
   <div class="register q-px-lg q-pb-md">
     <h2>Registrieren</h2>
-    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Registriere dich jetzt und nutze alle unsere Funktionen komplett kostenlos</p>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos</p>
     <q-form
       @submit="signUp"
       bordered
@@ -57,6 +57,7 @@
           class="q-mt-md"
           color="primary"
           text-color="white"
+          style="width:300px;"
         >
           <template v-slot:loading>
             <q-spinner />
@@ -68,10 +69,10 @@
       <span style="text-align:center;">oder</span><br>
       <q-btn
         :loading="googleLoading"
-        label="mit google registrieren"
+        label="google konto verwenden"
         class="q-mt-md google-btn"
-        color="primary"
-        text-color="white"
+        style="width:300px;"
+        icon="fab fa-google"
         @click="signUpWithGoogle"
       >
         <template v-slot:loading>
@@ -80,7 +81,8 @@
       </q-btn>
     </div>
     <br>
-    <span style="font-size:18px;">Du hast bereits einen Account ? Dann <router-link to="/login">logge</router-link> dich jetzt ein.</span>
+    <div style="font-size:18px; text-align:center;">Du hast bereits einen Account? <router-link to="/login">Jetzt Anmelden</router-link>
+    </div>
   </div>
 </template>
 

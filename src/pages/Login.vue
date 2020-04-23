@@ -1,6 +1,6 @@
 <template>
   <div class="login q-px-lg q-pb-md">
-    <h2>Log in</h2>
+    <h2>Anmelden</h2>
     <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um zu deinen Reisen zu kommen</p>
     <q-form
       @submit="onUserLogin"
@@ -39,6 +39,7 @@
           class="q-mt-md"
           color="primary"
           text-color="white"
+          style="width:300px;"
         >
           <template v-slot:loading>
             <q-spinner />
@@ -47,13 +48,13 @@
       </div>
     </q-form>
     <div class="google-form">
-      <span style="text-align:center;">oder</span><br>
+      <div class="form-option">oder</div>
       <q-btn
         :loading="googleLoading"
-        label="mit google anmelden"
+        label="google konto verwenden"
         class="q-mt-md google-btn"
-        color="primary"
-        text-color="white"
+        style="width:300px;"
+        icon="fab fa-google"
         @click="signUpWithGoogle"
       >
         <template v-slot:loading>
@@ -62,7 +63,8 @@
       </q-btn>
     </div>
     <br>
-    <span style="font-size:18px;">Du hast noch gar keinen Account ? Dann <router-link to="/registrieren">registriere</router-link> dich noch heute !</span>
+    <div style="font-size:18px; text-align:center; width:100%;">Du hast noch kein Konto? <router-link to="/registrieren">Jetzt Registrieren</router-link>
+    </div>
   </div>
 </template>
 

@@ -264,12 +264,6 @@
               data-share="true"
               style="margin-top:10px;"
             ></div>
-            <a
-              class="twitter-follow-button"
-              href="https://twitter.com/TwitterDev"
-              data-size="large"
-            >
-              Follow @TwitterDev</a>
           </div>
         </div>
       </div>
