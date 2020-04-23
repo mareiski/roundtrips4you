@@ -13,7 +13,7 @@
         outlined
         type="email"
         lazy-rules
-        :rules="[val => val !== null && val !== '' || 'Bitte wähle gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
+        :rules="[val => val !== null && val !== '' || 'Bitte gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
         label="Email"
       />
       <q-input
@@ -47,6 +47,45 @@
         </q-btn>
       </div>
     </q-form>
+    <div class="flex justify-center">
+      <q-btn
+        label="Passwort vergessen"
+        class="q-mt-md"
+        style="width:300px;"
+        @click="showResetPasswordDialog = true"
+      >
+      </q-btn>
+    </div>
+    <q-dialog v-model="showResetPasswordDialog">
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-input
+            v-model="userEmail"
+            outlined
+            type="email"
+            lazy-rules
+            :rules="[val => val !== null && val !== '' || 'Bitte gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
+            label="Email"
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Passwort zurücksetzen"
+            @click="resetPassword()"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            label="Abbrechen"
+            color="primary"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <div class="google-form">
       <div class="form-option">oder</div>
       <q-btn
@@ -90,6 +129,7 @@ export default {
       isPwdRepeat: true,
       submitting: false,
       googleLoading: false,
+      showResetPasswordDialog: false,
       reg: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
     }
   },
@@ -115,6 +155,28 @@ export default {
             message: 'Das Passwort oder der Benutzername ist leider falsch'
           })
         }
+      })
+    },
+    resetPassword () {
+      let context = this
+      auth.sendPasswordResetEmail(this.userEmail).then(function () {
+        // Email sent.
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Wir haben dir eine Email mit einem Resetlink gesendet'
+        })
+      }).catch(function (error) {
+        console.log(error)
+
+        // An error happened.
+        context.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Ups da ist ein Fehler aufgetreten, versuch es noch einmal'
+        })
       })
     },
     signUpWithGoogle () {
