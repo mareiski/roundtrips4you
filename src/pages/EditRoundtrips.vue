@@ -1514,6 +1514,8 @@ export default {
               this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
                 [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            } else {
+              if (this.stops.length === 1) this.stopsLoaded = true
             }
           })
 
@@ -2100,6 +2102,8 @@ export default {
               this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
                 [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+            } else {
+              if (this.stops.length === 1) this.stopsLoaded = true
             }
           })
 
