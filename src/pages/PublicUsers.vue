@@ -21,12 +21,12 @@
               color="primary"
               text-color="white"
             >
-              <img :src="user.image">
+              <img :src="user.image ? user.image : '../statics/dummy-image-landscape-1-150x150.jpg'">
             </q-avatar>
           </q-item-section>
 
           <q-item-section>
-            <q-item-label lines="1">{{user.name}}</q-item-label>
+            <q-item-label lines="1">{{user.name ? user.name : 'Anonymer Nutzer'}}</q-item-label>
             <q-item-label
               caption
               style="width:100px;"

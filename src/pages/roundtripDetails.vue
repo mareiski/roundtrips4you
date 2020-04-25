@@ -129,13 +129,42 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>Reiseverlauf</span>
+              <span>Reiseverlauf {{roundtrip[0] ? '- ' + roundtrip[0].Title : null}}</span>
               <q-toggle
                 style="font-size:18px"
                 @input="expandAllStops()"
                 v-model="allStopsExpanded"
                 label="Stopps ausklappen"
               ></q-toggle>
+            </div>
+            <div class="legal-description">
+              <p>Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creatorName ? creatorName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
+              <p>Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
+              <span v-if="creatorName">Diese Rundreise wurde von </span>
+              <router-link :to="'/benutzerprofil/' + roundtrip[0].UserId">
+                {{creatorName}}<q-tooltip>
+                  <q-avatar
+                    size="50px"
+                    style="width: 50px; margin:0; padding:0;"
+                  >
+                    <q-img :src="creatorImage"></q-img>
+                  </q-avatar>
+                </q-tooltip>
+              </router-link>
+              <q-badge
+                v-if="trustedCreator"
+                align="top"
+                color="blue"
+                style="border-radius:50%; border-radius: 50%; padding: 2px; padding-top: 2.5px; margin-left:1px;"
+              >
+                <q-icon
+                  name="done"
+                  color="white"
+                  size="13px"
+                />
+                <q-tooltip>Dies ist ein von Roundtrips4you anerkannter User</q-tooltip>
+              </q-badge>
+              <span v-if="creatorName"> erstellt</span>
             </div>
           </q-timeline-entry>
           <template v-if="!stopsLoaded">
@@ -321,7 +350,10 @@ export default {
       allStopsExpanded: false,
       currentExpansionStates: [],
       firstLoad: true,
-      stopsLoaded: false
+      stopsLoaded: false,
+      creatorName: null,
+      creatorImage: null,
+      trustedCreator: false
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -352,6 +384,7 @@ export default {
           roundtrip = []
           snapshot.forEach(doc => {
             roundtrip.push(doc.data())
+            this.loadUserData(doc.data().UserId)
             roundtripDocId = doc.id
           })
           this.inputProfile = roundtrip[0].Profile
@@ -365,6 +398,22 @@ export default {
         })
         .catch(err => {
           console.log('Error getting Roundtrip', err)
+        })
+    },
+    loadUserData (UserId) {
+      let creators = []
+      let context = this
+      let userRef = db.collection('User')
+        .where('UserUID', '==', UserId)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            creators.push(doc.data())
+            context.creatorName = creators[0].UserName
+            context.creatorImage = creators[0].UserImage
+            context.trustedCreator = !!creators[0].TrustedUser
+          })
         })
     },
     expandAllStops () {
