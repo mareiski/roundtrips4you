@@ -33,6 +33,17 @@
       </q-badge>
     </h3>
     <span v-if="userSince">Mitglied seit {{userSince}}</span>
+    <br>
+    <span v-if="companyWebsite">Unternehmenswebsite:
+      <a @click="openInNewTab(companyWebsite)">{{companyWebsite}}</a>
+    </span>
+    <br>
+    <span
+      v-if="companyDescription"
+      style="max-width:460px;"
+    >
+      {{companyDescription}}
+    </span>
     <div
       style="margin-top:10px;"
       class="flex justify-between details-container"
@@ -50,7 +61,7 @@
       <div>
         <h3>Inhalte</h3>
         <ul>
-          <li>{{ publishedRoundtrips }} öffentliche Rundreise {{ publishedRoundtrips === 1 ? '' : 'n' }} erstellt</li>
+          <li>{{ publishedRoundtrips }} öffentliche Rundreise{{ publishedRoundtrips === 1 ? '' : 'n' }} erstellt</li>
           <!-- <li>hilfreiche Kommentare erstellt</li> -->
           <!-- <li>Bewertungen erstellt</li> -->
           <!-- <li>Follower</li> -->
@@ -117,7 +128,7 @@
             @click="$router.push('/rundreisen-details/' + roundtrip.RTId)"
             v-ripple
             v-for="(roundtrip, index) in createdRoundtrips"
-            :key="roundtrip"
+            :key="roundtrip.RTId"
           >
             <q-item-section
               avatar
@@ -207,7 +218,9 @@ export default {
       RTIds: [],
       userSince: null,
       trustedUser: false,
-      title: 'User'
+      title: 'User',
+      companyWebsite: null,
+      companyDescription: null
     }
   },
   meta () {
@@ -232,6 +245,8 @@ export default {
           this.userRTEdited = doc.data().RTEdited
           this.userSince = this.getCreatedAtDate(doc.data().createdAt)
           this.trustedUser = !!doc.data().TrustedUser
+          this.companyWebsite = doc.data().website
+          this.companyDescription = doc.data().companyDescription
           this.title = this.userName
         })
       })
@@ -269,6 +284,9 @@ export default {
           console.log(error)
           this.showRoundtrips = true
         })
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     },
     getReputation (userId) {
       let publicRT = this.publishedRoundtrips * 50

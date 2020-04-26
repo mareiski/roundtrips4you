@@ -3,7 +3,7 @@
     class="user q-px-lg q-pb-md"
     v-if="user"
   >
-    <h3>Hallo {{user.displayName}}!</h3>
+    <h3>Hallo {{user.displayName}}</h3>
     <h4>Allgemeine Einstellungen</h4>
     <q-form
       @submit="onSaveUserSettings"
@@ -22,6 +22,27 @@
           label="Benutzername"
           lazy-rules
         />
+        <q-input
+          v-model="CompanyWebsite"
+          v-if="companyProfile"
+          outlined
+          clear-icon
+          :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+          label="Website"
+          lazy-rules
+        />
+        <q-input
+          v-model="companyDescription"
+          v-if="companyProfile"
+          outlined
+          autogrow
+          label="Unternehmensbeschreibung"
+          :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
+          val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
+        > <template v-slot:prepend>
+            <q-icon name="subject" />
+          </template>
+        </q-input>
         <!--
         <q-input
           v-model="UserEmail"
@@ -213,7 +234,11 @@ export default {
       passwordRepeat: '',
       isPwdRepeat: true,
       deleteDialog: false,
-      deleting: false
+      deleting: false,
+      urlReg: /^(http:\/\/|https:\/\/)/,
+      CompanyWebsite: null,
+      companyProfile: false,
+      companyDescription: null
     }
   },
   computed: {
@@ -292,7 +317,6 @@ export default {
       }
     },
     updateDBEntry (uid) {
-      console.log(uid)
       let context = this
       let roundtripsRef = db.collection('User')
         .where('UserUID', '==', uid)
@@ -302,7 +326,9 @@ export default {
           snapshot.forEach(doc => {
             db.collection('User').doc(doc.id).update({
               UserImage: context.titleImgUrl,
-              UserName: context.UserDisplayName
+              UserName: context.UserDisplayName,
+              website: context.CompanyWebsite,
+              companyDescription: context.companyDescription
             })
           })
         })
@@ -383,6 +409,18 @@ export default {
       this.UserDisplayName = auth.user().displayName
       this.UserEmail = auth.user().email
       this.titleImgUrl = auth.user().photoURL
+
+      let userRef = db.collection('User')
+        .where('UserUID', '==', auth.user().uid)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            this.companyProfile = !!doc.data().companyProfile
+            if (doc.data().website) this.CompanyWebsite = doc.data().website
+            if (doc.data().companyDescription) this.companyDescription = doc.data().companyDescription
+          })
+        })
     })
   }
 }

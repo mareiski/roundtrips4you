@@ -138,21 +138,21 @@
               ></q-toggle>
             </div>
             <div class="legal-description">
-              <p>Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creatorName ? creatorName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
-              <p>Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
-              <span v-if="creatorName">Diese Rundreise wurde von </span>
+              <p v-if="!creator.companyProfile">Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creator.UserName ? creator.UserName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
+              <p v-if="!creator.companyProfile">Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
+              <span v-if="creator.UserName">Diese Rundreise wurde von </span>
               <router-link :to="'/benutzerprofil/' + roundtrip[0].UserId">
-                {{creatorName}}<q-tooltip>
+                {{creator.UserName}}<q-tooltip>
                   <q-avatar
                     size="50px"
                     style="width: 50px; margin:0; padding:0;"
                   >
-                    <q-img :src="creatorImage"></q-img>
+                    <q-img :src="creator.UserImage"></q-img>
                   </q-avatar>
                 </q-tooltip>
               </router-link>
               <q-badge
-                v-if="trustedCreator"
+                v-if="creator.TrustedUser"
                 align="top"
                 color="blue"
                 style="border-radius:50%; border-radius: 50%; padding: 2px; padding-top: 2.5px; margin-left:1px;"
@@ -164,7 +164,13 @@
                 />
                 <q-tooltip>Dies ist ein von Roundtrips4you anerkannter User</q-tooltip>
               </q-badge>
-              <span v-if="creatorName"> erstellt</span>
+              <span v-if="creator.UserName"> erstellt</span>
+              <br>
+              <q-btn
+                style="margin-top:20px;"
+                v-if="!!creator.companyProfile && creator.UserName && tripWebsite"
+                @click="openInNewTab(tripWebsite)"
+              >Bei {{creator.UserName}} buchen</q-btn>
             </div>
           </q-timeline-entry>
           <template v-if="!stopsLoaded">
@@ -351,9 +357,8 @@ export default {
       currentExpansionStates: [],
       firstLoad: true,
       stopsLoaded: false,
-      creatorName: null,
-      creatorImage: null,
-      trustedCreator: false
+      creator: {},
+      tripWebsite: null
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -393,6 +398,7 @@ export default {
           this.adults = roundtrip[0].Adults
           this.roundtrip = roundtrip
           this.profile = this.getProfile(roundtrip[0].Profile)
+          this.tripWebsite = roundtrip[0].tripWebsite
 
           this.loadGaleryImgs()
         })
@@ -401,7 +407,6 @@ export default {
         })
     },
     loadUserData (UserId) {
-      let creators = []
       let context = this
       let userRef = db.collection('User')
         .where('UserUID', '==', UserId)
@@ -409,10 +414,7 @@ export default {
       userRef.get()
         .then(snapshot => {
           snapshot.forEach(doc => {
-            creators.push(doc.data())
-            context.creatorName = creators[0].UserName
-            context.creatorImage = creators[0].UserImage
-            context.trustedCreator = !!creators[0].TrustedUser
+            context.creator = doc.data()
           })
         })
     },
@@ -558,6 +560,9 @@ export default {
             })
         })
       }
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     },
     msToTime (duration) {
       var ms = duration % 1000

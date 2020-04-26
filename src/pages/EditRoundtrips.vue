@@ -1007,6 +1007,23 @@
             </div>
           </q-list>
         </q-form>
+        <h4 v-if="companyProfile">Unternehmenseinstellungen</h4>
+        <q-list
+          v-if="companyProfile"
+          bordered
+          class="rounded-borders"
+          style="padding:10px;"
+        >
+          <q-input
+            v-model="tripWebsite"
+            outlined
+            clear-icon
+            @blur="tripWebsite && urlReg.test(tripWebsite)  ? saveData('tripWebsite', tripWebsite) : null"
+            :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+            label="Link zu dieser Reise"
+            lazy-rules
+          />
+        </q-list>
         <h4>Danger Zone</h4>
         <q-list
           bordered
@@ -1184,7 +1201,9 @@ export default {
       firstLoad: true,
       tripDuration: 0,
       allStopsExpanded: false,
-      currentExpansionStates: []
+      currentExpansionStates: [],
+      companyProfile: false,
+      tripWebsite: null
     }
   },
   meta () {
@@ -1913,6 +1932,8 @@ export default {
           this.children = roundtrip[0].ChildrenAges.length
           this.childrenAges = roundtrip[0].ChildrenAges
 
+          if (roundtrip[0].tripWebsite) this.tripWebsite = roundtrip[0].tripWebsite
+
           this.pageTitle = this.title + ' bearbeiten'
 
           this.arrivalDepatureProfile = roundtrip[0].TransportProfile ? roundtrip[0].TransportProfile : 'Flugzeug'
@@ -2605,6 +2626,19 @@ export default {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
           })
       })
+    },
+    getUserData () {
+      let userRef = db.collection('User')
+        .where('UserUID', '==', auth.user().uid)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            this.companyProfile = !!doc.data().companyProfile
+            // if (doc.data().website) this.CompanyWebsite = doc.data().website
+            // if (doc.data().companyDescription) this.companyDescription = doc.data().companyDescription
+          })
+        })
     }
   },
   created () {
@@ -2633,6 +2667,7 @@ export default {
             this.loadSingleRoundtrip(RTId)
             this.loadRoundtripDetails(RTId, false)
             this.loadCategories()
+            this.getUserData()
           } else if (isPublic) {
             this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
           } else {
