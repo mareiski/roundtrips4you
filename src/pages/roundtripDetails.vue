@@ -141,7 +141,10 @@
               <p v-if="!creator.companyProfile">Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creator.UserName ? creator.UserName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
               <p v-if="!creator.companyProfile">Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
               <span v-if="creator.UserName">Diese Rundreise wurde von </span>
-              <router-link :to="'/benutzerprofil/' + roundtrip[0].UserId">
+              <router-link
+                v-if="roundtrip[0]"
+                :to="'/benutzerprofil/' + roundtrip[0].UserId"
+              >
                 {{creator.UserName}}<q-tooltip>
                   <q-avatar
                     size="50px"

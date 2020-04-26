@@ -97,7 +97,7 @@
           </q-select>
           <a
             class="button"
-            @click="$router.push('/rundreisen/' + country); getRoundtrips(false); getRTCount()"
+            @click="$router.push('/rundreisen/' + country); getRoundtrips(true); getRTCount()"
           >Suchen</a>
         </div>
         <div class="filter-card">
@@ -714,7 +714,9 @@ export default {
       let searchCreatedAt = createdAts[(this.currentPage * 20) - 20]
       if (typeof searchCreatedAt === 'undefined' || searchCreatedAt === null) searchCreatedAt = 0
 
-      if (initialLoad) searchCreatedAt = 0
+      if (initialLoad) {
+        searchCreatedAt = 0
+      }
 
       let roundtripsRef = db.collection('Roundtrips')
         .where('Location', 'array-contains', this.country)
