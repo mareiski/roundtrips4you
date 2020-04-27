@@ -1473,9 +1473,12 @@ export default {
             DocId: docId,
             expanded: false
           }
-          this.documentIds.push(docId)
 
           this.stops.push(newStopObject)
+
+          // resort stops
+          this.stops.sort(this.compare)
+          this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
 
           // save all values like in load roundtrip details
           let initDates = []

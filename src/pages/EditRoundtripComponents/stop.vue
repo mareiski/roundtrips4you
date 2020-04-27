@@ -333,7 +333,7 @@
                     >Hotelwebsite</q-chip>
                   </div>
                   <q-chip
-                    icon="house"
+                    icon="fab fa-bootstrap"
                     v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
                     style="width:175px;"
@@ -341,8 +341,16 @@
                     clickable
                     @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
                   > Hotel auf booking.com</q-chip>
+                  <q-chip
+                    icon="house"
+                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    dense
+                    style="width:175px;"
+                    class="linkChip"
+                    clickable
+                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
+                  > Hotel auf expedia</q-chip>
                 </q-item-section>
-
                 <q-item-section
                   side
                   v-if="hotelContact && typeof hotelContact !== 'undefined'"
@@ -1016,6 +1024,13 @@ export default {
       let text = '&group_children=' + this.childrenAges.length
       this.childrenAges.forEach(child => {
         text += '&age=' + child
+      })
+      return text
+    },
+    getExpediaChildrenText () {
+      let text = null
+      this.childrenAges.forEach((childAge, index) => {
+        text += (index !== 0 ? '_' : '') + childAge
       })
       return text
     },
