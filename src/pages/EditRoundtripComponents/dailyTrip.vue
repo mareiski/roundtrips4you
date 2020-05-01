@@ -12,11 +12,7 @@
       bordered
       class="rounded-borders"
     >
-      <q-expansion-item
-        expand-separator
-        :label="dailyTrip.location.label.split(',')[0]"
-        :caption="dailyTrip.date.split(' ')[1]"
-      >
+      <q-expansion-item expand-separator>
         <q-card>
           <q-card-section>
             <div v-if="editor">
@@ -236,7 +232,7 @@
 
           <q-item-section>
             <div class="q-item__label">{{dailyTrip.location.label.split(',')[0]}}</div>
-            <div class="q-item__label q-item__label--caption text-caption">{{dailyTrip.date.split(' ')[1]}}</div>
+            <div class="q-item__label q-item__label--caption text-caption">{{dailyTrip.date.split(' ')[1] + (dailyTrip.days ? ', ca. ' + dailyTrip.days.days + ' Aufenthalt': '')}}</div>
           </q-item-section>
 
           <q-item-section
@@ -271,7 +267,6 @@ export default {
   data () {
     return {
       savedEditorContent: this.dailyTrip.descriptionInput,
-      days: [],
       durations: [],
       preventPasting: true,
       oldAddedSights: [],

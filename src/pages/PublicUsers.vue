@@ -8,7 +8,7 @@
       <div v-if="showUser">
         <q-item
           clickable
-          @click="$router.push('benutzerprofil/' + user.userUID)"
+          @click="$router.push('/benutzerprofil/' + user.userUID)"
           v-ripple
           v-for="user in users"
           :key="user"

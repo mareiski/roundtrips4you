@@ -156,6 +156,7 @@
                 :key="stop.DocId"
                 :title="stop.Title"
                 :date="stop.InitDate"
+                :nextStopDate="stops[index + 1] ? stops[index + 1].InitDate : null"
                 :editor-placeholder="stop.Description"
                 :editor="true"
                 :docId="stop.DocId"

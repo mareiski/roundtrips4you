@@ -561,7 +561,7 @@
             <DailyTrip
               style="margin-top:10px;"
               v-for="(dailyTrip, index) in dailyTrips"
-              :key="dailyTrip.id"
+              :key="dailyTrip.id + index"
               :dailyTrip="dailyTrip"
               :editorToolbar="editorToolbar"
               :editorFonts="editorFonts"
@@ -621,7 +621,7 @@
                         v-model="tempDailyTripDate"
                         today-btn
                         mask="DD.MM.YYYY HH:mm"
-                        v-close-popup
+                        :options="dailyTripDateOptions"
                       />
                     </q-popup-proxy>
                   </q-icon>
@@ -814,7 +814,8 @@ export default {
     galeryImgUrls: Array,
     stopImages: Array,
     addedSights: Array,
-    dailyTrips: Array
+    dailyTrips: Array,
+    nextStopDate: String
   },
   data () {
     return {
@@ -939,7 +940,7 @@ export default {
         }, 500)
       })
     },
-    getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel) {
+    getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
 
@@ -954,16 +955,41 @@ export default {
             if (distance !== '') distance = ' (' + distance + ')'
 
             this.dailyTrips[index].duration = { duration: duration, distance: distance, cityFromLabel: cityFromLabel, defaultCityLabel: defaultCityLabel }
+            if (this.dailyTrips[index + 1] && !this.dailyTrips[index + 1].newDate) this.getDailyTripDays(trip, index, data.duration)
+            else if (index === this.dailyTrips.length - 1) this.dailyTrips.sort(this.compare)
+            else {
+              // if its the last item resort daily trips to force a refresh
+              if (index === this.dailyTrips.length - 1) this.dailyTrips.sort(this.compare)
+            }
           } else {
             this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
+            if (this.dailyTrips[index + 1]) this.getDailyTripDays(trip, index, null)
           }
-
-          // if its the last item resort daily trips to force a refresh
-          if (index === this.dailyTrips.length - 1) this.dailyTrips.sort(this.compare)
         }).catch(exception => {
           console.log(exception)
           this.dailyTrips[index].duration = { duration: null, distance: null, cityFromLabel: null, defaultCityLabel: null }
         })
+    },
+    getDailyTripDays (trip, index, duration) {
+      let dailyTripDays = null
+
+      let dateTimeParts = trip.date.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      dateTimeParts = this.dailyTrips[index + 1].date.split(' ')
+      dateParts = dateTimeParts[0].split('.')
+      timeParts = dateTimeParts[1].split(':')
+      let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      let dateDistance = 0
+      if (duration) dateDistance = (nextInitDate.valueOf() - currentInitDate.valueOf()) - duration
+      else dateDistance = nextInitDate.valueOf() - currentInitDate.valueOf()
+
+      dailyTripDays = this.msToTime(dateDistance)
+
+      this.dailyTrips[this.dailyTrips.findIndex(x => x.id === trip.id)].days = { days: dailyTripDays, id: trip.id }
     },
     msToTime (duration) {
       var ms = duration % 1000
@@ -1127,9 +1153,9 @@ export default {
           dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
 
           if (index === 0) {
-            this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+            this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, 0, this.location.label, this.location.label, dailyTrip)
           } else {
-            this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+            this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label, dailyTrip)
           }
         })
 
@@ -1164,9 +1190,9 @@ export default {
         dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
 
         if (index === 0) {
-          this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+          this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label, dailyTrip)
         } else {
-          this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+          this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label, dailyTrip)
         }
       })
 
@@ -1386,6 +1412,27 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     },
+    dailyTripDateOptions (date) {
+      if (this.date && this.date.length > 0) {
+        let dateTimeParts = this.date.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        const currentStopDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+        const currentDate = new Date(date)
+
+        if (this.nextStopDate && this.nextStopDate.length > 0) {
+          dateTimeParts = this.nextStopDate.split(' ')
+          dateParts = dateTimeParts[0].split('.')
+          const nextStopDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+
+          // date must be between current and next stop date
+          return currentDate >= currentStopDate && currentDate < nextStopDate
+        } else {
+          return currentDate >= currentStopDate
+        }
+      }
+      return null
+    },
     getParent (name) {
       let p = this.$parent
       while (typeof p !== 'undefined') {
@@ -1470,9 +1517,9 @@ export default {
     this.dailyTrips.forEach((dailyTrip, index) => {
       dailyTrip.newDate = this.newDailyTripDate(dailyTrip.date)
       if (index === 0) {
-        this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label)
+        this.getDailyTripDuration([this.location.lng, this.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.location.label, this.location.label, dailyTrip)
       } else {
-        this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label)
+        this.getDailyTripDuration([this.dailyTrips[index - 1].location.lng, dailyTrip.location.lat], [dailyTrip.location.lng, dailyTrip.location.lat], dailyTrip.profile, index, this.dailyTrips[index - 1].location.label, this.location.label, dailyTrip)
       }
     })
   },

@@ -27,7 +27,7 @@
       <div v-if="showRoundtrips">
         <q-item
           clickable
-          @click="$router.push('rundreise-bearbeiten/' + roundtrip.RTId)"
+          @click="$router.push('/rundreise-bearbeiten/' + roundtrip.RTId)"
           v-ripple
           v-for="(roundtrip, index) in roundtrips"
           :key="roundtrip.RTId"
