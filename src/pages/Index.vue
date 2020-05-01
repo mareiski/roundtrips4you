@@ -202,7 +202,7 @@
           <button>Reise kostenlos planen</button>
         </router-link>
       </div>
-      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem kostenlosen Reiseplaner erstellte Rundreisen an</p>
+      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
       <div class="card-container">
         <div class="card-wrap left">
           <router-link
