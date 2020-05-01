@@ -10,10 +10,11 @@
     <h3 v-show="!title">
       <q-skeleton
         width="200px"
+        height="50px"
         type="text"
       />
     </h3>
-    <h3 v-if="title">{{title}}
+    <h3 v-show="title">{{title}}
       <q-popup-edit
         v-model="title"
         buttons
