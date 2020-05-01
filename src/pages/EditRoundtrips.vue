@@ -7,13 +7,13 @@
       <q-icon name="keyboard_arrow_left"></q-icon>
       zurück zu meinen Rundreisen
     </router-link>
-    <h3 v-if="!title">
+    <h3 v-show="!title">
       <q-skeleton
         width="200px"
         type="text"
       />
     </h3>
-    <h3 v-else>{{title}}
+    <h3 v-if="title">{{title}}
       <q-popup-edit
         v-model="title"
         buttons
@@ -2293,7 +2293,12 @@ export default {
 
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.DocId), 0, { days: days, docId: stop.DocId })
 
-      if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
+      if (this.stops.indexOf(stop) === this.stops.length - 2) {
+        let context = this
+        setTimeout(function () {
+          context.stopsLoaded = true
+        }, 500)
+      }
     },
     saveTitle (val) {
       this.isUniqueTitle(val).then(uniqueTitle => {
