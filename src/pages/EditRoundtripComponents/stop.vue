@@ -704,6 +704,7 @@
             <q-btn
               style="margin:10px;"
               v-close-popup
+              @click="date = oldDate"
             >abbrechen</q-btn>
             <q-btn
               color="primary"
@@ -736,15 +737,15 @@
             format24h
           />
           <br>
-          <!-- <q-toggle
-            v-model="changeAllDates"
+          <q-toggle
+            v-model="changeAllDatesActive"
             label="Alle Daten ändern"
             icon="update"
           >
             <q-tooltip>
               Aktivieren um alle nachfolgenden Daten ebenfalls zu ändern
             </q-tooltip>
-          </q-toggle> -->
+          </q-toggle>
           <div
             class="flex justify-between"
             style="width:100%"
@@ -752,6 +753,7 @@
             <q-btn
               style="margin:10px;"
               v-close-popup
+              @click="date = oldDate"
             >abbrechen</q-btn>
             <q-btn
               color="primary"
@@ -844,6 +846,8 @@ export default {
       dailyTripProfile: 'Auto',
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       expanded: false,
+      changeAllDatesActive: false,
+      oldDate: null,
 
       editorFonts: {
         arial: 'Arial',
@@ -924,14 +928,20 @@ export default {
   },
   methods: {
     saveDate (refresh) {
-      let lastScrollPos = document.documentElement.scrollTop
+      const lastScrollPos = document.documentElement.scrollTop
       let newInitDate = this.getDateFromString(this.date)
+
+      // time entry also has changed
+      if (refresh) {
+        if (this.changeAllDatesActive) this.changeAllDates()
+        else this.oldDate = this.date
+      }
 
       let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'InitDate': newInitDate
       }).then(function () {
-        if (refresh) {
+        if (refresh && !context.changeAllDatesActive) {
           // resort stops and prepare views with new array
           context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.docId)
         }
@@ -1171,6 +1181,11 @@ export default {
           })
         })
       }
+    },
+    changeAllDates () {
+      let millis = this.getDateFromString(this.date).valueOf() - this.getDateFromString(this.oldDate).valueOf()
+      this.oldDate = this.date
+      this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.docId, millis, this.getDateFromString(this.date))
     },
     deleteDailyTrip (index) {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
@@ -1512,6 +1527,7 @@ export default {
   },
   created () {
     this.oldAddedSights = this.addedSights
+    this.oldDate = this.date
 
     this.dailyTrips.sort(this.compare)
     this.dailyTrips.forEach((dailyTrip, index) => {

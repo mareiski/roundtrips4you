@@ -2457,6 +2457,34 @@ export default {
 
       return sum / count
     },
+    changeAllFollowingStopDates (stopId, millis, currentStopDate) {
+      let index = this.stops.findIndex(x => x.DocId === stopId) + 1
+
+      for (index; index < this.stops.length; index++) {
+        let currentInitDate = this.getDateFromString(this.stops[index].InitDate)
+
+        let newInitDateMillis = 0
+
+        if (millis < 0) {
+          newInitDateMillis = currentInitDate.valueOf() - Math.abs(millis)
+        } else {
+          newInitDateMillis = currentInitDate.valueOf() + millis
+        }
+
+        const newInitDate = new Date(newInitDateMillis)
+
+        this.stops[index].InitDate = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
+
+        const docId = this.stops[index].DocId
+        let context = this
+        db.collection('RoundtripDetails').doc(docId).update({
+          'InitDate': newInitDate
+        }).then(function () {
+          // resort stops if its the last item
+          if (index === context.stops.length - 1) context.resortAndPrepareStops(currentStopDate, stopId)
+        })
+      }
+    },
     isDateTimeValid () {
       var testDate = this.date
       if (testDate === null || testDate.length === 0) return false
