@@ -22,6 +22,7 @@
         <MglPopup>
           <q-card>
             <q-img
+              v-if="stop.StopImages"
               width="240px"
               height="135px"
               :src="stop.StopImages[0]"

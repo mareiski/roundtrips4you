@@ -279,7 +279,6 @@
           :profile="getProfile(inputProfile)"
           :stops="stops"
           :childrenAges="childrenAges"
-          :checkOutDate="checkOutDate"
           :adults="parseInt(adults)"
           :rooms="parseInt(rooms)"
         ></Map>
