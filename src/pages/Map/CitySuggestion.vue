@@ -131,7 +131,6 @@ export default {
         DateDistance: '',
         Description: 'Beschreibung über ' + cityName,
         GeneralLink: null,
-        HotelStop: false,
         ImageUrl: null,
         InitDate: initDate,
         Price: 0,

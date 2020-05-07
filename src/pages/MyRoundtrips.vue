@@ -660,7 +660,6 @@ export default {
                 Description: 'Beschreibung dieses Stopps',
                 ExpediaLink: '',
                 GeneralLink: '',
-                HotelStop: false,
                 ImageUrl: '',
                 InitDate: depatureDate || new Date(timeStamp),
                 Price: 0,

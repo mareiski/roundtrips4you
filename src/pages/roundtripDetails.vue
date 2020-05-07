@@ -236,7 +236,6 @@
                 :key="stop.DocId"
                 :title="stop.Title"
                 :date="dates[index]"
-                :icon="!stop.HotelStop ? 'location_on' : 'hotel'"
                 :editor-placeholder="stop.Description"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"

@@ -15,33 +15,58 @@
       <MglMarker
         v-for="stop in stops"
         :key="stop.DocId"
-        :coordinates="stop.HotelStop && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
+        :coordinates="stop.HotelName && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
         @click="onMarkerClicked($event)"
       >
         <MglPopup>
           <q-card>
+            <q-img
+              width="240px"
+              height="135px"
+              :src="stop.StopImages[0]"
+            ></q-img>
             <q-card-section>
-              <a
-                v-if="stop.HotelStop && stop.HotelName"
-                :href="stop.GeneralLink"
-                target="_blank"
-              >{{stop.Title + ' - ' + capitalize(stop.HotelName)}}</a>
-              <p v-if="!stop.HotelStop || !stop.HotelName">{{stop.Title}}</p>
+              <div class="text-h6">
+                {{stop.Title}}
+              </div>
+              <div class="text-subtitle2">
+                <p style="margin-bottom:5px;">
+                  <q-icon name="location_on" />
+                  <a
+                    target="_blank"
+                    :href="!stop.HotelName || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
+                  >{{stop.HotelName && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
+                </p>
+                <p v-if="stop.GeneralLink && stop.GeneralLink.length > 0">
+                  <q-icon name="house" />
+                  <a
+                    :href="stop.GeneralLink"
+                    target="blank"
+                  >{{capitalize(stop.HotelName)}}</a>
+                </p>
+              </div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-none">
               <q-chip
-                icon="hotel"
+                icon="fab fa-bootstrap"
                 v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
                 dense
+                style="width:175px;"
                 class="linkChip"
                 clickable
-                @click="openInNewTab('https://www.booking.com/searchresults.de.html?aid=1632674&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + stop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + stop.InitDate.split('.')[1] + '&checkin_monthday=' + stop.InitDate.split('.')[0] + '&checkout_year=' + stop.CheckOutDate.split('.')[2] + '&checkout_month=' + stop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + stop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
-              >auf booking.com</q-chip>
-              <p>
-                <a
-                  target="_blank"
-                  :href="!stop.HotelStop || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
-                >{{stop.HotelStop && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
-              </p>
+                @click="openInNewTab('https://www.booking.com/searchresults.de.html?&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + new Date(stop.InitDate.seconds * 1000).getFullYear() + '&checkin_month=' + new Date(stop.InitDate.seconds * 1000).getMonth() + '&checkin_monthday=' + new Date(stop.InitDate.seconds * 1000).getDay() + '&checkout_year=' + stop.CheckOutDate.split('.')[2] + '&checkout_month=' + stop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + stop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + stop.Rooms + '&ac_langcode=de')"
+              > Hotel auf booking.com</q-chip>
+              <q-chip
+                icon="house"
+                v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
+                dense
+                style="width:175px;"
+                class="linkChip"
+                clickable
+                @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(stop.HotelName) + '&endDate=' + stop.CheckOutDate.split(' ')[0].split('.')[2] + '-' + stop.CheckOutDate.split('.')[1] + '-' + stop.CheckOutDate.split('.')[0] + '&rooms=' + stop.rooms + '&sort=RECOMMENDED&startDate=' + new Date(stop.InitDate.seconds * 1000).getFullYear() + '-' + new Date(stop.InitDate.seconds * 1000).getMonth() + '-' + new Date(stop.InitDate.seconds * 1000).getDay() + '&theme=&useRewards=true')"
+              > Hotel auf expedia</q-chip>
             </q-card-section>
           </q-card>
         </MglPopup>
@@ -59,6 +84,12 @@
         >
           <MglPopup>
             <q-card>
+              <div style="width:100%; display:flex; justify-content:center; padding-top:5px;">
+                <q-icon
+                  name="fas fa-parking"
+                  size="30px"
+                />
+              </div>
               <q-card-section>
                 <p>{{ stop.parkingPlace && typeof stop.parkingPlace !== 'undefined' &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
               </q-card-section>
@@ -80,6 +111,12 @@
         />
         <MglPopup>
           <q-card v-if="route.duration">
+            <div style="width:100%; display:flex; justify-content:center; padding-top:5px;">
+              <q-icon
+                name="fas fa-route"
+                size="30px"
+              />
+            </div>
             <q-card-section>
               <div>{{route.duration}} bis {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
               <a
@@ -244,6 +281,13 @@ export default {
       })
       return text
     },
+    getExpediaChildrenText () {
+      let text = null
+      this.childrenAges.forEach((childAge, index) => {
+        text += (index !== 0 ? '_' : '') + childAge
+      })
+      return text
+    },
     msToTime (duration) {
       var ms = duration % 1000
       duration = (duration - ms) / 1000
@@ -297,7 +341,7 @@ export default {
             let previousStopLat = 0
 
             if (index >= 1) {
-              if (this.stops[index - 1].HotelStop && this.stops[index - 1].HotelLocation) {
+              if (this.stops[index - 1].HotelName && this.stops[index - 1].HotelLocation) {
                 previousStopLng = this.stops[index - 1].HotelLocation.lat
                 previousStopLat = this.stops[index - 1].HotelLocation.lng
               } else {
@@ -306,7 +350,7 @@ export default {
               }
             }
 
-            if (stop.HotelStop && stop.HotelLocation) {
+            if (stop.HotelName && stop.HotelLocation) {
               if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, this.stops[index - 1].Profile)
 
               bounds.push([parseFloat(stop.HotelLocation.lng), parseFloat(stop.HotelLocation.lat)])
@@ -463,6 +507,7 @@ export default {
   created () {
     this.mapbox = this.Mapbox
     this.map = null
+    console.log(this.stops)
   }
 }
 

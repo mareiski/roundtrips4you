@@ -1261,7 +1261,7 @@ export default {
         if (index < this.childrenAges.length - 1) childrenAgeString += '%2C'
       })
 
-      let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?aid=1632674&type=ROUNDTRIP&adults=' + this.adults +
+      let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?type=ROUNDTRIP&adults=' + this.adults +
         '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getDepatureReturnDate(this.depatureDate) + '&return=' + this.getDepatureReturnDate(this.returnDate) + '&sort=BEST'
       window.open(url, '_blank')
     },
@@ -2449,7 +2449,7 @@ export default {
       let count = 0
 
       this.stops.forEach((stop, index) => {
-        if (stop.HotelStop) {
+        if (stop.HotelName) {
           sum += parseInt(stop.HotelStars, 10)
           count++
         }
