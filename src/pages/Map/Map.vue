@@ -74,13 +74,13 @@
       <div
         v-for="stop in stops"
         :key="'StopContainer' + stop.DocId"
-        @click="onMarkerClicked($event)"
       >
         <MglMarker
           v-if="stop.Parking && typeof stop.Parking !== 'undefined' && !isNaN(stop.Parking.lng)"
           :key="'Stop' + stop.DocId"
           :coordinates="[stop.Parking.lng, stop.Parking.lat]"
           color="#D56026"
+          @click="onMarkerClicked($event)"
         >
           <MglPopup>
             <q-card>
@@ -341,23 +341,12 @@ export default {
             let previousStopLat = 0
 
             if (index >= 1) {
-              if (this.stops[index - 1].HotelName && this.stops[index - 1].HotelLocation) {
-                previousStopLng = this.stops[index - 1].HotelLocation.lat
-                previousStopLat = this.stops[index - 1].HotelLocation.lng
-              } else {
-                previousStopLat = this.stops[index - 1].Location.lat
-                previousStopLng = this.stops[index - 1].Location.lng
-              }
+              previousStopLat = this.stops[index - 1].Location.lat
+              previousStopLng = this.stops[index - 1].Location.lng
             }
 
-            if (stop.HotelName && stop.HotelLocation) {
-              if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.HotelLocation.lng, stop.HotelLocation.lat], map, index, this.stops[index - 1].Profile)
-
-              bounds.push([parseFloat(stop.HotelLocation.lng), parseFloat(stop.HotelLocation.lat)])
-            } else {
-              if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
-              bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
-            }
+            if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
+            bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
           })
           try {
             map.fitBounds(new Mapbox.LngLatBounds(bounds))
@@ -507,7 +496,6 @@ export default {
   created () {
     this.mapbox = this.Mapbox
     this.map = null
-    console.log(this.stops)
   }
 }
 
