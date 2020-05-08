@@ -12,7 +12,7 @@
         v-model="userEmail"
         outlined
         type="email"
-        :rules="[val => val !== null && val !== '' || 'Bitte wähle gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
+        :rules="[val => val !== null && val !== '' || 'Bitte gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
         label="Email"
         lazy-rules
       />
@@ -118,7 +118,7 @@ export default {
       let mail = this.userEmail
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
-          this.createUserEntry(user)
+          context.createUserEntry(user)
           context.$q.notify({
             color: 'green-4',
             textColor: 'white',

@@ -44,7 +44,7 @@ export default {
             color: 'red-5',
             textColor: 'white',
             icon: 'error',
-            message: 'Oh nein, wir konnten dir leider keine email senden, bitte versuche es manuell noch einmal'
+            message: 'Oh nein, wir konnten dir leider keine email senden, bitte Kontaktiere uns unter hello@roundtrips4you.de'
           })
         })
       }

@@ -180,7 +180,7 @@ export default {
       })
     },
     signUpWithGoogle () {
-      getFirebase.then(firebase => {
+      getFirebase().then(firebase => {
         var provider = new firebase.auth.GoogleAuthProvider()
         let context = this
         auth.authRef().signInWithPopup(provider).then(function (result) {
@@ -200,5 +200,27 @@ export default {
       })
     }
   }
+  // uncomment following to manually verfiy mail
+  // created () {
+  //   var actionCodeSettings = {
+  //     url: 'https://roundtrips4you.de/login',
+  //     // This must be true.
+  //     handleCodeInApp: true
+  //   }
+
+  //   const email = 'jonas_eberwein@web.de'
+
+  //   auth.authRef().sendSignInLinkToEmail(email, actionCodeSettings)
+  //     .then(function () {
+  //       // The link was successfully sent. Inform the user.
+  //       // Save the email locally so you don't need to ask the user for it again
+  //       // if they open the link on the same device.
+  //       window.localStorage.setItem('emailForSignIn', email)
+  //     })
+  //     .catch(function (error) {
+  //       // Some error occurred, you can inspect the code: error.code
+  //       console.log(error)
+  //     })
+  // }
 }
 </script>

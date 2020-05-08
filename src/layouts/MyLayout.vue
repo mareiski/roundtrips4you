@@ -65,7 +65,7 @@
                 content-style="font-size: 14px;"
                 content-class="tooltip"
               >
-                {{user ? 'Hallo, ' + user.displayName : 'Anmelden'}}
+                {{user && user.displayName ? 'Hallo, ' + user.displayName : 'Anmelden'}}
               </q-tooltip>
             </div>
             <q-menu v-if="user">
