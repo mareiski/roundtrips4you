@@ -152,46 +152,52 @@
             class="stop-list"
             v-show="stopsLoaded"
           >
-            <template v-for="(stop, index) in stops">
-              <Stop
-                :key="stop.DocId"
-                :title="stop.Title"
-                :date="stop.InitDate"
-                :nextStopDate="stops[index + 1] ? stops[index + 1].InitDate : null"
-                :editor-placeholder="stop.Description"
-                :editor="true"
-                :docId="stop.DocId"
-                :general-link="stop.GeneralLink"
-                :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
-                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
-                :lastItem="index === stops.length -1"
-                :hotelStars="parseInt(stop.HotelStars)"
-                :hotelName="stop.HotelName"
-                :hotelLocation="stop.HotelLocation"
-                :hotelContact="stop.HotelContact"
-                :checkOutDate="stop.CheckOutDate ? stop.CheckOutDate : getDefaultCheckOutDate(stop)"
-                :adults="parseInt(adults)"
-                :childrenAges="childrenAges"
-                :rooms="parseInt(rooms)"
-                :firstStop="index === 0"
-                :galeryImgUrls="galeryImgUrls"
-                :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
-                :addedSights="stop.Sights ? stop.Sights : []"
-                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
-                :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                :expanded="stop.expanded"
-                @expansionChanged="expansionChanged($event)"
-                :ref="stop.DocId"
-              ></Stop>
-              <Duration
-                :key="'Stop' + stop.DocId"
-                v-if="index !== stops.length - 1"
-                :duration="durations[durations.findIndex(x => x.docId === stop.DocId)] && durations[durations.findIndex(x => x.docId === stop.DocId)].duration ? (durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance) : null"
-                :editor="true"
-                :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-                :doc-id="stop.DocId"
-              ></Duration>
-            </template>
+            <transition-group
+              name="flip-list"
+              tag="div"
+            >
+              <template v-for="(stop, index) in stops">
+                <Stop
+                  :key="stop.DocId"
+                  :title="stop.Title"
+                  :date="stop.InitDate"
+                  :nextStopDate="stops[index + 1] ? stops[index + 1].InitDate : null"
+                  :editor-placeholder="stop.Description"
+                  :editor="true"
+                  :docId="stop.DocId"
+                  :general-link="stop.GeneralLink"
+                  :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
+                  :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
+                  :lastItem="index === stops.length -1"
+                  :hotelStars="parseInt(stop.HotelStars)"
+                  :hotelName="stop.HotelName"
+                  :hotelLocation="stop.HotelLocation"
+                  :hotelContact="stop.HotelContact"
+                  :checkOutDate="stop.CheckOutDate ? stop.CheckOutDate : getDefaultCheckOutDate(stop)"
+                  :adults="parseInt(adults)"
+                  :childrenAges="childrenAges"
+                  :rooms="parseInt(rooms)"
+                  :firstStop="index === 0"
+                  :galeryImgUrls="galeryImgUrls"
+                  :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
+                  :addedSights="stop.Sights ? stop.Sights : []"
+                  :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
+                  :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
+                  :expanded="stop.expanded"
+                  @expansionChanged="expansionChanged($event)"
+                  :ref="stop.DocId"
+                ></Stop>
+                <Duration
+                  style="transition: all 1s;"
+                  :key="'Stop' + stop.DocId"
+                  v-if="index !== stops.length - 1"
+                  :duration="durations[durations.findIndex(x => x.docId === stop.DocId)] && durations[durations.findIndex(x => x.docId === stop.DocId)].duration ? (durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance) : null"
+                  :editor="true"
+                  :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+                  :doc-id="stop.DocId"
+                ></Duration>
+              </template>
+            </transition-group>
           </div>
         </q-timeline>
         <q-list
@@ -1080,8 +1086,8 @@
           :profile="profile"
           :stops="stops"
           :childrenAges="childrenAges"
-          :rooms="rooms"
-          :adults="adults"
+          :rooms="Number(rooms)"
+          :adults="Number(adults)"
           :editor="true"
           ref="map"
         ></Map>

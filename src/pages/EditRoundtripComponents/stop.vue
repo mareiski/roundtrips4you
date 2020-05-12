@@ -322,7 +322,7 @@
                   </q-item-label>
                 </q-item-section>
 
-                <q-item-section>
+                <q-item-section :side="!editor">
                   <div v-if="generalLink && generalLink.length > 0">
                     <q-chip
                       icon="link"
@@ -373,7 +373,10 @@
                   </div>
                 </q-item-section>
 
-                <q-item-section side>
+                <q-item-section
+                  side
+                  v-if="editor"
+                >
                   <q-icon
                     name="clear"
                     color="primary"
@@ -716,6 +719,7 @@
         </q-popup-proxy>
         <q-icon
           v-if="editor"
+          class="cursor-pointer"
           size="16px"
           name="event"
         />
@@ -766,6 +770,7 @@
         <q-icon
           v-if="editor"
           size="16px"
+          class="cursor-pointer"
           name="access_time"
         />
 
