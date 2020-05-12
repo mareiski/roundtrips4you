@@ -107,12 +107,21 @@ top of page > end of page
 
 .description-container {
     font-family: @primary-number-font;
-    font-size: 18px;
+    font-size: 20px;
     margin-bottom: 80px;
     margin-top: 40px;
     margin-left: 17px;
     padding-left: 16px;
     border-left: @primary-orange solid;
+    opacity: 0;
+    animation-delay: 2s;
+
+    &.in-viewport {
+        -webkit-animation: fadeInLeft 0.7s ease-in both;
+        -moz-animation: fadeInLeft 0.7s ease-in both;
+        -ms-animation: fadeInLeft 0.7s ease-in both;
+        animation: fadeInLeft 0.7s ease-in both;
+    }
 
     a {
         text-decoration: underline;
@@ -142,6 +151,14 @@ top of page > end of page
             padding-left: 20px;
             padding-right: 20px;
             font-size: 18px;
+
+            margin-top: 10px;
+            opacity: 0;
+            -webkit-animation: fadeInUp 0.7s ease-in both;
+            -moz-animation: fadeInUp 0.7s ease-in both;
+            -ms-animation: fadeInUp 0.7s ease-in both;
+            animation: fadeInUp 0.7s ease-in both;
+            animation-delay: 0.9s;
         }
     }
 }
@@ -155,6 +172,8 @@ top of page > end of page
         display: flex;
         justify-content: center;
         width: 100%;
+        margin-top: 30px;
+        opacity: 0;
 
         &.left {
             justify-content: flex-end;
@@ -162,6 +181,26 @@ top of page > end of page
 
         &.right {
             justify-content: flex-start;
+        }
+
+        &.in-viewport {
+            -webkit-animation: fadeInUp 0.7s ease-in both;
+            -moz-animation: fadeInUp 0.7s ease-in both;
+            -ms-animation: fadeInUp 0.7s ease-in both;
+            animation: fadeInUp 0.7s ease-in both;
+
+            &:nth-child(1) {
+                animation-delay: 0.6s;
+            }
+
+            &:nth-child(2) {
+                animation-delay: 0.8s;
+            }
+
+            &:nth-child(3) {
+                animation-delay: 1s;
+            }
+
         }
 
         .card {
@@ -242,7 +281,18 @@ top of page > end of page
     margin-bottom: 100px;
     padding: 0 10% 0 10%;
     font-size: 30px;
-    background-color: rgba(48, 25, 0, 0.11)
+
+    button {
+        opacity: 0;
+
+        &.in-viewport {
+            -webkit-animation: fadeInUp 0.7s ease-in both;
+            -moz-animation: fadeInUp 0.7s ease-in both;
+            -ms-animation: fadeInUp 0.7s ease-in both;
+            animation: fadeInUp 0.7s ease-in both;
+            animation-delay: 0.3s;
+        }
+    }
 }
 
 .register-container {
@@ -269,10 +319,22 @@ top of page > end of page
 
     }
 
-    &>li>div:nth-child(2) {
-        justify-content: center;
-        display: flex;
-        width: 100%;
+    &>li {
+        opacity: 0;
+
+        &.in-viewport {
+            -webkit-animation: fadeInUp 0.7s ease-in both;
+            -moz-animation: fadeInUp 0.7s ease-in both;
+            -ms-animation: fadeInUp 0.7s ease-in both;
+            animation: fadeInUp 0.7s ease-in both;
+            animation-delay: 0.3s;
+        }
+
+        &>div:nth-child(2) {
+            justify-content: center;
+            display: flex;
+            width: 100%;
+        }
     }
 }
 
@@ -531,5 +593,29 @@ top of page > end of page
     100% {
         padding-top: 30px;
         left: 105%;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 30%, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(-90%, 0, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
     }
 }

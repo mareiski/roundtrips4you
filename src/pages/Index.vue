@@ -38,7 +38,6 @@
             <q-btn
               @click="$router.push('/registrieren')"
               color="primary"
-              style="margin-top:10px;"
             >Los geht's</q-btn>
           </div>
           <!-- <div>
@@ -88,10 +87,14 @@
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
+          style="font-size:18px;"
         >JETZT REGISTRIEREN</q-btn>
       </div>
       <div class="card-container">
-        <div class="card-wrap left">
+        <div
+          class="card-wrap left"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/meine-rundreisen"
@@ -101,7 +104,10 @@
             <span>Teile deine eigenen Rundreisen mit der ganzen Welt in einer übersichtlichen Ansicht</span>
           </router-link>
         </div>
-        <div class="card-wrap">
+        <div
+          class="card-wrap"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/meine-rundreisen"
@@ -111,7 +117,10 @@
             <span>Plane deine Reise ganz professionell aber ohne Aufwand und in kürzester Zeit</span>
           </router-link>
         </div>
-        <div class="card-wrap right">
+        <div
+          class="card-wrap right"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/rundreisen-uebersicht"
@@ -122,7 +131,10 @@
           </router-link>
         </div>
       </div>
-      <div class="description-container">
+      <div
+        class="description-container"
+        v-in-viewport.once
+      >
         <p>Die eigene Reiseplanung kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die dort gar nicht angefahren werden.</p>
         <p>Roundtrips4you verbindet beide Konzepte miteinander:</p>
         <p>Bei uns kannst du deine Reise komplett nach deinen eigenen Wünschen zusammenstellen, somit entgeht dir keine Sehenswürdigkeit mehr (und du sparst dir die ein oder andere nervige Person in der Reisegruppe).</p>
@@ -134,7 +146,7 @@
         style="text-align:center;"
       >Mit diesen Tools planst du deine eigene Reise in unter 5 Minuten</h4>
       <ol class="create-roundtrip-ol">
-        <li>
+        <li v-in-viewport.once>
           <div>
             <h2>Flugsuche</h2>
             <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu buchen.</p>
@@ -143,7 +155,7 @@
           <div>
           </div>
         </li>
-        <li>
+        <li v-in-viewport.once>
           <div>
             <h2>Städtevorschläge</h2>
             <p>Zusätzlich schlagen dir automatisch die schönsten Städte in dem gewählten Land deine Reise vor.</p>
@@ -157,7 +169,7 @@
             />
           </div>
         </li>
-        <li>
+        <li v-in-viewport.once>
           <div>
             <h2>Rundreise automatisch zusammenstellen</h2>
             <p>Nachdem du die Städte deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
@@ -166,7 +178,7 @@
           <div>
           </div>
         </li>
-        <li>
+        <li v-in-viewport.once>
           <div>
             <h2>Vorschlag von Sehenswürdigkeiten</h2>
             <p>Die besten Sehenswürdigkeiten zu finden ist schwierig, deshalb unterstützen wir dich mit unseren automatischen Vorschlägen.</p>
@@ -180,7 +192,10 @@
             />
           </div>
         </li>
-        <li ref="map">
+        <li
+          v-in-viewport.once
+          ref="map"
+        >
           <div>
             <h2>Karte</h2>
             <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>
@@ -199,12 +214,15 @@
       <div class="section-img-placeholder">
         <h3>Plane jetzt ganz einfach, kostenlos und online deine individuelle Traumreise nach deinen Wünschen!</h3>
         <router-link to="/registrieren">
-          <button>Reise kostenlos planen</button>
+          <button v-in-viewport.once>Reise kostenlos planen</button>
         </router-link>
       </div>
       <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
       <div class="card-container">
-        <div class="card-wrap left">
+        <div
+          class="card-wrap left"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/rundreisen/Portugal"
@@ -215,7 +233,10 @@
             <span>Erlebe einzigartige Landschaften und fazinierende Städte</span>
           </router-link>
         </div>
-        <div class="card-wrap">
+        <div
+          class="card-wrap"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/rundreisen/USA"
@@ -226,7 +247,10 @@
             <span>Erlebe das Land der unbegrenzten Möglichkeiten</span>
           </router-link>
         </div>
-        <div class="card-wrap right">
+        <div
+          class="card-wrap right"
+          v-in-viewport.once
+        >
           <router-link
             class="card"
             to="/rundreisen/Italien"
@@ -251,6 +275,7 @@
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
+          style="font-size:18px;"
         >JETZT REGISTRIEREN</q-btn>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { AddressbarColor, Loading } from 'quasar'
 import vue from 'vue'
 import StoryblokVue from 'storyblok-vue'
 import VueLazyload from 'vue-lazyload'
+import inViewportDirective from 'vue-in-viewport-directive'
+
 const getClickOutside = () => import('v-click-outside')
 // import(/* webpackPreload: true */ 'leaflet/dist/leaflet.css')
 
@@ -26,4 +28,5 @@ export default async ({ app, store, router }) => {
   getClickOutside().then(vClickOutside => vue.use(vClickOutside))
   vue.use(StoryblokVue)
   vue.use(VueLazyload)
+  vue.directive('in-viewport', inViewportDirective)
 }
