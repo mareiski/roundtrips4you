@@ -72,6 +72,40 @@
           </q-card>
         </MglPopup>
       </MglMarker>
+      <template v-for="stop in stops">
+        <MglMarker
+          v-for="dailyTrip in stop.DailyTrips"
+          :key="dailyTrip.id"
+          :coordinates="[dailyTrip.location.lng, dailyTrip.location.lat]"
+          color="#D56026"
+          @click="onMarkerClicked($event)"
+        >
+          <MglPopup>
+            <q-card>
+              <q-img
+                v-if="dailyTrip.StopImages"
+                width="240px"
+                height="135px"
+                :src="dailyTrip.StopImages[0]"
+              ></q-img>
+              <q-card-section>
+                <div class="text-h6">
+                  {{dailyTrip.location.label.split(',')[0]}} - Tagesausflug von {{stop.Location.label.split(',')[0]}}
+                </div>
+                <div class="text-subtitle2">
+                  <p style="margin-bottom:5px;">
+                    <q-icon name="location_on" />
+                    <a
+                      target="_blank"
+                      :href="'https://www.google.com/maps/search/?api=1&query=' + dailyTrip.location.label"
+                    >{{dailyTrip.location.label}}</a>
+                  </p>
+                </div>
+              </q-card-section>
+            </q-card>
+          </MglPopup>
+        </MglMarker>
+      </template>
       <div
         v-for="stop in stops"
         :key="'StopContainer' + stop.DocId"
