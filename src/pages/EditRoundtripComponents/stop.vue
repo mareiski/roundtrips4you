@@ -558,6 +558,7 @@
             </q-card>
           </q-dialog>
           <div
+            v-if="expanded"
             class="daily-trip-container"
             v-show="dailyTrips.length"
           >

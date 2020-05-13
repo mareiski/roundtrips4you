@@ -1,8 +1,5 @@
 <template>
-  <q-timeline-entry
-    icon="speed"
-    :subtitle="duration"
-  >
+  <q-timeline-entry icon="speed">
     <q-chip
       icon="commute"
       :clickable="editor"
@@ -47,6 +44,16 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <template v-slot:subtitle>
+      <template v-if="duration || duration === 0 || duration === null">{{duration}}</template>
+      <template v-else>
+        <q-skeleton
+          width="100px"
+          height="20px"
+          type="text"
+        />
+      </template>
+    </template>
   </q-timeline-entry>
 </template>
 <script>
