@@ -135,11 +135,12 @@
         class="description-container"
         v-in-viewport.once
       >
-        <p>Die eigene Reiseplanung kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die dort gar nicht angefahren werden.</p>
+        <p>Eine Reise selbst planen kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die dort gar nicht angefahren werden.</p>
         <p>Roundtrips4you verbindet beide Konzepte miteinander:</p>
-        <p>Bei uns kannst du deine Reise komplett nach deinen eigenen Wünschen zusammenstellen, somit entgeht dir keine Sehenswürdigkeit mehr (und du sparst dir die ein oder andere nervige Person in der Reisegruppe).</p>
+        <p>Mit unserem Reiseplaner kannst du deine Reise selbst zusammenstellen, somit entgeht dir keine Sehenswürdigkeit mehr.</p>
         <p>Um dir diese Planungsarbeit zu erleichtern, bietet dir Roundtrips4you einige Tools, die dich bei deiner Reiseplanung unterstützen.</p>
         <p>Somit ist deine Reise zu 100% individualisiert und trotzdem perfekt durchgeplant.</p>
+        <p><b>Roundtrips4you</b> - deine Reise planungs App und Website für deinen nächsten Urlaub.</p>
       </div>
       <h4
         ref="tools"
@@ -271,12 +272,12 @@
           <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
       </div> -->
       <div class="register-container">
-        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Routenplaners kostenlos</h4>
+        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Reiseplaners online und kostenlos</h4>
         <q-btn
           @click="$router.push('/registrieren')"
           color="primary"
           style="font-size:18px;"
-        >JETZT REGISTRIEREN</q-btn>
+        >Reise selbst Planen</q-btn>
       </div>
     </div>
   </q-page>

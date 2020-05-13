@@ -45,7 +45,7 @@
       </q-card>
     </q-dialog>
     <template v-slot:subtitle>
-      <template v-if="duration || duration === 0 || duration === null">{{duration}}</template>
+      <template v-if="duration || duration === 0">{{duration}}</template>
       <template v-else>
         <q-skeleton
           width="100px"
