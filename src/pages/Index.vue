@@ -9,7 +9,7 @@
           to="/meine-rundreisen"
           style="text-decoration:none;"
         >
-          <q-btn class="banner">Eigene Reise erstellen</q-btn>
+          <q-btn class="banner">Reise planen kostenlos</q-btn>
         </router-link>
         <span class="line"></span>
         <img
@@ -26,7 +26,7 @@
       <div id="MainImgPlacholder">
         <h2 class="main-qoute">Damit deine Reise perfekt geplant und trotzdem individuell bleibt</h2>
         <span class="quote-subtext">
-          <span>Mit dem Reiseplaner Roundtrips4you kannst du deine Reise ganz leicht zusammenstellen</span>
+          <span>Mit dem kostenlosen Reiseplaner Roundtrips4you kannst du deine Reise selbst zusammenstellen</span>
           <span style="white-space:nowrap;"> - ganz egal wie besonders sie ist</span>
         </span>
         <div
@@ -79,7 +79,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Plane deinen eigenen perfekt auf dich zugeschnittenen Roadtrip</h1>
+        <h1>Plane deinen eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -136,7 +136,7 @@
         v-in-viewport.once
       >
         <p>Eine Reise selbst planen kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die dort gar nicht angefahren werden.</p>
-        <p>Roundtrips4you verbindet beide Konzepte miteinander:</p>
+        <p>Roundtrips4you verbindet das Tolle aus beiden Konzepten miteinander:</p>
         <p>Mit unserem Reiseplaner kannst du deine Reise selbst zusammenstellen, somit entgeht dir keine Sehenswürdigkeit mehr.</p>
         <p>Um dir diese Planungsarbeit zu erleichtern, bietet dir Roundtrips4you einige Tools, die dich bei deiner Reiseplanung unterstützen.</p>
         <p>Somit ist deine Reise zu 100% individualisiert und trotzdem perfekt durchgeplant.</p>
@@ -240,12 +240,12 @@
         >
           <router-link
             class="card"
-            to="/rundreisen/USA"
+            to="/rundreisen/Indonesien"
             itemtype="http://schema.org/Offer"
           >
-            <div id="USAImg"></div>
-            <h3>USA</h3>
-            <span>Erlebe das Land der unbegrenzten Möglichkeiten</span>
+            <div id="BaliImg"></div>
+            <h3>Indonesien</h3>
+            <span>Erlebe das Land der Tempel und Reisfelder</span>
           </router-link>
         </div>
         <div
@@ -259,7 +259,7 @@
           >
             <div id="ItalyImg"></div>
             <h3>Italien</h3>
-            <span>Erlebe la dolce Vita in Venedig</span>
+            <span>Erlebe mediteranen Flair in antiken Städten</span>
           </router-link>
         </div>
       </div>
@@ -291,9 +291,9 @@ const { getScrollTarget, setScrollPosition } = scroll
 
 export default {
   meta: {
-    title: 'Home',
+    title: 'Reiseplaner',
     meta: {
-      description: { name: 'description', content: 'Reise auf Roundtrips4you selbst planen und zusammenstellen, komplett kostenlos und online. Dein Routenplaner und Reiseplaner mit vielen tools für deinen Roadtrip' }
+      description: { name: 'description', content: 'Reise selbst planen & zusammenstellen, Reise planen kostenlos & online. Routenplaner und Reiseplaner mit vielen Tools für deinen Roadtrip' }
     }
   },
   name: 'PageIndex',

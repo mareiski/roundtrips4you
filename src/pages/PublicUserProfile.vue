@@ -227,7 +227,7 @@ export default {
     return {
       title: 'Profil von ' + this.title,
       meta: {
-        description: { name: 'description', content: 'Profil von ' + this.title + ' auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+        description: { name: 'description', content: 'Profil von ' + this.title + ' auf roundtrips4you ansehen. Reise planen komplett kostenlos, online und unkompliziert. Dein kostenloser Reiseplaner' }
       }
     }
   },

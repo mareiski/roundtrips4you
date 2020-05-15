@@ -5,7 +5,7 @@
   >
     <div id="TopContainer">
       <h2 class="topic">Roundtrips4you - Blog</h2>
-      <p>Hier findet ihr aktuelle Reisetipps für die unterschiedlichsten Ziele auf die ganze Welt</p>
+      <p>Hier findet ihr aktuelle Reisetipps für die unterschiedlichsten Ziele auf der ganzen Welt</p>
     </div>
     <div id="BlogBackgroundImg"></div>
     <div id="BlogBackgroundImgPlaceholder">

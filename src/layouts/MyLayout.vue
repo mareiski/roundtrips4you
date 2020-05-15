@@ -328,8 +328,8 @@ export default {
   },
   meta () {
     return {
-      title: 'Home',
-      titleTemplate: title => `${title} | Roundtrips4you - der kostenlose Reiseplaner | Route, Reise online planen`,
+      title: 'Reiseplaner',
+      titleTemplate: title => `${title} | Roundtrips4you - Reise kostenlos planen | Route, Reise zusammenstellen`,
       meta: {
         equiv: { 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' }
       }
