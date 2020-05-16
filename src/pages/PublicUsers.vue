@@ -7,11 +7,11 @@
     >
       <div v-if="showUser">
         <q-item
-          clickable
+          v-for="(user, index) in users"
+          :key="user"
+          :clickable="!!user.name"
           @click="$router.push('/benutzerprofil/' + user.userUID)"
           v-ripple
-          v-for="user in users"
-          :key="user"
         >
           <q-item-section
             avatar
@@ -26,7 +26,7 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label lines="1">{{user.name ? user.name : 'Anonymer Nutzer'}}</q-item-label>
+            <q-item-label lines="1">#{{index + 1}} {{user.name ? user.name : 'Anonymer Nutzer'}} {{user.reputation ? '(' + user.reputation + ')' : ''}}</q-item-label>
             <q-item-label
               caption
               style="width:100px;"
@@ -38,7 +38,10 @@
             </q-item-label>
           </q-item-section>
 
-          <q-item-section side>
+          <q-item-section
+            side
+            v-if="user.name"
+          >
             <q-icon
               name="keyboard_arrow_right"
               color="primary"
@@ -114,13 +117,36 @@ export default {
               userSince: context.getCreatedAtDate(doc.data().createdAt),
               trustedUser: !!doc.data().TrustedUser,
               userUID: doc.data().UserUID,
-              reputation: doc.data().Reputation
+              roundtripsEdited: doc.data().RTEdited ? doc.data().RTEdited : 0
             }
             this.users.push(user)
+            this.getPublishedRoundtrips(user)
           })
-          this.showUser = true
-          console.log(this.users)
         })
+    },
+    getPublishedRoundtrips (user) {
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('UserId', '==', user.userUID)
+        .where('Public', '==', true)
+      roundtripsRef.get()
+        .then(snapshot => {
+          let publishedRoundtrips = snapshot.size ? snapshot.size : 0
+          this.getReputation(user, publishedRoundtrips)
+        }).catch(function (error) {
+          console.log(error)
+          this.showRoundtrips = true
+        })
+    },
+    getReputation (user, publishedRoundtrips) {
+      let publicRT = publishedRoundtrips * 50
+      let editedRT = user.roundtripsEdited * 25
+      user.reputation = publicRT + editedRT + 100
+
+      // resort after end of the array
+      if (this.users.indexOf(user) === this.users.length - 1) {
+        this.users.sort((a, b) => Number(b.reputation) - Number(a.reputation))
+        this.showUser = true
+      }
     },
     getCreatedAtDate (timeStamp) {
       return date.formatDate(new Date(timeStamp.seconds * 1000), 'DD.MM.YYYY')

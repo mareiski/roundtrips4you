@@ -3,7 +3,7 @@
     <router-link
       class="header-page-link"
       to="/benutzer"
-    >zurück zu allen Nutzern</router-link>
+    >{{!isOnPrivateUserPage ? 'zurück zu allen Nutzern' : 'User Ranking ansehen'}}</router-link>
     <h3 class="user-name">{{userName}} {{ !isNaN(reputation) ? '(Reputation: ' + reputation + ')' : ''}}
       <q-badge
         v-if="trustedUser"
@@ -51,6 +51,7 @@
       <div>
         <h3>Reputation</h3>
         <ul>
+          <li>100 für "Nutzer der 1. Stunde" Badge</li>
           <li>{{ publishedRoundtrips ? publishedRoundtrips * 50 : 0 }} für veröffentlichte Rundreisen</li>
           <!-- <li>für hilfreiche Kommentare</li> -->
           <!-- <li>für Bewertungen</li> -->
@@ -118,10 +119,10 @@
     </div>
     <div class="roundtrip-container">
       <h3>Veröffentlichte Reisen</h3>
-      <q-list bordered>
+      <q-list :bordered="createdRoundtrips.length > 0">
         <div v-if="showRoundtrips">
           <div v-if="createdRoundtrips.length === 0">
-            <span style="font-size:18px;">{{userName}} hat leider noch keine Rundreisen erstellt.</span>
+            <span style="font-size:18px;">{{userName}} hat leider noch keine Rundreisen veröffentlicht.</span>
           </div>
           <q-item
             clickable
@@ -201,7 +202,7 @@
 </template>
 <script>
 import(/* webpackPrefetch: true */ '../css/publicUserProfile.less')
-import { db, storage } from '../firebaseInit'
+import { db, storage, auth } from '../firebaseInit'
 import { date } from 'quasar'
 
 export default {
@@ -220,7 +221,8 @@ export default {
       trustedUser: false,
       title: 'User',
       companyWebsite: null,
-      companyDescription: null
+      companyDescription: null,
+      isOnPrivateUserPage: false
     }
   },
   meta () {
@@ -233,24 +235,30 @@ export default {
   },
   created () {
     // get user data
-    const UserId = this.$route.params.id
-    let userRef = db.collection('User')
-      .where('UserUID', '==', UserId)
-      .limit(1)
-    userRef.get()
-      .then(snapshot => {
-        snapshot.forEach(doc => {
-          this.userImage = doc.data().UserImage
-          this.userName = doc.data().UserName
-          this.userRTEdited = doc.data().RTEdited
-          this.userSince = this.getCreatedAtDate(doc.data().createdAt)
-          this.trustedUser = !!doc.data().TrustedUser
-          this.companyWebsite = doc.data().website
-          this.companyDescription = doc.data().companyDescription
-          this.title = this.userName
+    let UserId = this.$route.params.id
+    if (!UserId) {
+      this.isOnPrivateUserPage = true
+      UserId = auth.user().uid
+    }
+    if (UserId) {
+      let userRef = db.collection('User')
+        .where('UserUID', '==', UserId)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            this.userImage = doc.data().UserImage
+            this.userName = doc.data().UserName
+            this.userRTEdited = doc.data().RTEdited
+            this.userSince = this.getCreatedAtDate(doc.data().createdAt)
+            this.trustedUser = !!doc.data().TrustedUser
+            this.companyWebsite = doc.data().website
+            this.companyDescription = doc.data().companyDescription
+            this.title = this.userName
+          })
         })
-      })
-    this.getPublishedRoundtrips(UserId)
+      this.getPublishedRoundtrips(UserId)
+    }
   },
   methods: {
     getPublishedRoundtrips (userId) {
@@ -291,7 +299,7 @@ export default {
     getReputation (userId) {
       let publicRT = this.publishedRoundtrips * 50
       let editedRT = this.userRTEdited * 25
-      this.reputation = publicRT + editedRT
+      this.reputation = publicRT + editedRT + 100
     },
     getLocationString (locations) {
       let locationString = ''
