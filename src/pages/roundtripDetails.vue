@@ -90,7 +90,7 @@
       </q-carousel-slide>
     </q-carousel>
     <div class="carousel-placeholder">
-      <h3>{{roundtrip[0] ? roundtrip[0].Title : null}}</h3>
+      <h1>{{roundtrip[0] ? roundtrip[0].Title : null}}</h1>
     </div>
     <q-tabs
       v-model="tab"

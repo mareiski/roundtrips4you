@@ -1,6 +1,6 @@
 <template>
   <div class="register q-px-lg q-pb-md">
-    <h2>Registrieren</h2>
+    <h1>Registrieren</h1>
     <p style="text-align:center; font-size:20px; padding-bottom:10px;">Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos</p>
     <q-form
       @submit="signUp"

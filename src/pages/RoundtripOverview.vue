@@ -2,13 +2,13 @@
   <q-page>
     <div class="roundtrips">
       <div class="overview-topic">
-        <h2>Eigene Reise erstellen</h2>
+        <h1>Eigene Reise erstellen</h1>
         <span>Gehe zu deinen Reisen und Registriere dich oder melde dich an um deine eigene Reise zu nach deinen Wünschen zusammenzutellen</span>
       </div>
       <div id="CardBackgroundImg"></div>
       <div
         id="CardBackgroundImgPlaceholder"
-        style="height:480px; min-height:unset;"
+        style="height:515px; min-height:unset;"
       >
         <div class="country-card-container">
           <router-link
