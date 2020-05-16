@@ -3,7 +3,7 @@
     class="cookie-banner"
     v-if="!cookiesAllowed"
   >
-    <span>Diese Seite benutzt Cookies. Mit der benutzung dieser Seite erklärst du dich damit einverstanden.</span>
+    <span>Wir benutzen Cookies und Analyse tools. Mit der Benutzung dieser Seite erklärst du dich damit einverstanden.</span>
     <q-btn
       label="Ok"
       class="q-mt-md"

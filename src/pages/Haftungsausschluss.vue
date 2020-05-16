@@ -1,4 +1,4 @@
-<template functional>
+<template>
   <div class="haftungsausschluss  q-px-lg q-pb-md">
     <h3>Haftungsausschluss</h3>
     <h4>Inhalt des Onlineangebotes</h4>
@@ -20,6 +20,7 @@
 </template>
 <script>
 export default {
+  name: 'Haftungsausschluss',
   meta: {
     title: 'Haftungsausschluss',
     meta: {

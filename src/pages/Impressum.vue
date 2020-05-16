@@ -1,4 +1,4 @@
-<template functional>
+<template>
   <div class="impressum  q-px-lg q-pb-md">
     <h3>Impressum</h3>
 
@@ -25,11 +25,11 @@
 </template>
 <script>
 export default {
+  name: 'Impressum',
   meta: {
     title: 'Impressum',
     meta: {
       robot: { name: 'robot', content: 'noIndex' }
-
     }
   }
 }

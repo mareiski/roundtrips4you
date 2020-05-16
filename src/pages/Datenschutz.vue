@@ -1,6 +1,6 @@
-<template functional>
+<template>
   <div class="datenschutz  q-px-lg q-pb-md">
-    <h5>Datenschutzerkl&auml;rung</h5>
+    <h3>Datenschutzerkl&auml;rung</h3>
     <h4>1. Datenschutz auf einen Blick</h4>
     <h5>Allgemeine Hinweise</h5>
     <p>Die folgenden Hinweise geben einen einfachen &Uuml;berblick dar&uuml;ber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie pers&ouml;nlich identifiziert werden k&ouml;nnen. Ausf&uuml;hrliche Informationen zum Thema Datenschutz entnehmen Sie unserer unter diesem Text aufgef&uuml;hrten Datenschutzerkl&auml;rung.</p>
@@ -71,6 +71,18 @@
     <p>Wenn Sie uns per E-Mail, Telefon oder Telefax kontaktieren, wird Ihre Anfrage inklusive aller daraus hervorgehenden personenbezogenen Daten (Name, Anfrage) zum Zwecke der Bearbeitung Ihres Anliegens bei uns gespeichert und verarbeitet. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.</p>
     <p>Die Verarbeitung dieser Daten erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO, sofern Ihre Anfrage mit der Erf&uuml;llung eines Vertrags zusammenh&auml;ngt oder zur Durchf&uuml;hrung vorvertraglicher Ma&szlig;nahmen erforderlich ist. In allen &uuml;brigen F&auml;llen beruht die Verarbeitung auf Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) und/oder auf unseren berechtigten Interessen (Art. 6 Abs. 1 lit. f DSGVO), da wir ein berechtigtes Interesse an der effektiven Bearbeitung der an uns gerichteten Anfragen haben.</p>
     <p>Die von Ihnen an uns per Kontaktanfragen &uuml;bersandten Daten verbleiben bei uns, bis Sie uns zur L&ouml;schung auffordern, Ihre Einwilligung zur Speicherung widerrufen oder der Zweck f&uuml;r die Datenspeicherung entf&auml;llt (z.&nbsp;B. nach abgeschlossener Bearbeitung Ihres Anliegens). Zwingende gesetzliche Bestimmungen &ndash; insbesondere gesetzliche Aufbewahrungsfristen &ndash; bleiben unber&uuml;hrt.</p>
+    <h5>Registrierung auf dieser Website</h5>
+    <p>Auf unserer Internetseite ist ein Registrierungsformular vorhanden, welches für die elektronische Registrierung genutzt werden kann. Nimmt ein Nutzer diese Möglichkeit wahr, so werden die in der Eingabemaske eingegebenen Daten an uns übermittelt und gespeichert.</p>
+    <p>Diese Daten sind nur die Email Adresse.</p>
+    <p>Des weiteren Speichern wir im Zeitpunkt Registrierung das aktuelle Datum und Uhrzeit.</p>
+    <p>Die Registrierungerfolgt über den Internetdienst Google Firebase</p>
+    <p>Ebenso verwenden wir Firebase für weitere Funktionen nach der Registrierung.</p>
+    <p>Diese Dinste sind:</p>
+    <ul>
+      <li>Cloud Firestore (Verwaltung von eingebenen Daten nach der Registrierung)</li>
+      <li>Firebase Authentication (Verwaltung der Nutzer und Anmelde-/Registrierungsvorgänge)</li>
+      <li>Cloud Storage for Firebase (Verwaltung von Bildern)</li>
+    </ul>
     <h5>Kommentarfunktion auf dieser Website</h5>
     <p>F&uuml;r die Kommentarfunktion auf dieser Seite werden neben Ihrem Kommentar auch Angaben zum Zeitpunkt der Erstellung des Kommentars, Ihre E-Mail-Adresse und, wenn Sie nicht anonym posten, der von Ihnen gew&auml;hlte Nutzername gespeichert.</p>
     <p><strong>Speicherdauer der Kommentare</strong></p>
@@ -101,10 +113,53 @@
       >https://wiki.osmfoundation.org/wiki/Privacy_Policy</a>.</p>
     <p>Die Nutzung von OpenStreetMap erfolgt im Interesse einer ansprechenden Darstellung unserer Online-Angebote und einer leichten Auffindbarkeit der von uns auf der Website angegebenen Orte. Dies stellt ein berechtigtes Interesse im Sinne von Art. 6 Abs. 1 lit. f DSGVO dar. Sofern eine entsprechende Einwilligung abgefragt wurde (z. B. eine Einwilligung zur Speicherung von Cookies), erfolgt die Verarbeitung ausschlie&szlig;lich auf Grundlage von Art. 6 Abs. 1 lit. a DSGVO; die Einwilligung ist jederzeit widerrufbar.</p>
     <p>Quelle: <a href="https://www.e-recht24.de/muster-datenschutzerklaerung.html">https://www.e-recht24.de/muster-datenschutzerklaerung.html</a></p>
+    <h5>Hotjar</h5>
+    <p>Wir nutzen Hotjar, um die Bedürfnisse unserer Nutzer besser zu verstehen und das Angebot und die Erfahrung auf dieser Webseite zu optimieren.</p>
+    <p>Mithilfe der Technologie von Hotjar bekommen wir ein besseres Verständnis von den Erfahrungen unserer Nutzer (z.B. wieviel Zeit Nutzer auf welchen Seiten verbringen, welche Links sie anklicken, was sie mögen und was nicht etc.) und das hilft uns, unser Angebot am Feedback unserer Nutzer auszurichten.</p>
+    <p>Hotjar arbeitet mit Cookies und anderen Technologien, um Daten über das Verhalten unserer Nutzer und über ihre Endgeräte zu erheben, insbesondere IP Adresse des Geräts (wird während Ihrer Website-Nutzung nur in anonymisierter Form erfasst und gespeichert), Bildschirmgröße, Gerätetyp (Unique Device Identifiers), Informationen über den verwendeten Browser, Standort (nur Land), zum Anzeigen unserer Webseite bevorzugte Sprache.</p>
+    <p>Hotjar speichert diese Informationen in unserem Auftrag in einem pseudonymisierten Nutzerprofil.</p>
+    <p>Hotjar ist es vertraglich verboten, die in unserem Auftrag erhobenen Daten zu verkaufen.</p>
+    <p>Weitere Informationen finden Sie in unter dem Abschnitt‚ about Hotjar‘ auf Hotjars Hilfe-Seite.</p>
+    <h5>Google Analyics</h5>
+    <p>Soweit Sie Ihre Einwilligung erklärt haben, wird auf dieser Website Google Analytics eingesetzt, ein Webanalysedienst der Google Ireland Limited (&bdquo;Google&ldquo;). Die Nutzung umfasst die Betriebsart &bdquo;Universal Analytics&ldquo;. Hierdurch ist es möglich, Daten, Sitzungen und Interaktionen über mehrere Geräte hinweg einer pseudonymen User-ID zuzuordnen und so die Aktivitäten eines Nutzers geräteübergreifend zu analysieren.</p>
+    <p>Google Analytics verwendet sog. &bdquo;Cookies&ldquo;, Textdateien, die auf Ihrem Computer gespeichert werden und die eine Analyse der Benutzung der Website durch Sie ermöglichen. Die durch das Cookie erzeugten Informationen über Ihre Benutzung dieser Website werden in der Regel an einen Server von Google in den USA übertragen und dort gespeichert. Im Falle der Aktivierung der IP-Anonymisierung auf dieser Website, wird Ihre IP-Adresse von Google jedoch innerhalb von Mitgliedstaaten der Europäischen Union oder in anderen Vertragsstaaten des Abkommens über den Europäischen Wirtschaftsraum zuvor gekürzt. Wir weisen Sie darauf hin, dass auf dieser Webseite Google Analytics um eine IP-Anonymisierung erweitert wurde, um eine anonymisierte Erfassung von IP-Adressen (sog. IP-Masking) zu gewährleisten. Die im Rahmen von Google Analytics von Ihrem Browser übermittelte IP-Adresse wird nicht mit anderen Daten von Google zusammengeführt. Nähere Informationen zu Nutzungsbedingungen und Datenschutz finden Sie unter <a
+        href="https://www.google.com/analytics/terms/de.html"
+        target="_blank"
+      >https://www.google.com/analytics/terms/de.html</a> bzw. unter <a
+        href="https://policies.google.com/?hl=de"
+        target="_blank"
+      >https://policies.google.com/?hl=de</a>.</p>
+
+    <p><strong>Zwecke der Verarbeitung</strong><br>
+      Im Auftrag des Betreibers dieser Website wird Google diese Informationen benutzen, um Ihre Nutzung der Website auszuwerten, um Reports über die Websiteaktivitäten zusammenzustellen und um weitere mit der Websitenutzung und der Internetnutzung verbundene Dienstleistungen gegenüber dem Websitebetreiber zu erbringen.</p>
+    <p><strong>Rechtsgrundlage</strong><br>
+      Die Rechtsgrundlage für den Einsatz von Google Analytics ist Ihre Einwilligung gemäß <a
+        href="https://dsgvo-gesetz.de/art-6-dsgvo/"
+        target="_blank"
+      >Art. 6 Abs. 1 S.1 lit. a DSGVO</a>.</p>
+    <p><strong>Empfänger / Kategorien von Empfängern</strong><br>
+      Der Empfänger der erhobenen Daten ist Google.</p>
+    <p><strong>Übermittlung in Drittstaaten</strong><br>
+      Die personenbezogenen Daten werden unter dem EU-US Privacy Shield auf Grundlage des Angemessenheitsbeschlusses der Europäischen Kommission in die USA übermittelt. Das Zertifikat können Sie <a
+        href="https://www.privacyshield.gov/participant?id=a2zt000000001L5AAI"
+        target="_blank"
+      >hier</a> abrufen.</p>
+    <p><strong>Dauer der Datenspeicherung</strong><br>
+      Die von uns gesendeten und mit Cookies, Nutzerkennungen (z. B. User-ID) oder Werbe-IDs verknüpften Daten werden nach 14 Monaten automatisch gelöscht. Die Löschung von Daten, deren Aufbewahrungsdauer erreicht ist, erfolgt automatisch einmal im Monat.</p>
+    <p><strong>Betroffenenrechte</strong><br>
+      Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen, indem Sie die Speicherung der Cookies durch eine entsprechende Einstellung Ihrer Browser-Software verhindern; wir weisen Sie jedoch darauf hin, dass Sie in diesem Fall gegebenenfalls nicht sämtliche Funktionen dieser Website vollumfänglich werden nutzen können.</p>
+
+    <p>Sie können darüber hinaus die Erfassung der durch das Cookie erzeugten und auf Ihre Nutzung der Website bezogenen Daten (inkl. Ihrer IP-Adresse) an Google sowie die Verarbeitung dieser Daten durch Google verhindern, indem Sie das <a
+        href="https://tools.google.com/dlpage/gaoptout?hl=de"
+        target="_blank"
+      >Browser-Add-on</a> herunterladen und installieren. Opt-Out-Cookies verhindern die zukünftige Erfassung Ihrer Daten beim Besuch dieser Website. Um die Erfassung durch Universal Analytics über verschiedene Geräte hinweg zu verhindern, müssen Sie das Opt-Out auf allen genutzten Systemen durchführen. Wenn Sie hier klicken, wird das Opt-Out-Cookie gesetzt: <a href="javascript:gaOptout()"><strong>Google Analytics deaktivieren</strong></a></p>
+    <p>Quelle: <a href="https://www.datenschutzbeauftragter-info.de/fachbeitraege/google-analytics-datenschutzkonform-einsetzen/">https://www.datenschutzbeauftragter-info.de/fachbeitraege/google-analytics-datenschutzkonform-einsetzen/</a></p>
+
   </div>
 </template>
 <script>
 export default {
+  name: 'Datenschutz',
   meta: {
     title: 'Datenschutz',
     meta: {
