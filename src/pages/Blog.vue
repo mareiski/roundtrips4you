@@ -121,7 +121,7 @@ export default {
     return {
       title: this.title,
       meta: {
-        description: { name: 'description', content: 'Reise auf Roundtrips4you selbst erstellen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
+        description: { name: 'description', content: this.title + ' auf Roundtrips4you. Die Besten Tipps und Tricks für deine nächste Reise.' }
       }
     }
   },

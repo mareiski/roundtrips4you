@@ -14,7 +14,10 @@
         v-for="story in stories"
         :key="story.id"
       >
-        <q-card class="story-card">
+        <q-card
+          class="story-card"
+          v-if="story.first_published_at"
+        >
           <q-card-section>
             <h2 class="story-title">{{story.name}}</h2>
             <div class="author-container">
