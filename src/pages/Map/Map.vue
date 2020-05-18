@@ -153,7 +153,7 @@
               />
             </div>
             <q-card-section>
-              <div>{{route.duration}} bis {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+              <div>{{route.duration}} bis {{route.destination}} {{ route.origin ? 'von ' + route.origin : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
               <a
                 target="_blank"
                 v-if="route.origin !== route.destination"
@@ -163,7 +163,7 @@
           </q-card>
           <q-card v-else>
             <q-card-section>
-              <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ route[index -1] ? 'von ' + route[index - 1].destination : ''}}</div>
+              <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ addedRoutes[index -1] ? 'von ' + addedRoutes[index - 1].destination : ''}}</div>
             </q-card-section>
           </q-card>
         </MglPopup>
@@ -372,15 +372,33 @@ export default {
           // this.addedRoutes = []
 
           this.stops.forEach((stop, index) => {
-            let previousStopLng = 0
-            let previousStopLat = 0
-
             if (index >= 1) {
-              previousStopLat = this.stops[index - 1].Location.lat
-              previousStopLng = this.stops[index - 1].Location.lng
+              this.getRoute(this.stops[index - 1].Location, stop.Location, map, index, this.stops[index - 1].Profile, false)
+            }
+            console.log(stop)
+            if (stop.DailyTrips) {
+              stop.DailyTrips.forEach((dailyTrip, dailyTripIndex) => {
+                // if its not the first item calculate from last to this one
+                if (dailyTripIndex >= 1) {
+                  if (!dailyTrip.newDate) {
+                    // its not a new date calculate from last stop
+                    this.getRoute(stop.DailyTrips[dailyTripIndex - 1].location, dailyTrip.location, map, index + dailyTripIndex, stop.Profile, true)
+                  } else {
+                    // it starts from origin stop, calculate from there
+                    this.getRoute(stop.Location, dailyTrip.location, map, index + dailyTripIndex, stop.Profile, true)
+
+                    // also calculate route back to origin from the last daily trip
+                    this.getRoute(stop.DailyTrips[dailyTripIndex - 1].location, stop.Location, map, index + index + dailyTripIndex, stop.Profile, true)
+                  }
+                } else {
+                  // its the first item calculate from origin stop
+                  this.getRoute(stop.Location, dailyTrip.location, map, index + dailyTripIndex, stop.Profile, true)
+                }
+                // it its the last daily trip calculate route back to origin
+                if (dailyTripIndex === stop.DailyTrips.length - 1) this.getRoute(dailyTrip.location, stop.Location, map, dailyTripIndex + index, stop.Profile, true)
+              })
             }
 
-            if (index >= 1) this.getRoute([previousStopLng, previousStopLat], [stop.Location.lng, stop.Location.lat], map, index, this.stops[index - 1].Profile)
             bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
           })
           try {
@@ -409,20 +427,22 @@ export default {
     deg2rad (deg) {
       return deg * (Math.PI / 180)
     },
-    getRoute (startLocation, endLocation, map, index, stopProfile) {
+    getRoute (startLocation, endLocation, map, index, stopProfile, dailyTrip) {
       let profile = this.profile
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
       // get id for route
-      let id = 'route' + index
+      let id = (dailyTrip ? 'dailyTrip' : '') + 'route' + index
 
-      // get color for route
+      // get random color for route
       let color = this.getRandomColor()
 
       if (profile !== 'plane') {
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        // create url for the duration request
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accessToken
         let context = this
 
+        // retrieve data from mapbox
         getAxios().then(axios => {
           axios.get(url)
             .then(response => {
@@ -441,12 +461,13 @@ export default {
               let geojsonCoords = geojson.geometry.coordinates
               let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
 
+              // get duration
               let duration = context.msToTime(data.duration * 1000)
 
               let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
 
               // add route marker
-              if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: context.stops[index - 1].Location.label.split(',')[0], destination: context.stops[index].Location.label.split(',')[0], id: id })
+              if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: startLocation.label.split(',')[0], destination: endLocation.label.split(',')[0], id: id })
 
               // if the route already exists on the map, reset it using setData
               if (map.getSource(id)) {
