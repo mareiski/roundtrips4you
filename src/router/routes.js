@@ -37,6 +37,8 @@ const routes = [
       {
         path: 'registrieren',
         component: () => import('pages/Register.vue'),
+        props: true,
+        name: 'Register',
         meta: {
           guestOnly: true
         }
@@ -80,10 +82,7 @@ const routes = [
       },
       {
         path: 'rundreise-bearbeiten/:id',
-        component: () => import('pages/EditRoundtrips.vue'),
-        meta: {
-          requireAuth: true
-        }
+        component: () => import('pages/EditRoundtrips.vue')
       },
       {
         path: 'benutzerprofil/:id',

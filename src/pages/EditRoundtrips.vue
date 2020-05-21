@@ -1,6 +1,7 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
     <router-link
+      v-if="auth && auth.user()"
       style="text-decoration:none;"
       to="/meine-rundreisen"
     >
@@ -52,12 +53,16 @@
       <q-tab
         name="start"
         label="An-/Abreise"
+        :disable="!auth || !auth.user()"
       >
+        <q-tooltip v-if="!auth || !auth.user()">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
       </q-tab>
       <q-tab
         name="settings"
         label="Einstellungen"
+        :disable="!auth || !auth.user()"
       >
+        <q-tooltip v-if="!auth || !auth.user()">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
       </q-tab>
       <q-tab
         name="map"
@@ -1985,12 +1990,16 @@ export default {
         })
         .catch(err => {
           console.log('Error getting Roundtrip', err)
-          this.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Es gibt fehlende Angaben bei deiner Rundreise'
-          })
+
+          // show this message only if it's not a user
+          if (auth.user()) {
+            this.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Es gibt fehlende Angaben bei deiner Rundreise'
+            })
+          }
         })
     },
     loadCategories () {
@@ -2687,7 +2696,6 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
-      if (auth.user() === null) this.$router.push('/login')
       const params = this.$route.params.id
       let RTId = params
       let title = null
@@ -2704,24 +2712,42 @@ export default {
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
-          let isCreator = auth.user().uid === snapshot.docs[0].data().UserId
-          let isPublic = snapshot.docs[0].data().Public === true
+          if (snapshot.docs[0].data().UserId) {
+            if (auth.user() === null) this.$router.push('/login')
+            let isCreator = auth.user().uid === snapshot.docs[0].data().UserId
+            let isPublic = snapshot.docs[0].data().Public === true
 
-          if (isCreator) {
-            this.loadSingleRoundtrip(RTId)
-            this.loadRoundtripDetails(RTId, false)
-            this.loadCategories()
-            this.getUserData()
-          } else if (isPublic) {
-            this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
+            if (isCreator) {
+              this.loadSingleRoundtrip(RTId)
+              this.loadRoundtripDetails(RTId, false)
+              this.loadCategories()
+              this.getUserData()
+            } else if (isPublic) {
+              this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
+            } else {
+              this.$q.notify({
+                color: 'red-5',
+                textColor: 'white',
+                icon: 'error',
+                message: 'Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat'
+              })
+              this.$router.push('/meine-rundreisen')
+            }
           } else {
-            this.$q.notify({
-              color: 'red-5',
-              textColor: 'white',
-              icon: 'error',
-              message: 'Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat'
-            })
-            this.$router.push('/meine-rundreisen')
+            if (auth.user() === null) {
+              // trial roundtrip
+              this.loadSingleRoundtrip(RTId)
+              this.loadRoundtripDetails(RTId, false)
+              this.loadCategories()
+            } else {
+              this.$q.notify({
+                color: 'red-5',
+                textColor: 'white',
+                icon: 'error',
+                message: 'Ooops du hast bereits einen Account bei uns'
+              })
+              this.$router.push('/meine-rundreisen')
+            }
           }
         })
     })

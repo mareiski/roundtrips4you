@@ -1,7 +1,7 @@
 <template>
   <div class="register q-px-lg q-pb-md">
     <h1>Registrieren</h1>
-    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos</p>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">{{!RTId ? 'Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos' : 'Registriere dich jetzt um deine erstellte Rundreise zu speichern'}}</p>
     <q-form
       @submit="signUp"
       bordered
@@ -100,6 +100,7 @@ export default {
     }
   },
   name: 'Register',
+  props: ['RTId'],
   data () {
     return {
       userEmail: '',
@@ -110,6 +111,19 @@ export default {
       submitting: false,
       googleLoading: false,
       reg: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
+    }
+  },
+  beforeRouteUpdate (to, from, next) {
+    // lock all other pages
+    if (this.RTId && (!auth || !auth.user())) {
+      const answer = window.confirm('Willst du diese Seite wirklich verlassen, deine Rundreise ist nicht gespeichert!')
+      if (answer) {
+        next()
+      } else {
+        next(false)
+      }
+    } else {
+      next()
     }
   },
   methods: {
@@ -161,7 +175,20 @@ export default {
       })
     },
     createUserEntry (user) {
-      console.log(user)
+      if (this.RTId) {
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('RTId', '==', this.RTId)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              db.collection('Roundtrips').doc(doc.id).update({
+                'UserId': user.user.uid
+              })
+            })
+          })
+      }
+
       db.collection('User').add({
         Reputation: 0,
         UserImage: user.user.photoURL,

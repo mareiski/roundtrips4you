@@ -9,7 +9,7 @@
           to="/meine-rundreisen"
           style="text-decoration:none;"
         >
-          <q-btn class="banner">Reise planen kostenlos</q-btn>
+          <q-btn class="banner">jetzt Reise planen</q-btn>
         </router-link>
         <span class="line"></span>
         <img
@@ -34,12 +34,94 @@
           id="OfferContainer"
         >
           <div>
-            <p>Plane deine Reise jetzt kostenlos</p>
+            <p>Plane deine Reise jetzt kostenlos und ohne Registrierung</p>
+            <!-- @click="$router.push('/registrieren')" -->
             <q-btn
-              @click="$router.push('/registrieren')"
+              @click="showCreateTempRTDialog = true"
               color="primary"
             >Los geht's</q-btn>
           </div>
+          <q-dialog v-model="showCreateTempRTDialog">
+            <q-card>
+              <q-card-section class="row items-center">
+                <span style="width:100%; text-align:center; font-size:18px;">Gib noch ein paar allgemeine Daten an um zu beginnen</span>
+                <q-input
+                  v-model="title"
+                  :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+                  label="Titel der Reise"
+                  outlined
+                  ref="titleInput"
+                  style="margin:auto; margin-top:20px; width:300px;"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="title" />
+                  </template>
+                </q-input>
+                <div
+                  class="flex justify-around"
+                  style="width:100%;"
+                >
+                  <div
+                    v-for="(countryNum, index) in parseInt(countryAmount)"
+                    :key="countryNum"
+                    class="flex"
+                    style="justify-content:center;"
+                  >
+                    <q-select
+                      @filter="filterFn"
+                      outlined
+                      v-model="countries[index]"
+                      :options="countryOptions"
+                      label="Land"
+                      clearable
+                      class="input-item"
+                      use-input
+                      style="margin-top:10px; width:200px; margin-right:5px;"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                    >
+                      <template v-slot:prepend>
+                        <q-icon name="explore" />
+                      </template>
+                    </q-select>
+                    <div class="add-country-container">
+                      <q-btn
+                        v-if="parseInt(index ) !== 0"
+                        @click="[countries.splice(index, 1), countryAmount = parseInt(countryAmount) - 1]"
+                        round
+                        icon="add"
+                        side
+                        style="transform:rotate(45deg)"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="flex justify-center"
+                    style="flex-direction:column;"
+                  >
+                    <q-btn
+                      @click="countryAmount = parseInt(countryAmount) + 1"
+                      label="Land hinzufügen"
+                    />
+                  </div>
+                </div>
+              </q-card-section>
+
+              <q-card-actions align="right">
+                <q-btn
+                  label="Reise erstellen"
+                  @click="createTempRT()"
+                  color="primary"
+                  v-close-popup
+                />
+                <q-btn
+                  flat
+                  label="Abbrechen"
+                  color="primary"
+                  v-close-popup
+                />
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
           <!-- <div>
             <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
             <q-select
@@ -288,6 +370,7 @@ import(/* webpackPrefetch: true */ '../css/home.less')
 import { countries } from '../countries'
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
+import { db } from '../firebaseInit'
 
 export default {
   meta: {
@@ -302,7 +385,12 @@ export default {
       date: '2019/02/01',
       countryOptions: countries,
       searchLocation: '',
-      imgLoaded: false
+      imgLoaded: false,
+      showCreateTempRTDialog: false,
+      title: 'Meine Reise',
+      countryAmount: 1,
+      countries: []
+
     }
   },
   methods: {
@@ -318,6 +406,107 @@ export default {
       const offset = el.offsetTop
       const duration = 400
       setScrollPosition(target, offset, duration)
+    },
+    isUniqueTitle (value) {
+      return new Promise((resolve, reject) => {
+        value = value.toLowerCase()
+        value = value.charAt(0).toUpperCase() + value.slice(1)
+        value = value.trim()
+        // value = value.replace(/ /g, '')
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('Title', '==', value)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          })
+      })
+    },
+    createTempRT () {
+      if (this.countries.length === 0 || !this.title) {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Bitte überprüfe deine Angaben'
+        })
+        return false
+      }
+
+      let Title = this.title
+      let Location = this.countries
+      Title = Title.charAt(0).toUpperCase() + Title.slice(1)
+      Title = Title.trim()
+
+      try {
+        let timeStamp = Date.now()
+        let tempRTId = Math.floor(Math.random() * 10000000000000)
+
+        db.collection('Roundtrips').add({
+          Category: 'Gruppenreise',
+          Days: '< 5 Tage',
+          Description: 'Kurze Beschreibung deiner Rundreise',
+          Hotels: '0',
+          Location: Location,
+          Region: null,
+          Price: 100,
+          Public: false,
+          RTId: tempRTId,
+          Stars: 3,
+          Profile: 'Autoreise',
+          Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
+          Title: Title,
+          OfferEndPeriod: new Date(timeStamp),
+          OfferStartPeriod: new Date(timeStamp),
+          OfferWholeYear: true,
+          createdAt: new Date(timeStamp)
+        })
+
+        let roundtripsRef = db.collection('Roundtrips')
+          .where('RTId', '==', tempRTId)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              db.collection('Roundtrips').doc(doc.id).update({
+                'RTId': doc.id
+              })
+
+              // todo save doc id in store
+
+              db.collection('RoundtripDetails').add({
+                BookingComLink: '',
+                DateDistance: '',
+                Description: 'Beschreibung dieses Stopps',
+                ExpediaLink: '',
+                GeneralLink: '',
+                ImageUrl: '',
+                InitDate: new Date(timeStamp),
+                Price: 0,
+                RTId: doc.id,
+                Title: 'Titel des 1. Stopps',
+                Location: {
+                  lng: '13.3888599',
+                  lat: '52.5170365',
+                  label: 'Berlin, 10117, Germany'
+                }
+              })
+              this.$router.push('/rundreise-bearbeiten/' + doc.id)
+            })
+          })
+        this.title = ''
+        this.countries = []
+      } catch (error) {
+        console.log(error)
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut'
+        })
+        return false
+      }
+      return true
     }
   }
 }

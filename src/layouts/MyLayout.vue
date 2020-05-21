@@ -33,17 +33,17 @@
             to="/blog"
           >blog</router-link>
           <router-link
-            v-if="!user"
+            v-if="!user && !isInTrialMode"
             class="header-page-link"
             to="/login"
           >anmelden</router-link>
           <router-link
             v-if="!user"
-            to="/registrieren"
+            :to="isInTrialMode ? { name: 'Register', params: { RTId: RTId } } : '/registrieren'"
             class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
           >
-            <q-btn color="primary">registrieren</q-btn>
+            <q-btn color="primary">{{isInTrialMode ? 'Speichern' : 'registrieren'}}</q-btn>
           </router-link>
           <q-avatar
             v-else
@@ -323,7 +323,9 @@ export default {
     return {
       showPreload: true,
       onLine: navigator.onLine,
-      isOnNetlifyPage: false
+      isOnNetlifyPage: false,
+      isInTrialMode: false,
+      RTId: null
     }
   },
   meta () {
@@ -365,10 +367,21 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     },
+    getRTId () {
+      if (this.RTId === null) {
+        const params = this.$route.params.id
+        let RTId = params
+
+        if (params.includes('&')) {
+          RTId = params.split('&')[0]
+        }
+        this.RTId = RTId
+      }
+    },
     leaving () {
       window.addEventListener('beforeunload', (event) => {
-        if (this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) {
-          // any element is still in focus
+        if ((this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) || this.isInTrialMode) {
+          // any element is still in focus or user is in trial mode
           event.returnValue = 'You have unfinished changes!'
         }
       })
@@ -393,6 +406,26 @@ export default {
       }
     }
   },
+  beforeRouteUpdate (to, from, next) {
+    // lock all other pages except register
+    console.log(to.path)
+    if (this.isInTrialMode && to.path !== '/registrieren') {
+      const answer = window.confirm('Willst du diese Seite wirklich verlassen, deine Rundreise ist nicht gespeichert!')
+      if (answer) {
+        this.isInTrialMode = false
+        next()
+      } else {
+        next(false)
+      }
+    } else {
+      next()
+    }
+
+    if (to.path.split('/')[1] === 'rundreise-bearbeiten' && auth.user() === null) {
+      this.isInTrialMode = true
+      this.getRTId()
+    }
+  },
   mounted () {
     window.addEventListener('online', this.updateOnlineStatus)
     window.addEventListener('offline', this.updateOnlineStatus)
@@ -401,7 +434,6 @@ export default {
     window.removeEventListener('online', this.updateOnlineStatus)
     window.removeEventListener('offline', this.updateOnlineStatus)
   },
-
   created () {
     this.leaving()
     this.$storyblok.init({
