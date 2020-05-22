@@ -27,13 +27,13 @@ const routes = [
           guestOnly: true
         }
       },
-      {
-        path: 'email-bestaetigen',
-        component: () => import('pages/Verify.vue'),
-        meta: {
-          requireAuth: true
-        }
-      },
+      // {
+      //   path: 'email-bestaetigen',
+      //   component: () => import('pages/Verify.vue'),
+      //   meta: {
+      //     requireAuth: true
+      //   }
+      // },
       {
         path: 'registrieren',
         component: () => import('pages/Register.vue'),

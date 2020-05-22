@@ -444,19 +444,15 @@ export default {
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
         let loggedIn = auth.user() !== null
-        let verified = auth.user() ? auth.user().emailVerified : false
+        // let verified = auth.user() ? auth.user().emailVerified : false
         forEachCalled = true
         let requireAuth = to.matched.some(record => record.meta.requireAuth)
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
         let isOnLoginPage = to.path === '/login'
         let isOnRoundtripsPage = to.path === '/meine-rundreisen'
-        let isOnVerifyPage = to.path === '/email-bestaetigen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) next('login')
-        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) next('email-bestaetigen')
-        else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) next('meine-rundreisen')
-        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) next('email-bestaetigen')
-        else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) next('meine-rundreisen')
+        else if (!isOnRoundtripsPage && guestOnly && loggedIn) next('meine-rundreisen')
         else next()
 
         redirected = true
@@ -465,19 +461,14 @@ export default {
       let isOnDetailsPage = false
       if (!forEachCalled) {
         let loggedIn = auth.user() !== null
-        let verified = auth.user() ? auth.user().emailVerified : false
         let currentRoute = this.$router.currentRoute
         let requireAuth = currentRoute.matched.some(record => record.meta.requireAuth)
         let guestOnly = currentRoute.matched.some(record => record.meta.guestOnly)
         let isOnLoginPage = currentRoute.fullPath === '/login'
         let isOnRoundtripsPage = currentRoute.fullPath === '/meine-rundreisen'
-        let isOnVerifyPage = currentRoute.fullPath === '/email-bestaetigen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) this.$router.replace('login')
-        else if (!isOnVerifyPage && requireAuth && loggedIn && !verified) this.$router.replace('email-bestaetigen')
-        else if (!isOnRoundtripsPage && guestOnly && loggedIn && verified) this.$router.replace('meine-rundreisen')
-        else if (!isOnVerifyPage && guestOnly && loggedIn && !verified) this.$router.replace('email-bestaetigen')
-        else if (!isOnRoundtripsPage && isOnVerifyPage && loggedIn && verified) this.$router.replace('meine-rundreisen')
+        else if (!isOnRoundtripsPage && guestOnly && loggedIn) this.$router.replace('meine-rundreisen')
 
         isOnDetailsPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-details'
         redirected = true

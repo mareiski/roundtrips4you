@@ -1,7 +1,7 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
     <router-link
-      v-if="auth && auth.user()"
+      v-if="user"
       style="text-decoration:none;"
       to="/meine-rundreisen"
     >
@@ -53,16 +53,16 @@
       <q-tab
         name="start"
         label="An-/Abreise"
-        :disable="!auth || !auth.user()"
+        :disable="!user"
       >
-        <q-tooltip v-if="!auth || !auth.user()">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
       </q-tab>
       <q-tab
         name="settings"
         label="Einstellungen"
-        :disable="!auth || !auth.user()"
+        :disable="!user"
       >
-        <q-tooltip v-if="!auth || !auth.user()">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
       </q-tab>
       <q-tab
         name="map"

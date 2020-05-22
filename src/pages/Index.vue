@@ -296,9 +296,10 @@
       <div class="section-img"></div>
       <div class="section-img-placeholder">
         <h3>Plane jetzt ganz einfach, kostenlos und online deine individuelle Traumreise nach deinen Wünschen!</h3>
-        <router-link to="/registrieren">
-          <button v-in-viewport.once>Reise kostenlos planen</button>
-        </router-link>
+        <button
+          v-in-viewport.once
+          @click="showCreateTempRTDialog = true"
+        >Reise kostenlos planen</button>
       </div>
       <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
       <div class="card-container">
@@ -354,9 +355,9 @@
           <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
       </div> -->
       <div class="register-container">
-        <h4 style="text-align:center;">Registriere dich jetzt und nutze den vollen Umfang unseres Reiseplaners online und kostenlos</h4>
+        <h4 style="text-align:center;">Beginne jetzt gleich kostenlos und ohne Anmeldung mit der Planung deiner eigenen Reise</h4>
         <q-btn
-          @click="$router.push('/registrieren')"
+          @click="showCreateTempRTDialog = true"
           color="primary"
           style="font-size:18px;"
         >Reise selbst Planen</q-btn>

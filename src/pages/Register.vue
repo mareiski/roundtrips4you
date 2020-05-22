@@ -91,6 +91,11 @@ import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit'
 const getFirebase = () => import('firebase')
 let timeStamp = Date.now()
+var actionCodeSettings = {
+  url: 'https://roundtrips4you.de/login',
+  // This must be true.
+  handleCodeInApp: true
+}
 
 export default {
   meta: {
@@ -139,7 +144,7 @@ export default {
             icon: 'check_circle',
             message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
           })
-          context.$router.replace('email-bestaetigen')
+          context.$router.replace('meine-rundreisen')
         },
         (err) => {
           console.log(err)
@@ -161,7 +166,7 @@ export default {
           var token = result.credential.accessToken
           const credential = firebase.auth.GoogleAuthProvider().credential(token)
 
-          this.createUserEntry(result.user)
+          context.createUserEntry(result.user)
 
           // Sign in with credential from the Google user.
           auth.signInWithCredential(credential).then(function () {
@@ -173,6 +178,29 @@ export default {
           console.log(error)
         })
       })
+    },
+    verifyMail (user) {
+      console.log(user)
+      let context = this
+      if (!user.emailVerified) {
+        user.sendEmailVerification(actionCodeSettings).then(function () {
+          context.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Wir haben dir eine Bestätigungsmail für diene Email gesendet'
+
+          })
+        }).catch(function (error) {
+          console.log(error)
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Oh nein, wir konnten dir leider keine email senden, bitte kontaktiere uns unter hello@roundtrips4you.de'
+          })
+        })
+      }
     },
     createUserEntry (user) {
       if (this.RTId) {
@@ -196,6 +224,8 @@ export default {
         UserUID: user.user.uid,
         createdAt: new Date(timeStamp)
       })
+
+      this.verifyMail(user.user)
     }
   }
 }

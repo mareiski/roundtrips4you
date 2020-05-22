@@ -107,7 +107,7 @@
     <q-list
       bordered
       class="rounded-borders"
-      v-if="roundtrips.length < 20"
+      v-if="roundtrips.length < 20 && ((user && user.emailVerified) || roundtrips.length === 0)"
     >
       <q-expansion-item
         clickable
@@ -478,6 +478,15 @@
 
       </q-expansion-item>
     </q-list>
+    <div v-if="user && !user.emailVerified">
+      <span style="font-size:18px;">Deine Email Adresse wurde noch nicht bestätigt. Bitte bestätige diese {{ roundtrips.length > 0 ? 'bevor du eine weitere Reise erstellst' : 'sobald wie möglich'}}.</span>
+      <br>
+      <br>
+      <q-btn
+        color="primary"
+        @click="verifyMail()"
+      >Jetzt bestätigen</q-btn>
+    </div>
   </div>
 </template>
 <script>
@@ -494,6 +503,12 @@ const { getScrollTarget, setScrollPosition } = scroll
 
 let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
+
+var actionCodeSettings = {
+  url: 'https://roundtrips4you.de/login',
+  // This must be true.
+  handleCodeInApp: true
+}
 
 export default {
   meta: {
@@ -538,6 +553,11 @@ export default {
       destinationAddresses: [],
       countryAmount: 1,
       showRoundtrips: false
+    }
+  },
+  computed: {
+    user () {
+      return this.$store.getters['user/user']
     }
   },
   methods: {
@@ -586,6 +606,35 @@ export default {
           textColor: 'white',
           icon: 'error',
           message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
+        })
+      }
+    },
+    verifyMail () {
+      let context = this
+      if (!auth.user().emailVerified) {
+        auth.user().sendEmailVerification(actionCodeSettings).then(function () {
+          context.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'check_circle',
+            message: 'Wir haben dir eine Bestätigungsmail gesendet'
+
+          })
+        }).catch(function (error) {
+          console.log(error)
+          context.$q.notify({
+            color: 'red-5',
+            textColor: 'white',
+            icon: 'error',
+            message: 'Oh nein, wir konnten dir leider keine email senden, bitte Kontaktiere uns unter hello@roundtrips4you.de'
+          })
+        })
+      } else {
+        context.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Deine Email wurde bereits bestätigt'
         })
       }
     },
