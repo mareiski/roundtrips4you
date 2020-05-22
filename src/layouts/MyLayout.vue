@@ -264,6 +264,59 @@
               data-share="true"
               style="margin-top:10px;"
             ></div>
+            <!-- Begin Mailchimp Signup Form -->
+            <div
+              style="margin-top:10px;"
+              id="mc_embed_signup"
+            >
+              <form
+                action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&amp;id=c64c971288"
+                method="post"
+                id="mc-embedded-subscribe-form"
+                name="mc-embedded-subscribe-form"
+                class="validate"
+                target="_blank"
+                novalidate
+              >
+                <div id="mc_embed_signup_scroll">
+                  <label
+                    for="mce-EMAIL"
+                    style="font-size:18px"
+                  >Newsletter</label>
+                  <input
+                    type="email"
+                    value=""
+                    name="EMAIL"
+                    class="email"
+                    id="mce-EMAIL"
+                    placeholder="Email Adresse"
+                    required
+                  >
+                  <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                  <div
+                    style="position: absolute; left: -5000px;"
+                    aria-hidden="true"
+                  ><input
+                      type="text"
+                      name="b_ca8f607f808c8e5a9812aec8f_c64c971288"
+                      tabindex="-1"
+                      value=""
+                    ></div>
+                  <div class="clear">
+                    <q-btn
+                      type="submit"
+                      value="Subscribe"
+                      name="subscribe"
+                      id="mc-embedded-subscribe"
+                      color="primary"
+                      style="margin-top:5px;"
+                    >Anmelden</q-btn>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!--End mc_embed_signup-->
           </div>
         </div>
       </div>
@@ -394,7 +447,7 @@ export default {
           color: 'green-4',
           textColor: 'white',
           icon: 'check_circle',
-          message: 'Verbindung wieder hergestellt'
+          message: 'Verbindung wiederhergestellt'
         })
       } else {
         this.$q.notify({
