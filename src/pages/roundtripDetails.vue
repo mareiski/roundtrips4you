@@ -110,11 +110,10 @@
         name="map"
         label="Karte"
       />
-      <!--<q-tab
+      <q-tab
         name="ratings"
         label="Bewertungen"
-        https://hotellook.com/?destination=lucca&checkIn=2018-12-01&checkOut=2018-12-02&adults=2
-      />-->
+      />
     </q-tabs>
 
     <q-separator />
@@ -285,15 +284,22 @@
         <br>
         <a @click="$refs.tabPanels.goTo('overview')">zur Routenübersicht</a>
       </q-tab-panel>
-
-      <!-- <q-tab-panel name="ratings">
-        <div class="text-h6">Bewertungen</div>
-        <div class="q-pa-md row justify-center">
-          <div style="width: 100%; max-width: 400px">
-            <q-chat-message label="Sunday, 19th" />
-            <q-chat-message
+      <q-tab-panel name="ratings">
+        <h3>Bewertungen</h3>
+        <div class="q-pa-md row">
+          <div style="width: 100%;">
+            <div v-if="messages.length === 0">
+              <span style="font-size:18px;">Momentan sind leider keine Kommentare oder Bewertungen vorhanden.<br>
+                {{ user ? 'Sei der Erste und schreibe jetzt eine Bewertung!' : 'Melde dich an um die erste Bewertung abzugeben.'}}</span>
+            </div>
+            <template v-for="message in messages">
+              <!-- <q-chat-message
+                v-if="!message[index -1] || getStringDateFromTimestamp(message[index -1].Date) !== getStringDateFromTimestamp(message.Date)"
+                :key="'date' + message.id"
+                :label="getStringDateFromTimestamp(message.Date)"
+              /> -->
+              <!-- <q-chat-message
               name="me"
-              avatar="https://cdn.quasar.dev/img/avatar4.jpg"
               :text="['hey, how are you?']"
             >
               <q-rating
@@ -303,26 +309,85 @@
                 color="gold"
                 style="margin-right:10px;"
               />
-            </q-chat-message>
-            <q-chat-message
-              name="Jane"
-              avatar="https://cdn.quasar.dev/img/avatar3.jpg"
-              :text="[`doing fine, how r you?`]"
-            />
+            </q-chat-message> -->
+              <q-chat-message
+                :key="message.id"
+                :name="message.Name + (!message.UID || user.uid !== message.UID ? '' : ' (Autor)' )"
+                :sent="!message.UID || user.uid !== message.UID"
+                name-sanitize
+                text-sanitize
+                :text="[message.Message]"
+                bg-color="secondary"
+                text-color="white"
+                style="font-size:16px;"
+                :stamp="getStringDateFromTimestamp(message.Date)"
+              >
+                <q-rating
+                  v-if="message.Rating"
+                  class="stars"
+                  v-model="message.Rating"
+                  readonly
+                  size="15px"
+                  color="gold"
+                />
+                <template v-slot:avatar>
+                  <img
+                    v-if="message.Avatar"
+                    :class="'q-message-avatar ' + (!message.UID || user.uid !== message.UID ? 'q-message-avatar--sent' : 'q-message-avatar--received' ) "
+                    :src="message.Avatar"
+                  >
+                  <q-icon
+                    v-else
+                    :class="'q-message-avatar ' + (!message.UID || user.uid !== message.UID ? 'q-message-avatar--sent' : 'q-message-avatar--received' ) "
+                    name="account_circle"
+                    size="50px"
+                  />
+                </template>
+              </q-chat-message>
+            </template>
+
+          </div>
+          <div
+            v-if="user"
+            class="flex"
+            style="margin-top:30px;"
+          >
+            <div class="flex direction-column">
+              <q-input
+                v-model="tempMessage"
+                style="width:300px; margin-right:20px; font-size:18px;"
+                placeholder="Deine Nachricht"
+              />
+              <q-toggle
+                v-model="ratingEnabled"
+                style="font-size:18px; margin-right:10px;"
+                label="mit Bewertung"
+              ></q-toggle>
+              <q-rating
+                v-show="ratingEnabled"
+                class="stars"
+                v-model="tempCommentStars"
+                size="15px"
+                color="gold"
+                style="margin-right:15px;"
+              />
+            </div>
+            <q-btn @click="sendComment">Absenden</q-btn>
           </div>
         </div>
-      </q-tab-panel> -->
+      </q-tab-panel>
     </q-tab-panels>
   </div>
 </template>
 <script>
 import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
-import { db, storage } from '../firebaseInit'
+import { db, storage, auth } from '../firebaseInit'
 const getAxios = () => import('axios')
 
 let details = []
 let roundtrip = []
+let messages = []
 
 let roundtripDocId = null
 
@@ -359,7 +424,12 @@ export default {
       firstLoad: true,
       stopsLoaded: false,
       creator: {},
-      tripWebsite: null
+      tripWebsite: null,
+      messages: [],
+      tempMessage: null,
+      RTId: null,
+      tempCommentStars: 3,
+      ratingEnabled: true
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -402,10 +472,43 @@ export default {
           this.tripWebsite = roundtrip[0].tripWebsite
 
           this.loadGaleryImgs()
+          this.getUserRatings(RTId)
         })
         .catch(err => {
           console.log('Error getting Roundtrip', err)
         })
+    },
+    getStringDateFromTimestamp (timestamp) {
+      const initDate = new Date(timestamp.seconds * 1000)
+      return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+    },
+    getUserRatings (RTId) {
+      let roundtripsRef = db.collection('Comments')
+        .where('RTId', '==', RTId)
+        .orderBy('Date')
+      roundtripsRef.get()
+        .then(snapshot => {
+          messages = []
+          snapshot.forEach(doc => {
+            let index = messages.push(doc.data()) - 1
+            messages[index].id = doc.id
+          })
+          this.messages = messages
+        })
+    },
+    sendComment () {
+      db.collection('Comments').add({
+        Date: new Date(Date.now()),
+        Message: this.tempMessage,
+        Name: auth.user().displayName,
+        Avatar: auth.user().photoURL,
+        UID: auth.user().uid,
+        RTId: this.RTId,
+        Rating: this.ratingEnabled ? this.tempCommentStars : null
+      }).then(results => {
+        this.getUserRatings(this.RTId)
+        this.tempMessage = null
+      })
     },
     loadUserData (UserId) {
       let context = this
@@ -666,6 +769,8 @@ export default {
       RTId = params.split('&')[0]
       userDate = params.split('&')[1]
     }
+
+    this.RTId = RTId
 
     this.loadSingleRoundtrip(RTId)
     this.loadRoundtripDetails(RTId, parseInt(userDate))
