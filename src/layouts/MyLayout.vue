@@ -51,8 +51,13 @@
             style="width: 50px; margin:auto 10px auto 10px;"
             :style="user ? 'padding:0;' : 'font-size:60px;'"
             :icon="user && user.photoURL !== null ? null : 'account_circle'"
-            @click="user ? null : $router.push('/login')"
+            @click="[user ? null : $router.push('/login'), showWelcomeTooltip = false]"
           >
+            <q-badge
+              style="top:-1px; right:-3px; width:auto;"
+              color="primary"
+              floating
+            >{{undreadNotifications}}</q-badge>
             <img
               v-if="user && user.photoURL !== null"
               :src="user.photoURL"
@@ -61,7 +66,7 @@
               <q-tooltip
                 self="center middle"
                 anchor="center middle"
-                :value="true"
+                :value="showWelcomeTooltip"
                 content-style="font-size: 14px;"
                 content-class="tooltip"
               >
@@ -86,6 +91,21 @@
                 >
                   <q-item-section>
                     Meine Reisen
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="[drawer = !drawer, markAllMessagesSeen()]"
+                >
+                  <q-item-section>
+                    <span>Nachrichten
+                      <q-badge
+                        style="top:4px; right:7px;"
+                        color="primary"
+                        floating
+                      >{{undreadNotifications}}</q-badge>
+                    </span>
                   </q-item-section>
                 </q-item>
                 <q-item
@@ -161,6 +181,74 @@
         </div>
       </div>
     </div>
+    <q-drawer
+      v-if="user"
+      v-model="drawer"
+      :width="300"
+      :breakpoint="500"
+      side="right"
+      overlay
+      bordered
+      content-class="bg-grey-3"
+    >
+      <q-toolbar class="bg-primary text-white">
+        <q-toolbar-title>
+          Benachrichtigungen
+        </q-toolbar-title>
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          @click="drawer = false"
+        />
+      </q-toolbar>
+
+      <q-scroll-area class="fit">
+        <router-link
+          v-for="message in messages"
+          :key="message.id"
+          :to="message.Link"
+          style="text-decoration:none;"
+        >
+          <q-card class="notification-card cursor-pointer">
+            <q-card-section class="created-at">
+              {{ getStringDateFromTimestamp(message.createdAt) }}
+            </q-card-section>
+            <q-card-section class="message">
+              {{ message.Message }}
+            </q-card-section>
+            <q-card-section class="tag">
+              <q-icon
+                :name="message.Icon"
+                color="primary"
+                style="font-size:16px;"
+              /> {{ message.Tag }}
+            </q-card-section>
+          </q-card>
+        </router-link>
+
+        <!-- <q-list
+          v-for="message in messages"
+          :key="message.id"
+        >
+
+          <q-item
+            clickable
+            v-ripple
+          >
+            <q-item-section avatar>
+              <q-icon :name="message.Icon" />
+            </q-item-section>
+            <q-item-section>
+              {{ message.Message }}
+            </q-item-section>
+          </q-item>
+
+          <q-separator />
+        </q-list> -->
+      </q-scroll-area>
+    </q-drawer>
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -360,11 +448,12 @@
 </style>
 <script>
 // import(/* webpackPrefetch: true */ '../css/site.less')
-import { auth } from '../firebaseInit'
-import { Loading } from 'quasar'
+import { auth, db } from '../firebaseInit'
+import { Loading, date } from 'quasar'
 
 let forEachCalled = false
 let redirected = false
+let messages = []
 
 export default {
   name: 'MyLayout',
@@ -378,7 +467,11 @@ export default {
       onLine: navigator.onLine,
       isOnNetlifyPage: false,
       isInTrialMode: false,
-      RTId: null
+      RTId: null,
+      drawer: false,
+      messages: [],
+      showWelcomeTooltip: true,
+      undreadNotifications: 0
     }
   },
   meta () {
@@ -402,6 +495,10 @@ export default {
     hideMenu () {
       this.$refs.svg.classList.remove('active')
       this.$refs.Header.classList.remove('active')
+    },
+    getStringDateFromTimestamp (timestamp) {
+      const initDate = new Date(timestamp.seconds * 1000)
+      return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
     },
     hideLoading () {
       redirected = false
@@ -436,6 +533,58 @@ export default {
         if ((this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) || this.isInTrialMode) {
           // any element is still in focus or user is in trial mode
           event.returnValue = 'You have unfinished changes!'
+        }
+      })
+    },
+    getNotifications () {
+      if (auth.user()) {
+        let roundtripsRef = db.collection('PushNotifications')
+          .orderBy('createdAt', 'desc')
+        roundtripsRef.get()
+          .then(snapshot => {
+            messages = []
+            snapshot.forEach(doc => {
+              if (!doc.data().UserUID || doc.data().UserUID === auth.user().uid) {
+                let index = messages.push(doc.data()) - 1
+                messages[index].id = doc.id
+              }
+            })
+            this.messages = messages
+            this.setUnreadNotifications()
+          })
+      }
+    },
+    setUnreadNotifications () {
+      let count = 0
+      this.messages.forEach(message => {
+        if ((message.UserUID && !message.AlreadySeen) || (message.SeenUsers && !Array.from(message.SeenUsers).includes(auth.user().uid))) {
+          count++
+        }
+      })
+      this.undreadNotifications = count
+    },
+    markAllMessagesSeen () {
+      let context = this
+      this.messages.forEach(message => {
+        if (message.UserUID && !message.AlreadySeen) {
+          db.collection('PushNotifications').doc(message.id).update({
+            'AlreadySeen': true
+          }).then(results => {
+            if (context.undreadNotifications !== 0) context.undreadNotifications--
+          }).catch(ex => {
+            console.log(ex)
+          })
+        } else if (message.SeenUsers && !message.SeenUsers.includes(auth.user().uid)) {
+          let updatedSeenUsers = Array.from(message.SeenUsers)
+          updatedSeenUsers.push(auth.user().uid)
+
+          db.collection('PushNotifications').doc(message.id).update({
+            'SeenUsers': updatedSeenUsers
+          }).then(results => {
+            if (context.undreadNotifications !== 0) context.undreadNotifications--
+          }).catch(ex => {
+            console.log(ex)
+          })
         }
       })
     }
@@ -526,6 +675,8 @@ export default {
         isOnDetailsPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-details'
         redirected = true
       }
+
+      this.getNotifications()
 
       if (redirected && !isOnDetailsPage) {
         redirected = false

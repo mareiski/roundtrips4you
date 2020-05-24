@@ -84,7 +84,11 @@ module.exports = function (ctx) {
         'QStepper',
         'QStep',
         'QStepperNavigation',
-        'QSkeleton'
+        'QSkeleton',
+        'QDrawer',
+        'QToolbar',
+        'QToolbarTitle',
+        'QScrollArea'
       ],
 
       directives: [
