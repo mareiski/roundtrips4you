@@ -233,7 +233,7 @@
           <div>
             <h2>Flugsuche</h2>
             <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu buchen.</p>
-            <p>Du musst dafür nur einmal deine Daten eingeben und kannst dir dafür die verschieden Angebote der Anbieter ansehen.</p>
+            <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
           </div>
           <div>
           </div>
@@ -241,8 +241,9 @@
         <li v-in-viewport.once>
           <div>
             <h2>Städtevorschläge</h2>
-            <p>Zusätzlich schlagen dir automatisch die schönsten Städte in dem gewählten Land deine Reise vor.</p>
-            <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst und kannst diese mit einem Klick zu deiner Reise hizufügen.</p>
+            <p>Des Weiteren schlagen wir dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vor.</p>
+            <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst.</p>
+            <p>Mit einem Klick kannst du deine zu deiner Reise hizufügen.</p>
           </div>
           <div>
             <q-img
@@ -256,7 +257,7 @@
           <div>
             <h2>Rundreise automatisch zusammenstellen</h2>
             <p>Nachdem du die Städte deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
-            <p>Die Route wird so berechnet, dass du immer am wenigsten Zeit zwischen den Orten benötigst.</p>
+            <p>Die Route wird so berechnet, dass du immer am wenigsten Zeit zwischen den Orten benötigst und somit mehr Zeit für die Besichtigung der Reiseziele bleibt.</p>
           </div>
           <div>
           </div>
@@ -265,7 +266,7 @@
           <div>
             <h2>Vorschlag von Sehenswürdigkeiten</h2>
             <p>Die besten Sehenswürdigkeiten zu finden ist schwierig, deshalb unterstützen wir dich mit unseren automatischen Vorschlägen.</p>
-            <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern.</p>
+            <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern, damit du sie immer parat hast.</p>
           </div>
           <div>
             <q-img
@@ -283,6 +284,7 @@
             <h2>Karte</h2>
             <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>
             <p>Wir übernehmen die Kartenerstellung komplett für dich, sodass du nur auf den entsprechenden Reiter klicken musst um alle deine Stopps zu sehen.</p>
+            <p>Natürlich zeichnen wir auch gleich die Route die zwischen den einzelnen Reisezielen liegt ein.</p>
           </div>
           <div>
             <q-img
