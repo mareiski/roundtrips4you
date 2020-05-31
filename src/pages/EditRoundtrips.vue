@@ -422,7 +422,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <p style="padding-top:10px;">Insgesamt {{tripDuration}} Tage</p>
+        <p style="padding-top:10px;">Insgesamt {{tripDuration}} Tage {{tripDistance ? ' und ' + tripDistance + 'km' : ''}}</p>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1252,7 +1252,8 @@ export default {
       tripWebsite: null,
       RTId: null,
       shareLink: null,
-      shareCode: null
+      shareCode: null,
+      tripDistance: 0
     }
   },
   meta () {
@@ -2301,7 +2302,8 @@ export default {
       var hours = (duration - minutes) / 60
 
       let returnVal
-      if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
+      if (hours === 0 && minutes === 0) returnVal = 0
+      if (hours < 0 || minutes < 0) returnVal = null
       else if (hours === 0) returnVal = minutes + ' min'
       else if (minutes === 0) returnVal = hours + ' h'
       else returnVal = hours + ' h ' + minutes + ' min'
@@ -2323,8 +2325,11 @@ export default {
             if (data !== null && typeof data !== 'undefined') {
               let duration = context.msToTime(data.duration * 1000)
 
-              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-              if (distance !== '') distance = ' (' + distance + ')'
+              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : ''
+              if (distance !== '') {
+                this.tripDistance = this.tripDistance + distance
+                distance = ' (' + distance + 'km)'
+              }
 
               context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, durationInMs: data.duration * 1000, distance: distance, docId: docId })
               context.getDays(stop, index, data.duration * 1000)
@@ -2353,7 +2358,7 @@ export default {
       return date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
     getDays (stop, index, duration) {
-      let days = null
+      let days = 0
 
       let dateTimeParts = stop.InitDate.split(' ')
       let dateParts = dateTimeParts[0].split('.')
@@ -2726,9 +2731,6 @@ export default {
 
       const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
       this.tripDuration = diffDays
-    },
-    getTripDistance () {
-
     },
     isUniqueTitle (value) {
       return new Promise((resolve, reject) => {
