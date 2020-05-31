@@ -44,7 +44,7 @@
           <q-dialog v-model="showCreateTempRTDialog">
             <q-card>
               <q-card-section class="row items-center">
-                <span style="width:100%; text-align:center; font-size:18px;">Gib noch ein paar allgemeine Daten an um zu beginnen</span>
+                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine Reise ohne Anmeldung</span>
                 <q-input
                   v-model="title"
                   :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
@@ -161,7 +161,7 @@
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Plane deinen eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
+        <h1>Plane deine eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="register-container">
@@ -217,12 +217,12 @@
         class="description-container"
         v-in-viewport.once
       >
-        <p>Eine Reise selbst planen kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die dort gar nicht angefahren werden.</p>
-        <p>Roundtrips4you verbindet das Tolle aus beiden Konzepten miteinander:</p>
-        <p>Mit unserem Reiseplaner kannst du deine Reise selbst zusammenstellen, somit entgeht dir keine Sehenswürdigkeit mehr.</p>
-        <p>Um dir diese Planungsarbeit zu erleichtern, bietet dir Roundtrips4you einige Tools, die dich bei deiner Reiseplanung unterstützen.</p>
+        <p>Eine Reise selbst planen kann oft ganz schön anstrengend sein, aber bei Katalogreisen gibt es immer ein paar Orte die man lieber besucht hätte.</p>
+        <p>Roundtrips4you verbindet das Beste aus beiden Konzepten miteinander:</p>
+        <p>Mit unserem Reiseplaner kannst du deine Reise selbst zusammenstellen, somit entgeht dir kein Reiseziel mehr.</p>
+        <p>Um dir die Planungsarbeit zu erleichtern, bietet dir Roundtrips4you einige Tools, die dich bei deiner Reiseplanung unterstützen.</p>
         <p>Somit ist deine Reise zu 100% individualisiert und trotzdem perfekt durchgeplant.</p>
-        <p><b>Roundtrips4you</b> - deine Reise planungs App und Website für deinen nächsten Urlaub.</p>
+        <p><b>Roundtrips4you</b> - deine Reiseplanungs App für deinen nächsten Urlaub.</p>
       </div>
       <h4
         ref="tools"
@@ -243,12 +243,13 @@
             <h2>Städtevorschläge</h2>
             <p>Des Weiteren schlagen wir dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vor.</p>
             <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst.</p>
-            <p>Mit einem Klick kannst du deine zu deiner Reise hizufügen.</p>
+            <p>Mit einem Klick kannst du diese zu deiner Reise hizufügen.</p>
           </div>
           <div>
             <q-img
               style="width:1000px;"
               alt="Städtevorschläge"
+              @click="[showCreateTempRTDialog = true]"
               src="https://roundtrips4you.de/statics/cities.jpeg"
             />
           </div>
@@ -267,11 +268,13 @@
             <h2>Vorschlag von Sehenswürdigkeiten</h2>
             <p>Die besten Sehenswürdigkeiten zu finden ist schwierig, deshalb unterstützen wir dich mit unseren automatischen Vorschlägen.</p>
             <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern, damit du sie immer parat hast.</p>
+            <p>Mit einem Klick auf die jeweilige Sehenswürdigkeit kannst du dir genaue Informationen und Wissenswerte Tipps anzeigen lassen.</p>
           </div>
           <div>
             <q-img
               style="width:1000px;"
               alt="Vorschlag von Sehenswürdigkeiten"
+              @click="[showCreateTempRTDialog = true]"
               src="https://roundtrips4you.de/statics/pois.jpeg"
             />
           </div>
@@ -290,6 +293,7 @@
             <q-img
               style="width:1000px;"
               alt="Karte"
+              @click="[showCreateTempRTDialog = true]"
               src="https://roundtrips4you.de/statics/map.jpeg"
             />
           </div>

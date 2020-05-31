@@ -225,6 +225,8 @@ import {
   MglPopup
 } from 'vue-mapbox'
 
+import(/* webpackPrefetch: true */ '../../css/map.less')
+
 const getAxios = () => import('axios')
 import { date } from 'quasar'
 

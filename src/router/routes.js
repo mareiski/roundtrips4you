@@ -93,6 +93,16 @@ const routes = [
         component: () => import(/* webpackChunkName: "publicUser" */ 'pages/PublicUsers.vue')
       }
     ]
+  },
+  {
+    path: '/',
+    component: () => import('layouts/WidgetLayout.vue'),
+    children: [
+      {
+        path: 'MapWidget/:id',
+        component: () => import('pages/MapWidget.vue')
+      }
+    ]
   }
 ]
 

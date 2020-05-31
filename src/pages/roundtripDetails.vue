@@ -464,9 +464,11 @@ export default {
             roundtripDocId = doc.id
           })
           this.inputProfile = roundtrip[0].Profile
-          this.childrenAges = roundtrip[0].ChildrenAges
-          this.rooms = roundtrip[0].Rooms
-          this.adults = roundtrip[0].Adults
+
+          // set default values to ensure privacy
+          this.childrenAges = []
+          this.rooms = 1
+          this.adults = 2
           this.roundtrip = roundtrip
           this.profile = this.getProfile(roundtrip[0].Profile)
           this.tripWebsite = roundtrip[0].tripWebsite

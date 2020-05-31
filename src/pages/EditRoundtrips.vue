@@ -622,6 +622,7 @@
             class="rounded-borders"
             style="padding:10px"
           >
+            <p style="font-size:18px;">Reise teilen</p>
             <q-toggle
               v-model="publish"
               label="Rundreise veröffentlichen"
@@ -633,6 +634,38 @@
                 {{user && user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
               </q-tooltip>
             </q-toggle>
+            <div v-show="publish">
+              <b>Link zur Karte veröffentlichen</b>
+              <p>Über den Folgenden Link kannst du die Karte deiner Reise veröffentlichen. Ebenso wird ein Link zu der ganzen Reise auf Roundtrips4you veröffentlicht.</p>
+              <a :href="'https://roundtrips4you.de/MapWidget/' + RTId">https://roundtrips4you.de/MapWidget/{{RTId}}</a>
+              <q-icon
+                style="margin-left:10px;"
+                size="25px;"
+                name="file_copy"
+                class="cursor-pointer"
+                @click="copyShareLink('share-link')"
+              />
+              <input
+                type="hidden"
+                id="share-link"
+                :value="shareLink"
+              >
+              <br><br>
+              <p>Dieser Link darf auch per Iframe in eine Website eingebettet werden. Dazu einfach den folgenden Code kopieren und an die entsprechende Stelle einfügen.</p>
+              <span>&lt;iframe src='https://roundtrips4you.de/MapWidget/{{RTId}}'&gt;&lt;/iframe&gt;</span>
+              <q-icon
+                style="margin-left:10px;"
+                size="25px;"
+                name="file_copy"
+                class="cursor-pointer"
+                @click="copyShareLink('share-code')"
+              />
+              <input
+                type="hidden"
+                id="share-code"
+                :value="shareCode"
+              >
+            </div>
             <div
               v-if="Array.isArray(countries)"
               style="padding-bottom: 10px;"
@@ -1216,7 +1249,10 @@ export default {
       allStopsExpanded: false,
       currentExpansionStates: [],
       companyProfile: false,
-      tripWebsite: null
+      tripWebsite: null,
+      RTId: null,
+      shareLink: null,
+      shareCode: null
     }
   },
   meta () {
@@ -1238,6 +1274,32 @@ export default {
       const currentDate = new Date(date)
 
       return currentDate >= compareDate
+    },
+    copyShareLink (elName) {
+      let testingCodeToCopy = document.querySelector('#' + elName)
+      testingCodeToCopy.setAttribute('type', 'text')
+      testingCodeToCopy.select()
+
+      try {
+        document.execCommand('copy')
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Link wurde erfolgreich kopiert'
+        })
+      } catch (err) {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'error',
+          message: 'Oops da ist wohl was schiefgelaufen'
+        })
+      }
+
+      /* unselect the range */
+      testingCodeToCopy.setAttribute('type', 'hidden')
+      window.getSelection().removeAllRanges()
     },
     expandAllStops () {
       let context = this
@@ -1920,6 +1982,8 @@ export default {
       })
     },
     loadSingleRoundtrip (RTId) {
+      this.shareLink = 'https://roundtrips4you.de/MapWidget/' + RTId
+      this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + RTId + '"></iframe>'
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
         .limit(1)
@@ -2704,6 +2768,8 @@ export default {
         RTId = params.split('&')[0]
         title = params.split('&')[1]
       }
+
+      this.RTId = RTId
 
       this.stars = !isNaN(this.hotelRatingAvg()) ? this.hotelRatingAvg() : 3
 
