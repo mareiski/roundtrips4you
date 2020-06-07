@@ -127,7 +127,7 @@
               <span
                 style="font-size:16px;"
                 class="q-ml-sm"
-              >Möchtest du {{this.title ? this.title : 'disen Stopp'}} zu deiner Reise hinzufügen?</span>
+              >Möchtest du {{this.title ? this.title : 'deisen Stopp'}} zu deiner Reise hinzufügen?</span>
             </q-card-section>
 
             <q-input
@@ -138,7 +138,7 @@
               class="input-item"
               outlined
               label="Titel eingeben"
-              style="margin:5px;"
+              style="margin:5px; width:auto;"
             >
             </q-input>
 

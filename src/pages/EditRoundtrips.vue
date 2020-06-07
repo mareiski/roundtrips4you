@@ -611,18 +611,21 @@
           </q-form>
         </div>
       </q-tab-panel>
-      <q-tab-panel name="settings">
-        <h4>Allgemeine Einstellungen</h4>
+      <q-tab-panel
+        class="settings"
+        name="settings"
+      >
         <q-form
           bordered
           class="q-gutter-md rounded-borders"
         >
+          <h4>Reise teilen</h4>
           <q-list
             bordered
             class="rounded-borders"
             style="padding:10px"
           >
-            <p style="font-size:18px;">Reise teilen</p>
+            <q-item-label style="padding-bottom:5px;">Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten, folgende Daten werden angezeigt/benötigt:</q-item-label>
             <q-toggle
               v-model="publish"
               label="Rundreise veröffentlichen"
@@ -630,8 +633,8 @@
               :disable="!user || !user.displayName"
               @input="onSaveRoundtrip"
             >
-              <q-tooltip>
-                {{user && user.displayName ? 'Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten' : 'Bitte erstelle zuerst einen Benutzernamen'}}
+              <q-tooltip v-if="!user || !user.displayName">
+                Bitte erstelle zuerst einen Benutzernamen
               </q-tooltip>
             </q-toggle>
             <div v-show="publish">
@@ -666,81 +669,6 @@
                 :value="shareCode"
               >
             </div>
-            <div
-              v-if="Array.isArray(countries)"
-              style="padding-bottom: 10px;"
-            >
-              <div
-                v-for="(countryNum, index) in countries"
-                :key="countryNum"
-                class="flex"
-              >
-                <q-select
-                  @filter="filterFn"
-                  outlined
-                  v-model="countries[index]"
-                  :options="countryOptions"
-                  label="Land"
-                  clearable
-                  class="input-item"
-                  use-input
-                  style="margin-top:10px; margin-right:10px; padding:0;"
-                  :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-                  @blur="onSaveRoundtrip"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="explore" />
-                  </template>
-                </q-select>
-                <div
-                  class="add-country-container"
-                  style="padding:0;"
-                >
-                  <q-btn
-                    v-if="parseInt(index ) !== 0"
-                    @click="countries.splice(index, 1)"
-                    round
-                    icon="add"
-                    side
-                    style="transform:rotate(45deg);"
-                    @blur="onSaveRoundtrip"
-                  />
-                </div>
-              </div>
-            </div>
-            <div v-else>
-              <q-select
-                @filter="filterFn"
-                outlined
-                v-model="countries"
-                :options="countryOptions"
-                label="Land"
-                clearable
-                class="input-item"
-                use-input
-                style="margin-top:10px; margin-right:10px; padding:0;"
-                :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-                @blur="onSaveRoundtrip"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="explore" />
-                </template>
-              </q-select>
-            </div>
-            <q-btn
-              v-if="Array.isArray(countries)"
-              @click="countries.push('')"
-              label="Land hinzufügen"
-              style="margin-bottom:30px;"
-              @blur="onSaveRoundtrip"
-            />
-            <RegionSearch
-              v-if="countries.length === 1"
-              :country="countries[0]"
-              :defaultRegion="region"
-              @update="updateRegion($event)"
-              @blur="onSaveRoundtrip"
-            ></RegionSearch>
             <q-select
               outlined
               v-model="category"
@@ -820,8 +748,21 @@
               @blur="onSaveRoundtrip"
             > <template v-slot:prepend>
                 <q-icon name="star" />
-              </template></q-input>
-            <q-item-label>Angebotszeitraum</q-item-label>
+              </template>
+            </q-input>
+            <q-input
+              @blur="onSaveRoundtrip"
+              v-model="price"
+              label="Pauschalpreis ohne Freizeitgestaltung"
+              type="number"
+              outlined
+              :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
+            ><template v-slot:prepend>
+                <q-icon name="euro">
+                </q-icon>
+              </template>
+            </q-input>
+            <q-item-label style="padding-bottom:5px; margin-top:10px;">Angebotszeitraum</q-item-label>
             <q-toggle
               v-model="wholeYearOffer"
               label="Ganzes Jahr"
@@ -834,7 +775,7 @@
               outlined
               v-model="OfferStartPeriod"
               label="von"
-              class="input-item rounded-borders"
+              class="q-field--with-bottom"
               @blur="onSaveRoundtrip"
             >
               <q-popup-proxy
@@ -863,8 +804,8 @@
               :disable="wholeYearOffer"
               outlined
               v-model="OfferEndPeriod"
+              class="q-field--with-bottom"
               label="bis"
-              class="input-item rounded-borders"
             >
               <q-popup-proxy
                 ref="qDateProxy2"
@@ -887,20 +828,96 @@
                 </q-icon>
               </template>
             </q-input>
-            <q-input
+          </q-list>
+          <h4>Allgemeine Einstellungen</h4>
+          <q-list
+            bordered
+            class="rounded-borders"
+            style="padding:10px"
+          >
+            <div
+              v-if="Array.isArray(countries)"
+              style="padding-bottom: 10px;"
+            >
+              <div
+                v-for="(countryNum, index) in countries"
+                :key="countryNum"
+                class="flex"
+              >
+                <q-select
+                  @filter="filterFn"
+                  outlined
+                  v-model="countries[index]"
+                  :options="countryOptions"
+                  label="Land"
+                  clearable
+                  class="input-item"
+                  use-input
+                  style="margin-top:10px; margin-right:10px; padding:0;"
+                  :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                  @blur="onSaveRoundtrip"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="explore" />
+                  </template>
+                </q-select>
+                <div
+                  class="add-country-container"
+                  style="padding:0;"
+                >
+                  <q-btn
+                    v-if="parseInt(index ) !== 0"
+                    @click="countries.splice(index, 1)"
+                    round
+                    icon="add"
+                    side
+                    style="transform:rotate(45deg);"
+                    @blur="onSaveRoundtrip"
+                  />
+                </div>
+              </div>
+            </div>
+            <div v-else>
+              <q-select
+                @filter="filterFn"
+                outlined
+                v-model="countries"
+                :options="countryOptions"
+                label="Land"
+                clearable
+                class="input-item"
+                use-input
+                style="margin-top:10px; margin-right:10px; padding:0;"
+                :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+                @blur="onSaveRoundtrip"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="explore" />
+                </template>
+              </q-select>
+            </div>
+            <q-btn
+              v-if="Array.isArray(countries)"
+              @click="countries.push('')"
+              label="Land hinzufügen"
+              style="margin-bottom:30px;"
               @blur="onSaveRoundtrip"
-              v-model="price"
-              label="Pauschalpreis ohne Freizeitgestaltung"
-              type="number"
-              outlined
-              :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
-            ><template v-slot:prepend>
-                <q-icon name="euro">
-                </q-icon>
-              </template>
-            </q-input>
-            <h4 style="margin-bottom:10px;">Persönliche Informationen</h4>
-            <p style="margin-bottom:15px;">Diese werden nur dir angezeigt und auch beim veröffentlichen nicht berücksichtigt.</p>
+            />
+            <RegionSearch
+              v-if="countries.length === 1"
+              :country="countries[0]"
+              :defaultRegion="region"
+              @update="updateRegion($event)"
+              @blur="onSaveRoundtrip"
+            ></RegionSearch>
+          </q-list>
+          <h4>Persönliche Informationen</h4>
+          <q-list
+            bordered
+            class="rounded-borders"
+            style="padding:10px"
+          >
+            <p style="margin-bottom:15px;">Diese werden nur dir angezeigt und auch beim Veröffentlichen nicht berücksichtigt.</p>
             <div>
               <q-input
                 v-model="rooms"
@@ -960,10 +977,15 @@
                 </q-input>
               </div>
             </div>
+          </q-list>
+          <h4>Bilder</h4>
+          <q-list
+            bordered
+            class="rounded-borders"
+            style="padding:10px"
+          >
             <div>
-              <h4 style="margin-bottom:10px;">Bilder</h4>
-              <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br></span>
-              <br>
+              <p>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind.</p>
               <span>Titelbild</span>
               <div class="uploader">
                 <q-img
@@ -1178,7 +1200,7 @@ export default {
   data () {
     return {
       pageTitle: 'Reise bearbeiten',
-      category: null,
+      category: 'Familienreise',
       categoryOptions: [],
       date: formattedDate,
       addButtonActive: false,
