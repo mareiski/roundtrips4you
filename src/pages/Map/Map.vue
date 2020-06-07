@@ -15,6 +15,7 @@
         :input.sync="defaultInput"
         @result="handleSearch"
         placeholder="Ort suchen"
+        v-if="editor"
         reverseGeocode
       />
       <MglFullscreenControl position="bottom-right" />
@@ -117,6 +118,7 @@
         :coordinates="lastClickCoordinates"
         color="#d56026a1"
         @click="onMarkerClicked($event)"
+        v-if="editor"
         ref="addStopMarker"
       >
         <MglPopup>

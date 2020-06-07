@@ -58,26 +58,37 @@ export default {
           snapshot.forEach(doc => {
             roundtrip.push(doc.data())
           })
-          this.inputProfile = roundtrip[0].Profile
 
-          // set default values to ensure privacy
-          this.childrenAges = []
-          this.rooms = 1
-          this.adults = 2
+          if (roundtrip.Public) {
+            this.inputProfile = roundtrip[0].Profile
 
-          roundtripsRef = db.collection('RoundtripDetails')
-            .where('RTId', '==', RTId)
-            .orderBy('InitDate')
-          roundtripsRef.get()
-            .then(snapshot => {
-              details = []
-              snapshot.forEach(doc => {
-                details.push(doc.data())
-                details[details.findIndex(x => x.docId === doc.data().DocId)].DocId = doc.id
+            // set default values to ensure privacy
+            this.childrenAges = []
+            this.rooms = 1
+            this.adults = 2
+
+            roundtripsRef = db.collection('RoundtripDetails')
+              .where('RTId', '==', RTId)
+              .orderBy('InitDate')
+            roundtripsRef.get()
+              .then(snapshot => {
+                details = []
+                snapshot.forEach(doc => {
+                  details.push(doc.data())
+                  details[details.findIndex(x => x.docId === doc.data().DocId)].DocId = doc.id
+                })
+                this.stops = details
+                this.mapLoaded = true
               })
-              this.stops = details
-              this.mapLoaded = true
+          } else {
+            this.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Uuups, diese Karte ist leider privat'
             })
+            this.$router.push('/')
+          }
         })
         .catch(err => {
           console.log('Error getting Roundtrip', err)
