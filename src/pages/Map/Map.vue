@@ -1,16 +1,23 @@
 <template>
   <div>
     <MglMap
-      :accessToken="accessToken"
+      :accessToken="accTo"
       :mapStyle.sync="mapStyle"
       style="height:500px;"
-      :center="[stops[0].Location.lng, stops[0].Location.lat]"
+      :center="centerLocation"
       :zoom="6"
-      :mapboxGl="mapbox-gl"
+      :mapboxGl="mapbox"
       :attributionControl="false"
       @load="onMapLoaded"
-      @click="mapClicked($event)"
     >
+      <MglGeocoderControl
+        :accessToken="accTo"
+        :input.sync="defaultInput"
+        @result="handleSearch"
+        placeholder="Ort suchen"
+        reverseGeocode
+      />
+      <MglFullscreenControl position="bottom-right" />
       <MglNavigationControl position="top-right" />
       <MglMarker
         v-for="stop in stops"
@@ -106,6 +113,44 @@
           </MglPopup>
         </MglMarker>
       </template>
+      <MglMarker
+        :coordinates="lastClickCoordinates"
+        color="#d56026a1"
+        @click="onMarkerClicked($event)"
+        ref="addStopMarker"
+      >
+        <MglPopup>
+          <q-card>
+            <q-card-section class="row items-center">
+              <span
+                style="font-size:16px;"
+                class="q-ml-sm"
+              >Möchtest du {{this.title ? this.title : 'disen Stopp'}} zu deiner Reise hinzufügen?</span>
+            </q-card-section>
+
+            <q-input
+              filled
+              v-model="title"
+              lazy-rules
+              :rules="[val => val.length > 0 || 'Bitte gib einen Titel für diesen Stopp ein']"
+              class="input-item"
+              outlined
+              label="Titel eingeben"
+              style="margin:5px;"
+            >
+            </q-input>
+
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="Punkt hinzufügen"
+                @click="addStop"
+                color="primary"
+              />
+            </q-card-actions>
+          </q-card>
+        </MglPopup>
+      </MglMarker>
       <div
         v-for="stop in stops"
         :key="'StopContainer' + stop.DocId"
@@ -138,6 +183,7 @@
         :coordinates="route.location"
         :color="route.color"
         @click="onMarkerClicked($event)"
+        :ref="route.id"
       >
         <q-icon
           slot="marker"
@@ -169,44 +215,6 @@
         </MglPopup>
       </MglMarker>
     </MglMap>
-    <q-dialog
-      v-if="editor"
-      v-model="addStopDialog"
-    >
-      <q-card>
-        <q-card-section class="row items-center">
-          <span class="q-ml-sm">Möchtest du diesen Punkt zu deiner Reise hinzufügen?</span>
-        </q-card-section>
-
-        <q-input
-          filled
-          v-model="title"
-          lazy-rules
-          :rules="[val => val.length > 0 || 'Bitte gib einen Titel für diesen Stop ein']"
-          class="input-item"
-          outlined
-          label="Titel eingeben"
-          style="width:300px; margin-left:12%;"
-        >
-        </q-input>
-
-        <q-card-actions align="right">
-          <q-btn
-            flat
-            label="Abbrechen"
-            color="primary"
-            v-close-popup
-          />
-          <q-btn
-            flat
-            label="Punkt hinzufügen"
-            @click="addStop"
-            color="primary"
-            v-close-popup
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <style lang="less" scoped>
@@ -217,18 +225,25 @@
 </style>
 <script>
 const MglMap = () => import('vue-mapbox')
+const MglGeocoderControl = () => import('vue-mapbox-geocoder')
+const turf = () => import('@turf/turf')
 import Mapbox from 'mapbox-gl'
+
+let bounds = []
 
 import {
   MglMarker,
   MglNavigationControl,
-  MglPopup
+  MglPopup,
+  MglFullscreenControl
 } from 'vue-mapbox'
 
 import(/* webpackPrefetch: true */ '../../css/map.less')
 
 const getAxios = () => import('axios')
 import { date } from 'quasar'
+
+let hoveredStateId = null
 
 export default {
   meta: {
@@ -241,7 +256,9 @@ export default {
     MglMap,
     MglMarker,
     MglPopup,
-    MglNavigationControl
+    MglNavigationControl,
+    MglFullscreenControl,
+    MglGeocoderControl
   },
   props: {
     stops: Array,
@@ -253,13 +270,18 @@ export default {
   },
   data () {
     return {
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
-      mapStyle: 'mapbox://styles/mapbox/streets-v11',
+      accTo: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
+      mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
       addedRoutes: [],
-      addStopDialog: false,
+      showAddStopMarker: false,
+      lastClickCoordinates: [0, 0],
       lastClickLocation: {},
-      markerClicked: false,
-      title: null
+      title: null,
+      mapbox: null,
+      defaultInput: null,
+      whitelistedLabels: ['airport-label', 'place-label', 'country-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'],
+      centerLocation: [0, 0],
+      markerClicked: false
     }
   },
   watch: {
@@ -272,20 +294,42 @@ export default {
   methods: {
     onMapLoaded (event) {
       this.map = event.map
-      this.loadMap(event.map)
+      this.loadMap(event.map).then(e => {
+        // wait 1 second to ensure map is realy loaded
+        setTimeout(function () {
+          try {
+            turf().then(turf => {
+              var line = turf.lineString(bounds)
+              var bbox = turf.bbox(line)
+              event.map.fitBounds(new Mapbox.LngLatBounds(bbox), { padding: 70 })
+            })
+          } catch (e) {
+            console.log(e)
+          }
+        }, 1000)
+      })
     },
-    mapClicked (event) {
+    handleSearch (event) {
+      let result = event.result
+
       if (!this.markerClicked) {
-        this.addStopDialog = true
-        this.lastClickLocation = { lat: event.mapboxEvent.lngLat.lat, lng: event.mapboxEvent.lngLat.lng, label: 'unbekannter Ort' }
+        this.lastClickCoordinates = result.geometry.coordinates
+        this.title = result.place_name
+        this.showAddStopMarker = true
+
+        let context = this
+        setTimeout(function () {
+          context.$refs.addStopMarker.togglePopup()
+        }, 100)
       }
       this.markerClicked = false
     },
     onMarkerClicked (event) {
-      this.markerClicked = true
       event.map.flyTo({ center: event.component.marker._lngLat, speed: 0.5, curve: 1 })
+      this.markerClicked = true
     },
     addStop (event) {
+      this.showAddStopMarker = false
       this.lastClickLocation.label = this.title
 
       const timeStamp = Date.now()
@@ -343,13 +387,22 @@ export default {
 
       return returnVal
     },
-    getRandomColor () {
-      var letters = '0123456789ABCDEF'
-      var color = '#'
-      for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)]
+    getRandomColor (step, numOfSteps) {
+      var r, g, b
+      var h = step / numOfSteps
+      var i = ~~(h * 6)
+      var f = h * 6 - i
+      var q = 1 - f
+      switch (i % 6) {
+        case 0: r = 1; g = f; b = 0; break
+        case 1: r = q; g = 1; b = 0; break
+        case 2: r = 0; g = 1; b = f; break
+        case 3: r = 0; g = q; b = 1; break
+        case 4: r = f; g = 0; b = 1; break
+        case 5: r = 1; g = 0; b = q; break
       }
-      return color
+      var c = '#' + ('00' + (~~(r * 255)).toString(16)).slice(-2) + ('00' + (~~(g * 255)).toString(16)).slice(-2) + ('00' + (~~(b * 255)).toString(16)).slice(-2)
+      return (c)
     },
     capitalize (s) {
       if (s) {
@@ -364,8 +417,6 @@ export default {
 
         // if map hasn't load yet don't do anything
         if (map) {
-          let bounds = []
-
           // delete all routes
           // this.addedRoutes.forEach(route => {
           //   map.removeLayer(route.id)
@@ -377,7 +428,6 @@ export default {
             if (index >= 1) {
               this.getRoute(this.stops[index - 1].Location, stop.Location, map, index, this.stops[index - 1].Profile, false)
             }
-            console.log(stop)
             if (stop.DailyTrips) {
               stop.DailyTrips.forEach((dailyTrip, dailyTripIndex) => {
                 // if its not the first item calculate from last to this one
@@ -401,14 +451,52 @@ export default {
               })
             }
 
-            bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
+            if (bounds.length !== 0) {
+              bounds.forEach((coordinateArray, index) => {
+                const currentStopLng = parseFloat(stop.Location.lng)
+                const currentStopLat = parseFloat(stop.Location.lat)
+                if (coordinateArray[0] === currentStopLng && coordinateArray[1] === currentStopLat) return false
+                if (index === bounds.length - 1) {
+                  bounds.push([currentStopLng, currentStopLat])
+                  return true
+                }
+              })
+            } else {
+              bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
+            }
           })
-          try {
-            map.fitBounds(new Mapbox.LngLatBounds(bounds))
-          } catch (e) {
-            console.log(e)
-          }
 
+          let context = this
+          map.on('click', function (e) {
+            var features = map.queryRenderedFeatures(e.point)
+            var displayProperties = [
+              'properties',
+              'id',
+              'layer',
+              'geometry'
+            ]
+
+            var displayFeatures = features.map(function (feat) {
+              var displayFeat = {}
+              displayProperties.forEach(function (prop) {
+                displayFeat[prop] = feat[prop]
+              })
+              return displayFeat
+            })
+
+            displayFeatures.forEach(feature => {
+              if (context.whitelistedLabels.includes(feature.layer.id) && !context.markerClicked) {
+                context.lastClickCoordinates = feature.geometry.coordinates
+                context.title = feature.properties.name_de
+                context.showAddStopMarker = true
+                map.flyTo({ center: feature.geometry.coordinates, speed: 0.5, curve: 1 })
+                setTimeout(function () {
+                  context.$refs.addStopMarker.togglePopup()
+                }, 100)
+              }
+            })
+            context.markerClicked = false
+          })
           resolve(true)
         }
       })
@@ -434,14 +522,14 @@ export default {
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
       // get id for route
-      let id = (dailyTrip ? 'dailyTrip' : '') + 'route' + index
+      let id = (dailyTrip ? 1 : '') + 5 + index
 
       // get random color for route
-      let color = this.getRandomColor()
+      let color = this.getRandomColor(index, this.stops.length)
 
       if (profile !== 'plane') {
         // create url for the duration request
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accessToken
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accTo
         let context = this
 
         // retrieve data from mapbox
@@ -450,7 +538,9 @@ export default {
             .then(response => {
               var data = response.data.routes[0]
               var route = data.geometry.coordinates
+
               var geojson = {
+                id: id,
                 type: 'Feature',
                 properties: {},
                 geometry: {
@@ -496,7 +586,12 @@ export default {
                   'paint': {
                     'line-color': color,
                     'line-width': 5,
-                    'line-opacity': 0.75
+                    'line-opacity': [
+                      'case',
+                      ['boolean', ['feature-state', 'hover'], false],
+                      0.75,
+                      0.4
+                    ]
                   }
                 })
                 map.getSource(id).setData(geojson)
@@ -544,15 +639,57 @@ export default {
           'paint': {
             'line-color': color,
             'line-width': 5,
-            'line-opacity': 0.75
+            'line-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.75,
+              0.4
+            ]
           }
         })
         map.getSource(id).setData(geojson)
       }
+
+      // When the user moves their mouse over the route, we'll update the
+      // feature state for the feature under the mouse.
+      map.on('mousemove', id, function (e) {
+        if (e.features.length > 0) {
+          if (hoveredStateId && typeof hoveredStateId !== 'undefined') {
+            map.setFeatureState(
+              { id: hoveredStateId },
+              { hover: false }
+            )
+          }
+          if (e.features[0].layer.id && typeof e.features[0].layer.id !== 'undefined') {
+            hoveredStateId = e.features[0].layer.id
+            map.setFeatureState(
+              { source: hoveredStateId, id: hoveredStateId },
+              { hover: true }
+            )
+          }
+        }
+      })
+
+      // When the mouse leaves the route, update the feature state of the
+      // previously hovered feature.
+      map.on('mouseleave', id, function () {
+        if (hoveredStateId && typeof hoveredStateId !== 'undefined') {
+          map.setFeatureState(
+            { source: hoveredStateId, id: hoveredStateId },
+            { hover: false }
+          )
+        }
+        hoveredStateId = null
+      })
     }
   },
   created () {
-    this.mapbox = this.Mapbox
+    bounds = []
+    this.centerLocation = [0, 0]
+    if (this.stops[0] && this.stops[0].Location) {
+      this.centerLocation = [this.stops[0].Location.lng, this.stops[0].Location.lat]
+    }
+    this.mapbox = Mapbox
     this.map = null
   }
 }
