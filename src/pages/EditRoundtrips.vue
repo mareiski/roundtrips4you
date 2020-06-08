@@ -835,8 +835,15 @@
                 </q-icon>
               </template>
             </q-input>
+            <RegionSearch
+              v-if="countries.length === 1"
+              :country="countries[0]"
+              :defaultRegion="region"
+              @update="updateRegion($event)"
+              @blur="onSaveRoundtrip"
+            ></RegionSearch>
           </q-list>
-          <h4>Allgemeine Einstellungen</h4>
+          <!-- <h4>Allgemeine Einstellungen</h4>
           <q-list
             bordered
             class="rounded-borders"
@@ -910,14 +917,8 @@
               style="margin-bottom:30px;"
               @blur="onSaveRoundtrip"
             />
-            <RegionSearch
-              v-if="countries.length === 1"
-              :country="countries[0]"
-              :defaultRegion="region"
-              @update="updateRegion($event)"
-              @blur="onSaveRoundtrip"
-            ></RegionSearch>
-          </q-list>
+
+          </q-list> -->
           <h4>Persönliche Informationen</h4>
           <q-list
             bordered
@@ -1536,17 +1537,19 @@ export default {
         this.generalTempLink = null
         if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
 
+        let locationLabel = Location.label
+        if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
         db.collection('RoundtripDetails').add({
           BookingComLink,
           DateDistance,
-          Description: 'Beschreibung zu ' + Location.label.split(',')[0],
+          Description: 'Beschreibung zu ' + locationLabel,
           ExpediaLink,
           GeneralLink,
           ImageUrl,
           InitDate,
           Price,
           RTId,
-          Title: 'Zwischenstopp in ' + Location.label.split(',')[0],
+          Title: 'Zwischenstopp in ' + locationLabel,
           Location,
           Parking: parking
         }).then(results => {
@@ -1565,14 +1568,14 @@ export default {
           let newStopObject = {
             BookingComLink: BookingComLink,
             DateDistance: DateDistance,
-            Description: 'Beschreibung zu ' + Location.label.split(',')[0],
+            Description: 'Beschreibung zu ' + locationLabel,
             ExpediaLink: ExpediaLink,
             GeneralLink: GeneralLink,
             ImageUrl: ImageUrl,
             InitDate: DateString,
             Price: Price,
             RTId: RTId,
-            Title: 'Zwischenstopp in ' + Location.label.split(',')[0],
+            Title: 'Zwischenstopp in ' + locationLabel,
             Location: Location,
             Parking: parking,
             DocId: docId,
@@ -1749,6 +1752,7 @@ export default {
       let days = 1
       let initDates = []
       let hotelCount = 0
+      let tempCountries = []
 
       this.stops.forEach(stop => {
         let dateTimeParts = stop.InitDate.split(' ')
@@ -1758,7 +1762,15 @@ export default {
 
         if (!initDates.includes(initDate)) initDates.push(initDate)
         if (stop.HotelName) hotelCount++
+
+        let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
+        axios.get(url)
+          .then(response => {
+            if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
+          })
       })
+      this.countries = []
+      this.countries = tempCountries
 
       if (initDates.length > 0) {
         let maxDate = new Date(Math.max.apply(null, initDates))

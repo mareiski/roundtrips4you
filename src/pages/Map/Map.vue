@@ -16,7 +16,6 @@
         @result="handleSearch"
         placeholder="Ort suchen"
         v-if="editor"
-        reverseGeocode
       />
       <MglFullscreenControl position="bottom-right" />
       <MglNavigationControl position="top-right" />
@@ -300,11 +299,13 @@ export default {
         // wait 1 second to ensure map is realy loaded
         setTimeout(function () {
           try {
-            turf().then(turf => {
-              var line = turf.lineString(bounds)
-              var bbox = turf.bbox(line)
-              event.map.fitBounds(new Mapbox.LngLatBounds(bbox), { padding: 70 })
-            })
+            if (bounds.length > 1) {
+              turf().then(turf => {
+                var line = turf.lineString(bounds)
+                var bbox = turf.bbox(line)
+                event.map.fitBounds(new Mapbox.LngLatBounds(bbox), { padding: 70 })
+              })
+            }
           } catch (e) {
             console.log(e)
           }
@@ -333,13 +334,16 @@ export default {
     addStop (event) {
       this.showAddStopMarker = false
       this.lastClickLocation.label = this.title
+      this.lastClickLocation.lat = this.lastClickCoordinates[1]
+      this.lastClickLocation.lng = this.lastClickCoordinates[0]
 
       const timeStamp = Date.now()
       const formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
 
-      this.getParent('EditRoundtrips').addStop(formattedDate, false, this.lastClickLocation, null, null).then(success => {
+      this.getParent('EditRoundtrips').addStop(formattedDate, this.lastClickLocation, null, null).then(success => {
         this.loadMap(this.map).then(success => {
           this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
+          this.$refs.addStopMarker.togglePopup()
         })
       })
     },
@@ -420,11 +424,11 @@ export default {
         // if map hasn't load yet don't do anything
         if (map) {
           // delete all routes
-          // this.addedRoutes.forEach(route => {
-          //   map.removeLayer(route.id)
-          // })
+          this.addedRoutes.forEach(route => {
+            map.removeLayer(route.id)
+          })
 
-          // this.addedRoutes = []
+          this.addedRoutes = []
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
