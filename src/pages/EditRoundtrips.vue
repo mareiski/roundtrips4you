@@ -107,7 +107,7 @@
               <q-timeline-entry :key="n">
                 <template v-slot:subtitle>
                   <q-skeleton
-                    width="300px"
+                    width="200px"
                     height="10px"
                     type="rect"
                     style="margin-bottom:10px;"
@@ -118,10 +118,16 @@
                   style="margin-bottom:10px;"
                 >
                   <q-skeleton
-                    width="400px"
+                    width="150px"
                     height="15px"
                     type="rect"
-                    style="margin-right:10px;"
+                    style="margin-right:10px; margin-top:2px;"
+                  />
+                  <q-skeleton
+                    height="20px"
+                    width="60px"
+                    type="QChip"
+                    style="margin-bottom:10px;"
                   />
                 </div>
                 <q-skeleton
@@ -586,6 +592,7 @@
             </div>
             <div v-else>
               <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+              <p>Wenn du mit dem Auto fährst, kannst du deinen Startort gleich als ersten Ort im Reiseverlauf festlegen.</p>
             </div>
             <!-- price -->
             <div class="column">
@@ -625,7 +632,7 @@
             class="rounded-borders"
             style="padding:10px"
           >
-            <q-item-label style="padding-bottom:5px;">Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten, folgende Daten werden angezeigt/benötigt:</q-item-label>
+            <q-item-label style="padding-bottom:5px;">Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und bearbeiten, nachfolgende Daten werden angezeigt/benötigt.</q-item-label>
             <q-toggle
               v-model="publish"
               label="Rundreise veröffentlichen"

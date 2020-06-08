@@ -177,7 +177,7 @@
                       clearable
                       class="input-item"
                       use-input
-                      style="margin-top:10px; width:300px;"
+                      :style="'margin-top:10px; ' + (parseInt(index) === 0 ? 'width:300px;' : 'width:255px;')"
                       :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
                     >
                       <template v-slot:prepend>
@@ -186,7 +186,7 @@
                     </q-select>
                     <div class="add-country-container">
                       <q-btn
-                        v-if="parseInt(index ) !== 0"
+                        v-if="parseInt(index) !== 0"
                         @click="[countries.splice(index, 1), countryAmount = parseInt(countryAmount) - 1]"
                         round
                         icon="add"
@@ -353,7 +353,7 @@
                       input-debounce="0"
                       :options="['Ja', 'Nein']"
                       label="Non Stop"
-                      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Option']"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
                     >
                       <template v-slot:prepend>
                         <q-icon name="flight" />
@@ -361,20 +361,21 @@
                     </q-select>
                   </div>
                   <div v-else>
-                    <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
-                    <p>Bitte gib hier den Ersten Ort deiner Reise an</p>
+                    <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
+                    <p style="text-align:left;">Bitte gib hier den Ersten Ort deiner Reise an</p>
                     <CitySearch
                       ref="citySearch"
                       :parkingPlaceSearch="false"
                       :defaultLocation="null"
                       @update="updateLocation($event)"
+                      :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
                     ></CitySearch>
                   </div>
                   <q-stepper-navigation>
                     <q-btn
                       @click="step = 3"
                       color="primary"
-                      :disable="arrivalDepatureProfile === 'Flugzeug' && (!arrivalDepatureProfile || !origin || !destination || !depatureDate || !returnDate || !travelClass || !nonStop)"
+                      :disable="(arrivalDepatureProfile === 'Flugzeug' && (!arrivalDepatureProfile || !origin || !destination || !depatureDate || !returnDate || !travelClass || !nonStop)) || (arrivalDepatureProfile === 'Andere' && !tempLocation)"
                       label="Weiter"
                     />
                     <q-btn
@@ -552,7 +553,8 @@ export default {
       destinationCode: null,
       destinationAddresses: [],
       countryAmount: 1,
-      showRoundtrips: false
+      showRoundtrips: false,
+      tempLocation: null
     }
   },
   computed: {
