@@ -424,11 +424,11 @@ export default {
         // if map hasn't load yet don't do anything
         if (map) {
           // delete all routes
-          this.addedRoutes.forEach(route => {
-            map.removeLayer(route.id)
-          })
+          // this.addedRoutes.forEach(route => {
+          //   map.removeLayer(route.id)
+          // })
 
-          this.addedRoutes = []
+          // this.addedRoutes = []
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
