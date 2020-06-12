@@ -81,6 +81,14 @@
       </q-btn>
     </div>
     <br>
+    <div class="legal-container">
+      <p>Warum muss man sich bei Roundtrips4you registrieren?</p>
+      <p>Bei uns musst du dich nur Registrieren, damit wir deine Reisen auch dir zuordnen können.</p>
+      <p>Leider geht dies nur wenn du einen Account hast der eindeutig zu dir gehört (deshalb brauchen wir deine Email Adresse).</p>
+      <p>Nach der Registrierung musst du allerdings gar keine weiteren Daten angeben, wenn du das nicht möchtest.</p>
+      <p>Natürlich kannst du uns auch jederzeit unter <a href="mailto:hello@roundtrips4you.de">hello@roundtrips4you.de</a> Fragen zum Datenschutz stellen oder einfach in der Datenschutzerklärung nachlesen.</p>
+    </div>
+    <br>
     <div style="font-size:18px; text-align:center;">Du hast bereits einen Account? <router-link to="/login">Jetzt Anmelden</router-link>
     </div>
   </div>
