@@ -74,11 +74,13 @@
 
     <q-tab-panels
       v-model="tab"
-      keep-alive
       animated
       ref="tabPanels"
     >
-      <q-tab-panel name="inspiration">
+      <q-tab-panel
+        name="inspiration"
+        keep-alive
+      >
         <h4>Inspiration</h4>
         <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Hauptland ({{countries[0]}}) vorschlagen</p>
         <CitySuggestion
@@ -87,7 +89,10 @@
           :RTId="$route.params.id"
         ></CitySuggestion>
       </q-tab-panel>
-      <q-tab-panel name="route">
+      <q-tab-panel
+        name="route"
+        keep-alive
+      >
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
@@ -1148,7 +1153,6 @@
         </q-list>
       </q-tab-panel>
       <q-tab-panel name="map">
-
         <h4>Karte</h4>
         <Map
           :profile="profile"
@@ -1556,11 +1560,11 @@ export default {
           let lastScrollPos = document.documentElement.scrollTop
 
           // clear all values
-          this.$refs.addEntryForm.reset()
+          if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
           this.generalTempLink = null
           this.location = {}
-          this.$refs.citySearch.clear()
-          this.$refs.parkingPlaceSearch.clear()
+          if (this.$refs.citySearch) this.$refs.citySearch.clear()
+          if (this.$refs.parkingPlaceSearch) this.$refs.parkingPlaceSearch.clear()
 
           this.addExpanded = false
 
@@ -1635,9 +1639,6 @@ export default {
           }
           this.saveData('Hotels', hotelCount)
 
-          // reload Map
-          if (this.$refs.map) this.$refs.map.loadMap(null)
-
           this.durations = []
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
@@ -1654,6 +1655,9 @@ export default {
           this.saveRoundtripDaysAndHotels()
 
           this.currentExpansionStates.push({ docId: docId, expanded: false })
+
+          // reload Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
 
           let context = this
           setTimeout(function () {
@@ -1724,9 +1728,6 @@ export default {
       }
       this.saveData('Hotels', hotelCount)
 
-      // reload Map
-      if (this.$refs.map) this.$refs.map.loadMap(null)
-
       this.durations = []
       this.stops.forEach((stop, index) => {
         if (index >= 1) {
@@ -1741,6 +1742,9 @@ export default {
       this.saveRoundtripDaysAndHotels()
 
       this.currentExpansionStates.splice(this.currentExpansionStates.findIndex(x => x.docId === stopDocId), 1)
+
+      // reload Map
+      if (this.$refs.map) this.$refs.map.loadMap(null)
 
       let context = this
       setTimeout(function () {
@@ -2238,9 +2242,6 @@ export default {
           }
           this.saveData('Hotels', hotelCount)
 
-          // reload Map
-          if (this.$refs.map) this.$refs.map.loadMap(null)
-
           this.stops = details
 
           this.durations = []
@@ -2257,6 +2258,9 @@ export default {
           this.getTripDuration()
 
           this.saveRoundtripDaysAndHotels()
+
+          // reload Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
 
           if (!this.firstLoad && refreshAll) {
             let context = this
@@ -2800,6 +2804,11 @@ export default {
           })
         })
     }
+  },
+  mounted () {
+    this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
+      this.addStop(formattedDate, lastClickLocation, null, null)
+    })
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {

@@ -180,7 +180,7 @@
       </div>
       <MglMarker
         v-for="(route, index) in addedRoutes"
-        :key="route.color"
+        :key="route.id + index"
         :coordinates="route.location"
         :color="route.color"
         @click="onMarkerClicked($event)"
@@ -286,7 +286,7 @@ export default {
     }
   },
   watch: {
-    'stops': function (val, oldVal) {
+    stops: function (val, oldVal) {
       if (val !== oldVal) {
         this.loadMap(this.map)
       }
@@ -321,9 +321,12 @@ export default {
         this.showAddStopMarker = true
 
         let context = this
-        setTimeout(function () {
-          context.$refs.addStopMarker.togglePopup()
-        }, 100)
+        // we never want to hide the popup
+        if (!context.$refs.addStopMarker.marker._popup.options.showed) {
+          setTimeout(function () {
+            context.$refs.addStopMarker.togglePopup()
+          }, 100)
+        }
       }
       this.markerClicked = false
     },
@@ -337,14 +340,24 @@ export default {
       this.lastClickLocation.lat = this.lastClickCoordinates[1]
       this.lastClickLocation.lng = this.lastClickCoordinates[0]
 
-      const timeStamp = Date.now()
-      const formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
+      const initDate = this.stops[this.stops.length - 1].InitDate
 
-      this.getParent('EditRoundtrips').addStop(formattedDate, this.lastClickLocation, null, null).then(success => {
-        this.loadMap(this.map).then(success => {
-          this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
-          this.$refs.addStopMarker.togglePopup()
-        })
+      let dateTimeParts = initDate.split(' ')
+      let dateParts = dateTimeParts[0].split('.')
+      let timeParts = dateTimeParts[1].split(':')
+      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+
+      const defaultCheckOutDate = currentInitDate
+      defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
+
+      const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
+
+      this.$root.$emit('addStop', formattedDate, this.lastClickLocation)
+      this.loadMap(this.map).then(success => {
+        this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
+
+        // we only want to hide the popup
+        this.$refs.addStopMarker.marker._popup.remove()
       })
     },
     getParent (name) {
@@ -421,14 +434,15 @@ export default {
       return new Promise((resolve, reject) => {
         if (map === null) map = this.map
 
+        console.log(map)
         // if map hasn't load yet don't do anything
         if (map) {
           // delete all routes
-          // this.addedRoutes.forEach(route => {
-          //   map.removeLayer(route.id)
-          // })
+          this.addedRoutes.forEach(route => {
+            map.setLayoutProperty(route.id, 'visibility', 'none')
+          })
 
-          // this.addedRoutes = []
+          this.addedRoutes = []
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
@@ -496,9 +510,13 @@ export default {
                 context.title = feature.properties.name_de
                 context.showAddStopMarker = true
                 map.flyTo({ center: feature.geometry.coordinates, speed: 0.5, curve: 1 })
-                setTimeout(function () {
-                  context.$refs.addStopMarker.togglePopup()
-                }, 100)
+
+                // we never want to hide the popup
+                if (!context.$refs.addStopMarker.marker._popup.options.showed) {
+                  setTimeout(function () {
+                    if (!context.$refs.addStopMarker.marker._popup.options.showed) context.$refs.addStopMarker.togglePopup()
+                  }, 100)
+                }
               }
             })
             context.markerClicked = false
@@ -570,6 +588,8 @@ export default {
               // if the route already exists on the map, reset it using setData
               if (map.getSource(id)) {
                 map.getSource(id).setData(geojson)
+                map.setPaintProperty(id, 'line-color', color)
+                map.setLayoutProperty(id, 'visibility', 'visible')
               } else { // otherwise, make a new request
                 map.addLayer({
                   'id': id,
@@ -587,7 +607,8 @@ export default {
                   },
                   'layout': {
                     'line-join': 'round',
-                    'line-cap': 'round'
+                    'line-cap': 'round',
+                    'visibility': 'visible'
                   },
                   'paint': {
                     'line-color': color,
