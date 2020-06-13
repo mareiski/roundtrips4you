@@ -76,6 +76,7 @@
       v-model="tab"
       animated
       ref="tabPanels"
+      keep-alive
     >
       <q-tab-panel
         name="inspiration"
@@ -1197,6 +1198,7 @@ let documentIds = []
 let roundtrip = []
 let roundtripDocId = ''
 let galeryImgId = 0
+let tempLastClickLocation = {}
 
 export default {
   name: 'EditRoundtrips',
@@ -1657,7 +1659,7 @@ export default {
           this.currentExpansionStates.push({ docId: docId, expanded: false })
 
           // reload Map
-          if (this.$refs.map) this.$refs.map.loadMap(null)
+          if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
 
           let context = this
           setTimeout(function () {
@@ -2807,7 +2809,11 @@ export default {
   },
   mounted () {
     this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
-      this.addStop(formattedDate, lastClickLocation, null, null)
+      // check if we didn't add this stop before
+      if (tempLastClickLocation !== lastClickLocation) {
+        tempLastClickLocation = lastClickLocation
+        this.addStop(formattedDate, tempLastClickLocation, null, null)
+      }
     })
   },
   created () {

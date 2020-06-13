@@ -200,7 +200,7 @@
               />
             </div>
             <q-card-section>
-              <div>{{route.duration}} bis {{route.destination}} {{ route.origin ? 'von ' + route.origin : ''}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
+              <div>{{route.duration}} {{ route.origin ? 'von ' + route.origin : ''}} bis {{route.destination}} {{route.distance !== null ? '(' + route.distance + ')' : null}}</div>
               <a
                 target="_blank"
                 v-if="route.origin !== route.destination"
@@ -210,7 +210,7 @@
           </q-card>
           <q-card v-else>
             <q-card-section>
-              <div>{{route.distance}} mit dem Flugzeug nach {{route.destination}} {{ addedRoutes[index -1] ? 'von ' + addedRoutes[index - 1].destination : ''}}</div>
+              <div>{{route.distance}} mit dem Flugzeug {{ addedRoutes[index -1] ? 'von ' + addedRoutes[index - 1].destination : ''}} nach {{route.destination}}</div>
             </q-card-section>
           </q-card>
         </MglPopup>
@@ -352,7 +352,9 @@ export default {
 
       const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
 
-      this.$root.$emit('addStop', formattedDate, this.lastClickLocation)
+      // need this json stringify to prevent update of location when the click location changes
+      this.$root.$emit('addStop', formattedDate, JSON.parse(JSON.stringify(this.lastClickLocation)))
+      this.lastClickCoordinates = [0, 0]
       this.loadMap(this.map).then(success => {
         this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
 
@@ -430,11 +432,14 @@ export default {
       }
       return s
     },
-    loadMap (map) {
+    loadMap (map, stops) {
       return new Promise((resolve, reject) => {
         if (map === null) map = this.map
 
-        console.log(map)
+        // if we have stops given than copy them
+        if (stops) this.stops = stops
+        console.log(this.stops)
+
         // if map hasn't load yet don't do anything
         if (map) {
           // delete all routes

@@ -715,7 +715,7 @@ export default {
                 InitDate: depatureDate || new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
-                Title: 'Titel des 1. Stopps',
+                Title: this.tempLocation ? 'Start in ' + this.tempLocation.label : 'Titel des 1. Stopps',
                 Location: this.tempLocation ? this.tempLocation : {
                   lng: '13.3888599',
                   lat: '52.5170365',
