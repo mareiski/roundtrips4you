@@ -57,53 +57,6 @@
                     <q-icon name="title" />
                   </template>
                 </q-input>
-                <div
-                  class="flex justify-around"
-                  style="width:100%;"
-                >
-                  <div
-                    v-for="(countryNum, index) in parseInt(countryAmount)"
-                    :key="countryNum"
-                    class="flex"
-                    style="justify-content:center;"
-                  >
-                    <q-select
-                      @filter="filterFn"
-                      outlined
-                      v-model="countries[index]"
-                      :options="countryOptions"
-                      label="Land"
-                      clearable
-                      class="input-item"
-                      use-input
-                      style="margin-top:10px; width:200px; margin-right:5px;"
-                      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="explore" />
-                      </template>
-                    </q-select>
-                    <div class="add-country-container">
-                      <q-btn
-                        v-if="parseInt(index ) !== 0"
-                        @click="[countries.splice(index, 1), countryAmount = parseInt(countryAmount) - 1]"
-                        round
-                        icon="add"
-                        side
-                        style="transform:rotate(45deg)"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="flex justify-center"
-                    style="flex-direction:column;"
-                  >
-                    <q-btn
-                      @click="countryAmount = parseInt(countryAmount) + 1"
-                      label="Land hinzufügen"
-                    />
-                  </div>
-                </div>
               </q-card-section>
 
               <q-card-actions align="right">
@@ -375,7 +328,6 @@
 
 <script>
 import(/* webpackPrefetch: true */ '../css/home.less')
-import { countries } from '../countries'
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
 import { db } from '../firebaseInit'
@@ -391,23 +343,13 @@ export default {
   data () {
     return {
       date: '2019/02/01',
-      countryOptions: countries,
       searchLocation: '',
       imgLoaded: false,
       showCreateTempRTDialog: false,
-      title: 'Meine Reise',
-      countryAmount: 1,
-      countries: []
-
+      title: 'Meine Reise'
     }
   },
   methods: {
-    filterFn (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    },
     scrollTo (refName) {
       var el = this.$refs[refName]
       const target = getScrollTarget(el)
@@ -431,7 +373,7 @@ export default {
       })
     },
     createTempRT () {
-      if (this.countries.length === 0 || !this.title) {
+      if (!this.title) {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
@@ -442,7 +384,9 @@ export default {
       }
 
       let Title = this.title
-      let Location = this.countries
+
+      // set as default country (will be overitten)
+      let Location = ['Deutschland']
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       Title = Title.trim()
 
@@ -503,7 +447,6 @@ export default {
             })
           })
         this.title = ''
-        this.countries = []
       } catch (error) {
         console.log(error)
         this.$q.notify({

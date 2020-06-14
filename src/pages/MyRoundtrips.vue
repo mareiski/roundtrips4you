@@ -162,7 +162,7 @@
                       <q-icon name="title" />
                     </template>
                   </q-input>
-                  <div
+                  <!-- <div
                     v-for="(countryNum, index) in parseInt(countryAmount)"
                     :key="countryNum"
                     class="flex"
@@ -194,17 +194,17 @@
                         style="transform:rotate(45deg)"
                       />
                     </div>
-                  </div>
-                  <q-btn
+                  </div> -->
+                  <!-- <q-btn
                     @click="countryAmount = parseInt(countryAmount) + 1"
                     label="Land hinzufügen"
-                  />
+                  /> -->
                   <q-stepper-navigation>
                     <q-btn
                       @click="step = 2"
                       color="primary"
                       label="Weiter"
-                      :disable="!title || !countries"
+                      :disable="!title"
                     />
                   </q-stepper-navigation>
                 </q-step>
@@ -494,7 +494,7 @@
 import(/* webpackPrefetch: true */ '../css/my-roundtrips.less')
 import { db, auth, storage } from '../firebaseInit'
 import { date, scroll } from 'quasar'
-import { countries } from '../countries'
+// import { countries } from '../countries'
 
 let uid = null
 import axios from 'axios'
@@ -529,8 +529,8 @@ export default {
       title: '',
       addExpanded: false,
       addButtonActive: false,
-      countries: [],
-      countryOptions: countries,
+      // countries: [],
+      // countryOptions: countries,
       RTIds: [],
       showNoRoundtripsText: false,
       rooms: 1,
@@ -568,7 +568,7 @@ export default {
         this.addButtonActive = false
         this.showNoRoundtripsText = false
 
-        if (this.title && this.countries && this.arrivalDepatureProfile && this.rooms && this.adults) {
+        if (this.title && this.arrivalDepatureProfile && this.rooms && this.adults) {
           if (this.arrivalDepatureProfile === 'Flugzeug' && !this.origin && !this.destination && !this.depatureDate && !this.returnDate && !this.travelClass && !this.nonStop) {
             this.$q.notify({
               color: 'red-5',
@@ -577,7 +577,7 @@ export default {
               message: 'Bitte überprüfe deine Angaben'
             })
           } else {
-            if (this.addRoundtrip(this.title, this.countries)) {
+            if (this.addRoundtrip(this.title)) {
               this.$q.notify({
                 color: 'green-4',
                 textColor: 'white',
@@ -659,7 +659,7 @@ export default {
         label: event.label
       }
     },
-    addRoundtrip (Title, Location) {
+    addRoundtrip (Title) {
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       // Title = Title.replace(/ /g, '')
       Title = Title.trim()
@@ -673,7 +673,9 @@ export default {
           Days: '< 5 Tage',
           Description: 'Kurze Beschreibung deiner Rundreise',
           Hotels: '0',
-          Location: Location,
+
+          // set as default country (will be overitten)
+          Location: ['Deutschland'],
           Region: null,
           Price: 100,
           Public: false,
@@ -729,7 +731,7 @@ export default {
           })
         this.$refs.addRoundtripForm.reset()
         this.title = ''
-        this.countries = []
+        // this.countries = []
         this.$refs.titleInput.resetValidation()
       } catch (error) {
         console.log(error)
@@ -866,12 +868,12 @@ export default {
     getCreatedAtDate (timeStamp) {
       return date.formatDate(new Date(timeStamp.seconds * 1000), 'DD.MM.YYYY')
     },
-    filterFn (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    },
+    // filterFn (val, update, abort) {
+    //   update(() => {
+    //     const needle = val.toLowerCase()
+    //     this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+    //   })
+    // },
     getOrigins (val, update, abort) {
       this.filterAirports(val, update, abort, true)
     },

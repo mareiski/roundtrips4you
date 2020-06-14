@@ -219,7 +219,7 @@ export const countries = [
   'Tonga',
   'Trinidad und Tobago',
   'Tschad',
-  'Tschechoslowakei',
+  'Tschechien',
   'Tunisien',
   'Turkmenistan',
   'Turks- und Caicosinseln',
