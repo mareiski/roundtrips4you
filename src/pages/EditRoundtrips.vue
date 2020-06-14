@@ -31,52 +31,55 @@
         </q-input>
       </q-popup-edit>
     </h3>
-    <q-tabs
-      v-model="tab"
-      dense
-      class="text-grey"
-      active-color="primary"
-      indicator-color="primary"
-      align="justify"
-      narrow-indicator
-      style="padding-top:20px;"
-    >
-      <q-tab
-        name="inspiration"
-        label="Inspiration"
+    <div class="sticky">
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+        style="padding-top:20px;"
       >
-      </q-tab>
-      <q-tab
-        name="route"
-        label="Reiseverlauf"
-      />
-      <q-tab
-        name="start"
-        label="An-/Abreise"
-        :disable="!user"
-      >
-        <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-      </q-tab>
-      <q-tab
-        name="settings"
-        label="Einstellungen"
-        :disable="!user"
-      >
-        <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-      </q-tab>
-      <q-tab
-        name="map"
-        label="Karte"
-      />
-    </q-tabs>
+        <q-tab
+          name="inspiration"
+          label="Inspiration"
+        >
+        </q-tab>
+        <q-tab
+          name="route"
+          label="Reiseverlauf"
+        />
+        <q-tab
+          name="start"
+          label="An-/Abreise"
+          :disable="!user"
+        >
+          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        </q-tab>
+        <q-tab
+          name="settings"
+          label="Einstellungen"
+          :disable="!user"
+        >
+          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        </q-tab>
+        <q-tab
+          name="map"
+          label="Karte"
+        />
+      </q-tabs>
 
-    <q-separator />
+      <q-separator />
+    </div>
 
     <q-tab-panels
       v-model="tab"
       animated
       ref="tabPanels"
       keep-alive
+      @transition="scrollTo(0)"
     >
       <q-tab-panel
         name="inspiration"

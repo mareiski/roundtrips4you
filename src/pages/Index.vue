@@ -288,6 +288,7 @@
             <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>
             <p>Wir übernehmen die Kartenerstellung komplett für dich, sodass du nur auf den entsprechenden Reiter klicken musst um alle deine Stopps zu sehen.</p>
             <p>Natürlich zeichnen wir auch gleich die Route die zwischen den einzelnen Reisezielen liegt ein.</p>
+            <p>Möchtest du deine Reise lieber komplett mit der Karte erstellen kannst du natürlich auch dort mit nur 1 Klick die einzelnen Stopps hinzufügen</p>
           </div>
           <div>
             <q-img
