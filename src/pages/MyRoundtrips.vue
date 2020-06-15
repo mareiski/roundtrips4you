@@ -885,10 +885,9 @@ export default {
         abort()
         return
       }
-
-      update(() => {
-        if (val.length >= 3) {
-          this.getAirports(val).then((results) => {
+      if (val.length >= 3) {
+        this.getAirports(val).then((results) => {
+          update(() => {
             if (originSearch) {
               this.originOptions = []
               this.originCodes = []
@@ -908,8 +907,8 @@ export default {
               }
             })
           })
-        }
-      })
+        })
+      }
     },
     capitalize (s) {
       s = s.toLowerCase()

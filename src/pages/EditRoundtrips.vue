@@ -1606,10 +1606,16 @@ export default {
           // get dates
           this.stops.forEach((stop) => {
             let initDate = stop.InitDate
-            if (stop.InitDate.sceonds) initDate = new Date(stop.InitDate.seconds * 1000)
+            if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
 
             if (this.stops.indexOf(stop) === this.stops.length - 1) {
-              this.date = stop.InitDate.sceonds ? date.formatDate(initDate, 'DD.MM.YYYY HH:mm') : initDate
+              // add one day
+              const currentInitDate = this.getDateFromString(initDate)
+              const newInitDate = this.getDateFromString(initDate)
+              console.log(currentInitDate)
+
+              newInitDate.setDate(currentInitDate.getDate() + 1)
+              this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
             }
 
             if (stop.HotelName) hotelCount++
@@ -1695,10 +1701,17 @@ export default {
       // get dates
       this.stops.forEach((stop) => {
         let initDate = stop.InitDate
-        if (stop.InitDate.sceonds) initDate = new Date(stop.InitDate.seconds * 1000)
+        if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
 
         if (this.stops.indexOf(stop) === this.stops.length - 1) {
-          this.date = stop.InitDate.sceonds ? date.formatDate(initDate, 'DD.MM.YYYY HH:mm') : initDate
+          // add one day
+          const currentInitDate = this.getDateFromString(initDate)
+          const newInitDate = this.getDateFromString(initDate)
+
+          console.log(currentInitDate)
+
+          newInitDate.setDate(currentInitDate.getDate() + 1)
+          this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
         }
 
         if (stop.HotelName) hotelCount++
@@ -1960,10 +1973,9 @@ export default {
         abort()
         return
       }
-
-      update(() => {
-        if (val.length >= 3) {
-          this.getAirports(val).then((results) => {
+      if (val.length >= 3) {
+        this.getAirports(val).then((results) => {
+          update(() => {
             if (originSearch) {
               this.originOptions = []
               this.originCodes = []
@@ -1983,8 +1995,8 @@ export default {
               }
             })
           })
-        }
-      })
+        })
+      }
     },
     capitalize (s) {
       s = s.toLowerCase()
@@ -2212,7 +2224,12 @@ export default {
             stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
 
             if (details.indexOf(stop) === details.length - 1) {
-              this.date = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+              // add one day
+              const newInitDate = initDate
+
+              console.log(newInitDate)
+              newInitDate.setDate(newInitDate.getDate() + 1)
+              this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
             }
 
             if (stop.HotelName) hotelCount++

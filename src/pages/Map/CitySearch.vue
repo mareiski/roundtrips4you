@@ -54,8 +54,8 @@ export default {
         return
       }
 
-      update(() => {
-        provider.search({ query: val }).then((results) => {
+      provider.search({ query: val }).then((results) => {
+        update(() => {
           this.countryOptions = results
         })
       })
