@@ -888,6 +888,7 @@ export default {
       if (val.length >= 3) {
         this.getAirports(val).then((results) => {
           update(() => {
+            if (!results) return false
             if (originSearch) {
               this.originOptions = []
               this.originCodes = []
@@ -906,6 +907,8 @@ export default {
                 this.destinationAddresses.push(this.capitalize(city.address.cityName))
               }
             })
+          }).catch(e => {
+            return false
           })
         })
       }

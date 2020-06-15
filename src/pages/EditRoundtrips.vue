@@ -1612,7 +1612,6 @@ export default {
               // add one day
               const currentInitDate = this.getDateFromString(initDate)
               const newInitDate = this.getDateFromString(initDate)
-              console.log(currentInitDate)
 
               newInitDate.setDate(currentInitDate.getDate() + 1)
               this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
@@ -1707,8 +1706,6 @@ export default {
           // add one day
           const currentInitDate = this.getDateFromString(initDate)
           const newInitDate = this.getDateFromString(initDate)
-
-          console.log(currentInitDate)
 
           newInitDate.setDate(currentInitDate.getDate() + 1)
           this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
@@ -1976,6 +1973,8 @@ export default {
       if (val.length >= 3) {
         this.getAirports(val).then((results) => {
           update(() => {
+            if (!results) return false
+
             if (originSearch) {
               this.originOptions = []
               this.originCodes = []
@@ -1994,6 +1993,8 @@ export default {
                 this.destinationAddresses.push(this.capitalize(city.address.cityName))
               }
             })
+          }).catch(e => {
+            return false
           })
         })
       }
@@ -2227,7 +2228,6 @@ export default {
               // add one day
               const newInitDate = initDate
 
-              console.log(newInitDate)
               newInitDate.setDate(newInitDate.getDate() + 1)
               this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
             }

@@ -44,7 +44,7 @@
           <q-dialog v-model="showCreateTempRTDialog">
             <q-card>
               <q-card-section class="row items-center">
-                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine Reise ohne Anmeldung</span>
+                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine erste Reise ohne Anmeldung</span>
                 <q-input
                   v-model="title"
                   :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
@@ -130,40 +130,40 @@
           class="card-wrap left"
           v-in-viewport.once
         >
-          <router-link
-            class="card"
-            to="/meine-rundreisen"
+          <div
+            class="card cursor-pointer"
+            @click="showCreateTempRTDialog = true"
           >
             <q-icon name="fas fa-lightbulb" />
             <h3>Inspiration</h3>
             <span>Wir zeigen dir die besten Orte in deinem gewählten Reiseland. Zusätzlich kannst du dich von unserem Blog und vorgefertigten Reisen inspirieren lassen.</span>
-          </router-link>
+          </div>
         </div>
         <div
           class="card-wrap"
           v-in-viewport.once
         >
-          <router-link
-            class="card"
-            to="/meine-rundreisen"
+          <div
+            class="card cursor-pointer"
+            @click="showCreateTempRTDialog = true"
           >
             <q-icon name="explore" />
             <h3>Individualität</h3>
             <span>Du planst deine Reise genau so wie du sie haben möchtest. Du bestimmst wann und wie du an einem Bestimmten Ort sein möchtest.</span>
-          </router-link>
+          </div>
         </div>
         <div
           class="card-wrap right"
           v-in-viewport.once
         >
-          <router-link
-            class="card"
-            to="/rundreisen-uebersicht"
+          <div
+            class="card cursor-pointer"
+            @click="showCreateTempRTDialog = true"
           >
             <q-icon name="edit" />
             <h3>Einfache Nutzung</h3>
             <span>Bei uns kannst du ganz schnell und kinderleicht deine eigene Reise zusammenstellen, genau wie eine Katalogreise nur individueller.</span>
-          </router-link>
+          </div>
         </div>
       </div>
       <!-- <div

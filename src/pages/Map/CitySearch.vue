@@ -56,8 +56,12 @@ export default {
 
       provider.search({ query: val }).then((results) => {
         update(() => {
+          if (!results) return false
+
           this.countryOptions = results
         })
+      }).catch(e => {
+        return false
       })
     },
     clear () {
