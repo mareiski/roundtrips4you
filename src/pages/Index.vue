@@ -134,9 +134,9 @@
             class="card"
             to="/meine-rundreisen"
           >
-            <q-icon name="share" />
-            <h3>Teilen</h3>
-            <span>Teile deine eigenen Rundreisen mit der ganzen Welt in einer übersichtlichen Ansicht</span>
+            <q-icon name="fas fa-lightbulb" />
+            <h3>Inspiration</h3>
+            <span>Wir zeigen dir die besten Orte in deinem gewählten Reiseland. Zusätzlich kannst du dich von unserem Blog und vorgefertigten Reisen inspirieren lassen.</span>
           </router-link>
         </div>
         <div
@@ -148,8 +148,8 @@
             to="/meine-rundreisen"
           >
             <q-icon name="explore" />
-            <h3>Planen</h3>
-            <span>Plane deine Reise ganz professionell aber ohne Aufwand und in kürzester Zeit</span>
+            <h3>Individualität</h3>
+            <span>Du planst deine Reise genau so wie du sie haben möchtest. Du bestimmst wann und wie du an einem Bestimmten Ort sein möchtest.</span>
           </router-link>
         </div>
         <div
@@ -161,12 +161,12 @@
             to="/rundreisen-uebersicht"
           >
             <q-icon name="edit" />
-            <h3>Bearbeiten</h3>
-            <span>Bearbeite vorgefertigte Reisen und schaffe somit deine ganz eigene Traumreise</span>
+            <h3>Einfache Nutzung</h3>
+            <span>Bei uns kannst du ganz schnell und kinderleicht deine eigene Reise zusammenstellen, genau wie eine Katalogreise nur individueller.</span>
           </router-link>
         </div>
       </div>
-      <div
+      <!-- <div
         class="description-container"
         v-in-viewport.once
       >
@@ -176,7 +176,7 @@
         <p>Um dir die Planungsarbeit zu erleichtern, bietet dir Roundtrips4you einige Tools, die dich bei deiner Reiseplanung unterstützen.</p>
         <p>Somit ist deine Reise zu 100% individualisiert und trotzdem perfekt durchgeplant.</p>
         <p><b>Roundtrips4you</b> - deine Reiseplanungs App für deinen nächsten Urlaub.</p>
-      </div>
+      </div> -->
       <h4
         ref="tools"
         style="text-align:center;"
@@ -185,8 +185,9 @@
         <li v-in-viewport.once>
           <div>
             <h2>Flugsuche</h2>
-            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu buchen.</p>
+            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu suchen.</p>
             <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
+            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen</p>
           </div>
           <div>
           </div>
@@ -194,7 +195,7 @@
         <li v-in-viewport.once>
           <div>
             <h2>Städtevorschläge</h2>
-            <p>Des Weiteren schlagen wir dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vor.</p>
+            <p>Mit Roundtrips4you werden dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vorgeschlagen.</p>
             <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst.</p>
             <p>Mit einem Klick kannst du diese zu deiner Reise hizufügen.</p>
           </div>
@@ -210,7 +211,7 @@
         <li v-in-viewport.once>
           <div>
             <h2>Rundreise automatisch zusammenstellen</h2>
-            <p>Nachdem du die Städte deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
+            <p>Nachdem du alle Ziele auf deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
             <p>Die Route wird so berechnet, dass du immer am wenigsten Zeit zwischen den Orten benötigst und somit mehr Zeit für die Besichtigung der Reiseziele bleibt.</p>
           </div>
           <div>
@@ -256,10 +257,12 @@
       <div class="section-img"></div>
       <div class="section-img-placeholder">
         <h3>Plane jetzt ganz einfach, kostenlos und online deine individuelle Traumreise nach deinen Wünschen!</h3>
-        <button
+        <q-btn
+          color="primary"
           v-in-viewport.once
           @click="showCreateTempRTDialog = true"
-        >Reise kostenlos planen</button>
+          style="font-size:20px;"
+        >Reise erstellen</q-btn>
       </div>
       <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
       <div class="card-container">
