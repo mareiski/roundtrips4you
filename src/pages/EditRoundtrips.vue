@@ -1180,6 +1180,7 @@ import { date, scroll, Loading } from 'quasar'
 import { auth, db, storage } from '../firebaseInit'
 import { countries } from '../countries'
 import axios from 'axios'
+import { TaskQueue } from 'cwait'
 var querystring = require('querystring')
 
 const { setScrollPosition } = scroll
@@ -1650,13 +1651,36 @@ export default {
           this.saveData('Hotels', hotelCount)
 
           this.durations = []
+          let tempUrls = []
+          let tempUrlDocObjects = []
+
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
-              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+              let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
                 [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+              if (url) {
+                tempUrls.push(url)
+                tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+              }
             } else {
               if (this.stops.length === 1) this.stopsLoaded = true
+            }
+
+            // if its the last stop
+            if (index === this.stops.length - 1) {
+              this.stopsLoaded = true
+
+              // get durations
+              const urls = tempUrls
+              const queue = new TaskQueue(Promise, 5)
+              Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+                results.forEach((result, resultIndex) => {
+                  const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+                  this.writeDuration(result.data.routes[0], docId)
+                })
+              })
             }
           })
 
@@ -1744,11 +1768,33 @@ export default {
       this.saveData('Hotels', hotelCount)
 
       this.durations = []
+      let tempUrls = []
+      let tempUrlDocObjects = []
+
       this.stops.forEach((stop, index) => {
         if (index >= 1) {
-          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+          let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
             [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
             index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+          if (url) {
+            tempUrls.push(url)
+            tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+          }
+        }
+
+        // if its the last stop
+        if (index === this.stops.length - 1) {
+          // get durations
+          this.stopsLoaded = true
+          const urls = tempUrls
+          const queue = new TaskQueue(Promise, 5)
+          Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+            results.forEach((result, resultIndex) => {
+              const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+              this.writeDuration(result.data.routes[0], docId)
+            })
+          })
         }
       })
 
@@ -2267,13 +2313,36 @@ export default {
           this.stops = details
 
           this.durations = []
+          let tempUrls = []
+          let tempUrlDocObjects = []
+
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
-              this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+              let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
                 [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
                 index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+              if (url) {
+                tempUrls.push(url)
+                tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+              }
             } else {
               if (this.stops.length === 1) this.stopsLoaded = true
+            }
+
+            // if its the last stop
+            if (index === this.stops.length - 1) {
+              this.stopsLoaded = true
+
+              // get durations
+              const urls = tempUrls
+              const queue = new TaskQueue(Promise, 5)
+              Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+                results.forEach((result, resultIndex) => {
+                  const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+                  this.writeDuration(result.data.routes[0], docId)
+                })
+              })
             }
           })
 
@@ -2333,12 +2402,38 @@ export default {
 
       this.days = []
       this.durations = []
+      let tempUrls = []
+      let tempUrlDocObjects = []
 
       this.stops.forEach((stop, index) => {
         if (index >= 1) {
-          this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+          let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
             [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
             index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+          if (url) {
+            tempUrls.push(url)
+            tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+          }
+
+          // this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+          //   [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+          //   index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+        }
+
+        // if its the last stop
+        if (index === this.stops.length - 1) {
+          this.stopsLoaded = true
+
+          // get duration
+          const urls = tempUrls
+          const queue = new TaskQueue(Promise, 5)
+          Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+            results.forEach((result, resultIndex) => {
+              const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+              this.writeDuration(result.data.routes[0], docId)
+            })
+          })
         }
       })
 
@@ -2377,42 +2472,32 @@ export default {
 
       return returnVal
     },
-    getDuration (startLocation, endLocation, docId, stopProfile, stop, index) {
+    getDurationUrl (startLocation, endLocation, docId, stopProfile, stop, index) {
       let profile = this.profile
       if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
       if (profile !== 'plane') {
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-        let context = this
+        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      } else {
+        return null
+      }
+    },
+    writeDuration (result, docId) {
+      if (result !== null && typeof result !== 'undefined') {
+        let duration = this.msToTime(result.duration * 1000)
 
-        axios.get(url)
-          .then(response => {
-            var data = response.data.routes[0]
+        let distance = Math.floor(result.distance / 1000) > 0 ? Math.floor(result.distance / 1000) : ''
+        if (distance !== '') {
+          this.tripDistance = this.tripDistance + distance
+          distance = ' (' + distance + 'km)'
+        }
 
-            if (data !== null && typeof data !== 'undefined') {
-              let duration = context.msToTime(data.duration * 1000)
+        this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, durationInMs: result.duration * 1000, distance: distance, docId: docId })
 
-              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : ''
-              if (distance !== '') {
-                this.tripDistance = this.tripDistance + distance
-                distance = ' (' + distance + 'km)'
-              }
-
-              context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, durationInMs: data.duration * 1000, distance: distance, docId: docId })
-              context.getDays(stop, index, data.duration * 1000)
-            } else {
-              context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
-              if (context.stops.indexOf(stop) === context.stops.length - 2) context.stopsLoaded = true
-            }
-          }).catch(exception => {
-            context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
-            console.log(exception)
-            context.stopsLoaded = true
-          })
+        this.getDays(this.stops[this.stops.findIndex(x => x.DocId === docId)], result.duration * 1000)
       } else {
         this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
-        this.getDays(stop, index, null)
-        this.stopsLoaded = true
+        if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
       }
     },
     getDefaultCheckOutDate (stop) {
@@ -2424,7 +2509,7 @@ export default {
 
       return date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
-    getDays (stop, index, duration) {
+    getDays (stop, duration) {
       let days = 0
 
       let dateTimeParts = stop.InitDate.split(' ')
@@ -2432,7 +2517,7 @@ export default {
       let timeParts = dateTimeParts[1].split(':')
       let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-      dateTimeParts = this.stops[index + 1].InitDate.split(' ')
+      dateTimeParts = this.stops[this.stops.indexOf(stop) + 1].InitDate.split(' ')
       dateParts = dateTimeParts[0].split('.')
       timeParts = dateTimeParts[1].split(':')
       let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
@@ -2551,9 +2636,7 @@ export default {
       var fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Title/titleImg')
       fileRef.getDownloadURL().then(function (url) {
         context.titleImgUrl = url
-      }).catch(function (error) {
-        console.log(error)
-      })
+      }).catch(e => { })
 
       fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
       fileRef.listAll().then(function (res) {

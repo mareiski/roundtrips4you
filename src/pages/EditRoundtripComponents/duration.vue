@@ -26,6 +26,7 @@
               <q-icon name="commute" />
             </template>
           </q-select>
+          <!-- <a :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination">Diese Route auf Google anzeigen</a> -->
         </q-card-section>
         <q-card-actions align="right">
           <q-btn
@@ -64,6 +65,8 @@ export default {
     editor: Boolean,
     defaultProfile: String,
     roundtripProfile: String,
+    // origin: String,
+    // destination: String,
     docId: String
   },
   data () {

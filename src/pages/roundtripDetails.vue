@@ -384,6 +384,7 @@ import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import { db, storage, auth } from '../firebaseInit'
 const getAxios = () => import('axios')
+import { TaskQueue } from 'cwait'
 
 let details = []
 let roundtrip = []
@@ -547,8 +548,8 @@ export default {
         .then(snapshot => {
           details = []
           snapshot.forEach(doc => {
-            details.push(doc.data())
-            details[details.findIndex(x => x.docId === doc.data().DocId)].DocId = doc.id
+            let index = details.push(doc.data()) - 1
+            details[index].DocId = doc.id
           })
           this.stops = details
 
@@ -590,9 +591,45 @@ export default {
           })
           this.stops = details
 
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1, this.stops[index - 1].Profile)
+          let tempUrls = []
+          let tempUrlDocObjects = []
+
+          getAxios().then(axios => {
+            this.stops.forEach((stop, index) => {
+              if (index >= 1) {
+                let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+                  [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+                  index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+                if (url) {
+                  tempUrls.push(url)
+
+                  tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+                }
+              }
+
+              // if its the last stop
+              if (index === this.stops.length - 1) {
+                this.stopsLoaded = true
+
+                // get durations
+                const urls = tempUrls
+                const queue = new TaskQueue(Promise, 5)
+                Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+                  results.forEach((result, resultIndex) => {
+                    const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+
+                    this.writeDuration(result.data.routes[0], docId)
+                  })
+                })
+              }
+            })
           })
+
+          // this.stops.forEach((stop, index) => {
+          //   if (index >= 1) this.getDuration([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat], [stop.Location.lng, stop.Location.lat], this.stops[index - 1].Title, this.stops[index - 1], index - 1, this.stops[index - 1].Profile)
+          // })
+
           let context = this
           setTimeout(function () {
             context.stops.forEach(stop => {
@@ -638,33 +675,32 @@ export default {
       }
       )
     },
-    getDuration (startLocation, endLocation, docId, stop, index, stopProfile) {
+    getDurationUrl (startLocation, endLocation, docId, stopProfile, stop, index) {
       let profile = this.profile
-
-      if (stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
+      if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
       if (profile !== 'plane') {
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-        let context = this
+        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      } else {
+        return null
+      }
+    },
+    writeDuration (result, docId) {
+      if (result !== null && typeof result !== 'undefined') {
+        let duration = this.msToTime(result.duration * 1000)
 
-        getAxios().then(axios => {
-          axios.get(url)
-            .then(response => {
-              var data = response.data.routes[0]
+        let distance = Math.floor(result.distance / 1000) > 0 ? Math.floor(result.distance / 1000) : ''
+        if (distance !== '') {
+          this.tripDistance = this.tripDistance + distance
+          distance = ' (' + distance + 'km)'
+        }
 
-              if (data !== null && typeof data !== 'undefined') {
-                context.getDays(stop, index, data.duration * 1000)
+        this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, durationInMs: result.duration * 1000, distance: distance, docId: docId })
 
-                let duration = context.msToTime(data.duration * 1000)
-
-                let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
-                if (distance !== '') distance = ' (' + distance + ')'
-
-                context.durations.splice(context.stops.findIndex(x => x.DocId === docId), 0, { duration: duration, distance: distance, docId: docId })
-              }
-              context.stopsLoaded = true
-            })
-        })
+        this.getDays(this.stops[this.stops.findIndex(x => x.DocId === docId)], result.duration * 1000)
+      } else {
+        this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
+        if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
       }
     },
     openInNewTab (link) {
@@ -712,17 +748,17 @@ export default {
           return 'Auto'
       }
     },
-    getDays (stop, index, duration) {
+    getDays (stop, duration) {
       let days = null
 
-      if (index < this.stops.length - 1) {
+      if (this.stops.indexOf(stop) < this.stops.length - 1) {
         let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
         let dateTimeParts = formattedDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
         let timeParts = dateTimeParts[1].split(':')
         let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-        formattedDate = date.formatDate(new Date(this.stops[index + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        formattedDate = date.formatDate(new Date(this.stops[this.stops.indexOf(stop) + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
         dateTimeParts = formattedDate.split(' ')
         dateParts = dateTimeParts[0].split('.')
         timeParts = dateTimeParts[1].split(':')

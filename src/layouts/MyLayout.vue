@@ -610,7 +610,6 @@ export default {
   },
   beforeRouteUpdate (to, from, next) {
     // lock all other pages except register
-    console.log(to.path)
     if (this.isInTrialMode && to.path !== '/registrieren') {
       const answer = window.confirm('Willst du diese Seite wirklich verlassen, deine Rundreise ist nicht gespeichert!')
       if (answer) {
