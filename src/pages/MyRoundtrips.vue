@@ -765,8 +765,7 @@ export default {
             fileRef.getDownloadURL().then(function (url) {
               context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
               context.RTIds.push(doc.data().RTId)
-            }).catch(function (error) {
-              console.log(error)
+            }).catch(function () {
               context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, '../statics/dummy-image-landscape-1-150x150.jpg')
             })
           })

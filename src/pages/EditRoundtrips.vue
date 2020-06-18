@@ -1819,7 +1819,9 @@ export default {
       let hotelCount = 0
       let tempCountries = []
 
-      this.stops.forEach(stop => {
+      let promiseList = []
+
+      this.stops.forEach((stop, index) => {
         let dateTimeParts = stop.InitDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
         let timeParts = dateTimeParts[1].split(':')
@@ -1829,13 +1831,23 @@ export default {
         if (stop.HotelName) hotelCount++
 
         let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
-        axios.get(url)
-          .then(response => {
-            if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
-          })
+
+        promiseList.push(
+          axios.get(url)
+            .then(response => {
+              if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
+            })
+        )
       })
-      this.countries = []
-      this.countries = tempCountries
+
+      Promise.all(promiseList).then(vals => {
+        this.countries = []
+        this.countries = tempCountries
+
+        console.log(this.countries)
+        // save countries
+        this.saveData('Location', this.countries)
+      })
 
       if (initDates.length > 0) {
         let maxDate = new Date(Math.max.apply(null, initDates))
@@ -2647,9 +2659,7 @@ export default {
             context.galeryImgUrls.push(url)
           })
         })
-      }).catch(function (error) {
-        console.log(error)
-      })
+      }).catch(function () { })
     },
     removeFile (index) {
       let galeryImgNameArr = this.galeryImgUrls[index].split('Galery%2F')
