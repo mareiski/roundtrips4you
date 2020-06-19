@@ -254,6 +254,9 @@
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
                 @expansionChanged="expansionChanged($event)"
                 :doc-id="stop.DocId"
+                :profile="stop.Profile"
+                :lastItem="index === stops.length -1"
+                :firstStop="index === 0"
                 :ref="stop.DocId"
               ></Stop>
               <Duration

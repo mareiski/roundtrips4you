@@ -681,7 +681,7 @@ export default {
           Public: false,
           RTId: tempRTId,
           Stars: 3,
-          Profile: 'Autoreise',
+          Profile: 'Auto',
           Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
           Title: Title,
           OfferEndPeriod: new Date(timeStamp),

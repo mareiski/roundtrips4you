@@ -101,10 +101,10 @@
           >Suchen</a>
         </div>
         <div class="filter-card">
-          <h2>Filter</h2>
-          <q-list
+          <q-expansion-item
+            label="Filter"
             bordered
-            class="rounded-borders"
+            class="rounded-borders filter-expansion-label"
           >
             <q-expansion-item
               label="Gesamtpreis pro Person"
@@ -284,7 +284,7 @@
                 color="dark-orange"
               />
             </q-expansion-item>-->
-          </q-list>
+          </q-expansion-item>
         </div>
       </div>
       <div

@@ -438,7 +438,6 @@ export default {
 
         // if we have stops given than copy them
         if (stops) this.stops = stops
-        console.log(this.stops)
 
         // if map hasn't load yet don't do anything
         if (map) {
@@ -631,55 +630,47 @@ export default {
             })
         })
       } else {
-        var geojson = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: [[startLocation[0], startLocation[1]], [endLocation[0], endLocation[1]]]
-          }
+        let coordinates = [[startLocation.lng, startLocation.lat], [endLocation.lng, endLocation.lat]]
+
+        var route = {
+          'type': 'FeatureCollection',
+          'features': [
+            {
+              'type': 'Feature',
+              'geometry': {
+                'type': 'LineString',
+                'coordinates': coordinates
+              }
+            }
+          ]
         }
 
-        // calculate coordinates of route marker
-        let geojsonCoords = geojson.geometry.coordinates
-        let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
-
-        let distance = this.getDistanceFromLatLonInKm(startLocation[0], startLocation[1], endLocation[0], endLocation[1])
-        let avgDistance = Math.floor(distance / 1000) > 0 ? Math.floor(distance / 1000) + ' km' : null
-
-        // add route marker
-        this.addedRoutes.push({ location: centerLocation, duration: null, distance: avgDistance, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })
+        map.addSource('route', {
+          'type': 'geojson',
+          'data': route
+        })
 
         map.addLayer({
           'id': id,
+          'source': 'route',
           'type': 'line',
-          'source': {
-            'type': 'geojson',
-            'data': {
-              'type': 'Feature',
-              'properties': {},
-              'geometry': {
-                'type': 'LineString',
-                'coordinates': geojson
-              }
-            }
-          },
-          'layout': {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
           'paint': {
-            'line-color': color,
-            'line-width': 5,
-            'line-opacity': [
-              'case',
-              ['boolean', ['feature-state', 'hover'], false],
-              0.75,
-              0.4
-            ]
+            'line-width': 2,
+            'line-color': color
           }
         })
-        map.getSource(id).setData(geojson)
+
+        // calculate coordinates of route marker
+        const avgLng = Math.floor((Number(startLocation.lng) + Number(endLocation.lng)) / 2)
+        const avgLat = Math.floor((Number(startLocation.lat) + Number(endLocation.lat)) / 2)
+
+        let centerLocation = [avgLng, avgLat]
+
+        // let distance = this.getDistanceFromLatLonInKm(Number(startLocation.lng), Number(startLocation.lat), Number(endLocation.lng), Number(endLocation.lat))
+        // let avgDistance = Math.floor(distance / 100) > 0 ? Math.floor(distance / 100) + ' km' : null
+
+        // add route marker
+        this.addedRoutes.push({ location: centerLocation, duration: null, distance: null, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })
       }
 
       // When the user moves their mouse over the route, we'll update the

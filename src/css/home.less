@@ -113,14 +113,17 @@ top of page > end of page
     margin-left: 17px;
     padding-left: 16px;
     border-left: @primary-orange solid;
-    opacity: 0;
     animation-delay: 2s;
 
-    &.in-viewport {
-        -webkit-animation: fadeInLeft 0.7s ease-in both;
-        -moz-animation: fadeInLeft 0.7s ease-in both;
-        -ms-animation: fadeInLeft 0.7s ease-in both;
-        animation: fadeInLeft 0.7s ease-in both;
+    @media @desktop {
+        opacity: 0;
+
+        &.in-viewport {
+            -webkit-animation: fadeInLeft 0.7s ease-in both;
+            -moz-animation: fadeInLeft 0.7s ease-in both;
+            -ms-animation: fadeInLeft 0.7s ease-in both;
+            animation: fadeInLeft 0.7s ease-in both;
+        }
     }
 
     a {
@@ -173,7 +176,6 @@ top of page > end of page
         justify-content: center;
         width: 100%;
         margin-top: 30px;
-        opacity: 0;
 
         &.left {
             justify-content: flex-end;
@@ -183,24 +185,29 @@ top of page > end of page
             justify-content: flex-start;
         }
 
-        &.in-viewport {
-            -webkit-animation: fadeInUp 0.7s ease-in both;
-            -moz-animation: fadeInUp 0.7s ease-in both;
-            -ms-animation: fadeInUp 0.7s ease-in both;
-            animation: fadeInUp 0.7s ease-in both;
+        @media @desktop {
+            opacity: 0;
 
-            &:nth-child(1) {
-                animation-delay: 0.6s;
+
+            &.in-viewport {
+                -webkit-animation: fadeInUp 0.7s ease-in both;
+                -moz-animation: fadeInUp 0.7s ease-in both;
+                -ms-animation: fadeInUp 0.7s ease-in both;
+                animation: fadeInUp 0.7s ease-in both;
+
+                &:nth-child(1) {
+                    animation-delay: 0.6s;
+                }
+
+                &:nth-child(2) {
+                    animation-delay: 0.8s;
+                }
+
+                &:nth-child(3) {
+                    animation-delay: 1s;
+                }
+
             }
-
-            &:nth-child(2) {
-                animation-delay: 0.8s;
-            }
-
-            &:nth-child(3) {
-                animation-delay: 1s;
-            }
-
         }
 
         .card {
@@ -283,14 +290,17 @@ top of page > end of page
     font-size: 30px;
 
     button {
-        opacity: 0;
 
-        &.in-viewport {
-            -webkit-animation: fadeInUp 0.7s ease-in both;
-            -moz-animation: fadeInUp 0.7s ease-in both;
-            -ms-animation: fadeInUp 0.7s ease-in both;
-            animation: fadeInUp 0.7s ease-in both;
-            animation-delay: 0.3s;
+        @media @desktop {
+            opacity: 0;
+
+            &.in-viewport {
+                -webkit-animation: fadeInUp 0.7s ease-in both;
+                -moz-animation: fadeInUp 0.7s ease-in both;
+                -ms-animation: fadeInUp 0.7s ease-in both;
+                animation: fadeInUp 0.7s ease-in both;
+                animation-delay: 0.3s;
+            }
         }
     }
 }
@@ -320,14 +330,16 @@ top of page > end of page
     }
 
     &>li {
-        opacity: 0;
+        @media @desktop {
+            opacity: 0;
 
-        &.in-viewport {
-            -webkit-animation: fadeInUp 0.7s ease-in both;
-            -moz-animation: fadeInUp 0.7s ease-in both;
-            -ms-animation: fadeInUp 0.7s ease-in both;
-            animation: fadeInUp 0.7s ease-in both;
-            animation-delay: 0.3s;
+            &.in-viewport {
+                -webkit-animation: fadeInUp 0.7s ease-in both;
+                -moz-animation: fadeInUp 0.7s ease-in both;
+                -ms-animation: fadeInUp 0.7s ease-in both;
+                animation: fadeInUp 0.7s ease-in both;
+                animation-delay: 0.3s;
+            }
         }
 
         &>div:nth-child(2) {

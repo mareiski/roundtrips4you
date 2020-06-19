@@ -204,6 +204,7 @@
                   :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                   :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
                   :expanded="stop.expanded"
+                  :profile="stop.Profile"
                   @expansionChanged="expansionChanged($event)"
                   :ref="stop.DocId"
                 ></Stop>
@@ -1844,7 +1845,6 @@ export default {
         this.countries = []
         this.countries = tempCountries
 
-        console.log(this.countries)
         // save countries
         this.saveData('Location', this.countries)
       })

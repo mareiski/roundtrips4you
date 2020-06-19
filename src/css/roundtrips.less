@@ -6,7 +6,8 @@
     align-items: center;
 
     h2,
-    h1 {
+    h1,
+    .filter-expansion-label {
         font-size: 30px;
     }
 
@@ -143,10 +144,12 @@
                     font-size: 20px;
                 }
 
-                h2 {
+                h2,
+                .filter-expansion-label>div>.q-item {
                     text-align: left;
                     color: @primary-orange;
                 }
+
 
                 a {
                     border-color: @primary-orange;
@@ -354,6 +357,12 @@
 
 @media @tablet,
 @mobile {
+
+    .overview-topic {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
     .roundtrip-card {
         flex-direction: column;
         align-items: center;
@@ -369,6 +378,7 @@
             .card-bottom-row {
                 flex-wrap: wrap;
                 justify-content: center;
+                height: auto !important;
 
             }
         }
@@ -411,7 +421,7 @@
     }
 
     .country-title {
-        font-size: 16px !important;
+        font-size: 25px !important;
     }
 
     .country-card:hover {
@@ -431,7 +441,7 @@
     }
 
     .country-card-container {
-        padding-top: 35px;
+        padding-top: 35px !important;
     }
 
     .topic {

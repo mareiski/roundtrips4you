@@ -130,8 +130,8 @@
         v-model="expanded"
         @input="$emit('expansionChanged', { expanded: expanded, docId: docId })"
         :label="addedSights.length + (addedSights.length === 1 ? ' Sehenswürdigkeit' : ' Sehenswürdigkeiten') + (hotelName ? ' & 1 Hotel' : '') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
-        :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
-        :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem ? 'error-color' : '' )"
+        :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem || profile === 'plane' ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
+        :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem && profile !== 'plane' ? 'error-color' : '' )"
       >
         <div>
           <q-chip
@@ -823,7 +823,8 @@ export default {
     stopImages: Array,
     addedSights: Array,
     dailyTrips: Array,
-    nextStopDate: String
+    nextStopDate: String,
+    profile: String
   },
   data () {
     return {
