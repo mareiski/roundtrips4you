@@ -15,22 +15,28 @@
         type="text"
       />
     </h3>
-    <h3 v-show="title">{{title}}
-      <q-popup-edit
-        v-model="title"
-        buttons
-        label-set="Speichern"
-        @save="title !== null && title !== ''  && title[0] !== ' ' ? saveTitle(title) : showWrongTitleNotify()"
-      >
-        <q-input
+    <div>
+      <h3
+        id="v-step-0"
+        style="display:inline-block; padding-right:10px;"
+        v-show="title"
+      >{{title}}
+        <q-popup-edit
           v-model="title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
-          dense
-          autofocus
+          buttons
+          label-set="Speichern"
+          @save="title !== null && title !== ''  && title[0] !== ' ' ? saveTitle(title) : showWrongTitleNotify()"
         >
-        </q-input>
-      </q-popup-edit>
-    </h3>
+          <q-input
+            v-model="title"
+            :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+            dense
+            autofocus
+          >
+          </q-input>
+        </q-popup-edit>
+      </h3>
+    </div>
     <div class="sticky">
       <q-tabs
         v-model="tab"
@@ -43,15 +49,18 @@
         style="padding-top:20px;"
       >
         <q-tab
+          id="v-step-1"
           name="inspiration"
           label="Inspiration"
         >
         </q-tab>
         <q-tab
+          id="v-step-2"
           name="route"
           label="Reiseverlauf"
         />
         <q-tab
+          id="v-step-3"
           name="start"
           label="An-/Abreise"
           :disable="!user"
@@ -59,6 +68,7 @@
           <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
         </q-tab>
         <q-tab
+          id="v-step-4"
           name="settings"
           label="Einstellungen"
           :disable="!user"
@@ -66,6 +76,7 @@
           <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
         </q-tab>
         <q-tab
+          id="v-step-5"
           name="map"
           label="Karte"
         />
@@ -234,7 +245,10 @@
             @click="addButtonActive = !addButtonActive"
           >
             <template v-slot:header>
-              <q-item-section style="align-items: center;">
+              <q-item-section
+                style="align-items: center; flex-direction:row;"
+                class="flex"
+              >
                 <q-btn
                   class="add-button"
                   side
@@ -245,6 +259,8 @@
                   :class="{ active: addButtonActive }"
                 >
                 </q-btn>
+                <span style="font-size:20px;">Stopp hinzufügen</span>
+
               </q-item-section>
             </template>
             <q-card>
@@ -392,7 +408,7 @@
                       type="submit"
                     >
                       <q-tooltip>
-                        Eintrag hinzufügen
+                        Stopp hinzufügen
                       </q-tooltip>
                     </q-btn>
                   </div>
@@ -1170,7 +1186,12 @@
         ></Map>
       </q-tab-panel>
     </q-tab-panels>
-
+    <v-tour
+      name="myTour"
+      :steps="steps"
+      :options="tourOptions"
+      :callbacks="tourCallbacks"
+    ></v-tour>
   </div>
 </template>
 <style lang="less">
@@ -1183,6 +1204,7 @@ import { countries } from '../countries'
 import axios from 'axios'
 import { TaskQueue } from 'cwait'
 var querystring = require('querystring')
+require('vue-tour/dist/vue-tour.css')
 
 const { setScrollPosition } = scroll
 
@@ -1294,7 +1316,69 @@ export default {
       RTId: null,
       shareLink: null,
       shareCode: null,
-      tripDistance: 0
+      tripDistance: 0,
+      tourCallbacks: {
+        onPreviousStep: this.previousTourStep,
+        onNextStep: this.nextTourStep
+      },
+
+      tourOptions: {
+        useKeyboardNavigation: true,
+        startTimeout: 2000,
+        enableScrolling: false,
+        labels: {
+          buttonSkip: 'Tour überspringen',
+          buttonPrevious: 'Zurück',
+          buttonNext: 'Weiter',
+          buttonStop: 'Fertig'
+        }
+      },
+
+      // steps used for tour
+      steps: [
+        {
+          target: '#v-step-0',
+          content: `Dies ist der Titel deiner Reise um diesen zu ändern klicke einfach darauf`,
+          params: {
+            placement: 'left'
+          }
+        },
+        {
+          target: '#v-step-1',
+          content: `Hier kannst du dir Städte zu deinem Reiseland vorschlagen lassen`,
+          params: {
+            placement: 'top'
+          }
+        },
+        {
+          target: '#v-step-2',
+          content: `Den Verlauf deiner Reise kannst du hier bearbeiten`,
+          params: {
+            placement: 'top'
+          }
+        },
+        {
+          target: '#v-step-3',
+          content: `Unter diesem Punkt kannst du deine An-/Abreise planen`,
+          params: {
+            placement: 'top'
+          }
+        },
+        {
+          target: '#v-step-4',
+          content: `In den Einstellungen kannst du deine Reise teilen, Bildern hochladen usw.`,
+          params: {
+            placement: 'top'
+          }
+        },
+        {
+          target: '#v-step-5',
+          content: `Hier findest du eine Karte mit allen Stopps, diese können hier ebenfalls hinzugefügt werden`,
+          params: {
+            placement: 'top'
+          }
+        }
+      ]
     }
   },
   meta () {
@@ -1316,6 +1400,35 @@ export default {
       const currentDate = new Date(date)
 
       return currentDate >= compareDate
+    },
+    previousTourStep (currentStep) {
+      if (currentStep === 1) {
+        this.scrollTo(0)
+      } else if (currentStep === 2) {
+        this.$refs.tabPanels.goTo('inspiration')
+      } else if (currentStep === 3) {
+        this.$refs.tabPanels.goTo('route')
+      } else if (currentStep === 4) {
+        this.$refs.tabPanels.goTo('start')
+      } else if (currentStep === 5) {
+        this.$refs.tabPanels.goTo('settings')
+      } else if (currentStep === 6) {
+        this.$refs.tabPanels.goTo('map')
+      }
+    },
+    nextTourStep (currentStep) {
+      if (currentStep === 0) {
+        this.scrollTo(0)
+        this.$refs.tabPanels.goTo('inspiration')
+      } else if (currentStep === 1) {
+        this.$refs.tabPanels.goTo('route')
+      } else if (currentStep === 2) {
+        this.$refs.tabPanels.goTo('start')
+      } else if (currentStep === 3) {
+        this.$refs.tabPanels.goTo('settings')
+      } else if (currentStep === 4) {
+        this.$refs.tabPanels.goTo('map')
+      }
     },
     copyShareLink (elName) {
       let testingCodeToCopy = document.querySelector('#' + elName)
@@ -2914,9 +3027,24 @@ export default {
         .then(snapshot => {
           snapshot.forEach(doc => {
             this.companyProfile = !!doc.data().companyProfile
+
             // if (doc.data().website) this.CompanyWebsite = doc.data().website
             // if (doc.data().companyDescription) this.companyDescription = doc.data().companyDescription
           })
+        })
+    },
+    getUserRoundtrips () {
+      const context = this
+      let roundtripsRef = db.collection('Roundtrips')
+        .where('UserId', '==', auth.user().uid)
+        .orderBy('createdAt')
+        .limit(20)
+      roundtripsRef.get()
+        .then(snapshot => {
+          if (Number(snapshot.size) === 0) this.$tours['myTour'].start()
+          setTimeout(function () {
+            context.scrollTo(0)
+          }, 2000)
         })
     }
   },
@@ -2959,6 +3087,7 @@ export default {
               this.loadRoundtripDetails(RTId, false)
               this.loadCategories()
               this.getUserData()
+              this.getUserRoundtrips()
             } else if (isPublic) {
               this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
             } else {

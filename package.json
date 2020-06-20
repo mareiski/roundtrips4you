@@ -41,6 +41,7 @@
     "vue-mapbox": "^0.4.1",
     "vue-mapbox-geocoder": "^0.2.0",
     "vue-template-compiler": "^2.6.11",
+    "vue-tour": "^1.4.0",
     "vue2-leaflet": "^2.2.1",
     "vue2-leaflet-geosearch": "^1.0.6",
     "vuefire": "^2.0.0-alpha.24"

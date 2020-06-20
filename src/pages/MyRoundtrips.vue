@@ -117,7 +117,10 @@
         @click="[addButtonActive = !addButtonActive,  scrollOnAddButtonClicked()]"
       >
         <template v-slot:header>
-          <q-item-section style="align-items: center;">
+          <q-item-section
+            style="align-items: center; flex-direction:row;"
+            class="flex"
+          >
             <q-btn
               class="add-button"
               side
@@ -127,6 +130,7 @@
               :class="{ active: addButtonActive }"
             >
             </q-btn>
+            <span style="font-size:20px;">Reise hinzufügen</span>
           </q-item-section>
         </template>
         <q-card id="AddRTCard">
