@@ -196,7 +196,7 @@ export default {
             color: 'green-4',
             textColor: 'white',
             icon: 'check_circle',
-            message: 'Wir haben dir eine Bestätigungsmail für diene Email gesendet'
+            message: 'Wir haben dir eine Bestätigungsmail für deine Email gesendet'
 
           })
         }).catch(function (error) {
