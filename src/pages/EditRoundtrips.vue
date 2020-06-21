@@ -3038,13 +3038,20 @@ export default {
       let roundtripsRef = db.collection('Roundtrips')
         .where('UserId', '==', auth.user().uid)
         .orderBy('createdAt')
-        .limit(20)
+        .limit(5)
       roundtripsRef.get()
-        .then(snapshot => {
-          if (Number(snapshot.size) === 0) this.$tours['myTour'].start()
-          setTimeout(function () {
-            context.scrollTo(0)
-          }, 2000)
+        .then(RTSnapshot => {
+          let roundtripsRef = db.collection('RoundtripDetails')
+            .where('RTId', '==', RTSnapshot.docs[0].id)
+            .orderBy('InitDate')
+          roundtripsRef.get()
+            .then(RTDetailsSnapshot => {
+              // if the user has one Roundtrip and also just one Stopp added
+              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1) this.$tours['myTour'].start()
+              setTimeout(function () {
+                context.scrollTo(0)
+              }, 2000)
+            })
         })
     }
   },
