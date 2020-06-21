@@ -3,7 +3,7 @@
     <div class="roundtrips">
       <div class="overview-topic">
         <h1>Eigene Reise erstellen</h1>
-        <span>Gehe zu deinen Reisen und beginne damit deine eigene Reise nach deinen Wünschen zusammenzutellen</span>
+        <span>Beginne damit deine eigene Reise nach deinen Wünschen zusammenzutellen</span>
       </div>
       <div id="CardBackgroundImg"></div>
       <div

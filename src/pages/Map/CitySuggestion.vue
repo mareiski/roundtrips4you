@@ -88,7 +88,7 @@ export default {
     getCities (country) {
       this.loading = true
       const context = this
-      axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
+      axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
         headers: {
           'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
         }
@@ -102,6 +102,9 @@ export default {
           }).then(function (response) {
             context.cities = response.data.data
             context.cities.forEach(city => {
+              console.log(city.name)
+              console.log(city.name.includes('Metropolitanstadt'))
+              if (city.name.includes('Metropolitanstadt')) city.name = city.name.slice(city.name.indexOf('Metropolitanstadt') + 17)
               setTimeout(function () {
                 context.getCityImage(city.name, city.country)
               }, 1000)

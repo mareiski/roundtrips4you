@@ -26,8 +26,7 @@
       <div id="MainImgPlacholder">
         <h2 class="main-qoute">Damit deine Reise perfekt geplant und trotzdem individuell bleibt</h2>
         <span class="quote-subtext">
-          <span>Mit dem kostenlosen Reiseplaner Roundtrips4you kannst du deine Reise selbst zusammenstellen</span>
-          <span style="white-space:nowrap;"> - ganz egal wie besonders sie ist</span>
+          Mit dem kostenlosen Reiseplaner Roundtrips4you kannst du deine eigene Reise selbst zusammenstellen
         </span>
         <div
           class="flex justify-around"
@@ -184,10 +183,10 @@
       <ol class="create-roundtrip-ol">
         <li v-in-viewport.once>
           <div>
-            <h2>Flugsuche</h2>
-            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug zu suchen.</p>
+            <h2>Flug- & Hotelsuche</h2>
+            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Flug- und Hotelanbietern einen Flug bzw. ein Hotel zu suchen.</p>
             <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
-            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen</p>
+            <p>Anschließend kannst du deinen Flug/Hotel direkt auf der Seite des Anbieters buchen.</p>
           </div>
           <div>
           </div>
@@ -197,7 +196,7 @@
             <h2>Städtevorschläge</h2>
             <p>Mit Roundtrips4you werden dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vorgeschlagen.</p>
             <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst.</p>
-            <p>Mit einem Klick kannst du diese zu deiner Reise hizufügen.</p>
+            <p>Mit einem Klick kannst du diese zu deiner erstellten Reise hizufügen.</p>
           </div>
           <div>
             <q-img
@@ -256,7 +255,7 @@
       </ol>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
-        <h3>Plane jetzt ganz einfach, kostenlos und online deine individuelle Traumreise nach deinen Wünschen!</h3>
+        <h3>Beginne jetzt gleich und ohne Anmeldung mit der Planung deiner ganz eigenen Reise!</h3>
         <q-btn
           color="primary"
           v-in-viewport.once
@@ -264,7 +263,7 @@
           style="font-size:20px;"
         >Reise erstellen</q-btn>
       </div>
-      <p style="text-align:center; font-size:20px; padding-top:40px;">Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
+      <p style="text-align:center; font-size:20px; padding-top:40px;">Möchtest du erstmal ein paar Beispiele sehen?<br> Wähle ein Land und sehe dir von anderen Usern mit unserem Reiseplaner kostenlos und online erstellte Rundreisen an</p>
       <div class="card-container">
         <div
           class="card-wrap left"

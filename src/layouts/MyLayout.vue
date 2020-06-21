@@ -27,7 +27,7 @@
           <router-link
             class="header-page-link"
             to="/rundreisen-uebersicht"
-          >rundreisen</router-link>
+          >reisen</router-link>
           <router-link
             class="header-page-link"
             to="/blog"
@@ -153,7 +153,7 @@
           <router-link
             class="mobile-header-page-link"
             to="/rundreisen-uebersicht"
-          >rundreisen</router-link>
+          >reisen</router-link>
         </div>
         <div @click="hideMenu()">
           <router-link
@@ -427,7 +427,7 @@
     </back-to-top>
     <div
       class="register-btn"
-      v-if="!user && $router.currentRoute.fullPath !== '/registrieren'"
+      v-if="!user && !isInTrialMode && $router.currentRoute.fullPath !== '/registrieren'"
     >
       <router-link
         class="footer-link"

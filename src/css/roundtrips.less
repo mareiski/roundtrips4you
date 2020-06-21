@@ -355,6 +355,28 @@
     text-transform: none;
 }
 
+button:not(.q-btn),
+.button {
+    &:not(.v-step__buttons) &:not(.mapboxgl-ctrl-geocoder--button) {
+        &:not(.mapboxgl-ctrl-icon) {
+            &:not(.mapboxgl-popup-close-button) {
+                background-color: rgba(0, 0, 0, 0.25);
+                border: solid 2px white;
+                color: white;
+                font-size: 25px;
+                padding: 5px 10px 5px 10px;
+                transition: 0.4s;
+
+                &:hover {
+                    transform: scale(1.1);
+                    cursor: pointer;
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
 @media @tablet,
 @mobile {
 
