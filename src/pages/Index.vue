@@ -148,7 +148,7 @@
           >
             <q-icon name="explore" />
             <h3>Individualität</h3>
-            <span>Du planst deine Reise genau so wie du sie haben möchtest. Du bestimmst wann und wie du an einem Bestimmten Ort sein möchtest.</span>
+            <span>Du planst deine Reise genau so wie du sie haben möchtest und bestimmst wann und wie du an einem bestimmten Ort sein möchtest.</span>
           </div>
         </div>
         <div
