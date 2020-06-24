@@ -7,6 +7,9 @@
       bordered
       class="q-gutter-md rounded-borders flex column"
       style="align-items:center;"
+      method="post"
+      target="_blank"
+      action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&id=c64c971288&gdpr[71542]=true"
     >
       <q-input
         v-model="userEmail"
@@ -15,6 +18,7 @@
         :rules="[val => val !== null && val !== '' || 'Bitte gib eine Email an', val => reg.test(val) || 'Bitte gib eine richtige Email an']"
         label="Email"
         lazy-rules
+        name="EMAIL"
       />
       <q-input
         v-model="password"
@@ -80,13 +84,21 @@
         </template>
       </q-btn>
     </div>
+    <p style="text-align:center;">Mit der Registrierung stimmst du zu das wir dir Emails an deine angegebene Adresse senden dürfen.</p>
     <br>
     <div class="legal-container">
-      <p>Warum muss man sich bei Roundtrips4you registrieren?</p>
-      <p>Bei uns musst du dich nur Registrieren, damit wir deine Reisen auch dir zuordnen können.</p>
-      <p>Leider geht dies nur wenn du einen Account hast der eindeutig zu dir gehört (deshalb brauchen wir deine Email Adresse).</p>
-      <p>Nach der Registrierung musst du allerdings gar keine weiteren Daten angeben, wenn du das nicht möchtest.</p>
-      <p>Natürlich kannst du uns auch jederzeit unter <a href="mailto:hello@roundtrips4you.de">hello@roundtrips4you.de</a> Fragen zum Datenschutz stellen oder einfach in der Datenschutzerklärung nachlesen.</p>
+      <q-list bordered>
+        <q-expansion-item label=" Warum muss man sich bei Roundtrips4you registrieren?">
+          <q-card>
+            <q-card-section>
+              <p>Bei uns musst du dich nur Registrieren, damit wir deine Reisen auch dir zuordnen können.</p>
+              <p>Leider geht dies nur wenn du einen Account hast der eindeutig zu dir gehört (deshalb brauchen wir deine Email Adresse).</p>
+              <p>Nach der Registrierung musst du allerdings gar keine weiteren Daten angeben, wenn du das nicht möchtest.</p>
+              <p>Natürlich kannst du uns auch jederzeit unter <a href="mailto:hello@roundtrips4you.de">hello@roundtrips4you.de</a> Fragen zum Datenschutz stellen oder einfach in der Datenschutzerklärung nachlesen.</p>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+      </q-list>
     </div>
     <br>
     <div style="font-size:18px; text-align:center;">Du hast bereits einen Account? <router-link to="/login">Jetzt Anmelden</router-link>
@@ -98,6 +110,7 @@
 import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit'
 const getFirebase = () => import('firebase')
+
 let timeStamp = Date.now()
 var actionCodeSettings = {
   url: 'https://roundtrips4you.de/login',
@@ -140,9 +153,10 @@ export default {
     }
   },
   methods: {
-    signUp () {
+    signUp (evt) {
       let context = this
       let mail = this.userEmail
+
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
           context.createUserEntry(user)
@@ -152,6 +166,7 @@ export default {
             icon: 'check_circle',
             message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
           })
+          evt.target.submit()
           context.$router.replace('meine-rundreisen')
         },
         (err) => {
