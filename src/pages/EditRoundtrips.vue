@@ -2520,7 +2520,7 @@ export default {
       let lastScrollPos = document.documentElement.scrollTop
 
       // update date
-      this.stops[this.stops.findIndex(x => x.DocId === currentDocId)].InitDate = newInitDate
+      this.stops[this.stops.findIndex(x => x.DocId === currentDocId)].InitDate = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
 
       // prepare from resortet stops
       this.stops.sort(this.compare)
@@ -2816,6 +2816,7 @@ export default {
     },
     changeAllFollowingStopDates (stopId, millis, currentStopDate) {
       let index = this.stops.findIndex(x => x.DocId === stopId) + 1
+      let promiseList = []
 
       for (index; index < this.stops.length; index++) {
         let currentInitDate = this.getDateFromString(this.stops[index].InitDate)
@@ -2833,14 +2834,18 @@ export default {
         this.stops[index].InitDate = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
 
         const docId = this.stops[index].DocId
-        let context = this
-        db.collection('RoundtripDetails').doc(docId).update({
-          'InitDate': newInitDate
-        }).then(function () {
-          // resort stops if its the last item
-          if (index === context.stops.length - 1) context.resortAndPrepareStops(currentStopDate, stopId)
-        })
+
+        promiseList.push(
+          db.collection('RoundtripDetails').doc(docId).update({
+            'InitDate': newInitDate
+          })
+        )
       }
+
+      let context = this
+      Promise.all(promiseList).then(v => {
+        context.resortAndPrepareStops(currentStopDate, stopId)
+      })
     },
     isDateTimeValid () {
       var testDate = this.date
