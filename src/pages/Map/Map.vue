@@ -625,6 +625,10 @@ export default {
                     ]
                   }
                 })
+
+                map.on('click', id, function (e) {
+                  context.$refs[id][0].togglePopup()
+                })
                 map.getSource(id).setData(geojson)
               }
             })
