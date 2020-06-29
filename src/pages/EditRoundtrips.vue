@@ -417,17 +417,19 @@
             </q-card>
           </q-expansion-item>
         </q-list>
-        <q-btn
-          @click="showAutoRoutedialog = true"
-          class="q-mt-md"
-          color="primary"
-          style="margin-top:30px;"
-          text-color="white"
-          :disable="!stopsLoaded || stops.length <= 1"
-          label="automatische Route erstellen"
-        >
-          <q-tooltip v-if="stops.length <= 1">Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
-        </q-btn>
+        <div style="display:inline-block; margin-top:30px;">
+          <q-btn
+            @click="showAutoRoutedialog = true"
+            class="q-mt-md"
+            color="primary"
+            text-color="white"
+            :disable="!stopsLoaded || stops.length <= 1"
+            label="automatische Route erstellen"
+          >
+          </q-btn>
+          <q-tooltip>Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
+
+        </div>
         <q-dialog
           persistent
           v-model="showAutoRoutedialog"
@@ -1317,6 +1319,7 @@ export default {
       shareLink: null,
       shareCode: null,
       tripDistance: 0,
+      isInTrialMode: false,
       tourCallbacks: {
         onPreviousStep: this.previousTourStep,
         onNextStep: this.nextTourStep
@@ -1402,33 +1405,32 @@ export default {
       return currentDate >= compareDate
     },
     previousTourStep (currentStep) {
-      if (currentStep === 1) {
-        this.scrollTo(0)
-      } else if (currentStep === 2) {
+      if (currentStep === 2) {
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 3) {
         this.$refs.tabPanels.goTo('route')
-      } else if (currentStep === 4) {
+      } else if (currentStep === 4 && !this.isInTrialMode) {
         this.$refs.tabPanels.goTo('start')
-      } else if (currentStep === 5) {
+      } else if (currentStep === 5 && !this.isInTrialMode) {
         this.$refs.tabPanels.goTo('settings')
       } else if (currentStep === 6) {
         this.$refs.tabPanels.goTo('map')
       }
+      this.scrollTo(0)
     },
     nextTourStep (currentStep) {
       if (currentStep === 0) {
-        this.scrollTo(0)
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 1) {
         this.$refs.tabPanels.goTo('route')
-      } else if (currentStep === 2) {
+      } else if (currentStep === 2 && !this.isInTrialMode) {
         this.$refs.tabPanels.goTo('start')
-      } else if (currentStep === 3) {
+      } else if (currentStep === 3 && !this.isInTrialMode) {
         this.$refs.tabPanels.goTo('settings')
       } else if (currentStep === 4) {
         this.$refs.tabPanels.goTo('map')
       }
+      this.scrollTo(0)
     },
     copyShareLink (elName) {
       let testingCodeToCopy = document.querySelector('#' + elName)
@@ -2489,16 +2491,16 @@ export default {
           setTimeout(function () {
             let emptyStates = !context.currentExpansionStates.length
 
-            context.stops.forEach(stop => {
+            context.stops.forEach((stop, index) => {
               if (emptyStates || !context.currentExpansionStates) {
-                context.currentExpansionStates.push({ docId: stop.DocId, expanded: false })
-                if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(false)
+                context.currentExpansionStates.push({ docId: stop.DocId, expanded: (index === 0) })
+                if (context.$refs[stop.DocId]) index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
               } else {
                 if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
                   context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
                 } else {
                   // this stop was not already added
-                  context.$refs[stop.DocId][0].changeExpansion(false)
+                  index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
                 }
               }
             })
@@ -3051,11 +3053,14 @@ export default {
             .orderBy('InitDate')
           roundtripsRef.get()
             .then(RTDetailsSnapshot => {
+              let isOnMobileDevice = window.matchMedia('(max-width: 550px)').matches
               // if the user has one Roundtrip and also just one Stopp added
-              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1) this.$tours['myTour'].start()
-              setTimeout(function () {
-                context.scrollTo(0)
-              }, 2000)
+              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1 && !isOnMobileDevice) {
+                this.$tours['myTour'].start()
+                setTimeout(function () {
+                  context.scrollTo(0)
+                }, 2000)
+              }
             })
         })
     }
@@ -3114,9 +3119,21 @@ export default {
           } else {
             if (auth.user() === null) {
               // trial roundtrip
+              this.isInTrialMode = true
               this.loadSingleRoundtrip(RTId)
               this.loadRoundtripDetails(RTId, false)
               this.loadCategories()
+
+              // always start tour here
+              let isOnMobileDevice = window.matchMedia('(max-width: 550px)').matches
+              if (!isOnMobileDevice) {
+                this.$tours['myTour'].start()
+
+                const context = this
+                setTimeout(function () {
+                  context.scrollTo(0)
+                }, 2000)
+              }
             } else {
               this.$q.notify({
                 color: 'red-5',

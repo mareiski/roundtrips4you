@@ -216,7 +216,7 @@
         </q-dialog>
         <div>
           <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
-            <a
+            <span
               v-for="(sight, index) in sights"
               :key="index"
               :href="'https://www.google.com/search?q=' + sight.name + ' ' + location.label.split(',')[0]"
@@ -226,15 +226,47 @@
               <q-chip
                 v-if="editor"
                 clickable
+                @click="showSightData(index)"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>
-            </a>
+
+            </span>
             <a
               target="_blank"
               style="text-decoration:none;"
               :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
             >weitere anzeigen</a>
+            <q-dialog
+              v-for="(sightDialog, index) in sightDialogs"
+              :key="'dialog' + index"
+              v-model="sightDialog.showed"
+            >
+              <q-card>
+                <q-img
+                  :src="sightDialog.src"
+                  style="max-height:75vh;"
+                >
+                  <div class="absolute-bottom">
+                    <div class="text-h6">{{sightDialog.title}}</div>
+                    <div class="text-subtitle2">{{sightDialog.description}}</div>
+                  </div>
+                </q-img>
+
+                <q-card-section>
+                  {{sightDialog.extract}}
+                </q-card-section>
+
+                <q-card-actions align="right">
+                  <q-btn
+                    flat
+                    label="OK"
+                    color="primary"
+                    v-close-popup
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
           </div>
           <q-chip
             v-else-if="editor && (!hotelName || typeof hotelName === 'undefined')"
@@ -855,6 +887,7 @@ export default {
       expanded: false,
       changeAllDatesActive: false,
       oldDate: null,
+      sightDialogs: [],
 
       editorFonts: {
         arial: 'Arial',
@@ -956,6 +989,9 @@ export default {
           context.scrollTo(lastScrollPos)
         }, 500)
       })
+    },
+    showSightData (index) {
+      this.sightDialogs[index].showed = true
     },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
@@ -1471,6 +1507,32 @@ export default {
         this.getSights(this.location.lng, this.location.lat).then((results) => {
           if (results !== null) {
             this.sights = results.data.data
+
+            const headers = {
+
+              'Content-Type': 'application/json; charset=UTF-8'
+            }
+
+            // get sight dialog content
+            const context = this
+            this.sights.forEach((sight, index) => {
+              axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + sight.name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+                { headers: headers })
+                .then(function (response) {
+                  const pages = response.data.query.pages
+                  const firstPageName = Object.keys(pages)[0]
+
+                  const title = pages[firstPageName].title
+                  const description = pages[firstPageName].description
+                  const extract = pages[firstPageName].extract
+                  const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
+
+                  context.sightDialogs.splice(index, 0, { title: title, showed: false, description: description, extract: extract, src: src })
+                }).catch(function (error) {
+                  console.log('Error' + error)
+                  context.sightDialogs.splice(index, 0, { title: sight.name, showed: false })
+                })
+            })
           } else {
             this.sights = 'error'
           }
