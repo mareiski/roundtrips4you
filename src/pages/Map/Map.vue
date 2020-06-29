@@ -518,7 +518,7 @@ export default {
                 // we never want to hide the popup
                 if (!context.$refs.addStopMarker.marker._popup.options.showed) {
                   setTimeout(function () {
-                    if (!context.$refs.addStopMarker.marker._popup.options.showed) context.$refs.addStopMarker.togglePopup()
+                    if (!context.$refs.addStopMarker.marker._popup.options.showed) context.$refs.addStopMarker.marker._popup.addTo(map)
                   }, 100)
                 }
               }
