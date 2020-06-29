@@ -226,7 +226,7 @@
               <q-chip
                 v-if="editor"
                 clickable
-                @click="showSightData(index)"
+                @click="sightDialogs[index].showed = true"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>
@@ -990,9 +990,6 @@ export default {
         }, 500)
       })
     },
-    showSightData (index) {
-      this.sightDialogs[index].showed = true
-    },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
       let context = this
@@ -1527,10 +1524,10 @@ export default {
                   const extract = pages[firstPageName].extract
                   const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
 
-                  context.sightDialogs.splice(index, 0, { title: title, showed: false, description: description, extract: extract, src: src })
+                  context.sightDialogs.splice(index, 0, { title: title || sight.name, showed: false, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src })
                 }).catch(function (error) {
                   console.log('Error' + error)
-                  context.sightDialogs.splice(index, 0, { title: sight.name, showed: false })
+                  context.sightDialogs.splice(index, 0, { title: sight.name, showed: false, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' })
                 })
             })
           } else {

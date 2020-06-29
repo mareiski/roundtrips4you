@@ -427,7 +427,7 @@
             label="automatische Route erstellen"
           >
           </q-btn>
-          <q-tooltip>Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
+          <q-tooltip v-if="stops.length <= 1">Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
 
         </div>
         <q-dialog
