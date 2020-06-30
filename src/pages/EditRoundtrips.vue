@@ -1707,6 +1707,7 @@ export default {
             DocId: docId,
             expanded: false
           }
+          console.log('push Stop')
 
           this.stops.push(newStopObject)
 
@@ -1807,6 +1808,7 @@ export default {
           this.currentExpansionStates.push({ docId: docId, expanded: false })
 
           // reload Map
+          console.log('LoadMap')
           if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
 
           let context = this

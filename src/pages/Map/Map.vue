@@ -492,37 +492,39 @@ export default {
 
           let context = this
           map.on('click', function (e) {
-            var features = map.queryRenderedFeatures(e.point)
-            var displayProperties = [
-              'properties',
-              'id',
-              'layer',
-              'geometry'
-            ]
+            if (!context.markerClicked) {
+              var features = map.queryRenderedFeatures(e.point)
+              var displayProperties = [
+                'properties',
+                'id',
+                'layer',
+                'geometry'
+              ]
 
-            var displayFeatures = features.map(function (feat) {
-              var displayFeat = {}
-              displayProperties.forEach(function (prop) {
-                displayFeat[prop] = feat[prop]
+              var displayFeatures = features.map(function (feat) {
+                var displayFeat = {}
+                displayProperties.forEach(function (prop) {
+                  displayFeat[prop] = feat[prop]
+                })
+                return displayFeat
               })
-              return displayFeat
-            })
 
-            displayFeatures.forEach(feature => {
-              if (context.whitelistedLabels.includes(feature.layer.id) && !context.markerClicked) {
-                context.lastClickCoordinates = feature.geometry.coordinates
-                context.title = feature.properties.name_de
-                context.showAddStopMarker = true
-                map.flyTo({ center: feature.geometry.coordinates, speed: 0.5, curve: 1 })
+              displayFeatures.forEach(feature => {
+                if (context.whitelistedLabels.includes(feature.layer.id) && !context.markerClicked) {
+                  context.lastClickCoordinates = feature.geometry.coordinates
+                  context.title = feature.properties.name_de
+                  context.showAddStopMarker = true
+                  map.flyTo({ center: feature.geometry.coordinates, speed: 0.5, curve: 1 })
 
-                // we never want to hide the popup
-                if (!context.$refs.addStopMarker.marker._popup.options.showed) {
-                  setTimeout(function () {
-                    if (!context.$refs.addStopMarker.marker._popup.options.showed) context.$refs.addStopMarker.marker._popup.addTo(map)
-                  }, 100)
+                  // we never want to hide the popup
+                  if (!context.$refs.addStopMarker.marker._popup.options.showed) {
+                    setTimeout(function () {
+                      if (!context.$refs.addStopMarker.marker._popup.options.showed) context.$refs.addStopMarker.marker._popup.addTo(map)
+                    }, 100)
+                  }
                 }
-              }
-            })
+              })
+            }
             context.markerClicked = false
           })
           resolve(true)

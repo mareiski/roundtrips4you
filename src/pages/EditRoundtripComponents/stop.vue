@@ -510,15 +510,12 @@
               round
               color="primary"
               icon="add"
-              :disable="galeryImgUrls.length === 0"
               style="position: absolute;"
               @click="chooseImgDialog = true"
             >
-              <q-tooltip v-if="galeryImgUrls.length === 0">Wenn du ein Bild in den Einstellungen hochlädst, kannst du es hier hinzufügen.</q-tooltip>
             </q-btn>
           </div>
           <q-dialog
-            v-if="galeryImgUrls.length > 0"
             keep-alive
             v-model="chooseImgDialog"
           >
@@ -541,6 +538,21 @@
                     @click="addImageToStop(url)"
                   >
                   </q-btn>
+                </div>
+                <div
+                  v-if="galeryImgUrls.length === 0"
+                  class="flex"
+                >
+                  <div>
+                    <q-img
+                      src="../../statics/dummy-image-landscape-1.jpg"
+                      style="height:148px; width:148px;"
+                    ></q-img>
+                  </div>
+                  <div
+                    class="flex justify-center"
+                    style="max-width:300px; padding-left:10px; flex-direction:column;"
+                  >Wenn du ein Bild in den Einstellungen hochlädst kannst du es hier hinzufügen.</div>
                 </div>
               </q-card-section>
               <q-card-section class="row items-center flex">
@@ -1506,7 +1518,6 @@ export default {
             this.sights = results.data.data
 
             const headers = {
-
               'Content-Type': 'application/json; charset=UTF-8'
             }
 
