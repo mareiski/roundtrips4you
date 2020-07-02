@@ -126,7 +126,7 @@
               <span
                 style="font-size:16px;"
                 class="q-ml-sm"
-              >Möchtest du {{this.title ? this.title : 'deisen Stopp'}} zu deiner Reise hinzufügen?</span>
+              >Möchtest du {{this.title ? this.title : 'diesen Stopp'}} zu deiner Reise hinzufügen?</span>
             </q-card-section>
 
             <q-input
