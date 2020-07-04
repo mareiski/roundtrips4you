@@ -739,6 +739,7 @@
           ref="qDateProxy"
           transition-show="scale"
           transition-hide="scale"
+          persistent
         >
           <q-date
             v-model="date"
@@ -779,6 +780,7 @@
           ref="qTimeProxy"
           transition-show="scale"
           transition-hide="scale"
+          persistent
         >
           <q-time
             v-model="date"
@@ -995,7 +997,7 @@ export default {
       }).then(function () {
         if (refresh && !context.changeAllDatesActive) {
           // resort stops and prepare views with new array
-          context.getParent('EditRoundtrips').resortAndPrepareStops(context.date, context.docId)
+          context.getParent('EditRoundtrips').resortAndPrepareStops(newInitDate, context.docId)
         }
         setTimeout(function () {
           context.scrollTo(lastScrollPos)
