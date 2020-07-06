@@ -555,13 +555,26 @@ export default {
       }
     },
     setUnreadNotifications () {
-      let count = 0
-      this.messages.forEach(message => {
-        if ((message.UserUID && !message.AlreadySeen) || (message.SeenUsers && !Array.from(message.SeenUsers).includes(auth.user().uid))) {
-          count++
-        }
-      })
-      this.undreadNotifications = count
+      let userRef = db.collection('User')
+        .where('UserUID', '==', auth.user().uid)
+        .limit(1)
+      userRef.get()
+        .then(snapshot => {
+          snapshot.forEach(doc => {
+            let count = 0
+            this.messages.forEach(message => {
+              if ((message.UserUID && !message.AlreadySeen) || (message.SeenUsers && !Array.from(message.SeenUsers).includes(auth.user().uid))) {
+                if (this.getDateFromTimestamp(doc.data().createdAt) < this.getDateFromTimestamp(message.createdAt)) count++
+              }
+            })
+            this.undreadNotifications = count
+          })
+        }).catch(ex => {
+          console.log(ex)
+        })
+    },
+    getDateFromTimestamp (timestamp) {
+      return date.formatDate(new Date(timestamp.seconds * 1000), 'DD.MM.YYYY')
     },
     markAllMessagesSeen () {
       let context = this
