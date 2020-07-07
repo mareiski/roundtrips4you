@@ -260,9 +260,16 @@
                 <q-card-actions align="right">
                   <q-btn
                     flat
-                    label="OK"
+                    label="zurück"
                     color="primary"
                     v-close-popup
+                  />
+                  <q-btn
+                    flat
+                    label="hinzufügen"
+                    color="primary"
+                    v-close-popup
+                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
                   />
                 </q-card-actions>
               </q-card>
@@ -290,6 +297,7 @@
               new-value-mode="add-unique"
               style="margin:10px 10px 10px 0; width:260px;"
               @blur="saveSights()"
+              ref="sightInput"
             />
           </div>
           <div
