@@ -117,7 +117,7 @@
                 @input="expandAllStops()"
                 v-model="allStopsExpanded"
                 :disable="!stopsLoaded"
-                label="Stopps ausklappen"
+                label="alle Stopps ausklappen"
               ></q-toggle>
             </div>
           </q-timeline-entry>
@@ -217,6 +217,7 @@
                   :expanded="stop.expanded"
                   :profile="stop.Profile"
                   @expansionChanged="expansionChanged($event)"
+                  :class="'stop' + stop.DocId"
                   :ref="stop.DocId"
                 ></Stop>
                 <Duration
@@ -497,6 +498,7 @@
                 :options="originOptions"
                 @filter="getOrigins"
                 style="width:300px;"
+                lazy-rules
                 @blur="onSaveArrivalDepature"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
               >
@@ -1662,6 +1664,7 @@ export default {
 
         this.generalTempLink = null
         if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
+        if (typeof this.$refs.select !== 'undefined') this.$refs.select.resetValidation()
 
         let locationLabel = Location.label
         if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
@@ -1679,8 +1682,6 @@ export default {
           Location,
           Parking: parking
         }).then(results => {
-          let lastScrollPos = document.documentElement.scrollTop
-
           // clear all values
           if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
           this.generalTempLink = null
@@ -1813,7 +1814,9 @@ export default {
 
           let context = this
           setTimeout(function () {
-            context.scrollTo(lastScrollPos)
+            const el = document.getElementsByClassName('stop' + docId)[0]
+
+            context.scrollTo(el.offsetTop)
           }, 500)
 
           this.$q.notify({
@@ -1827,8 +1830,6 @@ export default {
       })
     },
     removeEntry (stopDocId) {
-      let lastScrollPos = document.documentElement.scrollTop
-
       this.documentIds.splice(this.documentIds.indexOf(stopDocId), 1)
 
       this.stops.splice(this.stops.findIndex(x => x.DocId === stopDocId), 1)
@@ -1924,11 +1925,6 @@ export default {
 
       // reload Map
       if (this.$refs.map) this.$refs.map.loadMap(null)
-
-      let context = this
-      setTimeout(function () {
-        context.scrollTo(lastScrollPos)
-      }, 500)
     },
     saveRoundtripDaysAndHotels () {
       let daysString = ''
