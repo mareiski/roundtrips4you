@@ -15,6 +15,7 @@
       @filter="filterFn"
       @input="$emit('update', $event)"
       style="width:300px;"
+      lazy-rules
       :rules="!parkingPlaceSearch ? [val => val !== null && val !== '' || 'Bitte wähle einen Ort'] : []"
     >
       <template v-slot:no-option>

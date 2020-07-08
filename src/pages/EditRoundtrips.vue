@@ -498,7 +498,6 @@
                 :options="originOptions"
                 @filter="getOrigins"
                 style="width:300px;"
-                lazy-rules
                 @blur="onSaveArrivalDepature"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
               >
@@ -1664,7 +1663,7 @@ export default {
 
         this.generalTempLink = null
         if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
-        if (typeof this.$refs.select !== 'undefined') this.$refs.select.resetValidation()
+        if (typeof this.$refs.citySearch !== 'undefined') this.$refs.citySearch.clear()
 
         let locationLabel = Location.label
         if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
