@@ -10,6 +10,49 @@
       :attributionControl="false"
       @load="onMapLoaded"
     >
+      <q-btn
+        color="white"
+        text-color="secondary"
+        label="Karte wechseln"
+      >
+        <q-menu>
+          <q-list style="min-width: 100px">
+            <q-item
+              clickable
+              @click="switchMapStyle(null)"
+              v-close-popup
+            >
+              <q-item-section>Standart</q-item-section>
+            </q-item>
+            <q-separator />
+
+            <q-item
+              clickable
+              @click="switchMapStyle('nav')"
+              v-close-popup
+            >
+              <q-item-section>Navigation</q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item
+              clickable
+              @click="switchMapStyle('sat')"
+              v-close-popup
+            >
+              <q-item-section>Satellit</q-item-section>
+            </q-item>
+            <q-separator />
+
+            <q-item
+              clickable
+              @click="switchMapStyle('out')"
+              v-close-popup
+            >
+              <q-item-section>Outdoor</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
       <MglGeocoderControl
         :accessToken="accTo"
         :input.sync="defaultInput"
@@ -293,6 +336,23 @@ export default {
     }
   },
   methods: {
+    switchMapStyle (styleName) {
+      switch (styleName) {
+        case 'nav':
+          this.mapStyle = 'mapbox://styles/mareiski/ckcevjmf81b7t1imouvv52xrh'
+          break
+        case 'out':
+          this.mapStyle = 'mapbox://styles/mareiski/ckcew03vc12dy1imgq1eonlvt'
+          break
+        case 'sat':
+          this.mapStyle = 'mapbox://styles/mareiski/ckcevopcq123g1imgb36xu37s'
+          break
+        default:
+          this.mapStyle = 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn'
+          break
+      }
+      this.loadMap(this.map)
+    },
     onMapLoaded (event) {
       this.map = event.map
       this.loadMap(event.map).then(e => {
