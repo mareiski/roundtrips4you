@@ -437,7 +437,7 @@
         >
           <q-card>
             <q-card-section class="row items-center">
-              <span class="q-ml-sm">Wenn du eine automatische Route erstellst gehen die akutellen Daten der Stopps verlohren. Außerdem ordnen wir die Stopps in der kürzesten Reihenfolge wieder an..</span>
+              <span class="q-ml-sm">Wenn du eine automatische Route erstellst geht die aktuelle Reihenfolge deiner Reise verloren.</span>
             </q-card-section>
 
             <q-card-actions align="right">
@@ -1522,20 +1522,19 @@ export default {
     },
     setToShortestRoute () {
       let suggestedStops = this.getShortestRoute()
+      let initDate = this.getDateFromString(this.stops[0].InitDate)
 
-      let dateTimeParts = this.stops[0].InitDate.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      let initDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-
-      suggestedStops.forEach(stop => {
-        db.collection('RoundtripDetails').doc(documentIds[this.stops.indexOf(stop)]).update({
+      suggestedStops.forEach((stop, index) => {
+        db.collection('RoundtripDetails').doc(stop.DocId).update({
           'InitDate': initDate
         })
+        stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
         initDate.setDate(initDate.getDate() + 1)
+
+        if (index === suggestedStops.length - 1) this.stops = suggestedStops
       })
-      this.loadSingleRoundtrip(this.$route.params.id)
-      this.loadRoundtripDetails(this.$route.params.id, false)
+      // this.loadSingleRoundtrip(this.$route.params.id)
+      // this.loadRoundtripDetails(this.$route.params.id, false)
     },
     getShortestRoute () {
       let stopsTaken = [this.stops[0]]
