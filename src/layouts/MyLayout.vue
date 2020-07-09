@@ -564,7 +564,7 @@ export default {
             let count = 0
             this.messages.forEach(message => {
               if ((message.UserUID && !message.AlreadySeen) || (message.SeenUsers && !Array.from(message.SeenUsers).includes(auth.user().uid))) {
-                if (this.getDateFromTimestamp(doc.data().createdAt) < this.getDateFromTimestamp(message.createdAt)) count++
+                if (doc.data().createdAt < message.createdAt) count++
               }
             })
             this.undreadNotifications = count
@@ -573,9 +573,9 @@ export default {
           console.log(ex)
         })
     },
-    getDateFromTimestamp (timestamp) {
-      return date.formatDate(new Date(timestamp.seconds * 1000), 'DD.MM.YYYY')
-    },
+    // getDateFromTimestamp (timestamp) {
+    //   return new Date(timestamp.seconds * 1000)
+    // },
     markAllMessagesSeen () {
       let context = this
       this.messages.forEach(message => {
