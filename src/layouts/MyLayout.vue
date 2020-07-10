@@ -1,6 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <div
+    <q-header
+      :reveal="isOnMobileDevice"
       id="Header"
       ref="Header"
       v-click-outside="hideMenu"
@@ -180,7 +181,7 @@
           </router-link>
         </div>
       </div>
-    </div>
+    </q-header>
     <q-drawer
       v-if="user"
       v-model="drawer"
@@ -486,6 +487,9 @@ export default {
   computed: {
     user () {
       return this.$store.getters['user/user']
+    },
+    isOnMobileDevice () {
+      return window.matchMedia('(max-width: 550px)').matches
     }
   },
   methods: {
