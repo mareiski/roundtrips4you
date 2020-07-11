@@ -4,7 +4,7 @@
     class="q-px-lg q-pb-md"
   >
     <div id="TopContainer">
-      <h2 class="topic">Roundtrips4you - Blog</h2>
+      <h3 class="topic">Roundtrips4you - Blog</h3>
       <p>Hier findet ihr aktuelle Reisetipps für die unterschiedlichsten Ziele auf der ganzen Welt</p>
     </div>
     <div id="BlogBackgroundImg"></div>
@@ -19,9 +19,9 @@
           v-if="story.first_published_at"
         >
           <q-card-section>
-            <h2 class="story-title">{{story.name}}</h2>
+            <h3 class="story-title">{{story.name}}</h3>
             <div class="author-container">
-              <p>Von Roundtrips4you</p>
+              <p>von Roundtrips4you</p>
               <p>
                 <span class="story-date">{{story.first_published_at.split('T')[0]}}</span>
                 <span class="story-author"> aus {{story.content.Country}}</span>

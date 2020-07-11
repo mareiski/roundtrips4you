@@ -10,10 +10,20 @@
       :attributionControl="false"
       @load="onMapLoaded"
     >
+      <MglGeocoderControl
+        :accessToken="accTo"
+        :input.sync="defaultInput"
+        @result="handleSearch"
+        placeholder="Ort suchen"
+        v-if="editor"
+      />
+      <MglFullscreenControl position="bottom-right" />
+      <MglNavigationControl position="top-right" />
       <q-btn
         color="white"
         text-color="secondary"
-        label="Karte wechseln"
+        icon="layers"
+        style="position:absolute; right:9px; top:175px;"
       >
         <q-menu>
           <q-list style="min-width: 100px">
@@ -53,15 +63,6 @@
           </q-list>
         </q-menu>
       </q-btn>
-      <MglGeocoderControl
-        :accessToken="accTo"
-        :input.sync="defaultInput"
-        @result="handleSearch"
-        placeholder="Ort suchen"
-        v-if="editor"
-      />
-      <MglFullscreenControl position="bottom-right" />
-      <MglNavigationControl position="top-right" />
       <MglMarker
         v-for="stop in stops"
         :key="stop.DocId"

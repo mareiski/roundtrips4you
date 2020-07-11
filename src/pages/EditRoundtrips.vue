@@ -111,7 +111,7 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>Reiseverlauf</span>
+              <h4>Reiseverlauf</h4>
               <q-toggle
                 style="font-size:18px"
                 @input="expandAllStops()"
