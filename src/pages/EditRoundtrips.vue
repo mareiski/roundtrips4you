@@ -1,21 +1,25 @@
 <template>
   <div class="edit-roundtrips q-px-lg q-pb-md">
-    <router-link
-      v-if="user"
-      style="text-decoration:none;"
-      to="/meine-rundreisen"
+    <div
+      class="flex"
+      style="flex-direction:column; padding-top:73px;"
     >
-      <q-icon name="keyboard_arrow_left"></q-icon>
-      zurück zu meinen Rundreisen
-    </router-link>
-    <h3 v-show="!title">
-      <q-skeleton
-        width="200px"
-        height="50px"
-        type="text"
-      />
-    </h3>
-    <div>
+      <router-link
+        v-if="user"
+        style="text-decoration:none;"
+        to="/meine-rundreisen"
+      >
+        <q-icon name="keyboard_arrow_left"></q-icon>
+        zurück zu meinen Rundreisen
+      </router-link>
+      <h3 v-show="!title">
+        <q-skeleton
+          width="200px"
+          height="50px"
+          type="text"
+        />
+      </h3>
+
       <h3
         id="v-step-0"
         style="display:inline-block; padding-right:10px;"
