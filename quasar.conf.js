@@ -89,7 +89,8 @@ module.exports = function (ctx) {
         'QToolbar',
         'QToolbarTitle',
         'QScrollArea',
-        'QHeader'
+        'QHeader',
+        'QPageSticky'
       ],
 
       directives: [

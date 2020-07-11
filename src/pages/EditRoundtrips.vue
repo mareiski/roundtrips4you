@@ -37,53 +37,60 @@
         </q-popup-edit>
       </h3>
     </div>
-    <div class="sticky">
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="justify"
-        narrow-indicator
-        style="padding-top:20px;"
-      >
-        <q-tab
-          id="v-step-1"
-          name="inspiration"
-          label="Inspiration"
+    <q-page-sticky
+      position="top"
+      expand
+      class="bg-white"
+      style="z-index:100;"
+    >
+      <div style="width:100%;">
+        <q-tabs
+          v-model="tab"
+          dense
+          class="text-grey"
+          active-color="primary"
+          indicator-color="primary"
+          align="justify"
+          narrow-indicator
+          style="padding-top:20px;"
         >
-        </q-tab>
-        <q-tab
-          id="v-step-2"
-          name="route"
-          label="Reiseverlauf"
-        />
-        <q-tab
-          id="v-step-3"
-          name="start"
-          label="An-/Abreise"
-          :disable="!user"
-        >
-          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-        </q-tab>
-        <q-tab
-          id="v-step-4"
-          name="settings"
-          label="Einstellungen"
-          :disable="!user"
-        >
-          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-        </q-tab>
-        <q-tab
-          id="v-step-5"
-          name="map"
-          label="Karte"
-        />
-      </q-tabs>
+          <q-tab
+            id="v-step-1"
+            name="inspiration"
+            label="Inspiration"
+          >
+          </q-tab>
+          <q-tab
+            id="v-step-2"
+            name="route"
+            label="Reiseverlauf"
+          />
+          <q-tab
+            id="v-step-3"
+            name="start"
+            label="An-/Abreise"
+            :disable="!user"
+          >
+            <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+          </q-tab>
+          <q-tab
+            id="v-step-4"
+            name="settings"
+            label="Einstellungen"
+            :disable="!user"
+          >
+            <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+          </q-tab>
+          <q-tab
+            id="v-step-5"
+            name="map"
+            label="Karte"
+          />
+        </q-tabs>
 
-      <q-separator />
-    </div>
+        <q-separator />
+      </div>
+    </q-page-sticky>
 
     <q-tab-panels
       v-model="tab"
@@ -92,10 +99,7 @@
       keep-alive
       @transition="scrollTo(0)"
     >
-      <q-tab-panel
-        name="inspiration"
-        keep-alive
-      >
+      <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
         <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Hauptland ({{countries[0]}}) vorschlagen</p>
         <CitySuggestion
@@ -104,10 +108,7 @@
           :RTId="$route.params.id"
         ></CitySuggestion>
       </q-tab-panel>
-      <q-tab-panel
-        name="route"
-        keep-alive
-      >
+      <q-tab-panel name="route">
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
@@ -1709,6 +1710,7 @@ export default {
           console.log('push Stop')
 
           this.stops.push(newStopObject)
+          console.log(this.stops)
 
           // resort stops
           this.stops.sort(this.compare)
@@ -1808,13 +1810,14 @@ export default {
 
           // reload Map
           console.log('LoadMap')
+          console.log(this.stops)
           if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
 
           let context = this
           setTimeout(function () {
             const el = document.getElementsByClassName('stop' + docId)[0]
 
-            context.scrollTo(el.offsetTop)
+            if (el) context.scrollTo(el.offsetTop)
           }, 500)
 
           this.$q.notify({
