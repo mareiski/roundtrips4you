@@ -1467,6 +1467,9 @@ export default {
         })
         return false
       }
+
+      this.getParent('EditRoundtrips').removeEntry(this.docId)
+
       const context = this
       db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
         context.$q.notify({
@@ -1475,7 +1478,6 @@ export default {
           icon: 'check_circle',
           message: 'Eintrag wurde gelöscht'
         })
-        context.getParent('EditRoundtrips').removeEntry(context.docId)
       }).catch(function (error) {
         console.log(error)
         context.$q.notify({

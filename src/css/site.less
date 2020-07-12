@@ -116,13 +116,22 @@ h2 {
     line-height: normal;
 }
 
+.sticky {
+    position: -webkit-sticky;
+    /* Safari */
+    position: sticky;
+    top: 80px;
+    z-index: 100;
+    background: white;
+
+}
+
 /*Header*/
 #Header {
     display: flex;
     justify-content: space-between;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     height: 80px;
-    position: fixed;
     left: 0;
     width: 100%;
     top: 0;
@@ -130,6 +139,7 @@ h2 {
     z-index: 1000;
     transition: 1s;
     flex-direction: column;
+    position: fixed;
 
     .top-row {
         display: flex;
@@ -288,6 +298,7 @@ h2 {
         justify-content: center;
         text-align: right;
         overflow: hidden;
+        padding-right: 30px;
 
         .mobile-header-page-link {
             display: flex;
@@ -326,6 +337,7 @@ h2 {
 
 .q-page-container {
     min-height: 90vh;
+    margin-top: 80px;
 }
 
 .q-avatar {

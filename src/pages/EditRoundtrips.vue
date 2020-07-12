@@ -2,7 +2,7 @@
   <div class="edit-roundtrips q-px-lg q-pb-md">
     <div
       class="flex"
-      style="flex-direction:column; padding-top:73px;"
+      style="flex-direction:column;"
     >
       <router-link
         v-if="user"
@@ -19,7 +19,6 @@
           type="text"
         />
       </h3>
-
       <h3
         id="v-step-0"
         style="display:inline-block; padding-right:10px;"
@@ -41,60 +40,56 @@
         </q-popup-edit>
       </h3>
     </div>
-    <q-page-sticky
-      position="top"
-      expand
-      class="bg-white"
-      style="z-index:100;"
+    <div
+      style="width:100%;"
+      class="sticky"
     >
-      <div style="width:100%;">
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
-          style="padding-top:20px;"
+      <q-tabs
+        v-model="tab"
+        dense
+        class="text-grey"
+        active-color="primary"
+        indicator-color="primary"
+        align="justify"
+        narrow-indicator
+        style="padding-top:20px;"
+      >
+        <q-tab
+          id="v-step-1"
+          name="inspiration"
+          label="Inspiration"
         >
-          <q-tab
-            id="v-step-1"
-            name="inspiration"
-            label="Inspiration"
-          >
-          </q-tab>
-          <q-tab
-            id="v-step-2"
-            name="route"
-            label="Reiseverlauf"
-          />
-          <q-tab
-            id="v-step-3"
-            name="start"
-            label="An-/Abreise"
-            :disable="!user"
-          >
-            <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-          </q-tab>
-          <q-tab
-            id="v-step-4"
-            name="settings"
-            label="Einstellungen"
-            :disable="!user"
-          >
-            <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
-          </q-tab>
-          <q-tab
-            id="v-step-5"
-            name="map"
-            label="Karte"
-          />
-        </q-tabs>
+        </q-tab>
+        <q-tab
+          id="v-step-2"
+          name="route"
+          label="Reiseverlauf"
+        />
+        <q-tab
+          id="v-step-3"
+          name="start"
+          label="An-/Abreise"
+          :disable="!user"
+        >
+          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        </q-tab>
+        <q-tab
+          id="v-step-4"
+          name="settings"
+          label="Einstellungen"
+          :disable="!user"
+        >
+          <q-tooltip v-if="!user">Speichere deine Reise um diese Funktion nutzen zu können</q-tooltip>
+        </q-tab>
+        <q-tab
+          id="v-step-5"
+          name="map"
+          label="Karte"
+        />
+      </q-tabs>
 
-        <q-separator />
-      </div>
-    </q-page-sticky>
+      <q-separator />
+    </div>
 
     <q-tab-panels
       v-model="tab"
