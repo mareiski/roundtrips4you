@@ -3,6 +3,7 @@
     <div
       id="Header"
       ref="Header"
+      :class="{ 'header-hidden': !showHeader }"
     >
       <div class="top-row">
         <div class="left-col">
@@ -470,7 +471,9 @@ export default {
       drawer: false,
       messages: [],
       showWelcomeTooltip: true,
-      undreadNotifications: 0
+      undreadNotifications: 0,
+      showHeader: true,
+      lastScrollPosition: 0
     }
   },
   meta () {
@@ -498,6 +501,28 @@ export default {
     getStringDateFromTimestamp (timestamp) {
       const initDate = new Date(timestamp.seconds * 1000)
       return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+    },
+    onScroll () {
+      const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
+      if (currentScrollPosition < 0) {
+        return
+      }
+      // Stop executing this function if the difference between
+      // current scroll position and last scroll position is less than some offset
+      if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
+        return
+      }
+      this.showHeader = currentScrollPosition < this.lastScrollPosition
+
+      let stickyEls = document.getElementsByClassName('sticky')
+
+      if (window.pageYOffset + stickyEls[0].getBoundingClientRect().top >= 350) {
+        this.showHeader ? stickyEls[0].classList.remove('at-top') : stickyEls[0].classList.add('at-top')
+      } else {
+        stickyEls[0].classList.add('at-top')
+      }
+
+      this.lastScrollPosition = currentScrollPosition
     },
     hideLoading () {
       redirected = false
@@ -642,10 +667,12 @@ export default {
   mounted () {
     window.addEventListener('online', this.updateOnlineStatus)
     window.addEventListener('offline', this.updateOnlineStatus)
+    window.addEventListener('scroll', this.onScroll)
   },
   beforeDestroy () {
     window.removeEventListener('online', this.updateOnlineStatus)
     window.removeEventListener('offline', this.updateOnlineStatus)
+    window.removeEventListener('scroll', this.onScroll)
   },
   created () {
     this.leaving()

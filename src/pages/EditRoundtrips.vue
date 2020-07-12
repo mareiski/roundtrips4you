@@ -42,7 +42,7 @@
     </div>
     <div
       style="width:100%;"
-      class="sticky"
+      class="sticky at-top"
     >
       <q-tabs
         v-model="tab"

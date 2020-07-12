@@ -120,10 +120,15 @@ h2 {
     position: -webkit-sticky;
     /* Safari */
     position: sticky;
-    top: 80px;
+    top: 0px;
     z-index: 100;
     background: white;
+    transform: translate3d(0, 80px, 0);
+    transition: transform 0.1s ease-out, height 1s;
 
+    &.at-top {
+        transform: translate3d(0, 0, 0);
+    }
 }
 
 /*Header*/
@@ -137,9 +142,15 @@ h2 {
     top: 0;
     background-color: white;
     z-index: 1000;
-    transition: 1s;
     flex-direction: column;
     position: fixed;
+    transform: translate3d(0, 0, 0);
+    transition: transform 0.1s ease-out, height 1s;
+
+    &.header-hidden {
+        box-shadow: none;
+        transform: translate3d(0, -100%, 0);
+    }
 
     .top-row {
         display: flex;
