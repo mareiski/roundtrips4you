@@ -170,7 +170,7 @@
               <span
                 style="font-size:16px;"
                 class="q-ml-sm"
-              >Möchtest du {{this.title ? this.title : 'diesen Stopp'}} zu deiner Reise hinzufügen?</span>
+              >{{title ? title : 'Diesen Stopp'}} zu deiner Reise hinzufügen?</span>
             </q-card-section>
 
             <q-input
@@ -188,6 +188,13 @@
             <q-card-actions align="right">
               <q-btn
                 flat
+                label="Infos"
+                @click="showSightDetails(title)"
+                color="secondary"
+                v-show="title"
+              />
+              <q-btn
+                flat
                 label="Punkt hinzufügen"
                 @click="addStop"
                 color="primary"
@@ -196,6 +203,32 @@
           </q-card>
         </MglPopup>
       </MglMarker>
+      <q-dialog v-model="sightDialog.showed">
+        <q-card>
+          <q-img
+            :src="sightDialog.src"
+            style="max-height:75vh;"
+          >
+            <div class="absolute-bottom">
+              <div class="text-h6">{{sightDialog.title}}</div>
+              <div class="text-subtitle2">{{sightDialog.description}}</div>
+            </div>
+          </q-img>
+
+          <q-card-section>
+            {{sightDialog.extract}}
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="zurück"
+              color="primary"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
       <div
         v-for="stop in stops"
         :key="'StopContainer' + stop.DocId"
@@ -326,7 +359,8 @@ export default {
       defaultInput: null,
       whitelistedLabels: ['airport-label', 'place-label', 'country-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'],
       centerLocation: [0, 0],
-      markerClicked: false
+      markerClicked: false,
+      sightDialog: {}
     }
   },
   watch: {
@@ -394,6 +428,31 @@ export default {
     onMarkerClicked (event) {
       event.map.flyTo({ center: event.component.marker._lngLat, speed: 0.5, curve: 1 })
       this.markerClicked = true
+    },
+    showSightDetails (name) {
+      const headers = {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+
+      let context = this
+      getAxios().then(axios => {
+        axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+          { headers: headers })
+          .then(function (response) {
+            const pages = response.data.query.pages
+            const firstPageName = Object.keys(pages)[0]
+
+            const title = pages[firstPageName].title
+            const description = pages[firstPageName].description
+            const extract = pages[firstPageName].extract
+            const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
+
+            context.sightDialog = { title: title || name, showed: true, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src }
+          }).catch(function (error) {
+            console.log('Error' + error)
+            context.sightDialog = { title: name, showed: true, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' }
+          })
+      })
     },
     addStop (event) {
       this.showAddStopMarker = false
