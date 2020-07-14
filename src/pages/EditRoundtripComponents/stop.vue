@@ -643,7 +643,7 @@
                   side
                   color="primary"
                   icon="add"
-                >Tagesausflug hinzufügen
+                >Tagesausflug
                 </q-btn>
               </q-item>
             </q-list>
@@ -924,7 +924,7 @@ export default {
       editorToolbar: [
         [
           {
-            label: this.$q.lang.editor.align,
+            label: '',
             icon: this.$q.iconSet.editor.align,
             fixedLabel: true,
             list: 'only-icons',
@@ -936,20 +936,7 @@ export default {
         ['fullscreen'],
         [
           {
-            label: this.$q.lang.editor.formatting,
-            icon: this.$q.iconSet.editor.formatting,
-            list: 'no-icons',
-            options: [
-              'p',
-              'h2',
-              'h3',
-              'h4',
-              'h5',
-              'h6'
-            ]
-          },
-          {
-            label: this.$q.lang.editor.fontSize,
+            label: 'Größe',
             icon: this.$q.iconSet.editor.fontSize,
             fixedLabel: true,
             fixedIcon: true,
@@ -965,8 +952,9 @@ export default {
             ]
           },
           {
-            label: this.$q.lang.editor.defaultFont,
+            label: 'Schrift',
             icon: this.$q.iconSet.editor.font,
+            fixedLabel: true,
             fixedIcon: true,
             list: 'no-icons',
             options: [
