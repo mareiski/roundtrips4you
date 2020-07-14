@@ -226,7 +226,7 @@
               <q-chip
                 v-if="editor"
                 clickable
-                @click="sightDialogs[index].showed = true"
+                @click="sightDialogs[sightDialogs.findIndex(x=> x.title === sight.name)].showed = true"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>

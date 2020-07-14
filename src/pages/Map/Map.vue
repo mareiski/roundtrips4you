@@ -415,6 +415,8 @@ export default {
 
       // need this json stringify to prevent update of location when the click location changes
       this.$root.$emit('addStop', formattedDate, JSON.parse(JSON.stringify(this.lastClickLocation)))
+
+      // reload map and fly to coords
       this.lastClickCoordinates = [0, 0]
       this.loadMap(this.map).then(success => {
         this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
