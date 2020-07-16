@@ -29,7 +29,7 @@
           v-for="hotel in hotels"
           :key="hotel"
         >
-          {{hotel !== null ? hotel.hotel.name : 'Keine Ergebnisse. Klicken um dieses Hotel hinzuzufügen'}}
+          {{hotel !== null ? hotel.hotel.name : 'Klicken um Hotel manuell hinzuzufügen'}}
         </q-item>
       </q-list>
     </q-card>

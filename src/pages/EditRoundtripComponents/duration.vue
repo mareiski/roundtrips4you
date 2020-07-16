@@ -4,7 +4,9 @@
       icon="commute"
       :clickable="editor"
       @click="editStopProfile = true"
-    >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}</q-chip>
+    >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}
+      <q-tooltip>Reisemittel ändern</q-tooltip>
+    </q-chip>
     <q-dialog
       v-if="editor"
       v-model="editStopProfile"

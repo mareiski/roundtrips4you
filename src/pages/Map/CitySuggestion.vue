@@ -31,7 +31,6 @@
             :src="images[images.findIndex(x => x.cityName === city.name)].url"
             style="height:170px;"
             placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
-            basic
           >
             <div class="absolute-bottom text-h6">{{city.name}}
             </div>
@@ -95,20 +94,36 @@ export default {
       }).then(function (response) {
         // wait 2 secs because only 1 request per sec is allowed
         setTimeout(function () {
-          axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=10&countryIds=' + response.data.data[0].code + '&minPopulation=100000&sort=-population&languageCode=de&types=CITY', {
+          axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
             headers: {
               'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
             }
           }).then(function (response) {
-            context.cities = response.data.data
-            context.cities.forEach(city => {
-              console.log(city.name)
-              console.log(city.name.includes('Metropolitanstadt'))
+            let tempCities = response.data.data
+
+            tempCities.forEach((city, index) => {
               if (city.name.includes('Metropolitanstadt')) city.name = city.name.slice(city.name.indexOf('Metropolitanstadt') + 17)
               setTimeout(function () {
                 context.getCityImage(city.name, city.country)
               }, 1000)
             })
+
+            context.cities = JSON.parse(JSON.stringify(tempCities))
+            for (let i; i < tempCities.lenght; i++) {
+              const city = tempCities[i]
+
+              for (let index; index < tempCities.lenght; index++) {
+                const checkCity = tempCities[index]
+
+                console.log(checkCity.name)
+                console.log(city.name)
+                if (checkCity.name === city.name) {
+                  context.cities.splice(index, 1)
+                  break
+                }
+              }
+            }
+
             this.loading = true
           }).catch(function (error) {
             console.log('Error' + error)

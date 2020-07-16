@@ -30,7 +30,9 @@
             icon="add"
             @click="addHotel = true"
             v-if="editor && !hotelName"
-          >Hotel hinzufügen</q-chip>
+          >Hotel
+            <q-tooltip>Hotel hinzufügen</q-tooltip>
+          </q-chip>
         </div>
         <q-dialog
           v-if="editor"
@@ -280,7 +282,9 @@
             v-else-if="editor && (!hotelName || typeof hotelName === 'undefined')"
             clickable
             @click="searchSights()"
-          >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}</q-chip>
+          >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
+            <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
+          </q-chip>
           <div
             v-if="editor"
             class="flex"
@@ -522,6 +526,7 @@
               style="position: absolute;"
               @click="chooseImgDialog = true"
             >
+              <q-tooltip>Bilder hinzufügen</q-tooltip>
             </q-btn>
           </div>
           <q-dialog
@@ -570,7 +575,7 @@
                   <a
                     style="text-decoration:underline;"
                     @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
-                  >Vorschläge auf Google</a>
+                  >Bildvorschläge auf Google</a>
                   <br>
                   <br>
                 </span>
@@ -631,23 +636,19 @@
               :galeryImgUrls="galeryImgUrls"
             ></DailyTrip>
           </div>
-          <div v-if="editor">
-            <q-list class="rounded-borders daily-trip-list">
-              <q-item
-                clickable
-                v-ripple
-                class="flex justify-center"
-                @click="addDailyTripDialogVisible = true"
-              >
-                <q-btn
-                  class="add-daily-trip-button"
-                  side
-                  color="primary"
-                  icon="add"
-                >Tagesausflug
-                </q-btn>
-              </q-item>
-            </q-list>
+          <div
+            v-if="editor"
+            class="flex justify-center"
+            style="padding-top:30px;"
+          >
+            <q-btn
+              class="add-daily-trip-button"
+              side
+              color="secondary"
+              icon="add"
+            >Tagesausflug
+              <q-tooltip>Stopp ohne Übernachtung hinzufügen</q-tooltip>
+            </q-btn>
           </div>
         </div>
         <!-- Place for add daily trip dialog -->
@@ -741,7 +742,7 @@
       </q-expansion-item>
     </q-list>
     <template v-slot:subtitle>
-      <span class="q-timeline__title">
+      <span class="q-timeline__title cursor-pointer">
         {{date !== null && date.length > 0 ? date.split(' ')[0]: date}}
         <q-popup-proxy
           v-if="editor"
@@ -774,13 +775,13 @@
         </q-popup-proxy>
         <q-icon
           v-if="editor"
-          class="cursor-pointer"
           size="16px"
           name="event"
         />
+        <q-tooltip>Datum/Zeit ändern</q-tooltip>
       </span>
       <span
-        class="q-timeline__title"
+        class="q-timeline__title cursor-pointer"
         style="padding-right:10px;"
       >
         {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}
@@ -826,10 +827,9 @@
         <q-icon
           v-if="editor"
           size="16px"
-          class="cursor-pointer"
           name="access_time"
         />
-
+        <q-tooltip>Zeit ändern</q-tooltip>
       </span>
       <!-- <span class="q-timeline__title">{{days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem ? '' : 'keine Verbleibende Zeit für den Aufenthalt') }}</span> -->
     </template>
