@@ -91,6 +91,10 @@ const routes = [
       {
         path: 'benutzer',
         component: () => import(/* webpackChunkName: "publicUser" */ 'pages/PublicUsers.vue')
+      },
+      {
+        path: 'faq',
+        component: () => import(/* webpackChunkName: "faq" */ 'pages/Help.vue')
       }
     ]
   },

@@ -625,24 +625,30 @@
             </div>
             <!-- price -->
             <div class="column">
-              <q-btn
-                @click="openBookingComFlights()"
-                class="q-mt-md"
-                color="primary"
-                text-color="white"
-                :disable="!destination"
-                v-if="arrivalDepatureProfile === 'Flugzeug'"
-                label="Flüge auf Booking.com ansehen"
-              ></q-btn>
-              <q-btn
-                @click="openFluegeDeFlights()"
-                class="q-mt-md"
-                color="primary"
-                text-color="white"
-                :disable="!destination"
-                v-if="arrivalDepatureProfile === 'Flugzeug'"
-                label="Flüge auf fluege.de ansehen"
-              ></q-btn>
+              <div class="flex justify-center">
+                <q-btn
+                  @click="openBookingComFlights()"
+                  class="q-mt-md"
+                  color="primary"
+                  text-color="white"
+                  :disable="!destination"
+                  v-if="arrivalDepatureProfile === 'Flugzeug'"
+                  label="Flüge auf Booking.com ansehen"
+                  style="width:280px"
+                ></q-btn>
+              </div>
+              <div class="flex justify-center">
+                <q-btn
+                  @click="openFluegeDeFlights()"
+                  class="q-mt-md"
+                  color="primary"
+                  text-color="white"
+                  :disable="!destination"
+                  v-if="arrivalDepatureProfile === 'Flugzeug'"
+                  label="Flüge auf fluege.de ansehen"
+                  style="width:280px"
+                ></q-btn>
+              </div>
             </div>
           </q-form>
         </div>

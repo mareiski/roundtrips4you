@@ -120,6 +120,7 @@
                   style="position: absolute;"
                   @click="chooseImgDialog = true"
                 >
+                  <q-tooltip>Bilder hinzufügen</q-tooltip>
                 </q-btn>
               </div>
               <q-dialog
@@ -255,7 +256,9 @@
               name="delete"
               class="cursor-pointer"
               @click="deleteEntry()"
-            ></q-icon>
+            >
+              <q-tooltip>Tagesausflug löschen</q-tooltip>
+            </q-icon>
           </q-item-section>
         </template>
       </q-expansion-item>

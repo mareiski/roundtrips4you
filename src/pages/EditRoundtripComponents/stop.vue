@@ -121,7 +121,9 @@
         name="delete"
         class="cursor-pointer"
         @click="deleteEntry()"
-      ></q-icon>
+      >
+        <q-tooltip>Stopp löschen</q-tooltip>
+      </q-icon>
     </div>
     <q-list
       bordered
@@ -646,6 +648,7 @@
               side
               color="secondary"
               icon="add"
+              @click="addDailyTripDialogVisible = true"
             >Tagesausflug
               <q-tooltip>Stopp ohne Übernachtung hinzufügen</q-tooltip>
             </q-btn>
