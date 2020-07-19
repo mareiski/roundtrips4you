@@ -155,9 +155,11 @@
         </q-card>
       </q-expansion-item>
 
+      <q-separator />
+
       <q-expansion-item
         group="editor"
-        icon="perm_media"
+        icon="autorenew"
         label="Rundreise autom. zusammenstellen"
       >
         <q-card>

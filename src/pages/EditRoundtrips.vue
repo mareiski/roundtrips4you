@@ -12,34 +12,51 @@
         <q-icon name="keyboard_arrow_left"></q-icon>
         zurück zu meinen Rundreisen
       </router-link>
-      <div style="display:inline-block;">
-        <h3 v-show="!title">
-          <q-skeleton
-            width="200px"
-            height="50px"
-            type="text"
-          />
-        </h3>
-        <h3
-          id="v-step-0"
-          style="display:inline-block; padding-right:10px;"
-          v-show="title"
-        >{{title}}
-          <q-popup-edit
-            v-model="title"
-            buttons
-            label-set="Speichern"
-            @save="title !== null && title !== ''  && title[0] !== ' ' ? saveTitle(title) : showWrongTitleNotify()"
-          >
-            <q-input
+      <div class="flex justify-between">
+        <div style="display:inline-block;">
+          <h3 v-show="!title">
+            <q-skeleton
+              width="200px"
+              height="50px"
+              type="text"
+            />
+          </h3>
+          <h3
+            id="v-step-0"
+            style="display:inline-block; padding-right:10px;"
+            v-show="title"
+          >{{title}}
+            <q-popup-edit
               v-model="title"
-              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
-              dense
-              autofocus
+              buttons
+              label-set="Speichern"
+              @save="title !== null && title !== ''  && title[0] !== ' ' ? saveTitle(title) : showWrongTitleNotify()"
             >
-            </q-input>
-          </q-popup-edit>
-        </h3>
+              <q-input
+                v-model="title"
+                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+                dense
+                autofocus
+              >
+              </q-input>
+            </q-popup-edit>
+          </h3>
+        </div>
+        <div
+          class="flex justify-center"
+          style="flex-direction:column;"
+        >
+          <router-link
+            to="/faq"
+            style="text-decoration:none;"
+            target="_blank"
+          >
+            <q-icon
+              name="help"
+              size="25px"
+            ></q-icon>
+          </router-link>
+        </div>
       </div>
     </div>
     <div

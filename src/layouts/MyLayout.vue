@@ -314,6 +314,12 @@
               v-if="!isOnNetlifyPage"
               class="footer-link"
               rel="nofollow"
+              to="/faq"
+            >FAQs</router-link>
+            <router-link
+              v-if="!isOnNetlifyPage"
+              class="footer-link"
+              rel="nofollow"
               to="/impressum"
             >Impressum</router-link>
             <router-link
