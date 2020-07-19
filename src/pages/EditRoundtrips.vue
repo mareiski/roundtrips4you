@@ -55,6 +55,7 @@
               name="help"
               size="25px"
             ></q-icon>
+            Hilfe
           </router-link>
         </div>
       </div>
@@ -1355,10 +1356,10 @@ export default {
         startTimeout: 2000,
         enableScrolling: false,
         labels: {
-          buttonSkip: 'Tour überspringen',
-          buttonPrevious: 'Zurück',
-          buttonNext: 'Weiter',
-          buttonStop: 'Fertig'
+          buttonSkip: 'überspringen',
+          buttonPrevious: 'zurück',
+          buttonNext: 'weiter',
+          buttonStop: 'fertig'
         }
       },
 
@@ -1375,35 +1376,35 @@ export default {
           target: '#v-step-1',
           content: `Hier kannst du dir Städte zu deinem Reiseland vorschlagen lassen`,
           params: {
-            placement: 'top'
+            placement: window.matchMedia('(max-width: 550px)').matches ? 'right' : 'top'
           }
         },
         {
           target: '#v-step-2',
           content: `Den Verlauf deiner Reise kannst du hier bearbeiten`,
           params: {
-            placement: 'top'
+            placement: window.matchMedia('(max-width: 550px)').matches ? 'right' : 'top'
           }
         },
         {
           target: '#v-step-3',
-          content: `Unter diesem Punkt kannst du deine An-/Abreise planen`,
+          content: !window.matchMedia('(max-width: 550px)').matches ? `Unter diesem Punkt kannst du deine An-/Abreise planen` : `Unter diesem Punkt kannst du nach dem Speichern deine An-/Abreise planen`,
           params: {
-            placement: 'top'
+            placement: window.matchMedia('(max-width: 550px)').matches ? 'right' : 'top'
           }
         },
         {
           target: '#v-step-4',
-          content: `In den Einstellungen kannst du deine Reise teilen, Bildern hochladen usw.`,
+          content: !window.matchMedia('(max-width: 550px)').matches ? `In den Einstellungen kannst du deine Reise teilen, Bilder hochladen usw.` : `Nach dem Speichern kannst du in den Einstellungen deine Reise teilen, Bilder hochladen usw.`,
           params: {
-            placement: 'top'
+            placement: window.matchMedia('(max-width: 550px)').matches ? 'left' : 'top'
           }
         },
         {
           target: '#v-step-5',
           content: `Hier findest du eine Karte mit allen Stopps, diese können hier ebenfalls hinzugefügt werden`,
           params: {
-            placement: 'top'
+            placement: window.matchMedia('(max-width: 550px)').matches ? 'left' : 'top'
           }
         }
       ]
@@ -3075,9 +3076,8 @@ export default {
             .orderBy('InitDate')
           roundtripsRef.get()
             .then(RTDetailsSnapshot => {
-              let isOnMobileDevice = window.matchMedia('(max-width: 550px)').matches
               // if the user has one Roundtrip and also just one Stopp added
-              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1 && !isOnMobileDevice) {
+              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1) {
                 this.$tours['myTour'].start()
                 setTimeout(function () {
                   context.scrollTo(0)
@@ -3147,15 +3147,12 @@ export default {
               this.loadCategories()
 
               // always start tour here
-              let isOnMobileDevice = window.matchMedia('(max-width: 550px)').matches
-              if (!isOnMobileDevice) {
-                this.$tours['myTour'].start()
+              this.$tours['myTour'].start()
 
-                const context = this
-                setTimeout(function () {
-                  context.scrollTo(0)
-                }, 2000)
-              }
+              const context = this
+              setTimeout(function () {
+                context.scrollTo(0)
+              }, 2000)
             } else {
               this.$q.notify({
                 color: 'red-5',
