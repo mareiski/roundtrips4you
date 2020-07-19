@@ -431,7 +431,7 @@
         </q-tooltip>
       </q-btn>
     </back-to-top>
-    <div
+    <!-- <div
       class="register-btn"
       v-if="!user && !isInTrialMode && $router.currentRoute.fullPath !== '/registrieren'"
     >
@@ -446,7 +446,7 @@
           label="Registrieren"
         />
       </router-link>
-    </div>
+    </div> -->
   </q-layout>
 </template>
 <style lang="less">
