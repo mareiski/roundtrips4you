@@ -141,7 +141,7 @@ export default {
         initDate = e
       })))
 
-      initDate.setDate(initDate.getDate() + 1)
+      // initDate.setDate(initDate.getDate() + 1)
 
       let cityName = city.name
 

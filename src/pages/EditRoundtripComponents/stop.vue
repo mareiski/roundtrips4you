@@ -1318,6 +1318,7 @@ export default {
               icon: 'check_circle'
             })
           }
+          if (field === 'Location') context.getParent('EditRoundtrips').getAndSaveCountries()
           if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
         })
       } catch (e) {

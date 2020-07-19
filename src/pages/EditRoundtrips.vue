@@ -1956,9 +1956,8 @@ export default {
       let days = 1
       let initDates = []
       let hotelCount = 0
-      let tempCountries = []
 
-      let promiseList = []
+      this.getAndSaveCountries()
 
       this.stops.forEach((stop, index) => {
         let dateTimeParts = stop.InitDate.split(' ')
@@ -1968,23 +1967,6 @@ export default {
 
         if (!initDates.includes(initDate)) initDates.push(initDate)
         if (stop.HotelName) hotelCount++
-
-        let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
-
-        promiseList.push(
-          axios.get(url)
-            .then(response => {
-              if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
-            })
-        )
-      })
-
-      Promise.all(promiseList).then(vals => {
-        this.countries = []
-        this.countries = tempCountries
-
-        // save countries
-        this.saveData('Location', this.countries)
       })
 
       if (initDates.length > 0) {
@@ -2012,6 +1994,29 @@ export default {
         this.saveData('Days', daysString)
       }
       this.saveData('Hotels', hotelCount)
+    },
+    getAndSaveCountries () {
+      let tempCountries = []
+      let promiseList = []
+
+      this.stops.forEach((stop, index) => {
+        let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
+
+        promiseList.push(
+          axios.get(url)
+            .then(response => {
+              if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
+            })
+        )
+      })
+
+      Promise.all(promiseList).then(vals => {
+        this.countries = []
+        this.countries = tempCountries
+
+        // save countries
+        this.saveData('Location', this.countries)
+      })
     },
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
