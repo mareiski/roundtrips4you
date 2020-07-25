@@ -10,7 +10,7 @@
       label="Hotelname suchen"
       style="width:300px; padding:0;"
       @click="hotelListVisible ? hotelListVisible = false : hotelListVisible = true"
-      :rules="val => val !== null && val !== '' || 'Bitte wähle ein Hotel'"
+      :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Hotel']"
     >
       <template v-slot:append>
         <q-btn
@@ -24,12 +24,16 @@
       <q-list>
         <q-item
           clickable
-          @click="hotel !== null ? [hotelName = hotel.hotel.name, hideHotelList(), $emit('update', hotel)] : showAddHotelDialog = true"
+          @click="hotel !== null ? [hotelName = hotel.name, hideHotelList(), $emit('update', hotel)] : showAddHotelDialog = true"
           v-show="hotelListVisible"
           v-for="hotel in hotels"
-          :key="hotel"
+          :key="hotel.geoId"
         >
-          {{hotel !== null ? hotel.hotel.name : 'Klicken um Hotel manuell hinzuzufügen'}}
+          <div
+            v-if="hotel !== null"
+            v-html="hotel.caption"
+          ></div>
+          {{hotel !== null ? '' : 'Klicken um Hotel manuell hinzuzufügen'}}
         </q-item>
       </q-list>
     </q-card>
@@ -115,12 +119,11 @@
     </q-dialog>
   </div>
 </template>
-<style lang="less" scoped>
+<style lang="less">
 @import url("../../css/hotelRegionSearch.less");
 </style>
 <script>
 const getAxios = () => import('axios')
-var querystring = require('querystring')
 
 export default {
   data () {
@@ -152,9 +155,9 @@ export default {
   methods: {
     searchHotel () {
       this.searchingForHotels = true
-      this.getHotels(this.hotelName, this.lat, this.long, this.checkInDate, this.checkOutDate, this.roomAmount, this.adults, this.childrenAges).then((results) => {
+      this.getHotels(this.hotelName).then((results) => {
         if (results !== null) {
-          this.hotels = results.data.data
+          this.hotels = results.data.suggestions[3].entities
           if (this.hotels.length === 0) this.hotels = { hotel: null }
         } else {
           this.hotels = { hotel: null }
@@ -165,16 +168,12 @@ export default {
     },
     addHotel () {
       let hotel = {
-        hotel: {
-          latitude: this.tempLocation.lat,
-          longitude: this.tempLocation.lng,
-          address: {
-            lines: [this.tempLocation.label]
-          },
-          rating: this.hotelStars,
-          name: this.hotelName,
-          contact: { email: this.hotelEmail }
-        }
+        latitude: this.tempLocation.lat,
+        longitude: this.tempLocation.lng,
+        address: this.tempLocation.label,
+        rating: this.hotelStars,
+        name: this.hotelName,
+        contact: { email: this.hotelEmail }
       }
       this.$emit('update', hotel)
       this.hideHotelList()
@@ -200,58 +199,23 @@ export default {
       this.hotels = null
       this.$refs.select.resetValidation()
     },
-    getHotels (hotelName, long, lat, checkInDate, checkOutDate, roomAmount, adults, childrenAges) {
+    getHotels (hotelName) {
       return new Promise((resolve, reject) => {
-        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-        const headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        const data = querystring.stringify({
-          grant_type: 'client_credentials', // gave the values directly for testing
-          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-          client_secret: 'lHQlUheyyAZtGQDA'
-        })
-
-        const dateTimeParts = checkInDate.split(' ')
-        let dateParts = dateTimeParts[0].split('.')
-        console.log(dateParts)
-        const formattedCheckInDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
-
-        dateParts = checkOutDate.split('.')
-        const formattedCheckOutDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
-
         getAxios().then(axios => {
-          axios.post(url, data, {
-            headers: headers,
-            form: {
-              'grant_type': 'client_credentials',
-              'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-              'client_secret': 'lHQlUheyyAZtGQDA'
+          axios.get('https://hotels4.p.rapidapi.com/locations/search?locale=de_DE&query=' + hotelName, {
+            headers: {
+              'content-type': 'application/octet-stream',
+              'x-rapidapi-host': 'hotels4.p.rapidapi.com',
+              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'useQueryString': true
             }
-          }).then(function (response) {
-            let token = response.data.access_token
-            const tokenString = 'Bearer ' + token
-
-            const offerUrl = 'https://api.amadeus.com/v2/shopping/hotel-offers?latitude=' + lat + '&longitude=' + long + '&hotelName=' +
-              hotelName + '&checkInDate=' + formattedCheckInDate + '&chechOutDate=' + formattedCheckOutDate + '&roomQuantity=' + roomAmount + '&adults=' +
-              adults + '&childAges' + childrenAges + '&includeClosed=true&radius=50&currency=EUR&lang=de&view=LIGHT'
-
-            axios.get(offerUrl, {
-              headers: {
-                'Authorization': tokenString
-              }
-            }).then(function (response) {
-              resolve(response)
-            }).catch(function (error) {
-              console.log('Error' + error)
+          }).then((response) => {
+            resolve(response)
+          })
+            .catch((error) => {
+              console.log(error)
               resolve(null)
             })
-          }).catch(function (error) {
-            console.log('Error on Authentication' + error)
-            resolve(null)
-          })
         })
       })
     }

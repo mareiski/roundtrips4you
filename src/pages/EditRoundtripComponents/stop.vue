@@ -107,9 +107,10 @@
               />
               <q-btn
                 flat
-                label="Hotel hinzufügen"
+                :label="addHotelDisabled ? 'Daten laden...' : 'Hotel hinzufügen'"
                 @click="addHotelToStop()"
                 color="primary"
+                :disable="addHotelDisabled"
                 v-close-popup
               />
             </q-card-actions>
@@ -363,13 +364,71 @@
                       color="gold"
                       style="margin-right:10px;"
                     />
+                    <div>
+                      <span class="raleway">
+                        {{guestRating}}
+                      </span>
+                      <span>
+                        <span class="raleway">ca. € </span>
+                        <span class="raleway">{{hotelPrice}}</span>
+                        <q-tooltip>ungefährer Durchschnittspreis</q-tooltip>
+                      </span>
+                    </div>
                   </q-item-label>
                   <q-item-label caption>
                     <a @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))">{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
                   </q-item-label>
                 </q-item-section>
+                <q-item-section>
 
-                <q-item-section :side="!editor">
+                  <q-btn
+                    style="width:150px;"
+                    @click="showTransportDialog = true"
+                  >Transport
+                  </q-btn>
+                </q-item-section>
+                <q-dialog v-model="showTransportDialog">
+                  <q-card>
+                    <q-card-section
+                      class="row items-center flex"
+                      style="flex-direction:column;"
+                    >
+                      <q-list>
+                        <div
+                          class="flex"
+                          style="flex-direction:column;"
+                          v-for="location in transportLocations"
+                          :key="location"
+                        >
+                          <q-item
+                            v-for="sublocation in location.locations"
+                            :key="sublocation"
+                            clickable
+                            @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + sublocation.name)"
+                          >
+                            <q-item-section>
+                              <span>
+                                <q-icon :name="getHotelTransportationIcon(location.category)" />
+                                <span>{{sublocation.name}}</span>
+                              </span>
+                              <p>{{sublocation.distanceInTime}}</p>
+                            </q-item-section>
+                          </q-item>
+                        </div>
+                      </q-list>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                      <q-btn
+                        flat
+                        label="OK"
+                        color="primary"
+                        v-close-popup
+                      />
+                    </q-card-actions>
+                  </q-card>
+                </q-dialog>
+                <q-item-section side>
                   <div v-if="generalLink && generalLink.length > 0">
                     <q-chip
                       icon="link"
@@ -383,20 +442,24 @@
                     icon="fab fa-bootstrap"
                     v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
-                    style="width:175px;"
+                    style="width:117px;"
                     class="linkChip"
                     clickable
                     @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
-                  > Hotel auf booking.com</q-chip>
+                  > booking.com
+                    <q-tooltip>Hotel auf booking.com</q-tooltip>
+                  </q-chip>
                   <q-chip
                     icon="house"
                     v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
-                    style="width:175px;"
+                    style="width:117px;"
                     class="linkChip"
                     clickable
                     @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
-                  > Hotel auf expedia</q-chip>
+                  > expedia
+                    <q-tooltip>Hotel auf expedia</q-tooltip>
+                  </q-chip>
                 </q-item-section>
                 <q-item-section
                   side
@@ -869,6 +932,9 @@ export default {
     lastItem: Boolean,
     hotelStars: Number,
     hotelName: String,
+    hotelPrice: Number,
+    guestRating: String,
+    transportLocations: Array,
     hotelLocation: Object,
     hotelContact: Object,
     checkOutDate: String,
@@ -913,6 +979,8 @@ export default {
       changeAllDatesActive: false,
       oldDate: null,
       sightDialogs: [],
+      showTransportDialog: false,
+      addHotelDisabled: true,
 
       editorFonts: {
         arial: 'Arial',
@@ -1125,38 +1193,91 @@ export default {
     },
     updateHotelData (event) {
       if (event !== null) {
-        let hotel = event.hotel
+        this.addHotelDisabled = true
+        let hotelLat = event.latitude
+        let hotelLng = event.longitude
 
-        let hotelLat = hotel.latitude
-        let hotelLng = hotel.longitude
+        this.hotelName = event.name
 
-        // capitalize cityName
-        let hotelLocationLabel = hotel.address.lines[0]
+        if (event.destinationId) {
+          axios.get('https://hotels4.p.rapidapi.com/properties/get-details?locale=de_DE&currency=EUR&id=' + event.destinationId, {
+            headers: {
+              'content-type': 'application/octet-stream',
+              'x-rapidapi-host': 'hotels4.p.rapidapi.com',
+              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'useQueryString': true
+            }
+          })
+            .then((response) => {
+              console.log(response)
 
-        this.hotelLocation = {
-          lng: hotelLat,
-          lat: hotelLng,
-          label: hotelLocationLabel
+              let body = response.data.data.body
+              let propertyDescription = body.propertyDescription
+
+              let label = propertyDescription.address.fullAddress
+
+              let avgPrice = propertyDescription.featuredPrice.currentPrice.plain
+
+              let guestRating = body.guestReviews.brands.formattedRating + ' ' + body.guestReviews.brands.badgeText
+
+              let transportLocations = response.data.transportation.transportLocations
+
+              this.writeHotelData(label, hotelLat, hotelLng, propertyDescription.starRating, avgPrice, guestRating, transportLocations)
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+        } else {
+          this.writeHotelData(event.label, hotelLat, hotelLng, null, null, null, null)
         }
+      }
+    },
+    writeHotelData (label, lat, lng, rating, price, guestRating, transportLocations) {
+      this.hotelLocation = {
+        lng: lat,
+        lat: lng,
+        label: label
+      }
 
-        typeof hotel.rating !== 'undefined' ? this.hotelStars = hotel.rating : this.hotelStars = null
+      price && typeof price !== 'undefined' ? this.hotelPrice = price : this.hotelPrice = null
 
-        this.hotelName = hotel.name
+      guestRating && typeof guestRating !== 'undefined' ? this.guestRating = guestRating : this.guestRating = null
 
-        this.hotelContact = hotel.contact
+      typeof transportLocations !== 'undefined' ? this.transportLocations = transportLocations : this.transportLocations = null
+
+      rating && typeof rating !== 'undefined' ? this.hotelStars = rating : this.hotelStars = null
+
+      this.addHotelDisabled = false
+
+      // if (contact) this.hotelContact = contact
+    },
+    getHotelTransportationIcon (category) {
+      switch (category) {
+        case 'airport':
+          return 'flight'
+        case 'train-station':
+          return 'train'
+        case 'metro':
+          return 'subway'
+        default:
+          return 'cummute'
       }
     },
     changeExpansion (expanded) {
       this.expanded = expanded
     },
     addHotelToStop () {
+      console.log(this.transportLocations)
       db.collection('RoundtripDetails').doc(this.docId).update({
         HotelLocation: this.hotelLocation,
         HotelStars: this.hotelStars,
         HotelContact: this.hotelContact,
         HotelName: this.hotelName,
         GeneralLink: this.generalTempLink,
-        CheckOutDate: this.checkOutDate
+        CheckOutDate: this.checkOutDate,
+        HotelPrice: this.hotelPrice,
+        GuestRating: this.guestRating,
+        TransportLocations: this.transportLocations
 
       }).then(results => {
         this.generalLink = this.generalTempLink
@@ -1169,6 +1290,12 @@ export default {
         parentStop.HotelName = this.hotelName
         parentStop.GeneralLink = this.generalTempLink
         parentStop.CheckOutDate = this.checkOutDate
+        parentStop.HotelPrice = this.hotelPrice
+        parentStop.GuestRating = this.guestRating
+
+        console.log(parentStops.TransportLocations)
+        console.log(this.transportLocations)
+        parentStops.TransportLocations = this.transportLocations
 
         this.$q.notify({
           color: 'green-4',
@@ -1184,7 +1311,10 @@ export default {
         HotelStars: null,
         HotelContact: null,
         HotelName: null,
-        GeneralLink: null
+        GeneralLink: null,
+        HotelPrice: null,
+        GuestRating: null,
+        TransportLocations: null
 
       }).then(results => {
         this.hotelName = null
@@ -1197,6 +1327,9 @@ export default {
         parentStop.HotelName = null
         parentStop.GeneralLink = null
         parentStop.CheckOutDate = null
+        parentStop.HotelPrice = null
+        parentStop.GuestRating = null
+        parentStop.TransportLocations = null
 
         this.$q.notify({
           color: 'green-4',
