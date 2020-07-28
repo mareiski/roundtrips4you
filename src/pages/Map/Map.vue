@@ -32,7 +32,7 @@
               @click="switchMapStyle(null)"
               v-close-popup
             >
-              <q-item-section>Standart</q-item-section>
+              <q-item-section>Standard</q-item-section>
             </q-item>
             <q-separator />
 
