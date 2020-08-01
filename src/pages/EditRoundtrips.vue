@@ -4,14 +4,16 @@
       class="flex"
       style="flex-direction:column;"
     >
-      <router-link
-        v-if="user"
-        style="text-decoration:none;"
-        to="/meine-rundreisen"
-      >
-        <q-icon name="keyboard_arrow_left"></q-icon>
-        zurück zu meinen Rundreisen
-      </router-link>
+      <div style="display:inline-block;">
+        <router-link
+          v-if="user"
+          style="text-decoration:none; display:inline-block;"
+          to="/meine-rundreisen"
+        >
+          <q-icon name="keyboard_arrow_left"></q-icon>
+          zurück zu meinen Rundreisen
+        </router-link>
+      </div>
       <div class="flex justify-between">
         <div style="display:inline-block;">
           <h3 v-show="!title">
@@ -2079,12 +2081,12 @@ export default {
         this.saveData('ChildrenAges', this.childrenAges)
       ) {
         this.submitting = false
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Rundreise wurde gespeichert'
-        })
+        // this.$q.notify({
+        //   color: 'green-4',
+        //   textColor: 'white',
+        //   icon: 'check_circle',
+        //   message: 'Rundreise wurde gespeichert'
+        // })
       } else {
         this.submitting = false
         this.$q.notify({

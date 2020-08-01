@@ -26,8 +26,8 @@
           clickable
           @click="hotel !== null ? [hotelName = hotel.name, hideHotelList(), $emit('update', hotel)] : showAddHotelDialog = true"
           v-show="hotelListVisible"
-          v-for="hotel in hotels"
-          :key="hotel.geoId"
+          v-for="(hotel, index) in hotels"
+          :key="hotel !== null ? hotel.geoId : index"
         >
           <div
             v-if="hotel !== null"
