@@ -29,7 +29,7 @@
           clickable
           @click="$router.push('/rundreise-bearbeiten/' + roundtrip.RTId)"
           v-ripple
-          v-for="(roundtrip, index) in roundtrips"
+          v-for="roundtrip in roundtrips"
           :key="roundtrip.RTId"
         >
           <q-item-section
@@ -40,7 +40,7 @@
               color="primary"
               text-color="white"
             >
-              <img :src="TitleImgs[index]">
+              <img :src="TitleImgs[TitleImgs.findIndex(x => x.docId === roundtrip.RTId)] ? TitleImgs[TitleImgs.findIndex(x => x.docId === roundtrip.RTId)].src : '../statics/dummy-image-landscape-1-150x150.jpg'">
             </q-avatar>
           </q-item-section>
 
@@ -721,7 +721,7 @@ export default {
                 InitDate: depatureDate || new Date(timeStamp),
                 Price: 0,
                 RTId: doc.id,
-                Title: this.tempLocation ? 'Start in ' + this.tempLocation.label : 'Titel des 1. Stopps',
+                Title: this.tempLocation ? 'Start in ' + this.tempLocation.label.split(',')[0] : 'Titel des 1. Stopps',
                 Location: this.tempLocation ? this.tempLocation : {
                   lng: '13.3888599',
                   lat: '52.5170365',
@@ -767,10 +767,10 @@ export default {
 
             var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
             fileRef.getDownloadURL().then(function (url) {
-              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
+              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, { src: url, docId: doc.data().RTId })
               context.RTIds.push(doc.data().RTId)
             }).catch(function () {
-              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, '../statics/dummy-image-landscape-1-150x150.jpg')
+              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, { src: '../statics/dummy-image-landscape-1-150x150.jpg', docId: doc.data().RTId })
             })
           })
           this.showNoRoundtripsText = snapshot.docs.length === 0

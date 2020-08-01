@@ -1444,12 +1444,12 @@ export default {
           ['' + field]: value
         }).then(function () {
           if (field !== 'Description') {
-            context.$q.notify({
-              message: 'Deine Änderungen wurde gespeichert',
-              color: 'green-4',
-              textColor: 'white',
-              icon: 'check_circle'
-            })
+            // context.$q.notify({
+            //   message: 'Deine Änderungen wurde gespeichert',
+            //   color: 'green-4',
+            //   textColor: 'white',
+            //   icon: 'check_circle'
+            // })
           }
           if (field === 'Location') context.getParent('EditRoundtrips').getAndSaveCountries()
           if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)

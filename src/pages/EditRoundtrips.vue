@@ -248,6 +248,8 @@
                   :key="'Stop' + stop.DocId"
                   v-if="index !== stops.length - 1"
                   :duration="durations[durations.findIndex(x => x.docId === stop.DocId)] && durations[durations.findIndex(x => x.docId === stop.DocId)].duration ? (durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance) : null"
+                  :origin="stop.Location.label"
+                  :destination="stops[index + 1 ] ? stops[index + 1 ].Location.label : null"
                   :editor="true"
                   :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
                   :doc-id="stop.DocId"

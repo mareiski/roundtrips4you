@@ -28,7 +28,11 @@
               <q-icon name="commute" />
             </template>
           </q-select>
-          <!-- <a :href="'https://www.google.com/maps/dir/?api=1&origin=' + route.origin + '&destination=' + route.destination">Diese Route auf Google anzeigen</a> -->
+          <a
+            v-if="destination"
+            target="_blank"
+            :href="'https://www.google.com/maps/dir/?api=1&origin=' + origin + '&destination=' + destination"
+          >Diese Route auf Google anzeigen</a>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn
@@ -67,8 +71,8 @@ export default {
     editor: Boolean,
     defaultProfile: String,
     roundtripProfile: String,
-    // origin: String,
-    // destination: String,
+    origin: String,
+    destination: String,
     docId: String
   },
   data () {
@@ -113,12 +117,12 @@ export default {
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
         }).then(function () {
-          context.$q.notify({
-            message: 'Deine Änderungen wurde gespeichert',
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle'
-          })
+          // context.$q.notify({
+          //   message: 'Deine Änderungen wurde gespeichert',
+          //   color: 'green-4',
+          //   textColor: 'white',
+          //   icon: 'check_circle'
+          // })
           context.defaultProfile = context.inputProfile
           let parent = context.getParent('EditRoundtrips')
           parent.loadRoundtripDetails(context.$route.params.id, false)
