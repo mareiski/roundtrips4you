@@ -509,29 +509,27 @@ export default {
       return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
     },
     onScroll () {
-      if (window.matchMedia('(max-width: 550px)').matches) {
-        const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
-        if (currentScrollPosition < 0) {
-          return
-        }
-        // Stop executing this function if the difference between
-        // current scroll position and last scroll position is less than some offset
-        if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
-          return
-        }
-        this.showHeader = currentScrollPosition < this.lastScrollPosition
-
-        let stickyEls = document.getElementsByClassName('sticky')
-        if (stickyEls.length > 0) {
-          if (window.pageYOffset + stickyEls[0].getBoundingClientRect().top >= 350) {
-            this.showHeader ? stickyEls[0].classList.remove('at-top') : stickyEls[0].classList.add('at-top')
-          } else {
-            stickyEls[0].classList.add('at-top')
-          }
-        }
-
-        this.lastScrollPosition = currentScrollPosition
+      const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
+      if (currentScrollPosition < 0) {
+        return
       }
+      // Stop executing this function if the difference between
+      // current scroll position and last scroll position is less than some offset
+      if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
+        return
+      }
+      if (window.matchMedia('(max-width: 550px)').matches) this.showHeader = currentScrollPosition < this.lastScrollPosition
+
+      let stickyEls = document.getElementsByClassName('sticky')
+      if (stickyEls.length > 0) {
+        if (window.pageYOffset + stickyEls[0].getBoundingClientRect().top >= 350) {
+          this.showHeader ? stickyEls[0].classList.remove('at-top') : stickyEls[0].classList.add('at-top')
+        } else {
+          stickyEls[0].classList.add('at-top')
+        }
+      }
+
+      this.lastScrollPosition = currentScrollPosition
     },
     hideLoading () {
       redirected = false
