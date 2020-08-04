@@ -174,6 +174,9 @@
                 @click="openInNewTab(tripWebsite)"
               >Bei {{creator.UserName}} buchen</q-btn>
             </div>
+            <div class="details-desctiption-container">
+              <p>{{roundtrip[0].Description}}</p>
+            </div>
           </q-timeline-entry>
           <template v-if="!stopsLoaded">
             <template v-for="n in 2">

@@ -159,10 +159,7 @@
                   @update="updateLocation($event)"
                 ></CitySearch>
                 <p>oder</p>
-                <q-btn
-                  color="primary"
-                  @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
-                >auf google anzeigen</q-btn>
+                <q-btn @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)">auf google anzeigen</q-btn>
               </q-card-section>
               <q-card-actions align="right">
                 <q-btn
@@ -1427,9 +1424,10 @@ export default {
       }
       return false
     },
-    saveDailyTrips (index, value, description) {
-      if (description) this.dailyTrips[index].descriptionInput = value
-      else this.dailyTrips[index].addedSights = value
+    saveDailyTrips (index, value, field) {
+      if (field === 'description') this.dailyTrips[index].descriptionInput = value
+      else if (field === 'sights') this.dailyTrips[index].addedSights = value
+      else if (field === 'date') this.dailyTrips[index].date = value
 
       this.saveData('DailyTrips', this.dailyTrips, false)
     },

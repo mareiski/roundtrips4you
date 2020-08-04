@@ -404,7 +404,10 @@
               ></q-img>
             </div>
             <div class="card-center-col">
-              <div class="card-row">
+              <div
+                class="card-row"
+                style="height: 50px;"
+              >
                 <span
                   class="card-category"
                   style="font-size:13px;"
