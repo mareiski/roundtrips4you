@@ -294,7 +294,7 @@
             <q-card>
               <q-card-section>
                 <q-form
-                  @submit="onAddEntry"
+                  @submit.prevent="onAddEntry"
                   class="q-gutter-md addEntryForm"
                   ref="addEntryForm"
                 >
@@ -352,82 +352,12 @@
                     :defaultLocation="null"
                     @update="updateLocation($event)"
                   ></CitySearch>
-                  <!-- <q-input
-                    v-if="selectedOption === 'Hotel'"
-                    filled
-                    label="Check Out Datum"
-                    v-model="checkOutDate"
-                    :rules="[date || 'Bitte gib ein richtiges Datum ein']"
-                    bottom-slots
-                    style="width:300px"
-                    class="input-item"
-                    outlined
-                  >
-                    <template v-slot:prepend>
-                      <q-icon
-                        name="event"
-                        class="cursor-pointer"
-                      >
-                        <q-popup-proxy
-                          transition-show="scale"
-                          transition-hide="scale"
-                        >
-                          <q-date
-                            v-model="checkOutDate"
-                            today-btn
-                            mask="DD.MM.YYYY"
-                          />
-                        </q-popup-proxy>
-                      </q-icon>
-                    </template>
-                  </q-input>
-                  <HotelSearch
-                    v-if="selectedOption === 'Hotel' && location.lat && checkOutDate"
-                    :lat="location.lng"
-                    :long="location.lat"
-                    :checkInDate="date"
-                    :checkOutDate="checkOutDate"
-                    :roomAmount="rooms"
-                    :adults="adults"
-                    :childrenAges="childrenAges"
-                    @update="updateHotelData($event)"
-                    ref="hotelSearch"
-                  ></HotelSearch> -->
                   <CitySearch
                     ref="parkingPlaceSearch"
                     :parkingPlaceSearch="true"
                     @update="updateParkingPlace($event)"
                     :defaultLocation="null"
                   ></CitySearch>
-                  <!-- <div v-if="selectedOption === 'Hotel'">
-                    <q-input
-                      v-model="generalTempLink"
-                      ref="urlInput"
-                      type="url"
-                      style="width:300px;"
-                      :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
-                      label="Hotel link (optional)"
-                      outlined
-                    >
-                      <template v-slot:prepend>
-                        <q-icon name="link" />
-                      </template>
-                    </q-input>
-                  </div> -->
-                  <!-- ##################################################################################### -->
-                  <!--<div
-                v-if="selectedOption === 'Hotel'"
-                class="flex"
-              >
-                <q-rating
-                  class="stars"
-                  v-model="tempStars"
-                  size="15px"
-                  color="gold"
-                  style="margin-right:10px;"
-                />
-                <q-item-label>Durchschittliche Hotelbewertung</q-item-label>
-              </div>-->
                   <div>
                     <q-btn
                       round
@@ -1632,6 +1562,7 @@ export default {
           message: 'Der Eintrag konnte nicht erstellt werden'
         })
       }
+      return false
     },
     searchOffers () {
       return new Promise((resolve, reject) => {
@@ -1687,177 +1618,178 @@ export default {
       return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     },
     addStop (DateString, Location, GeneralLink, parking) {
-      return new Promise((resolve, reject) => {
-        RTId = this.$route.params.id
+      RTId = this.$route.params.id
 
-        let InitDate = this.getDateFromString(DateString)
+      let InitDate = this.getDateFromString(DateString)
+
+      this.generalTempLink = null
+      if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
+      if (typeof this.$refs.citySearch !== 'undefined') this.$refs.citySearch.clear()
+
+      let locationLabel = Location.label
+      if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
+
+      db.collection('RoundtripDetails').add({
+        BookingComLink,
+        DateDistance,
+        Description: 'Beschreibung zu ' + locationLabel,
+        ExpediaLink,
+        GeneralLink,
+        ImageUrl,
+        InitDate,
+        Price,
+        RTId,
+        Title: 'Zwischenstopp in ' + locationLabel,
+        Location,
+        Parking: parking
+      }).then(results => {
+        // clear all values
+        if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
 
         this.generalTempLink = null
-        if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
-        if (typeof this.$refs.citySearch !== 'undefined') this.$refs.citySearch.clear()
+        this.location = {}
 
-        let locationLabel = Location.label
-        if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
-        db.collection('RoundtripDetails').add({
-          BookingComLink,
-          DateDistance,
+        if (this.$refs.citySearch) this.$refs.citySearch.clear()
+        if (this.$refs.parkingPlaceSearch) this.$refs.parkingPlaceSearch.clear()
+
+        this.addExpanded = false
+
+        let docId = results.id
+        let newStopObject = {
+          BookingComLink: BookingComLink,
+          DateDistance: DateDistance,
           Description: 'Beschreibung zu ' + locationLabel,
-          ExpediaLink,
-          GeneralLink,
-          ImageUrl,
-          InitDate,
-          Price,
-          RTId,
+          ExpediaLink: ExpediaLink,
+          GeneralLink: GeneralLink,
+          ImageUrl: ImageUrl,
+          InitDate: DateString,
+          Price: Price,
+          RTId: RTId,
           Title: 'Zwischenstopp in ' + locationLabel,
-          Location,
-          Parking: parking
-        }).then(results => {
-          // clear all values
-          if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
-          this.generalTempLink = null
-          this.location = {}
-          if (this.$refs.citySearch) this.$refs.citySearch.clear()
-          if (this.$refs.parkingPlaceSearch) this.$refs.parkingPlaceSearch.clear()
+          Location: Location,
+          Parking: parking,
+          DocId: docId,
+          expanded: false
+        }
+        console.log('push Stop')
 
-          this.addExpanded = false
+        this.stops.splice((this.stops.length - 1), 0, newStopObject)
 
-          let docId = results.id
-          let newStopObject = {
-            BookingComLink: BookingComLink,
-            DateDistance: DateDistance,
-            Description: 'Beschreibung zu ' + locationLabel,
-            ExpediaLink: ExpediaLink,
-            GeneralLink: GeneralLink,
-            ImageUrl: ImageUrl,
-            InitDate: DateString,
-            Price: Price,
-            RTId: RTId,
-            Title: 'Zwischenstopp in ' + locationLabel,
-            Location: Location,
-            Parking: parking,
-            DocId: docId,
-            expanded: false
+        // this.stops.push(newStopObject)
+
+        // resort stops
+        // this.stops.sort(this.compare)
+        this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
+
+        // save all values like in load roundtrip details
+        let initDates = []
+        let hotelCount = 0
+        let days = 0
+        let daysString = ''
+
+        // get dates
+        this.stops.forEach((stop) => {
+          let initDate = stop.InitDate
+          if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
+
+          if (this.stops.indexOf(stop) === this.stops.length - 1) {
+            // add one day
+            const currentInitDate = this.getDateFromString(initDate)
+            const newInitDate = this.getDateFromString(initDate)
+
+            newInitDate.setDate(currentInitDate.getDate() + 1)
+            this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
           }
-          console.log('push Stop')
 
-          this.stops.push(newStopObject)
-          console.log(this.stops)
+          if (stop.HotelName) hotelCount++
 
-          // resort stops
-          this.stops.sort(this.compare)
-          this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
+          if (!initDates.includes(initDate)) initDates.push(initDate)
+        })
 
-          // save all values like in load roundtrip details
-          let initDates = []
-          let hotelCount = 0
-          let days = 0
-          let daysString = ''
+        if (initDates.length > 0) {
+          let maxDate = new Date(Math.max.apply(null, initDates))
+          let minDate = new Date(Math.min.apply(null, initDates))
 
-          // get dates
-          this.stops.forEach((stop) => {
-            let initDate = stop.InitDate
-            if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
+          days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+        }
 
-            if (this.stops.indexOf(stop) === this.stops.length - 1) {
-              // add one day
-              const currentInitDate = this.getDateFromString(initDate)
-              const newInitDate = this.getDateFromString(initDate)
+        this.initDates = initDates
 
-              newInitDate.setDate(currentInitDate.getDate() + 1)
-              this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
+        if (days < 5) {
+          daysString = '< 5 Tage'
+        } else if (days >= 5 && days <= 8) {
+          daysString = '5-8 Tage'
+        } else if (days >= 9 && days <= 11) {
+          daysString = '9-11 Tage'
+        } else if (days >= 12 && days <= 15) {
+          daysString = '12-15 Tage'
+        } else if (days > 15) {
+          daysString = '> 15 Tage'
+        }
+
+        // save days and hotels
+        if (daysString.length > 0) {
+          this.saveData('Days', daysString)
+        }
+        this.saveData('Hotels', hotelCount)
+
+        this.durations = []
+        let tempUrls = []
+        let tempUrlDocObjects = []
+
+        this.stops.forEach((stop, index) => {
+          if (index >= 1) {
+            let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+              [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+              index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+            if (url) {
+              tempUrls.push(url)
+              tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
             }
-
-            if (stop.HotelName) hotelCount++
-
-            if (!initDates.includes(initDate)) initDates.push(initDate)
-          })
-
-          if (initDates.length > 0) {
-            let maxDate = new Date(Math.max.apply(null, initDates))
-            let minDate = new Date(Math.min.apply(null, initDates))
-
-            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+          } else {
+            if (this.stops.length === 1) this.stopsLoaded = true
           }
 
-          this.initDates = initDates
+          // if its the last stop
+          if (index === this.stops.length - 1) {
+            this.stopsLoaded = true
 
-          if (days < 5) {
-            daysString = '< 5 Tage'
-          } else if (days >= 5 && days <= 8) {
-            daysString = '5-8 Tage'
-          } else if (days >= 9 && days <= 11) {
-            daysString = '9-11 Tage'
-          } else if (days >= 12 && days <= 15) {
-            daysString = '12-15 Tage'
-          } else if (days > 15) {
-            daysString = '> 15 Tage'
-          }
-
-          // save days and hotels
-          if (daysString.length > 0) {
-            this.saveData('Days', daysString)
-          }
-          this.saveData('Hotels', hotelCount)
-
-          this.durations = []
-          let tempUrls = []
-          let tempUrlDocObjects = []
-
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) {
-              let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
-                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
-
-              if (url) {
-                tempUrls.push(url)
-                tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
-              }
-            } else {
-              if (this.stops.length === 1) this.stopsLoaded = true
-            }
-
-            // if its the last stop
-            if (index === this.stops.length - 1) {
-              this.stopsLoaded = true
-
-              // get durations
-              const urls = tempUrls
-              const queue = new TaskQueue(Promise, 5)
-              Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
-                results.forEach((result, resultIndex) => {
-                  const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
-                  this.writeDuration(result.data.routes[0], docId)
-                })
+            // get durations
+            const urls = tempUrls
+            const queue = new TaskQueue(Promise, 5)
+            Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+              results.forEach((result, resultIndex) => {
+                const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+                this.writeDuration(result.data.routes[0], docId)
               })
-            }
-          })
+            })
+          }
+        })
 
-          this.getTripDuration()
+        this.getTripDuration()
 
-          this.saveRoundtripDaysAndHotels()
+        this.saveRoundtripDaysAndHotels()
 
-          this.currentExpansionStates.push({ docId: docId, expanded: false })
+        this.currentExpansionStates.push({ docId: docId, expanded: false })
 
-          // reload Map
-          console.log('LoadMap')
-          console.log(this.stops)
-          if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
+        // reload Map
+        console.log('LoadMap')
+        console.log(this.stops)
+        if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
 
-          let context = this
-          setTimeout(function () {
-            const el = document.getElementsByClassName('stop' + docId)[0]
+        // let context = this
+        // setTimeout(function () {
+        //   const el = document.getElementsByClassName('stop' + docId)[0]
 
-            if (el) context.scrollTo(el.offsetTop)
-          }, 500)
+        //   if (el) context.scrollTo(el.offsetTop)
+        // }, 500)
 
-          this.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Eintrag wurde erstellt'
-          })
-          resolve(true)
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'check_circle',
+          message: 'Eintrag wurde erstellt'
         })
       })
     },
