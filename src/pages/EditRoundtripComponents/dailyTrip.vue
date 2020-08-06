@@ -15,6 +15,80 @@
       <q-expansion-item expand-separator>
         <q-card>
           <q-card-section>
+            <span v-if="editor">
+              <q-popup-proxy
+                v-if="editor"
+                ref="qDateProxy"
+                transition-show="scale"
+                transition-hide="scale"
+                persistent
+              >
+                <q-date
+                  v-model="dailyTrip.date"
+                  today-btn
+                  mask="DD.MM.YYYY HH:mm"
+                />
+                <div
+                  class="flex justify-between"
+                  style="width:100%"
+                >
+                  <q-btn
+                    style="margin:10px;"
+                    v-close-popup
+                    @click="dailyTrip.date = oldDate"
+                  >abbrechen</q-btn>
+                  <q-btn
+                    color="primary"
+                    style="margin:10px;"
+                    @click="[saveDate(false), $refs.qTimeProxy.show()]"
+                    v-close-popup
+                  >weiter</q-btn>
+                </div>
+              </q-popup-proxy>
+              Datum/Zeit ändern
+              <q-icon
+                v-if="editor"
+                size="16px"
+                name="event"
+              />
+            </span>
+            <span>
+              <q-popup-proxy
+                v-if="editor"
+                ref="qTimeProxy"
+                transition-show="scale"
+                transition-hide="scale"
+                persistent
+              >
+                <q-time
+                  v-model="dailyTrip.date"
+                  mask="DD.MM.YYYY HH:mm"
+                  format24h
+                />
+                <div
+                  class="flex justify-between"
+                  style="width:100%"
+                >
+                  <q-btn
+                    style="margin:10px;"
+                    v-close-popup
+                    @click="dailyTrip.date = oldDate"
+                  >abbrechen</q-btn>
+                  <q-btn
+                    color="primary"
+                    style="margin:10px;"
+                    @click="saveDate(true)"
+                    v-close-popup
+                  >fertig</q-btn>
+                </div>
+              </q-popup-proxy>
+              Zeit ändern
+              <q-icon
+                v-if="editor"
+                size="16px"
+                name="access_time"
+              />
+            </span>
             <div v-if="editor">
               <q-select
                 label="Sehenswürdigkeiten hinzufügen"
@@ -288,7 +362,8 @@ export default {
       dialogImgSrc: null,
       imgDialogVisible: false,
       chooseImgDialog: false,
-      tempImgLink: null
+      tempImgLink: null,
+      oldDate: null
     }
   },
   methods: {
@@ -296,8 +371,12 @@ export default {
       this.getParent('stop').deleteDailyTrip(this.index)
     },
     saveWork () {
-      this.getParent('stop').saveDailyTrips(this.index, this.dailyTrip.descriptionInput, true)
+      this.getParent('stop').saveDailyTrips(this.index, this.dailyTrip.descriptionInput, 'description')
       this.savedEditorContent = this.dailyTrip.descriptionInput
+    },
+    saveDate () {
+      this.getParent('stop').saveDailyTrips(this.index, this.dailyTrip.date, 'date')
+      this.oldDate = this.dailyTrip.date
     },
     formatOn () {
       this.preventPasting = !this.preventPasting
@@ -315,7 +394,7 @@ export default {
       if (this.addedSights !== this.oldAddedSights) {
         this.oldAddedSights = this.addedSights
 
-        this.getParent('stop').saveDailyTrips(this.index, this.addedSights, false)
+        this.getParent('stop').saveDailyTrips(this.index, this.addedSights, 'sights')
       }
     },
     showImgDialog (src) {
@@ -378,6 +457,7 @@ export default {
   },
   created () {
     this.oldAddedSights = this.addedSights
+    this.oldDate = this.dailyTrip.date
   }
 }
 </script>
