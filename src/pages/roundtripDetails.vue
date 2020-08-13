@@ -68,11 +68,9 @@
     <q-carousel
       animated
       v-model="slide"
-      navigation
       infinite
       :autoplay="10000"
       swipeable
-      control-color="white"
       padding
       arrows
     >

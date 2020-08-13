@@ -18,7 +18,7 @@
         v-model="sort"
         input-debounce="0"
         :options="sortOptions"
-        label="Filter"
+        label="Sortieren"
         style="padding:0 10px 0 0"
         @input="sortRoundtrips($event)"
       >
@@ -104,6 +104,7 @@
           <q-expansion-item
             label="Filter"
             bordered
+            v-model="isNotMobile"
             class="rounded-borders filter-expansion-label"
           >
             <q-expansion-item
@@ -580,6 +581,9 @@ export default {
   computed: {
     user () {
       return this.$store.getters['user/user']
+    },
+    isNotMobile () {
+      return !window.matchMedia('(max-width: 550px)').matches
     }
   },
   methods: {
@@ -754,12 +758,14 @@ export default {
           snapshot.forEach(doc => {
             if (doc.data().OfferWholeYear || (this.OfferPeriod !== null && this.OfferPeriod.length > 0 && doc.data().OfferStartPeriod.seconds * 1000 <= offerPeriod.getTime() && doc.data().OfferEndPeriod.seconds * 1000 >= offerPeriod.getTime())) {
               originalRoundtripArr.push(doc.data())
+              originalRoundtripArr.reverse()
               this.loadTitleImg(doc.id, doc.data().RTId)
 
               // load user data
               this.loadUserData(doc.data().UserId)
 
               roundtripArr.push(doc.data())
+              roundtripArr.reverse()
             }
           })
 
