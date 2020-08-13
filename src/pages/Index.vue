@@ -332,7 +332,7 @@
 import(/* webpackPrefetch: true */ '../css/home.less')
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
-import { db } from '../firebaseInit.js'
+import { db, auth } from '../firebaseInit.js'
 
 export default {
   meta: {
@@ -392,9 +392,13 @@ export default {
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       Title = Title.trim()
 
+      if (auth.user() !== null) {
+        this.$router.push('/rundreise-bearbeiten/1jf34893f&' + Title)
+      }
+
       try {
-        let timeStamp = Date.now()
         let tempRTId = Math.floor(Math.random() * 10000000000000)
+        let timeStamp = Date.now()
 
         db.collection('Roundtrips').add({
           Category: 'Gruppenreise',
@@ -427,7 +431,6 @@ export default {
               })
 
               // todo save doc id in store
-
               db.collection('RoundtripDetails').add({
                 BookingComLink: '',
                 DateDistance: '',

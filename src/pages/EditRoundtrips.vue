@@ -1508,7 +1508,7 @@ export default {
 
         if (index === suggestedStops.length - 1) this.stops = suggestedStops
       })
-      // this.loadSingleRoundtrip(this.$route.params.id)
+      // this.fetchSingleRoundtrip(this.$route.params.id)
       // this.fetchRoundtripStops(this.$route.params.id, false)
     },
     /**
@@ -2009,6 +2009,7 @@ export default {
      * Delete the current roundtrip
      */
     deleteRoundtrip () {
+      console.log(roundtripDocId)
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
       try {
         this.$store.dispatch('roundtrips/deleteRoundtrip', roundtripDocId).then(success => {
@@ -2021,34 +2022,8 @@ export default {
         })
       } catch (error) {
         console.log(error)
+        sharedMethods.showErrorNotification('Die Rundreise konnte nicht gelöscht werden')
       }
-      // if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
-      // let roundtripsRef = db.collection('RoundtripDetails')
-      //   .where('RTId', '==', roundtripDocId)
-      // roundtripsRef.get()
-      //   .then(snapshot => {
-      //     details = []
-      //     snapshot.forEach(doc => {
-      //       db.collection('RoundtripDetails').doc(doc.id).delete()
-      //     })
-      //   })
-      // db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
-      //   context.$q.notify({
-      //     color: 'green-4',
-      //     textColor: 'white',
-      //     icon: 'check_circle',
-      //     message: 'Rundreise wurde gelöscht'
-      //   })
-      //   context.$router.push('/meine-rundreisen')
-      // }).catch(function (error) {
-      //   console.log(error)
-      //   context.$q.notify({
-      //     color: 'red-5',
-      //     textColor: 'white',
-      //     icon: 'error',
-      //     message: 'Die Rundreise konnte nicht gelöscht werden'
-      //   })
-      // })
     },
     /**
      * Save the current trip (save all fields)
@@ -2162,7 +2137,7 @@ export default {
     getDestinations (val, update, abort) {
       sharedMethods.filterAirports(val, update, abort, false, context)
     },
-    loadSingleRoundtrip (RTId) {
+    fetchSingleRoundtrip (RTId) {
       this.shareLink = 'https://roundtrips4you.de/MapWidget/' + RTId
       this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + RTId + '"></iframe>'
 
@@ -3004,6 +2979,28 @@ export default {
 
       this.RTId = RTId
 
+      // secred id if user is logged in but goes into trial mode -> create a normal new roundtrip
+      if (RTId === '1jf34893f') {
+        try {
+          this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: title, uid: auth.user().uid, rooms: 1, adults: 2, childrenAges: null, tempLocation: null, depatureDate: null }).then(docId => {
+            if (docId && docId !== null) {
+              roundtripDocId = docId
+              this.fetchSingleRoundtrip(docId)
+              this.fetchRoundtripStops(docId, false)
+              this.fetchCategories()
+              this.getUserData()
+              this.getUserRoundtrips()
+            } else {
+              sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+            }
+          })
+        } catch (error) {
+          console.log(error)
+          sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+        }
+        return
+      }
+
       this.stars = !isNaN(this.hotelRatingAvg()) ? this.hotelRatingAvg() : 3
 
       let roundtripsRef = db.collection('Roundtrips')
@@ -3011,6 +3008,7 @@ export default {
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
+          roundtripDocId = snapshot.docs[0].id
           if (snapshot.empty) sharedMethods.showErrorNotification('Diese Reise existiert leider nicht (mehr)')
           if (snapshot.docs[0].data().UserId) {
             if (auth.user() === null) this.$router.push('/login')
@@ -3018,7 +3016,7 @@ export default {
             let isPublic = snapshot.docs[0].data().Public === true
 
             if (isCreator) {
-              this.loadSingleRoundtrip(RTId)
+              this.fetchSingleRoundtrip(RTId)
               this.fetchRoundtripStops(RTId, false)
               this.fetchCategories()
               this.getUserData()
@@ -3026,37 +3024,22 @@ export default {
             } else if (isPublic) {
               this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
             } else {
-              this.$q.notify({
-                color: 'red-5',
-                textColor: 'white',
-                icon: 'error',
-                message: 'Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat'
-              })
+              sharedMethods.showErrorNotification('Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat')
               this.$router.push('/meine-rundreisen')
             }
           } else {
-            if (auth.user() === null) {
-              // trial roundtrip
-              this.isInTrialMode = true
-              this.loadSingleRoundtrip(RTId)
-              this.fetchRoundtripStops(RTId, false)
-              this.fetchCategories()
+            // trial roundtrip
+            this.isInTrialMode = true
+            this.fetchSingleRoundtrip(RTId)
+            this.fetchRoundtripStops(RTId, false)
+            this.fetchCategories()
 
-              // always start tour here
-              this.$tours['myTour'].start()
+            // always start tour here
+            this.$tours['myTour'].start()
 
-              setTimeout(function () {
-                sharedMethods.scrollToOffset(0)
-              }, 2000)
-            } else {
-              this.$q.notify({
-                color: 'red-5',
-                textColor: 'white',
-                icon: 'error',
-                message: 'Ooops du hast bereits einen Account bei uns'
-              })
-              this.$router.push('/meine-rundreisen')
-            }
+            setTimeout(function () {
+              sharedMethods.scrollToOffset(0)
+            }, 2000)
           }
         })
     })

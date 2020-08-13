@@ -146,8 +146,11 @@ export default {
                     'RTId': doc.id
                   })
 
-                  let dateParts = payload.depatureDate.split('.')
-                  let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+                  let depatureDate = null
+                  if (payload.depatureDate) {
+                    const dateParts = payload.depatureDate.split('.')
+                    depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+                  }
 
                   db.collection('RoundtripDetails').add({
                     BookingComLink: '',
