@@ -1,5 +1,5 @@
 import state from './state'
-import { auth } from '../../firebaseInit'
+import { auth } from '../../firebaseInit.js'
 
 export default {
   namespaced: true,

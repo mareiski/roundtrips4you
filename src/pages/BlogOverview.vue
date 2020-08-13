@@ -86,10 +86,13 @@ export default {
     }
   },
   created: function () {
-    this.getAllPosts()
+    this.fetchAllPosts()
   },
   methods: {
-    getAllPosts () {
+    /**
+     * Fetch all posts from storyblok
+     */
+    fetchAllPosts () {
       this.$storyblok.get({
         slug: '/',
         starts_with: 'blog',

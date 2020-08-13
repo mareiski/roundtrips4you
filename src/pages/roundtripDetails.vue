@@ -2,7 +2,7 @@
   <div class="roundtrip-details q-px-lg q-pb-md">
     <div
       class="edit-btn-container"
-      v-if="user !== null && (!roundtrip[0] || user.uid !== roundtrip[0].UserId)"
+      v-if="user !== null && (!roundtrip || user.uid !== roundtrip.UserId)"
       style="position:absolute; z-index:1; right:0; padding: 10px"
     >
       <q-btn
@@ -50,7 +50,7 @@
               flat
               v-close-popup
               :disable="disableEditBtn"
-              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip[0].RTId +'&' + title)"
+              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
             />
           </q-card-actions>
         </q-card>
@@ -58,7 +58,7 @@
     </div>
     <div class="back-link">
       <a
-        @click="prevRouteParams && prevRouteParams.length > 0 ? $router.go(-1) : $router.push('/rundreisen/'  + roundtrip[0].Location[0])"
+        @click="prevRouteParams && prevRouteParams.length > 0 ? $router.go(-1) : $router.push('/rundreisen/'  + roundtrip.Location[0])"
         style="text-decoration:none;"
       >
         <q-icon name="keyboard_arrow_left"></q-icon>
@@ -90,7 +90,7 @@
       </q-carousel-slide>
     </q-carousel>
     <div class="carousel-placeholder">
-      <h1>{{roundtrip[0] ? roundtrip[0].Title : null}}</h1>
+      <h1>{{roundtrip ? roundtrip.Title : null}}</h1>
     </div>
     <q-tabs
       v-model="tab"
@@ -128,10 +128,10 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>Reiseverlauf {{roundtrip[0] ? '- ' + roundtrip[0].Title : null}}</span>
+              <span>Reiseverlauf {{roundtrip ? '- ' + roundtrip.Title : null}}</span>
               <q-toggle
                 style="font-size:18px"
-                @input="expandAllStops()"
+                @input="sharedMethods.expandAllStops(getContext, stops)"
                 v-model="allStopsExpanded"
                 label="Stopps ausklappen"
               ></q-toggle>
@@ -141,8 +141,8 @@
               <p v-if="!creator.companyProfile">Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
               <span v-if="creator.UserName">Diese Rundreise wurde von </span>
               <router-link
-                v-if="roundtrip[0]"
-                :to="'/benutzerprofil/' + roundtrip[0].UserId"
+                v-if="roundtrip"
+                :to="'/benutzerprofil/' + roundtrip.UserId"
               >
                 {{creator.UserName}}<q-tooltip>
                   <q-avatar
@@ -175,7 +175,7 @@
               >Bei {{creator.UserName}} buchen</q-btn>
             </div>
             <div class="details-desctiption-container">
-              <p>{{roundtrip[0].Description}}</p>
+              <p>{{roundtrip.Description}}</p>
             </div>
           </q-timeline-entry>
           <template v-if="!stopsLoaded">
@@ -258,7 +258,7 @@
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                @expansionChanged="expansionChanged($event)"
+                @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
                 :doc-id="stop.DocId"
                 :profile="stop.Profile"
                 :lastItem="index === stops.length -1"
@@ -391,15 +391,16 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
-import { db, storage, auth } from '../firebaseInit'
+import { db, storage, auth } from '../firebaseInit.js'
 const getAxios = () => import('axios')
 import { TaskQueue } from 'cwait'
+import sharedMethods from '../sharedMethods'
 
 let details = []
-let roundtrip = []
 let messages = []
 
-let roundtripDocId = null
+// context of the vue app (set in mounted)
+let context
 
 export default {
   components: {
@@ -450,6 +451,12 @@ export default {
   computed: {
     user () {
       return this.$store.getters['user/user']
+    },
+    sharedMethods () {
+      return sharedMethods
+    },
+    getContext () {
+      return context
     }
   },
   meta () {
@@ -462,33 +469,24 @@ export default {
   },
   methods: {
     loadSingleRoundtrip (RTId) {
-      let roundtripsRef = db.collection('Roundtrips')
-        .where('RTId', '==', RTId)
-        .limit(1)
-      roundtripsRef.get()
-        .then(snapshot => {
-          roundtrip = []
-          snapshot.forEach(doc => {
-            roundtrip.push(doc.data())
-            this.loadUserData(doc.data().UserId)
-            roundtripDocId = doc.id
-          })
-          this.inputProfile = roundtrip[0].Profile
+      this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
+        this.roundtrip = roundtrip
+        this.loadUserData(roundtrip.UserId)
+        this.inputProfile = roundtrip.Profile
 
-          // set default values to ensure privacy
-          this.childrenAges = []
-          this.rooms = 1
-          this.adults = 2
-          this.roundtrip = roundtrip
-          this.profile = this.getProfile(roundtrip[0].Profile)
-          this.tripWebsite = roundtrip[0].tripWebsite
+        // set default values to ensure privacy
+        this.childrenAges = []
+        this.rooms = 1
+        this.adults = 2
+        this.roundtrip = roundtrip
+        this.profile = this.getProfile(roundtrip.Profile)
+        this.tripWebsite = roundtrip.tripWebsite
 
-          this.loadGaleryImgs()
-          this.getUserRatings(RTId)
-        })
-        .catch(err => {
-          console.log('Error getting Roundtrip', err)
-        })
+        this.loadGaleryImgs()
+        this.getUserRatings(RTId)
+      }).catch(err => {
+        console.log('Error getting Roundtrip', err)
+      })
     },
     getStringDateFromTimestamp (timestamp) {
       const initDate = new Date(timestamp.seconds * 1000)
@@ -533,18 +531,6 @@ export default {
             context.creator = doc.data()
           })
         })
-    },
-    expandAllStops () {
-      let context = this
-      this.stops.forEach(stop => {
-        if (context.allStopsExpanded) {
-          if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(true)
-        } else context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
-      })
-    },
-    expansionChanged (event) {
-      this.allStopsExpanded = false
-      this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
     loadRoundtripDetails (RTId, retrievedDate) {
       this.selectedCountry = this.country
@@ -781,7 +767,7 @@ export default {
     },
     loadGaleryImgs () {
       const context = this
-      let fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery')
+      let fileRef = storage.ref().child('Images/Roundtrips/' + this.roundtrip.docId + '/Galery')
       fileRef.listAll().then(function (res) {
         res.items.forEach(function (itemRef) {
           fileRef = storage.ref().child(itemRef.fullPath)
@@ -806,6 +792,9 @@ export default {
       }
       return false
     }
+  },
+  mounted () {
+    context = this
   },
   created () {
     const params = this.$route.params.id

@@ -236,7 +236,6 @@
             </span>
             <a
               target="_blank"
-              style="text-decoration:none;"
               :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
             >weitere auf Google</a>
             oder auf der Karte
@@ -351,7 +350,7 @@
 
                 <q-item-section>
                   <q-item-label lines="1">
-                    {{capitalize(hotelName)}}
+                    {{sharedMethods.capitalize(hotelName)}}
                     <q-rating
                       v-if="hotelStars && !isNaN(hotelStars)"
                       class="stars"
@@ -546,7 +545,7 @@
                 round
                 color="primary"
                 icon="filter"
-                style="position: absolute; margin-top:-60px; margin-left:65px;"
+                style="position: absolute; margin-top:-113px; margin-left:120px;"
                 @click="showImgDialog(stopImage)"
               >
               </q-btn>
@@ -899,9 +898,10 @@
   </q-timeline-entry>
 </template>
 <script>
-import { db } from '../../firebaseInit'
+import { db } from '../../firebaseInit.js'
 import { date, scroll } from 'quasar'
 import axios from 'axios'
+import sharedMethods from '../../sharedMethods'
 
 var querystring = require('querystring')
 const { setScrollPosition } = scroll
@@ -915,6 +915,11 @@ export default {
     CitySearch: () => import('../Map/CitySearch'),
     HotelSearch: () => import('../Map/HotelSearch'),
     DailyTrip: () => import('./dailyTrip')
+  },
+  computed: {
+    sharedMethods () {
+      return sharedMethods
+    }
   },
   props: {
     title: String,
@@ -1047,7 +1052,7 @@ export default {
   methods: {
     saveDate (refresh) {
       const lastScrollPos = document.documentElement.scrollTop
-      let newInitDate = this.getDateFromString(this.date)
+      let newInitDate = sharedMethods.getDateFromString(this.date)
 
       // time entry also has changed
       if (refresh) {
@@ -1064,7 +1069,7 @@ export default {
           context.getParent('EditRoundtrips').resortAndPrepareStops(newInitDate, context.docId)
         }
         setTimeout(function () {
-          context.scrollTo(lastScrollPos)
+          sharedMethods.scrollToOffset(lastScrollPos)
         }, 500)
       })
     },
@@ -1158,12 +1163,6 @@ export default {
       } else {
         return true
       }
-    },
-    getDateFromString (value) {
-      let dateTimeParts = value.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -1366,9 +1365,9 @@ export default {
       }
     },
     changeAllDates () {
-      let millis = this.getDateFromString(this.date).valueOf() - this.getDateFromString(this.oldDate).valueOf()
+      let millis = sharedMethods.getDateFromString(this.date).valueOf() - sharedMethods.getDateFromString(this.oldDate).valueOf()
       this.oldDate = this.date
-      this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.docId, millis, this.getDateFromString(this.date))
+      this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.docId, millis, sharedMethods.getDateFromString(this.date))
     },
     deleteDailyTrip (index) {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
@@ -1449,7 +1448,7 @@ export default {
             //   icon: 'check_circle'
             // })
           }
-          if (field === 'Location') context.getParent('EditRoundtrips').getAndSaveCountries()
+          if (field === 'Location') context.getParent('EditRoundtrips').fetchAndSaveCountries()
           if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
         })
       } catch (e) {
@@ -1471,7 +1470,7 @@ export default {
       this.savedEditorContent = this.descriptionInput
     },
     updateLocation (event) {
-      if (event !== null) {
+      if (event !== null && this.location.label !== event.label) {
         this.tempLocation = {
           lng: event.x,
           lat: event.y,
@@ -1591,7 +1590,7 @@ export default {
         return false
       }
 
-      this.getParent('EditRoundtrips').removeEntry(this.docId)
+      this.getParent('EditRoundtrips').removeStop(this.docId)
 
       const context = this
       db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
@@ -1726,8 +1725,8 @@ export default {
       })
     },
     compare (a, b) {
-      const dateA = this.getDateFromString(a.date)
-      const dateB = this.getDateFromString(b.date)
+      const dateA = sharedMethods.getDateFromString(a.date)
+      const dateB = sharedMethods.getDateFromString(b.date)
 
       if (dateA > dateB) return 1
       if (dateB > dateA) return -1
@@ -1751,7 +1750,7 @@ export default {
   },
   mounted () {
     if (this.lastItem) {
-      this.getParent('EditRoundtrips').scrollTo(this.$refs.lastTimelineEntry)
+      sharedMethods.scrollToOffset(this.$refs.lastTimelineEntry)
     }
   }
 }

@@ -106,7 +106,7 @@
         <q-icon
           class="scroll-down-icon cursor-pointer"
           name="keyboard_arrow_down"
-          @click="scrollTo('sndSection')"
+          @click="sharedMethods.scrollToRef('sndSection')"
         />
       </div>
       <div
@@ -332,7 +332,7 @@
 import(/* webpackPrefetch: true */ '../css/home.less')
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
-import { db } from '../firebaseInit'
+import { db } from '../firebaseInit.js'
 
 export default {
   meta: {

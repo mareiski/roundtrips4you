@@ -653,19 +653,7 @@ export default {
         }
       })
     },
-    getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
-      var R = 6371 // Radius of the earth in km
-      var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
-      var dLon = this.deg2rad(lon2 - lon1)
-      var a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
 
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-      var d = R * c // Distance in km
-      return d
-    },
     deg2rad (deg) {
       return deg * (Math.PI / 180)
     },
@@ -793,9 +781,6 @@ export default {
         const avgLat = Math.floor((Number(startLocation.lat) + Number(endLocation.lat)) / 2)
 
         let centerLocation = [avgLng, avgLat]
-
-        // let distance = this.getDistanceFromLatLonInKm(Number(startLocation.lng), Number(startLocation.lat), Number(endLocation.lng), Number(endLocation.lat))
-        // let avgDistance = Math.floor(distance / 100) > 0 ? Math.floor(distance / 100) + ' km' : null
 
         // add route marker
         this.addedRoutes.push({ location: centerLocation, duration: null, distance: null, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })

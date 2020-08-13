@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 import routes from './routes'
-// import { auth } from '../firebaseInit'
+// import { auth } from '../firebaseInit.js'
 
 Vue.use(VueRouter)
 

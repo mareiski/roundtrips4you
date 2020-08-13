@@ -68,7 +68,7 @@
 </style>
 <script>
 import axios from 'axios'
-import { db } from '../../firebaseInit'
+import { db } from '../../firebaseInit.js'
 
 export default {
   data () {

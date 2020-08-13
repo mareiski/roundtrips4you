@@ -454,7 +454,7 @@
 </style>
 <script>
 // import(/* webpackPrefetch: true */ '../css/site.less')
-import { auth, db } from '../firebaseInit'
+import { auth, db } from '../firebaseInit.js'
 import { Loading, date } from 'quasar'
 
 let forEachCalled = false
@@ -498,7 +498,7 @@ export default {
   },
   methods: {
     logOut () {
-      auth.logout(this.$router)
+      auth.logout(this.$router, this.$store)
     },
     hideMenu () {
       this.$refs.svg.classList.remove('active')

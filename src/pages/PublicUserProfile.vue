@@ -202,7 +202,7 @@
 </template>
 <script>
 import(/* webpackPrefetch: true */ '../css/publicUserProfile.less')
-import { db, storage, auth } from '../firebaseInit'
+import { db, storage, auth } from '../firebaseInit.js'
 import { date } from 'quasar'
 
 export default {
@@ -216,7 +216,6 @@ export default {
       createdRoundtrips: [],
       showRoundtrips: false,
       TitleImgs: [],
-      RTIds: [],
       userSince: null,
       trustedUser: false,
       title: 'User',
@@ -279,7 +278,6 @@ export default {
             var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
             fileRef.getDownloadURL().then(function (url) {
               context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, url)
-              context.RTIds.push(doc.data().RTId)
             }).catch(function (error) {
               console.log(error)
               context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, '../statics/dummy-image-landscape-1-150x150.jpg')

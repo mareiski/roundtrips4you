@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-import { auth } from '../firebaseInit'
+import { auth } from '../firebaseInit.js'
 
 var actionCodeSettings = {
   url: 'https://roundtrips4you.de/login',

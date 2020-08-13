@@ -22,7 +22,7 @@
   </div>
 </template>
 <script>
-import { db } from '../firebaseInit'
+import { db } from '../firebaseInit.js'
 import { Loading } from 'quasar'
 
 let roundtrip = []

@@ -244,7 +244,7 @@
 </template>
 
 <script>
-import { auth, storage, db } from '../firebaseInit'
+import { auth, storage, db } from '../firebaseInit.js'
 
 export default {
   meta: {
@@ -285,7 +285,7 @@ export default {
   },
   methods: {
     logOut () {
-      auth.logout(this.$router)
+      auth.logout(this.$router, this.$store)
     },
     fileAdded: function (event) {
       let files = event

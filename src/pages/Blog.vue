@@ -127,18 +127,21 @@ export default {
   },
   created: function () {
     this.$storyblok.on('change', () => {
-      this.loadStory('draft')
+      this.fetchStory('draft')
     })
     this.$storyblok.on('published', () => {
-      this.loadStory('draft')
+      this.fetchStory('draft')
     })
-
     this.$storyblok.pingEditor(() => {
-      this.loadStory(this.$storyblok.inEditor ? 'draft' : 'published')
+      this.fetchStory(this.$storyblok.inEditor ? 'draft' : 'published')
     })
   },
   methods: {
-    loadStory (version) {
+    /**
+     * Load story for the current page url
+     * @param {String} version only used for editing (eg. draft, published)
+     */
+    fetchStory (version) {
       this.loading = true
       this.$storyblok.get({
         slug: 'blog/' + this.$route.params.name,
@@ -158,6 +161,10 @@ export default {
         this.loading = false
       })
     },
+    /**
+     * Get styles for single paragraph from abbreviations
+     * @param {*} paragraph element with style to choose
+     */
     getStyle (paragraph) {
       let style = paragraph.marks[0].type
       switch (style) {

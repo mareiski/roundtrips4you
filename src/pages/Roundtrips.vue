@@ -195,8 +195,8 @@
                 </q-item-section>
               </template>
               <q-checkbox
-                v-for="attr in roundtripAttr"
-                :key="attr"
+                v-for="(attr, index) in roundtripAttr"
+                :key="index"
                 :label="attr"
                 v-model="filteredRoundtripAttr"
                 :val="attr"
@@ -513,7 +513,7 @@
 <script>
 import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { date } from 'quasar'
-import { db, storage } from '../firebaseInit'
+import { db, storage } from '../firebaseInit.js'
 import { countries } from '../countries'
 
 let timeStamp = Date.now()

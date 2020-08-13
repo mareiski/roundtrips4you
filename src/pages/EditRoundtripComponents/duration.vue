@@ -64,7 +64,7 @@
   </q-timeline-entry>
 </template>
 <script>
-import { db } from '../../firebaseInit'
+import { db } from '../../firebaseInit.js'
 export default {
   props: {
     duration: String,

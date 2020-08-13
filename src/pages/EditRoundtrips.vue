@@ -118,7 +118,7 @@
       animated
       ref="tabPanels"
       keep-alive
-      @transition="scrollTo(0)"
+      @transition="sharedMethods.scrollToOffset(0)"
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
@@ -136,7 +136,7 @@
               <h4>Reiseverlauf</h4>
               <q-toggle
                 style="font-size:18px"
-                @input="expandAllStops()"
+                @input="sharedMethods.expandAllStops(getContext, stops)"
                 v-model="allStopsExpanded"
                 :disable="!stopsLoaded"
                 label="alle Stopps ausklappen"
@@ -241,7 +241,7 @@
                   :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
                   :expanded="stop.expanded"
                   :profile="stop.Profile"
-                  @expansionChanged="expansionChanged($event)"
+                  @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
                   :class="'stop' + stop.DocId"
                   :ref="stop.DocId"
                 ></Stop>
@@ -294,7 +294,7 @@
             <q-card>
               <q-card-section>
                 <q-form
-                  @submit.prevent="onAddEntry"
+                  @submit.prevent="onAddStop"
                   class="q-gutter-md addEntryForm"
                   ref="addEntryForm"
                 >
@@ -323,7 +323,6 @@
                             today-btn
                             mask="DD.MM.YYYY HH:mm"
                           />
-                          <!--  :options="dateOptions" -->
                         </q-popup-proxy>
                       </q-icon>
                     </template>
@@ -400,7 +399,7 @@
               <q-btn
                 flat
                 label="Rundreise automatisch erstellen"
-                @click="setToShortestRoute()"
+                @click="setTripToShortestRoute()"
                 color="primary"
                 v-close-popup
               />
@@ -452,7 +451,7 @@
                 hide-dropdown-icon
                 label="Abflugsort"
                 :options="originOptions"
-                @filter="getOrigins"
+                @filter="getFlightOrigins"
                 style="width:300px;"
                 @blur="onSaveArrivalDepature"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
@@ -787,7 +786,6 @@
                   mask="DD.MM.YYYY"
                   @input="() => [$refs.qDateProxy1.hide(), OfferEndPeriod = OfferStartPeriod]"
                 />
-                <!-- :options="dateOptions" -->
               </q-popup-proxy>
               <template v-slot:prepend>
                 <q-icon
@@ -1163,15 +1161,14 @@
 @import "../css/editRoundtrips.less";
 </style>
 <script>
-import { date, scroll, Loading } from 'quasar'
-import { auth, db, storage } from '../firebaseInit'
+import { date, Loading } from 'quasar'
+import { auth, db, storage } from '../firebaseInit.js'
 import { countries } from '../countries'
 import axios from 'axios'
 import { TaskQueue } from 'cwait'
-var querystring = require('querystring')
-require('vue-tour/dist/vue-tour.css')
+import sharedMethods from '../sharedMethods'
 
-const { setScrollPosition } = scroll
+require('vue-tour/dist/vue-tour.css')
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY HH:mm')
@@ -1187,10 +1184,12 @@ let BookingComLink = '',
 
 let details = []
 let documentIds = []
-let roundtrip = []
 let roundtripDocId = ''
 let galeryImgId = 0
 let tempLastClickLocation = {}
+
+// context of vue app (set in mounted)
+let context
 
 export default {
   name: 'EditRoundtrips',
@@ -1284,8 +1283,8 @@ export default {
       tripDistance: 0,
       isInTrialMode: false,
       tourCallbacks: {
-        onPreviousStep: this.previousTourStep,
-        onNextStep: this.nextTourStep
+        onPreviousStep: this.onPreviosTourStep,
+        onNextStep: this.onNextTourStep
       },
 
       tourOptions: {
@@ -1358,16 +1357,20 @@ export default {
   computed: {
     user () {
       return this.$store.getters['user/user']
+    },
+    sharedMethods () {
+      return sharedMethods
+    },
+    getContext () {
+      return context
     }
   },
   methods: {
-    dateOptions (date) {
-      let compareDate = this.getDateFromString(formattedDate)
-      const currentDate = new Date(date)
-
-      return currentDate >= compareDate
-    },
-    previousTourStep (currentStep) {
+    /**
+     * Called when user goes one step back in tour
+     * @param {number} currentStep current step as number (before change)
+     */
+    onPreviosTourStep (currentStep) {
       if (currentStep === 2) {
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 3) {
@@ -1379,9 +1382,13 @@ export default {
       } else if (currentStep === 6) {
         this.$refs.tabPanels.goTo('map')
       }
-      this.scrollTo(0)
+      sharedMethods.scrollToOffset(0)
     },
-    nextTourStep (currentStep) {
+    /**
+     * Called when user goes one step forward in tour
+     * @param {number} currentStep current step as number (before change)
+     */
+    onNextTourStep (currentStep) {
       if (currentStep === 0) {
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 1) {
@@ -1393,10 +1400,15 @@ export default {
       } else if (currentStep === 4) {
         this.$refs.tabPanels.goTo('map')
       }
-      this.scrollTo(0)
+      sharedMethods.scrollToOffset(0)
     },
-    copyShareLink (elName) {
-      let testingCodeToCopy = document.querySelector('#' + elName)
+    /**
+     * Copy share link of roundtrip to clipboard
+     * @param {String} elementId the id of the element, where the link to copy is
+     * @example copyShareLink('share-link-element')
+     */
+    copyShareLink (elementId) {
+      let testingCodeToCopy = document.querySelector('#' + elementId)
       testingCodeToCopy.setAttribute('type', 'text')
       testingCodeToCopy.select()
 
@@ -1417,28 +1429,13 @@ export default {
         })
       }
 
-      /* unselect the range */
+      // unselect the range
       testingCodeToCopy.setAttribute('type', 'hidden')
       window.getSelection().removeAllRanges()
     },
-    expandAllStops () {
-      let context = this
-      this.stops.forEach(stop => {
-        if (context.allStopsExpanded) {
-          if (context.$refs[stop.DocId]) context.$refs[stop.DocId][0].changeExpansion(true)
-        } else context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
-      })
-    },
-    expansionChanged (event) {
-      this.allStopsExpanded = false
-      this.currentExpansionStates[this.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
-    },
-    getDateFromString (val) {
-      const dateTimeParts = val.split(' ')
-      const dateParts = dateTimeParts[0].split('.')
-      const timeParts = dateTimeParts[1].split(':')
-      return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
-    },
+    /**
+     * Quasar date options for offer period
+     */
     scheduleDateOptions (date) {
       const dateTimeParts = this.OfferStartPeriod.split(' ')
       const dateParts = dateTimeParts[0].split('.')
@@ -1447,6 +1444,10 @@ export default {
 
       return currentDate > compareDate
     },
+    /**
+     * Open booking.com flights in a new tab
+     * @requires childrenAges, originCode, destinationCode, adults, travelClass, depatureDate, returnDate
+     */
     openBookingComFlights () {
       let childrenAgeString = ''
       this.childrenAges.forEach((childAge, index) => {
@@ -1455,9 +1456,13 @@ export default {
       })
 
       let url = 'https://flights.booking.com/flights/' + this.originCode + '-' + this.destinationCode + '/?type=ROUNDTRIP&adults=' + this.adults +
-        '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getDepatureReturnDate(this.depatureDate) + '&return=' + this.getDepatureReturnDate(this.returnDate) + '&sort=BEST'
+        '&cabinClass=' + this.travelClass.replace(/ /g, '_').toUpperCase() + '&children=' + childrenAgeString + '&depart=' + this.getFormattedDepatureReturnDate(this.depatureDate) + '&return=' + this.getFormattedDepatureReturnDate(this.returnDate) + '&sort=BEST'
       window.open(url, '_blank')
     },
+    /**
+     * Open booking.com flights in a new tab
+     * @requires childrenAges, originCode, destinationCode, adults, travelClass, depatureDate, returnDate
+     */
     openFluegeDeFlights () {
       let babies = 0
       let children = 0
@@ -1472,19 +1477,27 @@ export default {
       let url = 'https://www.fluege.de/flight/wait/?sFlightInput%5BflightType%5D=RT&sFlightInput%5BstoreSearch%5D=true&sFlightInput%5Bf0%5D%5BdepLocation%5D=' + this.originCode +
         '&sFlightInput%5Bf0%5D%5BaccMultiAirportDep%5D=&sFlightInput%5Bf0%5D%5BdepAirport%5D=' + this.originCode +
         '&sFlightInput%5Bf0%5D%5BarrLocation%5D=' + this.destinationCode + ' &sFlightInput%5Bf0%5D%5BaccMultiAirportArr%5D=' + this.destinationCode +
-        '&sFlightInput%5Bf0%5D%5BarrAirport%5D=' + this.destinationCode + '&sFlightInput%5Bf0%5D%5Bdate%5D=' + this.getDepatureReturnDate(this.depatureDate) +
-        '&sFlightInput%5Bf1%5D%5Bdate%5D=' + this.getDepatureReturnDate(this.returnDate) + '&sFlightInput%5BpaxAdt%5D=' + this.adults + '&sFlightInput%5BpaxChd%5D=' + children +
+        '&sFlightInput%5Bf0%5D%5BarrAirport%5D=' + this.destinationCode + '&sFlightInput%5Bf0%5D%5Bdate%5D=' + this.getFormattedDepatureReturnDate(this.depatureDate) +
+        '&sFlightInput%5Bf1%5D%5Bdate%5D=' + this.getFormattedDepatureReturnDate(this.returnDate) + '&sFlightInput%5BpaxAdt%5D=' + this.adults + '&sFlightInput%5BpaxChd%5D=' + children +
         '&sFlightInput%5BpaxInf%5D=' + babies + '&sFlightInput%5BcabinClass%5D=' + cabinClass + '&sFlightInput%5BdepAirline%5D=&sFlightInput%5BareaSearch%5D=TRUE&pop%5Bf24%5D=on&sFlightInput%5Bf0%5D%5BtimeRange%5D=2&sFlightInput%5Bf1%5D%5BtimeRange%5D=2'
       window.open(url, '_blank')
     },
+    /**
+     * Get class abbreviation from travel class string
+     * @param {String} travelClass travel class string
+     */
     getFluegeDeClass (travelClass) {
       if (travelClass === 'Economy' || travelClass === 'Premium Economy') return 'y'
       else if (travelClass === 'Business') return 'C'
       else return 'F'
     },
-    setToShortestRoute () {
+    /**
+     * Set roundtrip to shortest route possible (get it from getShortestRoute & reset init dates)
+     * @see getShortestRoute()
+     */
+    setTripToShortestRoute () {
       let suggestedStops = this.getShortestRoute()
-      let initDate = this.getDateFromString(this.stops[0].InitDate)
+      let initDate = sharedMethods.getDateFromString(this.stops[0].InitDate)
 
       suggestedStops.forEach((stop, index) => {
         db.collection('RoundtripDetails').doc(stop.DocId).update({
@@ -1496,8 +1509,12 @@ export default {
         if (index === suggestedStops.length - 1) this.stops = suggestedStops
       })
       // this.loadSingleRoundtrip(this.$route.params.id)
-      // this.loadRoundtripDetails(this.$route.params.id, false)
+      // this.fetchRoundtripStops(this.$route.params.id, false)
     },
+    /**
+     * Get shortest route in comparing the distances between every stop
+     * @see getShortestDistance()
+     */
     getShortestRoute () {
       let stopsTaken = [this.stops[0]]
       this.stops.forEach((stop, index) => {
@@ -1510,6 +1527,12 @@ export default {
       })
       return stopsTaken
     },
+    /**
+     * Get shortest distance between two stops
+     * @param originStop the origin to start from
+     * @param {Array} stopsTaken array of stops already in suggested route
+     * @see getDinstanceFromLatLonInKm()
+     */
     getShortestDistance (originStop, stopsTaken) {
       let distances = []
       let stop = null
@@ -1530,6 +1553,10 @@ export default {
       }
       return stop
     },
+    /**
+     * Get the distance between two lat lng positions in km
+     * @example getDistanceFromLatLonInKm(42.2, 11.2, 42.6, 11.6)
+     */
     getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
       var R = 6371 // Radius of the earth in km
       var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
@@ -1546,7 +1573,11 @@ export default {
     deg2rad (deg) {
       return deg * (Math.PI / 180)
     },
-    onAddEntry () {
+    /**
+     * Called when add new stop event is fired -> call add stop method
+     * @see addStop()
+     */
+    onAddStop () {
       if (!this.isDateTimeValid()) return false
       this.addExpanded = false
       this.addButtonActive = false
@@ -1564,63 +1595,71 @@ export default {
       }
       return false
     },
-    searchOffers () {
-      return new Promise((resolve, reject) => {
-        const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
-        let context = this
+    // searchOffers () {
+    //   return new Promise((resolve, reject) => {
+    //     const url = 'https://test.api.amadeus.com/v1/security/oauth2/token'
 
-        const headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
+    //     const headers = {
+    //       'Content-Type': 'application/x-www-form-urlencoded'
+    //     }
 
-        const data = querystring.stringify({
-          grant_type: 'client_credentials', // gave the values directly for testing
-          client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-          client_secret: '5NLWAdMXnOyNxWnk'
-        })
+    //     const data = querystring.stringify({
+    //       grant_type: 'client_credentials', // gave the values directly for testing
+    //       client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+    //       client_secret: '5NLWAdMXnOyNxWnk'
+    //     })
 
-        axios.post(url, data, {
-          headers: headers,
-          form: {
-            'grant_type': 'client_credentials',
-            'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-            'client_secret': '5NLWAdMXnOyNxWnk'
-          }
-        }).then(function (response) {
-          let token = response.data.access_token
-          const tokenString = 'Bearer ' + token
+    //     axios.post(url, data, {
+    //       headers: headers,
+    //       form: {
+    //         'grant_type': 'client_credentials',
+    //         'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
+    //         'client_secret': '5NLWAdMXnOyNxWnk'
+    //       }
+    //     }).then(function (response) {
+    //       let token = response.data.access_token
+    //       const tokenString = 'Bearer ' + token
 
-          let nonStopFlight = context.nonStop === 'Ja'
+    //       let nonStopFlight = context.nonStop === 'Ja'
 
-          axios.get('https://test.api.amadeus.com/v1/shopping/flight-offers?origin=' + context.originCode +
-            '&destination=' + context.destinationCode + '&departureDate=' + context.getDepatureReturnDate(context.depatureDate) +
-            '&travelClass=' + context.travelClass.toUpperCase() + '&nonStop=' + nonStopFlight + '&max=10&currency=EUR', {
-            headers: {
-              'Authorization': tokenString
-            }
-          }).then(function (response) {
-            resolve(response)
-          }).catch(function (error) {
-            console.log('Error' + error)
-            resolve(null)
-          })
-        }).catch(function (error) {
-          console.log('Error on Authentication' + error)
-          resolve(null)
-        })
-      })
-    },
-    validOfferSearchData () {
-      return this.originCode && this.destinationCode && this.depatureDate && this.travelClass && this.nonStop && this.arrivalDepatureProfile === 'Flugzeug'
-    },
-    getDepatureReturnDate (dateString) {
+    //       axios.get('https://test.api.amadeus.com/v1/shopping/flight-offers?origin=' + context.originCode +
+    //         '&destination=' + context.destinationCode + '&departureDate=' + context.getFormattedDepatureReturnDate(context.depatureDate) +
+    //         '&travelClass=' + context.travelClass.toUpperCase() + '&nonStop=' + nonStopFlight + '&max=10&currency=EUR', {
+    //         headers: {
+    //           'Authorization': tokenString
+    //         }
+    //       }).then(function (response) {
+    //         resolve(response)
+    //       }).catch(function (error) {
+    //         console.log('Error' + error)
+    //         resolve(null)
+    //       })
+    //     }).catch(function (error) {
+    //       console.log('Error on Authentication' + error)
+    //       resolve(null)
+    //     })
+    //   })
+    // },
+    /**
+     * Reformat date for third parties (eg. booking.com)
+     * @returns string date in format jjjj-mm-dd
+     */
+    getFormattedDepatureReturnDate (dateString) {
       let dateParts = dateString.split('.')
       return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     },
-    addStop (DateString, Location, GeneralLink, parking) {
+    /**
+     * Add stop to trip
+     * @param DateString init date of stop as string
+     * @param Location location object of new stop (contains: lat, lng, label)
+     * @param Parking same as location but with parking location
+     * @todo check if general link is neccessary
+     * @important don't remove or move to another file (this method is also called from stop file)
+     */
+    addStop (DateString, Location, GeneralLink, Parking) {
       RTId = this.$route.params.id
 
-      let InitDate = this.getDateFromString(DateString)
+      let InitDate = sharedMethods.getDateFromString(DateString)
 
       this.generalTempLink = null
       if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
@@ -1641,7 +1680,7 @@ export default {
         RTId,
         Title: 'Zwischenstopp in ' + locationLabel,
         Location,
-        Parking: parking
+        Parking: Parking
       }).then(results => {
         // clear all values
         if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
@@ -1667,7 +1706,7 @@ export default {
           RTId: RTId,
           Title: 'Zwischenstopp in ' + locationLabel,
           Location: Location,
-          Parking: parking,
+          Parking: Parking,
           DocId: docId,
           expanded: false
         }
@@ -1675,10 +1714,8 @@ export default {
 
         this.stops.splice((this.stops.length - 1), 0, newStopObject)
 
-        // this.stops.push(newStopObject)
-
         // resort stops
-        // this.stops.sort(this.compare)
+        this.stops.sort(this.compare)
         this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
 
         // save all values like in load roundtrip details
@@ -1694,8 +1731,8 @@ export default {
 
           if (this.stops.indexOf(stop) === this.stops.length - 1) {
             // add one day
-            const currentInitDate = this.getDateFromString(initDate)
-            const newInitDate = this.getDateFromString(initDate)
+            const currentInitDate = sharedMethods.getDateFromString(initDate)
+            const newInitDate = sharedMethods.getDateFromString(initDate)
 
             newInitDate.setDate(currentInitDate.getDate() + 1)
             this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
@@ -1769,7 +1806,7 @@ export default {
 
         this.getTripDuration()
 
-        this.saveRoundtripDaysAndHotels()
+        this.saveFrequentlyChangingData()
 
         this.currentExpansionStates.push({ docId: docId, expanded: false })
 
@@ -1778,7 +1815,6 @@ export default {
         console.log(this.stops)
         if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
 
-        // let context = this
         // setTimeout(function () {
         //   const el = document.getElementsByClassName('stop' + docId)[0]
 
@@ -1793,7 +1829,12 @@ export default {
         })
       })
     },
-    removeEntry (stopDocId) {
+    /**
+     * Remove stop from trip
+     * @param stopDocId firebase document id of the stop to remove
+     * @important don't remove or move to another file (this method is also called from stop file)
+     */
+    removeStop (stopDocId) {
       this.documentIds.splice(this.documentIds.indexOf(stopDocId), 1)
 
       this.stops.splice(this.stops.findIndex(x => x.DocId === stopDocId), 1)
@@ -1811,8 +1852,8 @@ export default {
 
         if (this.stops.indexOf(stop) === this.stops.length - 1) {
           // add one day
-          const currentInitDate = this.getDateFromString(initDate)
-          const newInitDate = this.getDateFromString(initDate)
+          const currentInitDate = sharedMethods.getDateFromString(initDate)
+          const newInitDate = sharedMethods.getDateFromString(initDate)
 
           newInitDate.setDate(currentInitDate.getDate() + 1)
           this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
@@ -1883,20 +1924,23 @@ export default {
 
       this.getTripDuration()
 
-      this.saveRoundtripDaysAndHotels()
+      this.saveFrequentlyChangingData()
 
       this.currentExpansionStates.splice(this.currentExpansionStates.findIndex(x => x.docId === stopDocId), 1)
 
       // reload Map
       if (this.$refs.map) this.$refs.map.loadMap(null)
     },
-    saveRoundtripDaysAndHotels () {
+    /**
+     * Save saveFrequentlyChangingData (eg. days, hotels & countries)
+     */
+    saveFrequentlyChangingData () {
       let daysString = ''
       let days = 1
       let initDates = []
       let hotelCount = 0
 
-      this.getAndSaveCountries()
+      this.fetchAndSaveCountries()
 
       this.stops.forEach((stop, index) => {
         let dateTimeParts = stop.InitDate.split(' ')
@@ -1934,7 +1978,11 @@ export default {
       }
       this.saveData('Hotels', hotelCount)
     },
-    getAndSaveCountries () {
+    /**
+     * fetch trip countries and save them
+     * @important don't remove or move to another file (this method is also called from stop file)
+     */
+    fetchAndSaveCountries () {
       let tempCountries = []
       let promiseList = []
 
@@ -1957,36 +2005,54 @@ export default {
         this.saveData('Location', this.countries)
       })
     },
+    /**
+     * Delete the current roundtrip
+     */
     deleteRoundtrip () {
       if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
-      const context = this
-      let roundtripsRef = db.collection('RoundtripDetails')
-        .where('RTId', '==', roundtripDocId)
-      roundtripsRef.get()
-        .then(snapshot => {
-          details = []
-          snapshot.forEach(doc => {
-            db.collection('RoundtripDetails').doc(doc.id).delete()
-          })
+      try {
+        this.$store.dispatch('roundtrips/deleteRoundtrip', roundtripDocId).then(success => {
+          if (success) {
+            sharedMethods.showSuccessNotification('Rundreise wurde gelöscht')
+            context.$router.push('/meine-rundreisen')
+          } else {
+            sharedMethods.showErrorNotification('Die Rundreise konnte nicht gelöscht werden')
+          }
         })
-      db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Rundreise wurde gelöscht'
-        })
-        context.$router.push('/meine-rundreisen')
-      }).catch(function (error) {
+      } catch (error) {
         console.log(error)
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Die Rundreise konnte nicht gelöscht werden'
-        })
-      })
+      }
+      // if (roundtripDocId === null || roundtripDocId === '' || roundtripDocId === 'undefined') return false
+      // let roundtripsRef = db.collection('RoundtripDetails')
+      //   .where('RTId', '==', roundtripDocId)
+      // roundtripsRef.get()
+      //   .then(snapshot => {
+      //     details = []
+      //     snapshot.forEach(doc => {
+      //       db.collection('RoundtripDetails').doc(doc.id).delete()
+      //     })
+      //   })
+      // db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
+      //   context.$q.notify({
+      //     color: 'green-4',
+      //     textColor: 'white',
+      //     icon: 'check_circle',
+      //     message: 'Rundreise wurde gelöscht'
+      //   })
+      //   context.$router.push('/meine-rundreisen')
+      // }).catch(function (error) {
+      //   console.log(error)
+      //   context.$q.notify({
+      //     color: 'red-5',
+      //     textColor: 'white',
+      //     icon: 'error',
+      //     message: 'Die Rundreise konnte nicht gelöscht werden'
+      //   })
+      // })
     },
+    /**
+     * Save the current trip (save all fields)
+     */
     onSaveRoundtrip () {
       this.submitting = true
 
@@ -2029,6 +2095,9 @@ export default {
         })
       }
     },
+    /**
+     * Save arrival and depature data
+     */
     onSaveArrivalDepature () {
       this.submitting = true
 
@@ -2066,12 +2135,6 @@ export default {
           })
         } else {
           this.submitting = false
-          this.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Die Daten konnten nicht gespeichert werden'
-          })
         }
       } else {
         if (this.saveData('TransportProfile', this.arrivalDepatureProfile)) {
@@ -2084,193 +2147,97 @@ export default {
           })
         } else {
           this.submitting = false
-          this.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Die Daten konnten nicht gespeichert werden'
-          })
         }
       }
     },
-    filterFn (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
+    /**
+     * Quasar select filter for flight origins (filter airports)
+     */
+    getFlightOrigins (val, update, abort) {
+      sharedMethods.filterAirports(val, update, abort, true, context)
     },
-    getOrigins (val, update, abort) {
-      this.filterAirports(val, update, abort, true)
-    },
+    /**
+     *  Quasar select filter for flight destinations (filter airports)
+     */
     getDestinations (val, update, abort) {
-      this.filterAirports(val, update, abort, false)
-    },
-    filterAirports (val, update, abort, originSearch) {
-      if (val.length < 3) {
-        abort()
-        return
-      }
-      if (val.length >= 3) {
-        this.getAirports(val).then((results) => {
-          update(() => {
-            if (!results) return false
-
-            if (originSearch) {
-              this.originOptions = []
-              this.originCodes = []
-            } else {
-              this.destinationOptions = []
-              this.destinationCodes = []
-            }
-
-            results.data.data.forEach(city => {
-              if (originSearch) {
-                this.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                this.originCodes.push(city.iataCode)
-              } else {
-                this.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                this.destinationCodes.push(city.iataCode)
-                this.destinationAddresses.push(this.capitalize(city.address.cityName))
-              }
-            })
-          }).catch(e => {
-            return false
-          })
-        })
-      }
-    },
-    capitalize (s) {
-      s = s.toLowerCase()
-      s = s.charAt(0).toUpperCase() + s.slice(1)
-      return s
-    },
-    getAirports (val) {
-      return new Promise((resolve, reject) => {
-        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-        const headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        const data = querystring.stringify({
-          grant_type: 'client_credentials',
-          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-          client_secret: 'lHQlUheyyAZtGQDA'
-        })
-
-        axios.post(url, data, {
-          headers: headers,
-          form: {
-            'grant_type': 'client_credentials',
-            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-            'client_secret': 'lHQlUheyyAZtGQDA'
-          }
-        }).then(function (response) {
-          let token = response.data.access_token
-          const tokenString = 'Bearer ' + token
-
-          axios.get('https://api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
-            headers: {
-              'Authorization': tokenString
-            }
-          }).then(function (response) {
-            resolve(response)
-          }).catch(function (error) {
-            console.log('Error' + error)
-            resolve(null)
-          })
-        }).catch(function (error) {
-          console.log('Error on Authentication' + error)
-          resolve(null)
-        })
-      })
+      sharedMethods.filterAirports(val, update, abort, false, context)
     },
     loadSingleRoundtrip (RTId) {
       this.shareLink = 'https://roundtrips4you.de/MapWidget/' + RTId
       this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + RTId + '"></iframe>'
-      let roundtripsRef = db.collection('Roundtrips')
-        .where('RTId', '==', RTId)
-        .limit(1)
-      roundtripsRef.get()
-        .then(snapshot => {
-          roundtrip = []
-          snapshot.forEach(doc => {
-            roundtrip.push(doc.data())
-            roundtripDocId = doc.id
-          })
-          this.title = roundtrip[0].Title
-          this.publish = roundtrip[0].Public
-          this.countries = roundtrip[0].Location
-          this.stars = roundtrip[0].Stars
-          this.category = roundtrip[0].Category
-          this.descriptionInput = roundtrip[0].Description
-          this.highlight1 = roundtrip[0].Highlights[0]
-          this.highlight2 = roundtrip[0].Highlights[1]
-          this.highlight3 = roundtrip[0].Highlights[2]
-          this.inputProfile = roundtrip[0].Profile
-          this.region = roundtrip[0].Region
-          this.price = roundtrip[0].Price
-          this.wholeYearOffer = roundtrip[0].OfferWholeYear
-          this.rooms = roundtrip[0].Rooms
-          this.adults = roundtrip[0].Adults
-          this.children = roundtrip[0].ChildrenAges.length
-          this.childrenAges = roundtrip[0].ChildrenAges
 
-          if (roundtrip[0].tripWebsite) this.tripWebsite = roundtrip[0].tripWebsite
+      this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
+        this.title = roundtrip.Title
+        this.publish = roundtrip.Public
+        this.countries = roundtrip.Location
+        this.stars = roundtrip.Stars
+        this.category = roundtrip.Category
+        this.descriptionInput = roundtrip.Description
+        this.highlight1 = roundtrip.Highlights
+        this.highlight2 = roundtrip.Highlights[1]
+        this.highlight3 = roundtrip.Highlights[2]
+        this.inputProfile = roundtrip.Profile
+        this.region = roundtrip.Region
+        this.price = roundtrip.Price
+        this.wholeYearOffer = roundtrip.OfferWholeYear
+        this.rooms = roundtrip.Rooms
+        this.adults = roundtrip.Adults
+        this.children = roundtrip.ChildrenAges.length
+        this.childrenAges = roundtrip.ChildrenAges
 
-          this.pageTitle = this.title + ' bearbeiten'
+        if (roundtrip.tripWebsite) this.tripWebsite = roundtrip.tripWebsite
 
-          this.arrivalDepatureProfile = roundtrip[0].TransportProfile ? roundtrip[0].TransportProfile : 'Flugzeug'
-          this.origin = roundtrip[0].Origin
+        this.pageTitle = this.title + ' bearbeiten'
 
-          let retrievedDate = new Date(roundtrip[0].OfferEndPeriod.seconds * 1000)
-          this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+        this.arrivalDepatureProfile = roundtrip.TransportProfile ? roundtrip.TransportProfile : 'Flugzeug'
+        this.origin = roundtrip.Origin
 
-          retrievedDate = new Date(roundtrip[0].OfferStartPeriod.seconds * 1000)
-          this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+        let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
+        this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
-          if (this.arrivalDepatureProfile === 'Flugzeug') {
-            this.destination = roundtrip[0].Destination
-            this.travelClass = roundtrip[0].TravelClass ? roundtrip[0].TravelClass : 'Economy'
-            this.nonStop = roundtrip[0].NonStop ? roundtrip[0].NonStop : 'Ja'
-            this.originCode = roundtrip[0].OriginCode
-            this.destinationCode = roundtrip[0].DestinationCode
+        retrievedDate = new Date(roundtrip.OfferStartPeriod.seconds * 1000)
+        this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
-            if (this.depatureDate && roundtrip[0].DepatureDate) {
-              retrievedDate = new Date(roundtrip[0].DepatureDate.seconds * 1000)
-              this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-            } else {
-              this.depatureDate = formattedScheduleDate
-            }
+        if (this.arrivalDepatureProfile === 'Flugzeug') {
+          this.destination = roundtrip.Destination
+          this.travelClass = roundtrip.TravelClass ? roundtrip.TravelClass : 'Economy'
+          this.nonStop = roundtrip.NonStop ? roundtrip.NonStop : 'Ja'
+          this.originCode = roundtrip.OriginCode
+          this.destinationCode = roundtrip.DestinationCode
 
-            if (this.returnDate && roundtrip[0].ReturnDate) {
-              retrievedDate = new Date(roundtrip[0].ReturnDate.seconds * 1000)
-              this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-            } else {
-              this.depatureDate = formattedScheduleDate
-            }
+          if (this.depatureDate && roundtrip.DepatureDate) {
+            retrievedDate = new Date(roundtrip.DepatureDate.seconds * 1000)
+            this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+          } else {
+            this.depatureDate = formattedScheduleDate
           }
 
-          // get the default profile of the roundtrip
-          this.getGeneralProfile()
+          if (this.returnDate && roundtrip.ReturnDate) {
+            retrievedDate = new Date(roundtrip.ReturnDate.seconds * 1000)
+            this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+          } else {
+            this.depatureDate = formattedScheduleDate
+          }
+        }
 
-          this.loadInitImgs()
-        })
+        // get the default profile of the roundtrip
+        this.getGeneralProfile()
+
+        this.loadInitImgs()
+      })
         .catch(err => {
           console.log('Error getting Roundtrip', err)
 
           // show this message only if it's not a user
           if (auth.user()) {
-            this.$q.notify({
-              color: 'red-5',
-              textColor: 'white',
-              icon: 'error',
-              message: 'Es gibt fehlende Angaben bei deiner Rundreise'
-            })
+            sharedMethods.showErrorNotification('Es gibt fehlende Angaben bei deiner Rundreise')
           }
         })
     },
-    loadCategories () {
+    /**
+   * fetch all category options from firebase db
+   */
+    fetchCategories () {
       let roundtripsRef = db.collection('Categories')
       roundtripsRef.get()
         .then(snapshot => {
@@ -2280,6 +2247,10 @@ export default {
           })
         })
     },
+    /**
+   * update location object witch city search results
+   * @param event event from city search update callback
+   */
     updateLocation (event) {
       if (event !== null) {
         this.location = {
@@ -2291,6 +2262,10 @@ export default {
         this.location = {}
       }
     },
+    /**
+   * update location object witch parking place search results
+   * @param event event from parking place search update callback
+   */
     updateParkingPlace (event) {
       if (event !== null) {
         this.parkingPlace = {
@@ -2300,35 +2275,21 @@ export default {
         }
       }
     },
+    /**
+   * update region object witch region search results
+   * @param event event from region search update callback
+   */
     updateRegion (event) {
       if (event !== null) {
         this.region = event
       }
     },
-    updateHotelData (event) {
-      if (event !== null) {
-        let hotel = event.hotel
-
-        let hotelLat = hotel.latitude
-        let hotelLng = hotel.longitude
-
-        // capitalize cityName
-        let hotelLocationLabel = hotel.address.lines[0]
-
-        this.hotelLocation = {
-          lng: hotelLat,
-          lat: hotelLng,
-          label: hotelLocationLabel
-        }
-
-        typeof hotel.rating !== 'undefined' ? this.hotelStars = hotel.rating : this.hotelStars = null
-
-        this.hotelName = hotel.name
-
-        this.hotelContact = hotel.contact
-      }
-    },
-    loadRoundtripDetails (RTId, refreshAll) {
+    /**
+   * load the stops of the current trip
+   * @param RTId the current roundtrip id
+   * @param refreshAll deletes all already fetched stops
+   */
+    fetchRoundtripStops (RTId, refreshAll) {
       let lastScrollPos = document.documentElement.scrollTop
 
       if (!this.firstLoad && refreshAll) {
@@ -2442,19 +2403,17 @@ export default {
 
           this.getTripDuration()
 
-          this.saveRoundtripDaysAndHotels()
+          this.saveFrequentlyChangingData()
 
           // reload Map
           if (this.$refs.map) this.$refs.map.loadMap(null)
 
           if (!this.firstLoad && refreshAll) {
-            let context = this
             setTimeout(function () {
-              context.scrollTo(lastScrollPos)
+              sharedMethods.scrollToOffset(lastScrollPos)
             }, 500)
           }
 
-          let context = this
           setTimeout(function () {
             let emptyStates = !context.currentExpansionStates.length
 
@@ -2485,6 +2444,11 @@ export default {
           })
         })
     },
+    /**
+   * rearanges all stops and updates all components (called when a stops date was updated)
+   * @param newInitDate new date of stop to update
+   * @param currentDocId doc id of stop to update
+   */
     resortAndPrepareStops (newInitDate, currentDocId) {
       let lastScrollPos = document.documentElement.scrollTop
 
@@ -2533,14 +2497,16 @@ export default {
 
       this.getTripDuration()
 
-      let context = this
       setTimeout(function () {
-        context.scrollTo(lastScrollPos)
+        sharedMethods.scrollToOffset(lastScrollPos)
       }, 200)
     },
+    /**
+   * sorts trip stps after their init dates (must be placed in sort())
+   */
     compare (a, b) {
-      const initDateA = this.getDateFromString(a.InitDate)
-      const initDateB = this.getDateFromString(b.InitDate)
+      const initDateA = sharedMethods.getDateFromString(a.InitDate)
+      const initDateB = sharedMethods.getDateFromString(b.InitDate)
 
       if (initDateA > initDateB) return 1
       if (initDateB > initDateA) return -1
@@ -2595,7 +2561,7 @@ export default {
       }
     },
     getDefaultCheckOutDate (stop) {
-      let initDate = this.getDateFromString(stop.InitDate)
+      let initDate = sharedMethods.getDateFromString(stop.InitDate)
 
       // add one day
       const defaultCheckOutDate = initDate
@@ -2625,7 +2591,6 @@ export default {
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.DocId), 0, { days: days, docId: stop.DocId })
 
       if (this.stops.indexOf(stop) === this.stops.length - 2) {
-        let context = this
         setTimeout(function () {
           context.stopsLoaded = true
         }, 500)
@@ -2671,7 +2636,6 @@ export default {
       this.$refs.galeryUpload.reset()
     },
     uploadNext (files, kind, uploadIndex) {
-      let context = this
       if (!this.uploading) {
         this.upload(files[uploadIndex], kind, uploadIndex + this.galeryImgUrls.length, uploadIndex === files.length - 1, files.length, uploadIndex).then(function (success) {
           context.uploading = false
@@ -2685,7 +2649,6 @@ export default {
 
       return new Promise((resolve, reject) => {
         let kindPath = 'Title/titleImg'
-        const context = this
         if (kind === 'galery') {
           kindPath = 'Galery/galeryImg' + count
         }
@@ -2726,7 +2689,6 @@ export default {
       })
     },
     loadInitImgs () {
-      let context = this
       var fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Title/titleImg')
       fileRef.getDownloadURL().then(function (url) {
         context.titleImgUrl = url
@@ -2749,7 +2711,6 @@ export default {
       galeryImgName = galeryImgName.substring(0, galeryImgName.indexOf('?alt'))
 
       const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/Galery/' + galeryImgName)
-      let context = this
       fileRef.delete().then(function (snapshot) {
         context.$q.notify({
           color: 'green-4',
@@ -2788,7 +2749,7 @@ export default {
       let promiseList = []
 
       for (index; index < this.stops.length; index++) {
-        let currentInitDate = this.getDateFromString(this.stops[index].InitDate)
+        let currentInitDate = sharedMethods.getDateFromString(this.stops[index].InitDate)
 
         let newInitDateMillis = 0
 
@@ -2811,7 +2772,6 @@ export default {
         )
       }
 
-      let context = this
       Promise.all(promiseList).then(v => {
         context.resortAndPrepareStops(currentStopDate, stopId)
       })
@@ -2870,10 +2830,6 @@ export default {
         icon: 'error',
         message: 'Bitte gib einen anderen Titel ein'
       })
-    },
-    scrollTo (offset) {
-      const duration = 400
-      setScrollPosition(document.documentElement, offset, duration)
     },
     copyRT (originalRT, UserId, newTitle) {
       this.isUniqueTitle(newTitle).then(uniqueTitle => {
@@ -2971,9 +2927,9 @@ export default {
       )
     },
     getTripDuration () {
-      let startDate = this.getDateFromString(this.stops[0].InitDate)
+      let startDate = sharedMethods.getDateFromString(this.stops[0].InitDate)
 
-      let stopDate = this.getDateFromString(this.stops[this.stops.length - 1].InitDate)
+      let stopDate = sharedMethods.getDateFromString(this.stops[this.stops.length - 1].InitDate)
       const oneDay = 24 * 60 * 60 * 1000
 
       const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
@@ -3008,30 +2964,25 @@ export default {
         })
     },
     getUserRoundtrips () {
-      const context = this
-      let roundtripsRef = db.collection('Roundtrips')
-        .where('UserId', '==', auth.user().uid)
-        .orderBy('createdAt')
-        .limit(5)
-      roundtripsRef.get()
-        .then(RTSnapshot => {
-          let roundtripsRef = db.collection('RoundtripDetails')
-            .where('RTId', '==', RTSnapshot.docs[0].id)
-            .orderBy('InitDate')
-          roundtripsRef.get()
-            .then(RTDetailsSnapshot => {
-              // if the user has one Roundtrip and also just one Stopp added
-              if (Number(RTSnapshot.size) === 1 && Number(RTDetailsSnapshot.size) === 1) {
-                this.$tours['myTour'].start()
-                setTimeout(function () {
-                  context.scrollTo(0)
-                }, 2000)
-              }
-            })
-        })
+      this.$store.dispatch('roundtrips/fetchAllRoundtrips', auth.user().uid).then(result => {
+        let roundtripsRef = db.collection('RoundtripDetails')
+          .where('RTId', '==', result.roundtrips[0].RTId)
+          .orderBy('InitDate')
+        roundtripsRef.get()
+          .then(RTDetailsSnapshot => {
+            // if the user has only one Roundtrip and also just one Stopp was added
+            if (Number(result.roundtrips.length) === 1 && Number(RTDetailsSnapshot.size) === 1) {
+              this.$tours['myTour'].start()
+              setTimeout(function () {
+                sharedMethods.scrollToOffset(0)
+              }, 2000)
+            }
+          })
+      })
     }
   },
   mounted () {
+    context = this
     this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
       // check if we didn't add this stop before
       if (tempLastClickLocation !== lastClickLocation) {
@@ -3060,6 +3011,7 @@ export default {
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
+          if (snapshot.empty) sharedMethods.showErrorNotification('Diese Reise existiert leider nicht (mehr)')
           if (snapshot.docs[0].data().UserId) {
             if (auth.user() === null) this.$router.push('/login')
             let isCreator = auth.user().uid === snapshot.docs[0].data().UserId
@@ -3067,8 +3019,8 @@ export default {
 
             if (isCreator) {
               this.loadSingleRoundtrip(RTId)
-              this.loadRoundtripDetails(RTId, false)
-              this.loadCategories()
+              this.fetchRoundtripStops(RTId, false)
+              this.fetchCategories()
               this.getUserData()
               this.getUserRoundtrips()
             } else if (isPublic) {
@@ -3087,15 +3039,14 @@ export default {
               // trial roundtrip
               this.isInTrialMode = true
               this.loadSingleRoundtrip(RTId)
-              this.loadRoundtripDetails(RTId, false)
-              this.loadCategories()
+              this.fetchRoundtripStops(RTId, false)
+              this.fetchCategories()
 
               // always start tour here
               this.$tours['myTour'].start()
 
-              const context = this
               setTimeout(function () {
-                context.scrollTo(0)
+                sharedMethods.scrollToOffset(0)
               }, 2000)
             } else {
               this.$q.notify({
@@ -3111,7 +3062,7 @@ export default {
     })
   },
   beforeDestroy () {
-    this.saveRoundtripDaysAndHotels()
+    this.saveFrequentlyChangingData()
   }
 }
 </script>

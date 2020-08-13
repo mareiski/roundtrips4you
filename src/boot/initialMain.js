@@ -1,4 +1,4 @@
-import { auth } from 'app/src/firebaseInit'
+import { auth } from 'app/src/firebaseInit.js'
 const getLeaflet = () => import('leaflet')
 import { AddressbarColor, Loading } from 'quasar'
 import vue from 'vue'

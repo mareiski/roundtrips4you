@@ -52,7 +52,7 @@
 </template>
 <script>
 import(/* webpackPrefetch: true */ '../css/roundtrips.less')
-import { db } from '../firebaseInit'
+import { db } from '../firebaseInit.js'
 export default {
   meta: {
     title: 'Rundreisen',

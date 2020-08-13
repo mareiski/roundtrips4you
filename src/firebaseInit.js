@@ -53,10 +53,11 @@ const auth = {
   user () {
     return this.context ? firebase.auth().currentUser : null
   },
-  logout (router) {
-    firebase.auth().signOut().then(
+  logout (router, store) {
+    firebase.auth().signOut().then(r => {
+      store.dispatch('roundtrips/resetAllRoundtrips')
       router.push('/')
-    )
+    })
   },
   authRef () {
     return firebase.auth()

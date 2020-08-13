@@ -40,7 +40,7 @@
               color="primary"
               text-color="white"
             >
-              <img :src="TitleImgs[TitleImgs.findIndex(x => x.docId === roundtrip.RTId)] ? TitleImgs[TitleImgs.findIndex(x => x.docId === roundtrip.RTId)].src : '../statics/dummy-image-landscape-1-150x150.jpg'">
+              <img :src="TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)] ? TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)].src : '../statics/dummy-image-landscape-1-150x150.jpg'">
             </q-avatar>
           </q-item-section>
 
@@ -496,15 +496,12 @@
 </template>
 <script>
 import(/* webpackPrefetch: true */ '../css/my-roundtrips.less')
-import { db, auth, storage } from '../firebaseInit'
-import { date, scroll } from 'quasar'
-// import { countries } from '../countries'
+import { db, auth } from '../firebaseInit.js'
+import { date } from 'quasar'
+import sharedMethods from '../sharedMethods'
 
 let uid = null
 import axios from 'axios'
-var querystring = require('querystring')
-
-const { getScrollTarget, setScrollPosition } = scroll
 
 let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
@@ -535,7 +532,6 @@ export default {
       addButtonActive: false,
       // countries: [],
       // countryOptions: countries,
-      RTIds: [],
       showNoRoundtripsText: false,
       rooms: 1,
       adults: 1,
@@ -582,37 +578,17 @@ export default {
             })
           } else {
             if (this.addRoundtrip(this.title)) {
-              this.$q.notify({
-                color: 'green-4',
-                textColor: 'white',
-                icon: 'check_circle',
-                message: 'Rundreise wurde erstellt'
-              })
+              sharedMethods.showSuccessNotification('Rundreise wurde erstellt')
               this.addExpanded = false
             } else {
-              this.$q.notify({
-                color: 'red-5',
-                textColor: 'white',
-                icon: 'error',
-                message: 'Oh nein, da ist wohl etwas schief gelaufen, bitte versuche es erneut'
-              })
+              sharedMethods.showErrorNotification('Oh nein, da ist wohl etwas schief gelaufen, bitte versuche es erneut')
             }
           }
         } else {
-          this.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Bitte überprüfe deine Angaben'
-          })
+          sharedMethods.showErrorNotification('Bitte überprüfe deine Angaben')
         }
       } else {
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Du kannst momentan leider nur maximal 20 Rundreisen erstellen'
-        })
+        sharedMethods.showErrorNotification('Du kannst momentan leider nur maximal 20 Rundreisen erstellen')
       }
     },
     verifyMail () {
@@ -648,13 +624,7 @@ export default {
       this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
     },
     scrollOnAddButtonClicked () {
-      this.addExpanded ? scrollTo(document.getElementById('AddRTCard')) : scrollTo(document.getElementById('Title'))
-    },
-    scrollTo (el) {
-      const target = getScrollTarget(el)
-      const offset = el.offsetTop
-      const duration = 400
-      setScrollPosition(target, offset, duration)
+      this.addExpanded ? sharedMethods.scrollToRef(document.getElementById('AddRTCard')) : sharedMethods.scrollToRef(document.getElementById('Title'))
     },
     updateLocation (event) {
       this.tempLocation = {
@@ -669,74 +639,22 @@ export default {
       Title = Title.trim()
 
       try {
-        let timeStamp = Date.now()
-        let tempRTId = Math.floor(Math.random() * 10000000000000)
-
-        db.collection('Roundtrips').add({
-          Category: 'Gruppenreise',
-          Days: '< 5 Tage',
-          Description: 'Kurze Beschreibung deiner Rundreise',
-          Hotels: '0',
-
-          // set as default country (will be overitten)
-          Location: ['Deutschland'],
-          Region: null,
-          Price: 100,
-          Public: false,
-          RTId: tempRTId,
-          Stars: 3,
-          Profile: 'Auto',
-          Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
-          Title: Title,
-          OfferEndPeriod: new Date(timeStamp),
-          OfferStartPeriod: new Date(timeStamp),
-          OfferWholeYear: true,
-          UserId: this.$store.getters['user/user'].uid,
-          createdAt: new Date(timeStamp),
-          Rooms: this.rooms,
-          Adults: this.adults,
-          ChildrenAges: this.childrenAges
-        })
-
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('RTId', '==', tempRTId)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              db.collection('Roundtrips').doc(doc.id).update({
-                'RTId': doc.id
-              })
-
-              let dateParts = this.depatureDate.split('.')
-              let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
-
-              db.collection('RoundtripDetails').add({
-                BookingComLink: '',
-                DateDistance: '',
-                Description: 'Beschreibung dieses Stopps',
-                ExpediaLink: '',
-                GeneralLink: '',
-                ImageUrl: '',
-                InitDate: depatureDate || new Date(timeStamp),
-                Price: 0,
-                RTId: doc.id,
-                Title: this.tempLocation ? 'Start in ' + this.tempLocation.label.split(',')[0] : 'Titel des 1. Stopps',
-                Location: this.tempLocation ? this.tempLocation : {
-                  lng: '13.3888599',
-                  lat: '52.5170365',
-                  label: 'Berlin, 10117, Germany'
-                }
-              })
-              this.saveArrivalDepature(doc.id)
-              this.getUserRoundtrips()
-              this.$router.push('/rundreise-bearbeiten/' + doc.id)
+        this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: Title, uid: auth.user().uid, rooms: this.rooms, adults: this.adults, childrenAges: this.childrenAges, tempLocation: this.tempLocation, depatureDate: this.depatureDate }).then(docId => {
+          if (docId && docId !== null) {
+            this.saveArrivalDepature(docId)
+            this.$router.push('/rundreise-bearbeiten/' + docId)
+          } else {
+            this.$q.notify({
+              color: 'red-5',
+              textColor: 'white',
+              icon: 'error',
+              message: 'Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut'
             })
-          })
-        this.$refs.addRoundtripForm.reset()
-        this.title = ''
-        // this.countries = []
-        this.$refs.titleInput.resetValidation()
+          }
+          this.$refs.addRoundtripForm.reset()
+          this.title = ''
+          this.$refs.titleInput.resetValidation()
+        })
       } catch (error) {
         console.log(error)
         this.$q.notify({
@@ -748,38 +666,6 @@ export default {
         return false
       }
       return true
-    },
-    getUserRoundtrips () {
-      let roundtripArr = []
-      let roundtripDocIds = []
-      this.roundtrips = []
-
-      var context = this
-      let roundtripsRef = db.collection('Roundtrips')
-        .where('UserId', '==', uid)
-        .orderBy('createdAt')
-        .limit(20)
-      roundtripsRef.get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            roundtripArr.push(doc.data())
-            roundtripDocIds.splice(roundtripArr.findIndex(x => x.RTId === doc.data().RTId), 0, doc.id)
-
-            var fileRef = storage.ref().child('Images/Roundtrips/' + doc.id + '/Title/titleImg')
-            fileRef.getDownloadURL().then(function (url) {
-              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, { src: url, docId: doc.data().RTId })
-              context.RTIds.push(doc.data().RTId)
-            }).catch(function () {
-              context.TitleImgs.splice(roundtripDocIds.indexOf(doc.id), 0, { src: '../statics/dummy-image-landscape-1-150x150.jpg', docId: doc.data().RTId })
-            })
-          })
-          this.showNoRoundtripsText = snapshot.docs.length === 0
-          this.showRoundtrips = true
-        }).catch(function (error) {
-          console.log(error)
-        })
-
-      this.roundtrips = roundtripArr
     },
     getLocationFromIataCode (code, countryName) {
       let context = this
@@ -878,95 +764,24 @@ export default {
     //   })
     // },
     getOrigins (val, update, abort) {
-      this.filterAirports(val, update, abort, true)
+      sharedMethods.filterAirports(val, update, abort, true, this)
     },
     getDestinations (val, update, abort) {
-      this.filterAirports(val, update, abort, false)
-    },
-    filterAirports (val, update, abort, originSearch) {
-      if (val.length < 3) {
-        abort()
-        return
-      }
-      if (val.length >= 3) {
-        this.getAirports(val).then((results) => {
-          update(() => {
-            if (!results) return false
-            if (originSearch) {
-              this.originOptions = []
-              this.originCodes = []
-            } else {
-              this.destinationOptions = []
-              this.destinationCodes = []
-            }
-
-            results.data.data.forEach(city => {
-              if (originSearch) {
-                this.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                this.originCodes.push(city.iataCode)
-              } else {
-                this.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                this.destinationCodes.push(city.iataCode)
-                this.destinationAddresses.push(this.capitalize(city.address.cityName))
-              }
-            })
-          }).catch(e => {
-            return false
-          })
-        })
-      }
-    },
-    capitalize (s) {
-      s = s.toLowerCase()
-      s = s.charAt(0).toUpperCase() + s.slice(1)
-      return s
-    },
-    getAirports (val) {
-      return new Promise((resolve, reject) => {
-        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-        const headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        const data = querystring.stringify({
-          grant_type: 'client_credentials',
-          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-          client_secret: 'lHQlUheyyAZtGQDA'
-        })
-
-        axios.post(url, data, {
-          headers: headers,
-          form: {
-            'grant_type': 'client_credentials',
-            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-            'client_secret': 'lHQlUheyyAZtGQDA'
-          }
-        }).then(function (response) {
-          let token = response.data.access_token
-          const tokenString = 'Bearer ' + token
-
-          axios.get('https://api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
-            headers: {
-              'Authorization': tokenString
-            }
-          }).then(function (response) {
-            resolve(response)
-          }).catch(function (error) {
-            console.log('Error' + error)
-            resolve(null)
-          })
-        }).catch(function (error) {
-          console.log('Error on Authentication' + error)
-          resolve(null)
-        })
-      })
+      sharedMethods.filterAirports(val, update, abort, false, this)
     }
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
       uid = auth.user().uid
-      this.getUserRoundtrips()
+      this.$store.dispatch('roundtrips/fetchAllRoundtrips', uid).then(result => {
+        if (typeof result === 'undefined' || !result || !result.roundtrips || result.roundtrips === null || result.roundtrips.length === 0) {
+          this.showNoRoundtripsText = true
+        } else {
+          this.showRoundtrips = true
+          this.roundtrips = result.roundtrips
+          this.TitleImgs = result.titleImages
+        }
+      })
     })
   }
 }
