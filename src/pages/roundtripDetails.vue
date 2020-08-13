@@ -767,7 +767,7 @@ export default {
     },
     loadGaleryImgs () {
       const context = this
-      let fileRef = storage.ref().child('Images/Roundtrips/' + this.roundtrip.docId + '/Galery')
+      let fileRef = storage.ref().child('Images/Roundtrips/' + context.roundtrip.docId + '/Galery')
       fileRef.listAll().then(function (res) {
         res.items.forEach(function (itemRef) {
           fileRef = storage.ref().child(itemRef.fullPath)
