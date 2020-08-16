@@ -36,7 +36,7 @@
             <p>Plane deine Reise jetzt kostenlos und ohne Registrierung</p>
             <!-- @click="$router.push('/registrieren')" -->
             <q-btn
-              @click="showCreateTempRTDialog = true"
+              @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
               color="primary"
             >Los geht's</q-btn>
           </div>
@@ -106,7 +106,7 @@
         <q-icon
           class="scroll-down-icon cursor-pointer"
           name="keyboard_arrow_down"
-          @click="sharedMethods.scrollToRef('sndSection')"
+          @click="sharedMethods.scrollToRef($refs['sndSection'])"
         />
       </div>
       <div
@@ -131,7 +131,7 @@
         >
           <div
             class="card cursor-pointer"
-            @click="showCreateTempRTDialog = true"
+            @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
           >
             <q-icon name="fas fa-lightbulb" />
             <h3>Inspiration</h3>
@@ -144,7 +144,7 @@
         >
           <div
             class="card cursor-pointer"
-            @click="showCreateTempRTDialog = true"
+            @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
           >
             <q-icon name="explore" />
             <h3>Individualität</h3>
@@ -157,7 +157,7 @@
         >
           <div
             class="card cursor-pointer"
-            @click="showCreateTempRTDialog = true"
+            @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
           >
             <q-icon name="edit" />
             <h3>Einfache Nutzung</h3>
@@ -202,7 +202,7 @@
             <q-img
               style="width:1000px;"
               alt="Städtevorschläge"
-              @click="[showCreateTempRTDialog = true]"
+              @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
               src="https://roundtrips4you.de/statics/cities.jpeg"
             />
           </div>
@@ -227,7 +227,7 @@
             <q-img
               style="width:1000px;"
               alt="Vorschlag von Sehenswürdigkeiten"
-              @click="[showCreateTempRTDialog = true]"
+              @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
               src="https://roundtrips4you.de/statics/pois.jpeg"
             />
           </div>
@@ -247,7 +247,7 @@
             <q-img
               style="width:1000px;"
               alt="Karte"
-              @click="[showCreateTempRTDialog = true]"
+              @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
               src="https://roundtrips4you.de/statics/map.jpeg"
             />
           </div>
@@ -259,7 +259,7 @@
         <q-btn
           color="primary"
           v-in-viewport.once
-          @click="showCreateTempRTDialog = true"
+          @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
           style="font-size:20px;"
         >Reise erstellen</q-btn>
       </div>
@@ -319,7 +319,7 @@
       <div class="register-container">
         <h4 style="text-align:center;">Beginne jetzt gleich kostenlos und ohne Anmeldung mit der Planung deiner eigenen Reise</h4>
         <q-btn
-          @click="showCreateTempRTDialog = true"
+          @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
           color="primary"
           style="font-size:18px;"
         >Reise selbst Planen</q-btn>
@@ -333,6 +333,7 @@ import(/* webpackPrefetch: true */ '../css/home.less')
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
 import { db, auth } from '../firebaseInit.js'
+import sharedMethods from '../sharedMethods'
 
 export default {
   meta: {
@@ -349,6 +350,11 @@ export default {
       imgLoaded: false,
       showCreateTempRTDialog: false,
       title: 'Meine Reise'
+    }
+  },
+  computed: {
+    sharedMethods () {
+      return sharedMethods
     }
   },
   methods: {
@@ -374,6 +380,11 @@ export default {
           })
       })
     },
+    createTempRTClicked () {
+      if (this.$store.getters['demoSession/isInDemoSession']) {
+        this.$router.push('/rundreise-bearbeiten/' + this.$store.getters['demoSession/getRoundtripId'])
+      }
+    },
     createTempRT () {
       if (!this.title) {
         this.$q.notify({
@@ -388,81 +399,94 @@ export default {
       let Title = this.title
 
       // set as default country (will be overitten)
-      let Location = ['Deutschland']
       Title = Title.charAt(0).toUpperCase() + Title.slice(1)
       Title = Title.trim()
 
       if (auth.user() !== null) {
-        this.$router.push('/rundreise-bearbeiten/1jf34893f&' + Title)
-      }
-
-      try {
-        let tempRTId = Math.floor(Math.random() * 10000000000000)
-        let timeStamp = Date.now()
-
-        db.collection('Roundtrips').add({
-          Category: 'Gruppenreise',
-          Days: '< 5 Tage',
-          Description: 'Kurze Beschreibung deiner Rundreise',
-          Hotels: '0',
-          Location: Location,
-          Region: null,
-          Price: 100,
-          Public: false,
-          RTId: tempRTId,
-          Stars: 3,
-          Profile: 'Auto',
-          Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
-          Title: Title,
-          OfferEndPeriod: new Date(timeStamp),
-          OfferStartPeriod: new Date(timeStamp),
-          OfferWholeYear: true,
-          createdAt: new Date(timeStamp)
-        })
-
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('RTId', '==', tempRTId)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              db.collection('Roundtrips').doc(doc.id).update({
-                'RTId': doc.id
-              })
-
-              // todo save doc id in store
-              db.collection('RoundtripDetails').add({
-                BookingComLink: '',
-                DateDistance: '',
-                Description: 'Beschreibung dieses Stopps',
-                ExpediaLink: '',
-                GeneralLink: '',
-                ImageUrl: '',
-                InitDate: new Date(timeStamp),
-                Price: 0,
-                RTId: doc.id,
-                Title: 'Titel des 1. Stopps',
-                Location: {
-                  lng: '13.3888599',
-                  lat: '52.5170365',
-                  label: 'Berlin, 10117, Germany'
-                }
-              })
-              this.$router.push('/rundreise-bearbeiten/' + doc.id)
-            })
+        try {
+          this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: Title, uid: auth.user().uid, rooms: 1, adults: 2, childrenAges: [], tempLocation: null, depatureDate: null }).then(docId => {
+            if (docId && docId !== null) {
+              this.$router.push('/rundreise-bearbeiten/' + docId)
+            } else {
+              sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+            }
           })
-        this.title = ''
-      } catch (error) {
-        console.log(error)
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut'
+        } catch (error) {
+          console.log(error)
+          sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+        }
+      } else {
+        this.$store.dispatch('demoSession/createRoundtrip', Title).then(docId => {
+          this.$router.push('/rundreise-bearbeiten/' + docId)
         })
-        return false
       }
-      return true
+      // try {
+      //   let tempRTId = Math.floor(Math.random() * 10000000000000)
+      //   let timeStamp = Date.now()
+
+      //   db.collection('Roundtrips').add({
+      //     Category: 'Gruppenreise',
+      //     Days: '< 5 Tage',
+      //     Description: 'Kurze Beschreibung deiner Rundreise',
+      //     Hotels: '0',
+      //     Location: Location,
+      //     Region: null,
+      //     Price: 100,
+      //     Public: false,
+      //     RTId: tempRTId,
+      //     Stars: 3,
+      //     Profile: 'Auto',
+      //     Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
+      //     Title: Title,
+      //     OfferEndPeriod: new Date(timeStamp),
+      //     OfferStartPeriod: new Date(timeStamp),
+      //     OfferWholeYear: true,
+      //     createdAt: new Date(timeStamp)
+      //   })
+
+      //   let roundtripsRef = db.collection('Roundtrips')
+      //     .where('RTId', '==', tempRTId)
+      //     .limit(1)
+      //   roundtripsRef.get()
+      //     .then(snapshot => {
+      //       snapshot.forEach(doc => {
+      //         db.collection('Roundtrips').doc(doc.id).update({
+      //           'RTId': doc.id
+      //         })
+
+      //         // todo save doc id in store
+      //         db.collection('RoundtripDetails').add({
+      //           BookingComLink: '',
+      //           DateDistance: '',
+      //           Description: 'Beschreibung dieses Stopps',
+      //           ExpediaLink: '',
+      //           GeneralLink: '',
+      //           ImageUrl: '',
+      //           InitDate: new Date(timeStamp),
+      //           Price: 0,
+      //           RTId: doc.id,
+      //           Title: 'Titel des 1. Stopps',
+      //           Location: {
+      //             lng: '13.3888599',
+      //             lat: '52.5170365',
+      //             label: 'Berlin, 10117, Germany'
+      //           }
+      //         })
+      //         this.$router.push('/rundreise-bearbeiten/' + doc.id)
+      //       })
+      //     })
+      //   this.title = ''
+      // } catch (error) {
+      //   console.log(error)
+      //   this.$q.notify({
+      //     color: 'red-5',
+      //     textColor: 'white',
+      //     icon: 'error',
+      //     message: 'Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut'
+      //   })
+      //   return false
+      // }
+      // return true
     }
   }
 }

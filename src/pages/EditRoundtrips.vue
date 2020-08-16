@@ -260,6 +260,7 @@
             </transition-group>
           </div>
         </q-timeline>
+        <span ref="AddStopExpansionItem"></span>
         <q-list
           bordered
           class="rounded-borders"
@@ -270,7 +271,7 @@
             v-model="addExpanded"
             class="add-item"
             :disable="!stopsLoaded"
-            @click="addButtonActive = !addButtonActive"
+            @click="[addButtonActive = !addButtonActive, scrollOnAddButtonClicked()]"
           >
             <template v-slot:header>
               <q-item-section
@@ -288,7 +289,6 @@
                 >
                 </q-btn>
                 <span style="font-size:20px;">Stopp hinzufügen</span>
-
               </q-item-section>
             </template>
             <q-card>
@@ -1281,16 +1281,17 @@ export default {
       shareLink: null,
       shareCode: null,
       tripDistance: 0,
-      isInTrialMode: false,
       tourCallbacks: {
         onPreviousStep: this.onPreviosTourStep,
-        onNextStep: this.onNextTourStep
+        onNextStep: this.onNextTourStep,
+        onStart: this.onTourStart
       },
 
       tourOptions: {
         useKeyboardNavigation: true,
         startTimeout: 2000,
         enableScrolling: false,
+        highlight: true,
         labels: {
           buttonSkip: 'überspringen',
           buttonPrevious: 'zurück',
@@ -1363,6 +1364,9 @@ export default {
     },
     getContext () {
       return context
+    },
+    isInDemoSession () {
+      return this.$store.getters['demoSession/isInDemoSession']
     }
   },
   methods: {
@@ -1375,9 +1379,9 @@ export default {
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 3) {
         this.$refs.tabPanels.goTo('route')
-      } else if (currentStep === 4 && !this.isInTrialMode) {
+      } else if (currentStep === 4 && !this.isInDemoSession) {
         this.$refs.tabPanels.goTo('start')
-      } else if (currentStep === 5 && !this.isInTrialMode) {
+      } else if (currentStep === 5 && !this.isInDemoSession) {
         this.$refs.tabPanels.goTo('settings')
       } else if (currentStep === 6) {
         this.$refs.tabPanels.goTo('map')
@@ -1393,14 +1397,20 @@ export default {
         this.$refs.tabPanels.goTo('inspiration')
       } else if (currentStep === 1) {
         this.$refs.tabPanels.goTo('route')
-      } else if (currentStep === 2 && !this.isInTrialMode) {
+      } else if (currentStep === 2 && !this.isInDemoSession) {
         this.$refs.tabPanels.goTo('start')
-      } else if (currentStep === 3 && !this.isInTrialMode) {
+      } else if (currentStep === 3 && !this.isInDemoSession) {
         this.$refs.tabPanels.goTo('settings')
       } else if (currentStep === 4) {
         this.$refs.tabPanels.goTo('map')
       }
       sharedMethods.scrollToOffset(0)
+    },
+    /**
+     * Called when tour is started => prevent to show tour again in this session
+     */
+    onTourStart () {
+      this.$store.commit('demoSession/setTourShowed', true)
     },
     /**
      * Copy share link of roundtrip to clipboard
@@ -1574,6 +1584,12 @@ export default {
       return deg * (Math.PI / 180)
     },
     /**
+     * Scrolls down when user expands add stop expansion item to center it on screen
+     */
+    scrollOnAddButtonClicked () {
+      if (this.addExpanded) sharedMethods.scrollToRef(this.$refs['AddStopExpansionItem'])
+    },
+    /**
      * Called when add new stop event is fired -> call add stop method
      * @see addStop()
      */
@@ -1659,8 +1675,6 @@ export default {
     addStop (DateString, Location, GeneralLink, Parking) {
       RTId = this.$route.params.id
 
-      let InitDate = sharedMethods.getDateFromString(DateString)
-
       this.generalTempLink = null
       if (typeof this.$refs.urlInput !== 'undefined') this.$refs.urlInput.resetValidation()
       if (typeof this.$refs.citySearch !== 'undefined') this.$refs.citySearch.clear()
@@ -1668,166 +1682,166 @@ export default {
       let locationLabel = Location.label
       if (Location.label.includes(',')) locationLabel = Location.label.split(',')[0]
 
-      db.collection('RoundtripDetails').add({
+      let newStopObject = {
         BookingComLink,
         DateDistance,
         Description: 'Beschreibung zu ' + locationLabel,
         ExpediaLink,
         GeneralLink,
         ImageUrl,
-        InitDate,
+        InitDate: DateString,
         Price,
         RTId,
         Title: 'Zwischenstopp in ' + locationLabel,
         Location,
         Parking: Parking
-      }).then(results => {
-        // clear all values
-        if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
+      }
 
+      if (this.isInDemoSession) {
+        this.$store.dispatch('demoSession/addNewStop', newStopObject)
         this.generalTempLink = null
-        this.location = {}
 
-        if (this.$refs.citySearch) this.$refs.citySearch.clear()
-        if (this.$refs.parkingPlaceSearch) this.$refs.parkingPlaceSearch.clear()
-
-        this.addExpanded = false
-
-        let docId = results.id
-        let newStopObject = {
-          BookingComLink: BookingComLink,
-          DateDistance: DateDistance,
-          Description: 'Beschreibung zu ' + locationLabel,
-          ExpediaLink: ExpediaLink,
-          GeneralLink: GeneralLink,
-          ImageUrl: ImageUrl,
-          InitDate: DateString,
-          Price: Price,
-          RTId: RTId,
-          Title: 'Zwischenstopp in ' + locationLabel,
-          Location: Location,
-          Parking: Parking,
-          DocId: docId,
-          expanded: false
-        }
-        console.log('push Stop')
-
-        this.stops.splice((this.stops.length - 1), 0, newStopObject)
-
-        // resort stops
-        this.stops.sort(this.compare)
-        this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
-
-        // save all values like in load roundtrip details
-        let initDates = []
-        let hotelCount = 0
-        let days = 0
-        let daysString = ''
-
-        // get dates
-        this.stops.forEach((stop) => {
-          let initDate = stop.InitDate
-          if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
-
-          if (this.stops.indexOf(stop) === this.stops.length - 1) {
-            // add one day
-            const currentInitDate = sharedMethods.getDateFromString(initDate)
-            const newInitDate = sharedMethods.getDateFromString(initDate)
-
-            newInitDate.setDate(currentInitDate.getDate() + 1)
-            this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
-          }
-
-          if (stop.HotelName) hotelCount++
-
-          if (!initDates.includes(initDate)) initDates.push(initDate)
+        let tempStopDocId = (Math.floor(Math.random() * 10000000000000)).toString() + 'A'
+        let results = { id: tempStopDocId }
+        this.handleAddStopResults(results, newStopObject)
+      } else {
+        db.collection('RoundtripDetails').add(newStopObject).then(results => {
+          this.handleAddStopResults(results, newStopObject)
         })
+      }
+    },
+    /**
+     * Handles the results retrieved from adding a stop
+     * @param results results from firebase (only used to get doc id)
+     * @param newStopObject the object of the stop added
+     */
+    handleAddStopResults (results, newStopObject) {
+      // clear all values
+      if (this.$refs.addEntryForm) this.$refs.addEntryForm.reset()
 
-        if (initDates.length > 0) {
-          let maxDate = new Date(Math.max.apply(null, initDates))
-          let minDate = new Date(Math.min.apply(null, initDates))
+      this.generalTempLink = null
+      this.location = {}
 
-          days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      if (this.$refs.citySearch) this.$refs.citySearch.clear()
+      if (this.$refs.parkingPlaceSearch) this.$refs.parkingPlaceSearch.clear()
+
+      this.addExpanded = false
+
+      let docId = results.id
+      newStopObject.DocId = docId
+      newStopObject.expanded = false
+      console.log('push Stop')
+
+      this.stops.splice((this.stops.length - 1), 0, newStopObject)
+
+      // resort stops
+      this.stops.sort(this.compare)
+      this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
+
+      // save all values like in load roundtrip details
+      let initDates = []
+      let hotelCount = 0
+      let days = 0
+      let daysString = ''
+
+      // get dates
+      this.stops.forEach((stop) => {
+        let initDate = stop.InitDate
+        if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
+
+        if (this.stops.indexOf(stop) === this.stops.length - 1) {
+          // add one day
+          const currentInitDate = sharedMethods.getDateFromString(initDate)
+          const newInitDate = sharedMethods.getDateFromString(initDate)
+
+          newInitDate.setDate(currentInitDate.getDate() + 1)
+          this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
         }
 
-        this.initDates = initDates
+        if (stop.HotelName) hotelCount++
 
-        if (days < 5) {
-          daysString = '< 5 Tage'
-        } else if (days >= 5 && days <= 8) {
-          daysString = '5-8 Tage'
-        } else if (days >= 9 && days <= 11) {
-          daysString = '9-11 Tage'
-        } else if (days >= 12 && days <= 15) {
-          daysString = '12-15 Tage'
-        } else if (days > 15) {
-          daysString = '> 15 Tage'
-        }
-
-        // save days and hotels
-        if (daysString.length > 0) {
-          this.saveData('Days', daysString)
-        }
-        this.saveData('Hotels', hotelCount)
-
-        this.durations = []
-        let tempUrls = []
-        let tempUrlDocObjects = []
-
-        this.stops.forEach((stop, index) => {
-          if (index >= 1) {
-            let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-              [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
-              index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
-
-            if (url) {
-              tempUrls.push(url)
-              tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
-            }
-          } else {
-            if (this.stops.length === 1) this.stopsLoaded = true
-          }
-
-          // if its the last stop
-          if (index === this.stops.length - 1) {
-            this.stopsLoaded = true
-
-            // get durations
-            const urls = tempUrls
-            const queue = new TaskQueue(Promise, 5)
-            Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
-              results.forEach((result, resultIndex) => {
-                const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
-                this.writeDuration(result.data.routes[0], docId)
-              })
-            })
-          }
-        })
-
-        this.getTripDuration()
-
-        this.saveFrequentlyChangingData()
-
-        this.currentExpansionStates.push({ docId: docId, expanded: false })
-
-        // reload Map
-        console.log('LoadMap')
-        console.log(this.stops)
-        if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
-
-        // setTimeout(function () {
-        //   const el = document.getElementsByClassName('stop' + docId)[0]
-
-        //   if (el) context.scrollTo(el.offsetTop)
-        // }, 500)
-
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Eintrag wurde erstellt'
-        })
+        if (!initDates.includes(initDate)) initDates.push(initDate)
       })
+
+      if (initDates.length > 0) {
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      this.initDates = initDates
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+
+      // save days and hotels
+      if (daysString.length > 0) {
+        this.saveData('Days', daysString)
+      }
+      this.saveData('Hotels', hotelCount)
+
+      this.durations = []
+      let tempUrls = []
+      let tempUrlDocObjects = []
+
+      this.stops.forEach((stop, index) => {
+        if (index >= 1) {
+          let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+          if (url) {
+            tempUrls.push(url)
+            tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+          }
+        } else {
+          if (this.stops.length === 1) this.stopsLoaded = true
+        }
+
+        // if its the last stop
+        if (index === this.stops.length - 1) {
+          this.stopsLoaded = true
+
+          // get durations
+          const urls = tempUrls
+          const queue = new TaskQueue(Promise, 5)
+          Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+            results.forEach((result, resultIndex) => {
+              const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+              this.writeDuration(result.data.routes[0], docId)
+            })
+          })
+        }
+      })
+
+      this.getTripDuration()
+
+      this.saveFrequentlyChangingData()
+
+      this.currentExpansionStates.push({ docId: docId, expanded: false })
+
+      // reload Map
+      console.log('LoadMap')
+      console.log(this.stops)
+      if (this.$refs.map) this.$refs.map.loadMap(null, this.stops)
+
+      // setTimeout(function () {
+      //   const el = document.getElementsByClassName('stop' + docId)[0]
+
+      //   if (el) context.scrollTo(el.offsetTop)
+      // }, 500)
+
+      sharedMethods.showSuccessNotification('Eintrag wurde erstellt')
     },
     /**
      * Remove stop from trip
@@ -2137,70 +2151,18 @@ export default {
     getDestinations (val, update, abort) {
       sharedMethods.filterAirports(val, update, abort, false, context)
     },
+    /**
+     * fetches data of the roundtrip for the given id
+     * @param RTId the id of the roundtrip to fetch (current RT id)
+     */
     fetchSingleRoundtrip (RTId) {
-      this.shareLink = 'https://roundtrips4you.de/MapWidget/' + RTId
-      this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + RTId + '"></iframe>'
-
-      this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
-        this.title = roundtrip.Title
-        this.publish = roundtrip.Public
-        this.countries = roundtrip.Location
-        this.stars = roundtrip.Stars
-        this.category = roundtrip.Category
-        this.descriptionInput = roundtrip.Description
-        this.highlight1 = roundtrip.Highlights
-        this.highlight2 = roundtrip.Highlights[1]
-        this.highlight3 = roundtrip.Highlights[2]
-        this.inputProfile = roundtrip.Profile
-        this.region = roundtrip.Region
-        this.price = roundtrip.Price
-        this.wholeYearOffer = roundtrip.OfferWholeYear
-        this.rooms = roundtrip.Rooms
-        this.adults = roundtrip.Adults
-        this.children = roundtrip.ChildrenAges.length
-        this.childrenAges = roundtrip.ChildrenAges
-
-        if (roundtrip.tripWebsite) this.tripWebsite = roundtrip.tripWebsite
-
-        this.pageTitle = this.title + ' bearbeiten'
-
-        this.arrivalDepatureProfile = roundtrip.TransportProfile ? roundtrip.TransportProfile : 'Flugzeug'
-        this.origin = roundtrip.Origin
-
-        let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
-        this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-
-        retrievedDate = new Date(roundtrip.OfferStartPeriod.seconds * 1000)
-        this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-
-        if (this.arrivalDepatureProfile === 'Flugzeug') {
-          this.destination = roundtrip.Destination
-          this.travelClass = roundtrip.TravelClass ? roundtrip.TravelClass : 'Economy'
-          this.nonStop = roundtrip.NonStop ? roundtrip.NonStop : 'Ja'
-          this.originCode = roundtrip.OriginCode
-          this.destinationCode = roundtrip.DestinationCode
-
-          if (this.depatureDate && roundtrip.DepatureDate) {
-            retrievedDate = new Date(roundtrip.DepatureDate.seconds * 1000)
-            this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-          } else {
-            this.depatureDate = formattedScheduleDate
-          }
-
-          if (this.returnDate && roundtrip.ReturnDate) {
-            retrievedDate = new Date(roundtrip.ReturnDate.seconds * 1000)
-            this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-          } else {
-            this.depatureDate = formattedScheduleDate
-          }
-        }
-
-        // get the default profile of the roundtrip
-        this.getGeneralProfile()
-
-        this.loadInitImgs()
-      })
-        .catch(err => {
+      if (this.isInDemoSession) {
+        let roundtrip = this.$store.getters['demoSession/getRoundtrip']
+        this.writeRoundtripIntoFields(roundtrip)
+      } else {
+        this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
+          this.writeRoundtripIntoFields(roundtrip)
+        }).catch(err => {
           console.log('Error getting Roundtrip', err)
 
           // show this message only if it's not a user
@@ -2208,6 +2170,73 @@ export default {
             sharedMethods.showErrorNotification('Es gibt fehlende Angaben bei deiner Rundreise')
           }
         })
+      }
+    },
+    /**
+     * Writes the current roundtrip data into local fields
+     * @param roundtrip the roundtrip object that contains all data
+     */
+    writeRoundtripIntoFields (roundtrip) {
+      this.shareLink = 'https://roundtrips4you.de/MapWidget/' + RTId
+      this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + RTId + '"></iframe>'
+
+      this.title = roundtrip.Title
+      this.publish = roundtrip.Public
+      this.countries = roundtrip.Location
+      this.stars = roundtrip.Stars
+      this.category = roundtrip.Category
+      this.descriptionInput = roundtrip.Description
+      this.highlight1 = roundtrip.Highlights[0]
+      this.highlight2 = roundtrip.Highlights[1]
+      this.highlight3 = roundtrip.Highlights[2]
+      this.inputProfile = roundtrip.Profile
+      this.region = roundtrip.Region
+      this.price = roundtrip.Price
+      this.wholeYearOffer = roundtrip.OfferWholeYear
+      this.rooms = roundtrip.Rooms
+      this.adults = roundtrip.Adults
+      this.children = roundtrip.ChildrenAges.length
+      this.childrenAges = roundtrip.ChildrenAges
+
+      if (roundtrip.tripWebsite) this.tripWebsite = roundtrip.tripWebsite
+
+      this.pageTitle = this.title + ' bearbeiten'
+
+      this.arrivalDepatureProfile = roundtrip.TransportProfile ? roundtrip.TransportProfile : 'Flugzeug'
+      this.origin = roundtrip.Origin
+
+      let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
+      this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+
+      retrievedDate = new Date(roundtrip.OfferStartPeriod.seconds * 1000)
+      this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+
+      if (this.arrivalDepatureProfile === 'Flugzeug') {
+        this.destination = roundtrip.Destination
+        this.travelClass = roundtrip.TravelClass ? roundtrip.TravelClass : 'Economy'
+        this.nonStop = roundtrip.NonStop ? roundtrip.NonStop : 'Ja'
+        this.originCode = roundtrip.OriginCode
+        this.destinationCode = roundtrip.DestinationCode
+
+        if (this.depatureDate && roundtrip.DepatureDate) {
+          retrievedDate = new Date(roundtrip.DepatureDate.seconds * 1000)
+          this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+        } else {
+          this.depatureDate = formattedScheduleDate
+        }
+
+        if (this.returnDate && roundtrip.ReturnDate) {
+          retrievedDate = new Date(roundtrip.ReturnDate.seconds * 1000)
+          this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+        } else {
+          this.depatureDate = formattedScheduleDate
+        }
+      }
+
+      // get the default profile of the roundtrip
+      this.getGeneralProfile()
+
+      this.loadInitImgs()
     },
     /**
    * fetch all category options from firebase db
@@ -2260,13 +2289,11 @@ export default {
       }
     },
     /**
-   * load the stops of the current trip
+   * fetch the stops of the current trip
    * @param RTId the current roundtrip id
    * @param refreshAll deletes all already fetched stops
    */
     fetchRoundtripStops (RTId, refreshAll) {
-      let lastScrollPos = document.documentElement.scrollTop
-
       if (!this.firstLoad && refreshAll) {
         Loading.show({
           spinnerColor: 'primary'
@@ -2275,155 +2302,172 @@ export default {
 
       if (refreshAll) this.stops = []
 
-      let roundtripsRef = db.collection('RoundtripDetails')
-        .where('RTId', '==', RTId)
-        .orderBy('InitDate')
-      roundtripsRef.get()
-        .then(snapshot => {
-          details = []
-          documentIds = []
-          snapshot.forEach(doc => {
-            let index = details.push(doc.data()) - 1
-            details[index].DocId = doc.id
-            documentIds.splice(details.findIndex(x => x.docId === doc.id), 0, doc.id)
-          })
+      details = []
+      documentIds = []
 
-          this.documentIds = documentIds
-
-          let daysString = ''
-          let days = 1
-          let initDates = []
-          let hotelCount = 0
-
-          // get dates
-          details.forEach((stop) => {
-            const initDate = new Date(stop.InitDate.seconds * 1000)
-            stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-
-            if (details.indexOf(stop) === details.length - 1) {
-              // add one day
-              const newInitDate = initDate
-
-              newInitDate.setDate(newInitDate.getDate() + 1)
-              this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
-            }
-
-            if (stop.HotelName) hotelCount++
-
-            if (!initDates.includes(initDate)) initDates.push(initDate)
-          })
-
-          if (initDates.length > 0) {
-            let maxDate = new Date(Math.max.apply(null, initDates))
-            let minDate = new Date(Math.min.apply(null, initDates))
-
-            days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
-          }
-
-          this.initDates = initDates
-
-          if (days < 5) {
-            daysString = '< 5 Tage'
-          } else if (days >= 5 && days <= 8) {
-            daysString = '5-8 Tage'
-          } else if (days >= 9 && days <= 11) {
-            daysString = '9-11 Tage'
-          } else if (days >= 12 && days <= 15) {
-            daysString = '12-15 Tage'
-          } else if (days > 15) {
-            daysString = '> 15 Tage'
-          }
-
-          // save days and hotels
-          if (daysString.length > 0) {
-            this.saveData('Days', daysString)
-          }
-          this.saveData('Hotels', hotelCount)
-
-          this.stops = details
-
-          this.durations = []
-          let tempUrls = []
-          let tempUrlDocObjects = []
-
-          this.stops.forEach((stop, index) => {
-            if (index >= 1) {
-              let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-                [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
-                index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
-
-              if (url) {
-                tempUrls.push(url)
-                tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
-              }
-            } else {
-              if (this.stops.length === 1) this.stopsLoaded = true
-            }
-
-            // if its the last stop
-            if (index === this.stops.length - 1) {
-              this.stopsLoaded = true
-
-              // get durations
-              const urls = tempUrls
-              const queue = new TaskQueue(Promise, 5)
-              Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
-                results.forEach((result, resultIndex) => {
-                  const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
-                  this.writeDuration(result.data.routes[0], docId)
-                })
-              })
-            }
-          })
-
-          this.getTripDuration()
-
-          this.saveFrequentlyChangingData()
-
-          // reload Map
-          if (this.$refs.map) this.$refs.map.loadMap(null)
-
-          if (!this.firstLoad && refreshAll) {
-            setTimeout(function () {
-              sharedMethods.scrollToOffset(lastScrollPos)
-            }, 500)
-          }
-
-          setTimeout(function () {
-            let emptyStates = !context.currentExpansionStates.length
-
-            context.stops.forEach((stop, index) => {
-              if (emptyStates || !context.currentExpansionStates) {
-                context.currentExpansionStates.push({ docId: stop.DocId, expanded: (index === 0) })
-                if (context.$refs[stop.DocId]) index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
-              } else {
-                if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
-                  context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
-                } else {
-                  // this stop was not already added
-                  index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
-                }
-              }
+      if (this.isInDemoSession) {
+        let stops = this.$store.getters['demoSession/getStops']
+        stops.forEach(stop => {
+          details.push(stop)
+          documentIds.splice(stops.findIndex(x => x.docId === stop.Docid), 0, stop.DocId)
+        })
+        this.getDataOutOfStops(refreshAll)
+      } else {
+        let roundtripsRef = db.collection('RoundtripDetails')
+          .where('RTId', '==', RTId)
+          .orderBy('InitDate')
+        roundtripsRef.get()
+          .then(snapshot => {
+            snapshot.forEach(doc => {
+              let index = details.push(doc.data()) - 1
+              details[index].DocId = doc.id
+              documentIds.splice(details.findIndex(x => x.docId === doc.id), 0, doc.id)
             })
-            Loading.hide()
-          }, 500)
-          this.firstLoad = false
-        })
-        .catch(err => {
-          console.log('Error getting Roundtrips', err)
-          this.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut'
+            this.getDataOutOfStops(refreshAll)
           })
-        })
+          .catch(err => {
+            console.log('Error getting Roundtrips', err)
+            sharedMethods.showErrorNotification('Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut')
+          })
+      }
     },
     /**
-   * rearanges all stops and updates all components (called when a stops date was updated)
-   * @param newInitDate new date of stop to update
-   * @param currentDocId doc id of stop to update
-   */
+     * handles all the data from stops assinged to this roundtrip
+     * @requires details the fetched stops
+     */
+    getDataOutOfStops (refreshAll) {
+      let lastScrollPos = document.documentElement.scrollTop
+      this.documentIds = documentIds
+
+      let daysString = ''
+      let days = 1
+      let initDates = []
+      let hotelCount = 0
+
+      // get dates
+      details.forEach((stop) => {
+        let initDate = null
+        if (typeof stop.InitDate !== 'string') {
+          initDate = new Date(stop.InitDate.seconds * 1000)
+          stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+        } else {
+          initDate = sharedMethods.getDateFromString(stop.InitDate)
+        }
+
+        if (details.indexOf(stop) === details.length - 1) {
+          // add one day
+          const newInitDate = initDate
+
+          newInitDate.setDate(newInitDate.getDate() + 1)
+          this.date = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
+        }
+
+        if (stop.HotelName) hotelCount++
+
+        if (!initDates.includes(initDate)) initDates.push(initDate)
+      })
+
+      if (initDates.length > 0) {
+        let maxDate = new Date(Math.max.apply(null, initDates))
+        let minDate = new Date(Math.min.apply(null, initDates))
+
+        days = parseInt((maxDate.getTime() - minDate.getTime()) / (24 * 3600 * 1000))
+      }
+
+      this.initDates = initDates
+
+      if (days < 5) {
+        daysString = '< 5 Tage'
+      } else if (days >= 5 && days <= 8) {
+        daysString = '5-8 Tage'
+      } else if (days >= 9 && days <= 11) {
+        daysString = '9-11 Tage'
+      } else if (days >= 12 && days <= 15) {
+        daysString = '12-15 Tage'
+      } else if (days > 15) {
+        daysString = '> 15 Tage'
+      }
+
+      // save days and hotels
+      if (daysString.length > 0) {
+        this.saveData('Days', daysString)
+      }
+      this.saveData('Hotels', hotelCount)
+
+      this.stops = details
+
+      this.durations = []
+      let tempUrls = []
+      let tempUrlDocObjects = []
+
+      this.stops.forEach((stop, index) => {
+        if (index >= 1) {
+          let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
+            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+
+          if (url) {
+            tempUrls.push(url)
+            tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+          }
+        } else {
+          if (this.stops.length === 1) this.stopsLoaded = true
+        }
+
+        // if its the last stop
+        if (index === this.stops.length - 1) {
+          this.stopsLoaded = true
+
+          // get durations
+          const urls = tempUrls
+          const queue = new TaskQueue(Promise, 5)
+          Promise.all(urls.map(queue.wrap(async url => axios.get(url)))).then(results => {
+            results.forEach((result, resultIndex) => {
+              const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
+              this.writeDuration(result.data.routes[0], docId)
+            })
+          })
+        }
+      })
+
+      this.getTripDuration()
+
+      this.saveFrequentlyChangingData()
+
+      // reload Map
+      if (this.$refs.map) this.$refs.map.loadMap(null)
+
+      if (!this.firstLoad && refreshAll) {
+        setTimeout(function () {
+          sharedMethods.scrollToOffset(lastScrollPos)
+        }, 500)
+      }
+
+      setTimeout(function () {
+        let emptyStates = !context.currentExpansionStates.length
+
+        context.stops.forEach((stop, index) => {
+          if (emptyStates || !context.currentExpansionStates) {
+            context.currentExpansionStates.push({ docId: stop.DocId, expanded: (index === 0) })
+            if (context.$refs[stop.DocId]) index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
+          } else {
+            if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
+              context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
+            } else {
+              // this stop was not already added
+              index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
+            }
+          }
+        })
+        Loading.hide()
+      }, 500)
+      this.firstLoad = false
+    },
+    /**
+     * rearanges all stops and updates all components (called when a stops date was updated)
+     * @param newInitDate new date of stop to update
+     * @param currentDocId doc id of stop to update
+     */
     resortAndPrepareStops (newInitDate, currentDocId) {
       let lastScrollPos = document.documentElement.scrollTop
 
@@ -2536,7 +2580,9 @@ export default {
       }
     },
     getDefaultCheckOutDate (stop) {
-      let initDate = sharedMethods.getDateFromString(stop.InitDate)
+      let initDate = null
+      if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
+      else initDate = sharedMethods.getDateFromString(stop.InitDate)
 
       // add one day
       const defaultCheckOutDate = initDate
@@ -2947,7 +2993,7 @@ export default {
           .then(RTDetailsSnapshot => {
             // if the user has only one Roundtrip and also just one Stopp was added
             if (Number(result.roundtrips.length) === 1 && Number(RTDetailsSnapshot.size) === 1) {
-              this.$tours['myTour'].start()
+              if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
               setTimeout(function () {
                 sharedMethods.scrollToOffset(0)
               }, 2000)
@@ -2978,70 +3024,43 @@ export default {
       }
 
       this.RTId = RTId
-
-      // secred id if user is logged in but goes into trial mode -> create a normal new roundtrip
-      if (RTId === '1jf34893f') {
-        try {
-          this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: title, uid: auth.user().uid, rooms: 1, adults: 2, childrenAges: null, tempLocation: null, depatureDate: null }).then(docId => {
-            if (docId && docId !== null) {
-              roundtripDocId = docId
-              this.fetchSingleRoundtrip(docId)
-              this.fetchRoundtripStops(docId, false)
-              this.fetchCategories()
-              this.getUserData()
-              this.getUserRoundtrips()
-            } else {
-              sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-            }
-          })
-        } catch (error) {
-          console.log(error)
-          sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-        }
-        return
-      }
-
       this.stars = !isNaN(this.hotelRatingAvg()) ? this.hotelRatingAvg() : 3
 
-      let roundtripsRef = db.collection('Roundtrips')
-        .where('RTId', '==', RTId)
-        .limit(1)
-      roundtripsRef.get()
-        .then(snapshot => {
-          roundtripDocId = snapshot.docs[0].id
-          if (snapshot.empty) sharedMethods.showErrorNotification('Diese Reise existiert leider nicht (mehr)')
-          if (snapshot.docs[0].data().UserId) {
-            if (auth.user() === null) this.$router.push('/login')
-            let isCreator = auth.user().uid === snapshot.docs[0].data().UserId
-            let isPublic = snapshot.docs[0].data().Public === true
+      if (this.isInDemoSession) {
+        this.fetchSingleRoundtrip(RTId)
+        this.fetchRoundtripStops(RTId, false)
+        this.fetchCategories()
 
-            if (isCreator) {
-              this.fetchSingleRoundtrip(RTId)
-              this.fetchRoundtripStops(RTId, false)
-              this.fetchCategories()
-              this.getUserData()
-              this.getUserRoundtrips()
-            } else if (isPublic) {
-              this.copyRT(snapshot.docs[0].data(), auth.user().uid, title)
-            } else {
-              sharedMethods.showErrorNotification('Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat')
-              this.$router.push('/meine-rundreisen')
-            }
-          } else {
-            // trial roundtrip
-            this.isInTrialMode = true
-            this.fetchSingleRoundtrip(RTId)
-            this.fetchRoundtripStops(RTId, false)
-            this.fetchCategories()
+        // always start tour here
+        if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
 
-            // always start tour here
-            this.$tours['myTour'].start()
+        setTimeout(function () {
+          sharedMethods.scrollToOffset(0)
+        }, 2000)
+      }
 
-            setTimeout(function () {
-              sharedMethods.scrollToOffset(0)
-            }, 2000)
-          }
-        })
+      this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
+        if (roundtrip === null) sharedMethods.showErrorNotification('Diese Reise existiert leider nicht (mehr)')
+        roundtripDocId = roundtrip.docId
+
+        if (auth.user() === null) this.$router.push('/login')
+
+        let isCreator = auth.user().uid === roundtrip.UserId
+        let isPublic = roundtrip.Public === true
+
+        if (isCreator) {
+          this.fetchSingleRoundtrip(RTId)
+          this.fetchRoundtripStops(RTId, false)
+          this.fetchCategories()
+          this.getUserData()
+          this.getUserRoundtrips()
+        } else if (isPublic) {
+          this.copyRT(roundtrip, auth.user().uid, title)
+        } else {
+          sharedMethods.showErrorNotification('Ooops da ist leider etwas schiefgelaufen, diese Rundreise ist Privat')
+          this.$router.push('/meine-rundreisen')
+        }
+      })
     })
   },
   beforeDestroy () {

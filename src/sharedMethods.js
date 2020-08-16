@@ -159,15 +159,18 @@ export default {
         })
     },
     /**
-     * scroll to a specific offset
+     * Scroll to a specific offset
      * @param {Number} offset numer in pixels from top
      */
     scrollToOffset (offset) {
         const duration = 400
         setScrollPosition(document.documentElement, offset, duration)
     },
-    scrollToRef (refName) {
-        var el = this.$refs[refName]
+    /**
+     * Scrolls to a element
+     * @param refName element get via $refs
+     */
+    scrollToRef (el) {
         const target = getScrollTarget(el)
         const offset = el.offsetTop
         const duration = 400

@@ -33,17 +33,17 @@
             to="/blog"
           >blog</router-link>
           <router-link
-            v-if="!user && !isInTrialMode"
+            v-if="!user && !this.$store.getters['demoSession/isInDemoSession']"
             class="header-page-link"
             to="/login"
           >anmelden</router-link>
           <router-link
             v-if="!user"
-            :to="isInTrialMode ? { name: 'Register', params: { RTId: RTId } } : '/registrieren'"
+            :to="getActionButtonLink()"
             class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
           >
-            <q-btn color="primary">{{isInTrialMode ? 'Speichern' : 'registrieren'}}</q-btn>
+            <q-btn color="primary">{{getActionButtonText()}}</q-btn>
           </router-link>
           <q-avatar
             v-else
@@ -472,7 +472,6 @@ export default {
       showPreload: true,
       onLine: navigator.onLine,
       isOnNetlifyPage: false,
-      isInTrialMode: false,
       RTId: null,
       drawer: false,
       messages: [],
@@ -531,6 +530,23 @@ export default {
 
       this.lastScrollPosition = currentScrollPosition
     },
+    getActionButtonText () {
+      if (this.$store.getters['demoSession/isInDemoSession']) {
+        let currentRoute = this.$router.currentRoute
+        let isOnEditRoundtripsPage = currentRoute.fullPath.split('/')[1] === 'rundreise-bearbeiten'
+
+        if (isOnEditRoundtripsPage) return 'speichern'
+        else return 'reise bearbeiten'
+      } else return 'registrieren'
+    },
+    getActionButtonLink () {
+      let currentRoute = this.$router.currentRoute
+      let isOnEditRoundtripsPage = currentRoute.fullPath.split('/')[1] === 'rundreise-bearbeiten'
+
+      if (this.$store.getters['demoSession/isInDemoSession'] && !isOnEditRoundtripsPage) {
+        return '/rundreise-bearbeiten/' + this.$store.getters['demoSession/getRoundtripId']
+      } else return '/registrieren'
+    },
     hideLoading () {
       redirected = false
       this.showPreload = false
@@ -548,20 +564,9 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     },
-    getRTId () {
-      if (this.RTId === null) {
-        const params = this.$route.params.id
-        let RTId = params
-
-        if (params.includes('&')) {
-          RTId = params.split('&')[0]
-        }
-        this.RTId = RTId
-      }
-    },
     leaving () {
       window.addEventListener('beforeunload', (event) => {
-        if ((this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) || this.isInTrialMode) {
+        if ((this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) || this.$store.getters['demoSession/isInDemoSession']) {
           // any element is still in focus or user is in trial mode
           event.returnValue = 'You have unfinished changes!'
         }
@@ -650,25 +655,6 @@ export default {
           message: 'Bitte überprüfe deine Internetverbindung'
         })
       }
-    }
-  },
-  beforeRouteUpdate (to, from, next) {
-    // lock all other pages except register
-    if (this.isInTrialMode && to.path !== '/registrieren') {
-      const answer = window.confirm('Willst du diese Seite wirklich verlassen, deine Rundreise ist nicht gespeichert!')
-      if (answer) {
-        this.isInTrialMode = false
-        next()
-      } else {
-        next(false)
-      }
-    } else {
-      next()
-    }
-
-    if (to.path.split('/')[1] === 'rundreise-bearbeiten' && auth.user() === null) {
-      this.isInTrialMode = true
-      this.getRTId()
     }
   },
   mounted () {

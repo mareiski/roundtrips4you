@@ -1592,23 +1592,17 @@ export default {
 
       this.getParent('EditRoundtrips').removeStop(this.docId)
 
-      const context = this
-      db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Eintrag wurde gelöscht'
+      if (!this.$store.getters['demoSession/isInDemoSession']) {
+        const context = this
+        db.collection('RoundtripDetails').doc(context.docId).delete().then(function () {
+          sharedMethods.showSuccessNotification('Eintrag wurde gelöscht')
+        }).catch(function (error) {
+          console.log(error)
+          sharedMethods.showErrorNotification('Der Eintrag konnte nicht gelöscht werden')
         })
-      }).catch(function (error) {
-        console.log(error)
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Der Eintrag konnte nicht gelöscht werden'
-        })
-      })
+      } else {
+        this.$store.commit('demoSession/removeStop', this.docId)
+      }
     },
     openInNewTab (link) {
       window.open(link, '_blank')

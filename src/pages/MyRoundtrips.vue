@@ -104,6 +104,7 @@
         </q-item>
       </div>
     </q-list>
+    <span ref="AddRoundtripExpansionItem"></span>
     <q-list
       bordered
       class="rounded-borders"
@@ -133,7 +134,7 @@
             <span style="font-size:20px;">Reise hinzufügen</span>
           </q-item-section>
         </template>
-        <q-card id="AddRTCard">
+        <q-card>
           <q-card-section>
             <q-form
               @submit="onAddRoundtrip"
@@ -560,6 +561,9 @@ export default {
   computed: {
     user () {
       return this.$store.getters['user/user']
+    },
+    sharedMethods () {
+      return sharedMethods
     }
   },
   methods: {
@@ -624,7 +628,7 @@ export default {
       this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
     },
     scrollOnAddButtonClicked () {
-      this.addExpanded ? sharedMethods.scrollToRef(document.getElementById('AddRTCard')) : sharedMethods.scrollToRef(document.getElementById('Title'))
+      if (this.addExpanded) sharedMethods.scrollToRef(this.$refs['AddRoundtripExpansionItem'])
     },
     updateLocation (event) {
       this.tempLocation = {

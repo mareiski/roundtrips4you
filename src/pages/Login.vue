@@ -137,6 +137,7 @@ export default {
     onUserLogin () {
       let context = this
       auth.authRef().signInWithEmailAndPassword(this.userEmail, this.password).then(function () {
+        context.$store.commit('demoSession/resetRoundtrip')
         context.$router.replace({ path: '/meine-rundreisen' })
       }).catch(function (error) {
         console.log(error)

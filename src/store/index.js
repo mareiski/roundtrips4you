@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 // import extern modules
 import user from './user'
 import roundtrips from './roundtrips'
+import demoSession from './demoSession'
 
 Vue.use(Vuex)
 
@@ -24,7 +25,8 @@ export default function (/* { ssrContext } */) {
     // modules to reference
     modules: {
       user,
-      roundtrips
+      roundtrips,
+      demoSession
     }
 
     // enable strict mode (adds overhead!)

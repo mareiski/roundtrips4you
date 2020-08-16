@@ -42,6 +42,8 @@ export default {
           roundtripsRef.get()
             .then(snapshot => {
               snapshot.forEach(doc => {
+                if (snapshot.empty) resolve(null)
+
                 let roundtrip = doc.data()
                 roundtrip.docId = doc.id
                 commit('addRoundtrip', roundtrip)

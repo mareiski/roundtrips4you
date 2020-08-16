@@ -1,7 +1,7 @@
 <template>
   <div class="register q-px-lg q-pb-md">
     <h1>Registrieren</h1>
-    <p style="text-align:center; font-size:20px; padding-bottom:10px;">{{!RTId ? 'Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos' : 'Registriere dich jetzt um deine erstellte Rundreise zu speichern'}}</p>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">{{!isInDemoSession ? 'Starte jetzt durch und nutze all unsere Funktionen komplett kostenlos' : 'Registriere dich jetzt um deine erstellte Rundreise zu speichern'}}</p>
     <q-form
       @submit="signUp"
       bordered
@@ -110,6 +110,7 @@
 import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit.js'
 const getFirebase = () => import('firebase')
+import sharedMethods from '../sharedMethods.js'
 
 let timeStamp = Date.now()
 var actionCodeSettings = {
@@ -126,7 +127,6 @@ export default {
     }
   },
   name: 'Register',
-  props: ['RTId'],
   data () {
     return {
       userEmail: '',
@@ -139,17 +139,9 @@ export default {
       reg: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
     }
   },
-  beforeRouteUpdate (to, from, next) {
-    // lock all other pages
-    if (this.RTId && (!auth || !auth.user())) {
-      const answer = window.confirm('Willst du diese Seite wirklich verlassen, deine Rundreise ist nicht gespeichert!')
-      if (answer) {
-        next()
-      } else {
-        next(false)
-      }
-    } else {
-      next()
+  computed: {
+    isInDemoSession () {
+      return this.$store.getters['demoSession/isInDemoSession']
     }
   },
   methods: {
@@ -160,23 +152,16 @@ export default {
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
           context.createUserEntry(user)
-          context.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Juhuuu dein Konto wurde erfolgreich erstellt'
-          })
+          if (context.isInDemoSession) context.$store.dispatch('demoSession/saveRoundtrip', user.user.uid)
+          context.$store.commit('demoSession/resetRoundtrip')
+          sharedMethods.showSuccessNotification('Juhuuu dein Konto wurde erfolgreich erstellt')
+
           evt.target.submit()
           context.$router.replace('meine-rundreisen')
         },
         (err) => {
           console.log(err)
-          context.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Oh nein, du konntest leider nicht registriert werden'
-          })
+          sharedMethods.showErrorNotification('Oh nein, du konntest leider nicht registriert werden')
         }
       )
     },
@@ -203,43 +188,16 @@ export default {
       })
     },
     verifyMail (user) {
-      console.log(user)
-      let context = this
       if (!user.emailVerified) {
         user.sendEmailVerification(actionCodeSettings).then(function () {
-          context.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Wir haben dir eine Bestätigungsmail für deine Email gesendet'
-
-          })
+          sharedMethods.showSuccessNotification('Wir haben dir eine Bestätigungsmail für deine Email gesendet')
         }).catch(function (error) {
           console.log(error)
-          context.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Oh nein, wir konnten dir leider keine email senden, bitte kontaktiere uns unter hello@roundtrips4you.de'
-          })
+          sharedMethods.showErrorNotification('Oh nein, wir konnten dir leider keine email senden, bitte kontaktiere uns unter hello@roundtrips4you.de')
         })
       }
     },
     createUserEntry (user) {
-      if (this.RTId) {
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('RTId', '==', this.RTId)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            snapshot.forEach(doc => {
-              db.collection('Roundtrips').doc(doc.id).update({
-                'UserId': user.user.uid
-              })
-            })
-          })
-      }
-
       db.collection('User').add({
         Reputation: 0,
         UserImage: user.user.photoURL,
