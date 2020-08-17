@@ -2394,28 +2394,30 @@ export default {
       }
       this.saveData('Hotels', hotelCount)
 
-      this.stops = details
-
       this.durations = []
       let tempUrls = []
       let tempUrlDocObjects = []
 
-      this.stops.forEach((stop, index) => {
+      details.forEach((stop, index) => {
         if (index >= 1) {
-          let url = this.getDurationUrl([this.stops[index - 1].Location.lng, this.stops[index - 1].Location.lat],
-            [stop.Location.lng, stop.Location.lat], index !== this.stops.length ? this.stops[index - 1].DocId : this.stops[index].DocId,
-            index !== this.stops.length ? this.stops[index - 1].Profile : this.stops[index].Profile, index !== this.stops.length ? this.stops[index - 1] : this.stops[index], index !== this.stops.length ? index - 1 : index)
+          let url = this.getDurationUrl([details[index - 1].Location.lng, details[index - 1].Location.lat],
+            [stop.Location.lng, stop.Location.lat], index !== details.length ? details[index - 1].DocId : details[index].DocId,
+            index !== details.length ? details[index - 1].Profile : details[index].Profile, index !== details.length ? details[index - 1] : details[index], index !== details.length ? index - 1 : index)
 
           if (url) {
             tempUrls.push(url)
-            tempUrlDocObjects.push({ id: this.stops[index - 1].DocId, url: url })
+            tempUrlDocObjects.push({ id: details[index - 1].DocId, url: url })
           }
         } else {
-          if (this.stops.length === 1) this.stopsLoaded = true
+          if (details.length === 1) {
+            this.stops = details
+            this.stopsLoaded = true
+          }
         }
 
         // if its the last stop
-        if (index === this.stops.length - 1) {
+        if (index === details.length - 1) {
+          this.stops = details
           this.stopsLoaded = true
 
           // get durations
@@ -2427,40 +2429,38 @@ export default {
               this.writeDuration(result.data.routes[0], docId)
             })
           })
+          this.getTripDuration()
+          this.saveFrequentlyChangingData()
+          // reload Map
+          if (this.$refs.map) this.$refs.map.loadMap(null)
+
+          if (!this.firstLoad && refreshAll) {
+            setTimeout(function () {
+              sharedMethods.scrollToOffset(lastScrollPos)
+            }, 500)
+          }
+
+          setTimeout(function () {
+            let emptyStates = !context.currentExpansionStates.length
+
+            context.stops.forEach((stop, index) => {
+              if (emptyStates || !context.currentExpansionStates) {
+                context.currentExpansionStates.push({ docId: stop.DocId, expanded: (index === 0) })
+                if (context.$refs[stop.DocId]) index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
+              } else {
+                if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
+                  context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
+                } else {
+                  // this stop was not already added
+                  index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
+                }
+              }
+            })
+            Loading.hide()
+          }, 500)
         }
       })
 
-      this.getTripDuration()
-
-      this.saveFrequentlyChangingData()
-
-      // reload Map
-      if (this.$refs.map) this.$refs.map.loadMap(null)
-
-      if (!this.firstLoad && refreshAll) {
-        setTimeout(function () {
-          sharedMethods.scrollToOffset(lastScrollPos)
-        }, 500)
-      }
-
-      setTimeout(function () {
-        let emptyStates = !context.currentExpansionStates.length
-
-        context.stops.forEach((stop, index) => {
-          if (emptyStates || !context.currentExpansionStates) {
-            context.currentExpansionStates.push({ docId: stop.DocId, expanded: (index === 0) })
-            if (context.$refs[stop.DocId]) index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
-          } else {
-            if (context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)]) {
-              context.$refs[stop.DocId][0].changeExpansion(context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === stop.DocId)].expanded)
-            } else {
-              // this stop was not already added
-              index === 0 ? context.$refs[stop.DocId][0].changeExpansion(true) : context.$refs[stop.DocId][0].changeExpansion(false)
-            }
-          }
-        })
-        Loading.hide()
-      }, 500)
       this.firstLoad = false
     },
     /**
