@@ -90,9 +90,9 @@
       <div class="form-option">oder</div>
       <q-btn
         :loading="googleLoading"
-        label="google konto verwenden"
+        label="Anmelden mit Google"
         class="q-mt-md google-btn"
-        style="width:300px;"
+        style="width:300px; text-transform:none; font-family:roboto;"
         icon="fab fa-google"
         @click="signUpWithGoogle"
       >

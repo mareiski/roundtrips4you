@@ -331,6 +331,7 @@
             <q-list
               bordered
               padding
+              dense
               class="rounded-borders"
               v-if="hotelName"
             >
@@ -349,8 +350,12 @@
                 </q-item-section>
 
                 <q-item-section>
-                  <q-item-label lines="1">
-                    {{sharedMethods.capitalize(hotelName)}}
+                  <q-item-label
+                    lines="1"
+                    class="flex"
+                    style="flex-wrap:wrap; white-space:normal;"
+                  >
+                    <span style="padding-right:5px;">{{sharedMethods.capitalize(hotelName)}}</span>
                     <q-rating
                       v-if="hotelStars && !isNaN(hotelStars)"
                       class="stars"
@@ -358,26 +363,35 @@
                       readonly
                       size="15px"
                       color="gold"
-                      style="margin-right:10px;"
+                      style="margin-right:10px; padding-right:5px;"
                     />
                     <div>
-                      <span class="raleway">
+                      <span
+                        v-if="guestRating"
+                        class="raleway"
+                      >
                         {{guestRating}}
                       </span>
-                      <span>
+                      <span v-if="hotelPrice">
                         <span class="raleway">ca. € </span>
                         <span class="raleway">{{hotelPrice}}</span>
                         <q-tooltip>ungefährer Durchschnittspreis</q-tooltip>
                       </span>
                     </div>
                   </q-item-label>
-                  <q-item-label caption>
-                    <a @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))">{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+                  <q-item-label
+                    caption
+                    style="overflow:hidden;"
+                  >
+                    <a
+                      class="ellipsis"
+                      @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
+                    >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
                   </q-item-label>
                 </q-item-section>
                 <q-item-section>
-
                   <q-btn
+                    v-if="transportLocations && transportLocations.lenght > 0"
                     style="width:150px;"
                     @click="showTransportDialog = true"
                   >Transport
