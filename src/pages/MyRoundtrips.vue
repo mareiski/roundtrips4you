@@ -25,52 +25,57 @@
         </q-item-section>
       </q-item>
       <div v-if="showRoundtrips">
-        <q-item
-          clickable
-          @click="$router.push('/rundreise-bearbeiten/' + roundtrip.RTId)"
-          v-ripple
+        <q-intersection
           v-for="roundtrip in roundtrips"
           :key="roundtrip.RTId"
+          once
+          transition="flip-right"
         >
-          <q-item-section
-            avatar
-            top
+          <q-item
+            clickable
+            @click="$router.push('/rundreise-bearbeiten/' + roundtrip.RTId)"
+            v-ripple
           >
-            <q-avatar
-              color="primary"
-              text-color="white"
+            <q-item-section
+              avatar
+              top
             >
-              <img :src="TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)] ? TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)].src : '../statics/dummy-image-landscape-1-150x150.jpg'">
-            </q-avatar>
-          </q-item-section>
+              <q-avatar
+                color="primary"
+                text-color="white"
+              >
+                <img :src="TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)] ? TitleImgs[TitleImgs.findIndex(x => x.RTId === roundtrip.RTId)].src : '../statics/dummy-image-landscape-1-150x150.jpg'">
+              </q-avatar>
+            </q-item-section>
 
-          <q-item-section>
-            <q-item-label lines="1">{{roundtrip.Title}} - {{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}</q-item-label>
-            <q-item-label
-              caption
-              style="width:100px;"
-            >
-              {{ getCreatedAtDate(roundtrip.createdAt) }}
-              <q-tooltip>
-                Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
-              </q-tooltip>
-            </q-item-label>
-          </q-item-section>
+            <q-item-section>
+              <q-item-label lines="1">{{roundtrip.Title}} - {{Array.isArray(roundtrip.Location) ? getLocationString(roundtrip.Location): roundtrip.Location}}</q-item-label>
+              <q-item-label
+                caption
+                style="width:100px;"
+              >
+                {{ getCreatedAtDate(roundtrip.createdAt) }}
+                <q-tooltip>
+                  Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
+                </q-tooltip>
+              </q-item-label>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-item-label
-              lines="1"
-              :style="[roundtrip.Public ? {'color': 'green'} : {'color': 'red'}]"
-            >{{roundtrip.Public ? 'veröffentlicht' : 'privat'}}</q-item-label>
-          </q-item-section>
+            <q-item-section side>
+              <q-item-label
+                lines="1"
+                :style="[roundtrip.Public ? {'color': 'green'} : {'color': 'red'}]"
+              >{{roundtrip.Public ? 'veröffentlicht' : 'privat'}}</q-item-label>
+            </q-item-section>
 
-          <q-item-section side>
-            <q-icon
-              name="keyboard_arrow_right"
-              color="primary"
-            />
-          </q-item-section>
-        </q-item>
+            <q-item-section side>
+              <q-icon
+                name="keyboard_arrow_right"
+                color="primary"
+              />
+            </q-item-section>
+          </q-item>
+        </q-intersection>
       </div>
       <div v-else>
         <q-item
@@ -90,6 +95,7 @@
 
           <q-item-section>
             <q-skeleton
+              class="title-skeleton"
               width="300px"
               style="margin-bottom:10px;"
               type="rect"

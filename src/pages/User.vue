@@ -105,7 +105,7 @@
                 />
               </div>
             </div>
-            <div class="row justify-end">
+            <div class="row">
               <q-btn
                 type="submit"
                 :loading="submitting"
@@ -174,7 +174,7 @@
                     />
                   </template>
                 </q-input>
-                <div class="row justify-end">
+                <div class="row">
                   <q-btn
                     type="submit"
                     :loading="submitting"

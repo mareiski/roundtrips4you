@@ -74,6 +74,8 @@
         indicator-color="primary"
         align="justify"
         narrow-indicator
+        outside-arrows
+        mobile-arrows
         style="padding-top:20px;"
       >
         <q-tab
@@ -118,7 +120,7 @@
       animated
       ref="tabPanels"
       keep-alive
-      @transition="sharedMethods.scrollToOffset(0)"
+      @transition="sharedMethods.scrollToOffset(220)"
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
@@ -135,7 +137,7 @@
             <div class="flex justify-between">
               <h4>Reiseverlauf</h4>
               <q-toggle
-                style="font-size:18px"
+                style="font-size:18px; line-height:normal;"
                 @input="sharedMethods.expandAllStops(getContext, stops)"
                 v-model="allStopsExpanded"
                 :disable="!stopsLoaded"
@@ -452,7 +454,7 @@
                 label="Abflugsort"
                 :options="originOptions"
                 @filter="getFlightOrigins"
-                style="width:300px;"
+                style="max-width:300px;"
                 @blur="onSaveArrivalDepature"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
               >
@@ -480,7 +482,7 @@
                 label="Ankunftsort"
                 :options="destinationOptions"
                 @filter="getDestinations"
-                style="width:300px;"
+                style="max-width:300px;"
                 :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
                 @blur="onSaveArrivalDepature"
               >
@@ -579,8 +581,11 @@
               <p>Wenn du mit dem Auto fährst, kannst du deinen Startort gleich als ersten Ort im Reiseverlauf festlegen.</p>
             </div>
             <!-- price -->
-            <div class="column">
-              <div class="flex justify-center">
+            <div
+              class="flex justify-between"
+              style="flex-wrap:wrap;"
+            >
+              <div class="flex">
                 <q-btn
                   @click="openBookingComFlights()"
                   class="q-mt-md"
@@ -588,11 +593,11 @@
                   text-color="white"
                   :disable="!destination"
                   v-if="arrivalDepatureProfile === 'Flugzeug'"
-                  label="Flüge auf Booking.com ansehen"
-                  style="width:280px"
+                  label="Flüge auf Booking.com"
+                  style="width:220px"
                 ></q-btn>
               </div>
-              <div class="flex justify-center">
+              <div class="flex">
                 <q-btn
                   @click="openFluegeDeFlights()"
                   class="q-mt-md"
@@ -600,8 +605,8 @@
                   text-color="white"
                   :disable="!destination"
                   v-if="arrivalDepatureProfile === 'Flugzeug'"
-                  label="Flüge auf fluege.de ansehen"
-                  style="width:280px"
+                  label="Flüge auf fluege.de"
+                  style="width:220px"
                 ></q-btn>
               </div>
             </div>

@@ -1,9 +1,6 @@
 <template>
   <div class="public-user-profile  q-px-lg q-pb-md">
-    <router-link
-      class="header-page-link"
-      to="/benutzer"
-    >{{!isOnPrivateUserPage ? 'zurück zu allen Nutzern' : 'User Ranking ansehen'}}</router-link>
+    <router-link to="/benutzer">{{!isOnPrivateUserPage ? 'zurück zu allen Nutzern' : 'User Ranking ansehen'}}</router-link>
     <h3 class="user-name">{{userName}} {{ !isNaN(reputation) ? '(Reputation: ' + reputation + ')' : ''}}
       <q-badge
         v-if="trustedUser"
@@ -239,6 +236,7 @@ export default {
       this.isOnPrivateUserPage = true
       UserId = auth.user().uid
     }
+    console.log(UserId)
     if (UserId) {
       let userRef = db.collection('User')
         .where('UserUID', '==', UserId)

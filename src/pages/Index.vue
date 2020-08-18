@@ -255,7 +255,7 @@
       </ol>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
-        <h3>Beginne jetzt gleich und ohne Anmeldung mit der Planung deiner ganz eigenen Reise!</h3>
+        <h3>Beginne jetzt gleich und ohne Anmeldung mit der Planung deiner ganz eigenen Reise</h3>
         <q-btn
           color="primary"
           v-in-viewport.once
