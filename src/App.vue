@@ -1,10 +1,9 @@
 <template>
-  <div id="q-app">
-    <router-view />
-    <span
-      id="notSupportedBrowserSpan"
-      style="display:none;"
-    >Dein Browser wird leider nicht unterstützt. Bitte füre ein Update durch.</span>
+  <div>
+    <div id="q-app">
+      <router-view />
+    </div>
+    <span id="notSupportedBrowserSpan">Dein Browser wird leider nicht unterstützt. Bitte füre ein Update durch.</span>
   </div>
 </template>
 
