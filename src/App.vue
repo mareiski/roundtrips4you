@@ -5,7 +5,7 @@
 </template>
 
 <script>
-const supportedBrowsers = require('../supportedBrowsers')
+const supportedBrowsers = require('../supportedBrowsers.js')
 
 if (!supportedBrowsers.test(navigator.userAgent)) {
   alert('Dein browser wird leider nicht nicht unterstützt.')
