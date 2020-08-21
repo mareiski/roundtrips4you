@@ -1,9 +1,6 @@
 <template>
-  <div>
-    <div id="q-app">
-      <router-view />
-    </div>
-    <span id="notSupportedBrowserSpan">Dein Browser wird leider nicht unterstützt. Bitte füre ein Update durch.</span>
+  <div id="q-app">
+    <router-view />
   </div>
 </template>
 
