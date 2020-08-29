@@ -256,8 +256,13 @@
                   :destination="stops[index + 1 ] ? stops[index + 1 ].Location.label : null"
                   :editor="true"
                   :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
-                  :doc-id="stop.DocId"
+                  :doc-id="stop.DocId + 'duration'"
                 ></Duration>
+                <q-timeline-entry
+                  :key="'Stop' + stop.DocId"
+                  v-else
+                  style="display:none;"
+                ></q-timeline-entry>
               </template>
             </transition-group>
           </div>
@@ -414,7 +419,7 @@
             </q-card-actions>
           </q-card>
         </q-dialog>
-        <p style="padding-top:10px;">Insgesamt {{tripDuration}} Tage {{tripDistance ? ' und ' + tripDistance + 'km' : ''}}</p>
+        <p style="padding-top:10px; font-family:Raleway;">Insgesamt {{tripDuration}} Tage {{tripDistance ? ' und ' + tripDistance + 'km' : ''}}</p>
       </q-tab-panel>
       <q-tab-panel name="start">
         <div class="arrival-depature-container">
@@ -1737,10 +1742,9 @@ export default {
       newStopObject.expanded = false
       console.log('push Stop')
 
-      this.stops.splice((this.stops.length - 1), 0, newStopObject)
+      for (var i = 0; i < this.stops.length && this.compare(this.stops[i], newStopObject) < 0; i++) { }
+      this.stops.splice(i, 0, newStopObject)
 
-      // resort stops
-      this.stops.sort(this.compare)
       this.documentIds.splice(this.stops.findIndex(x => x.docId === docId), 0, docId)
 
       // save all values like in load roundtrip details
@@ -2474,8 +2478,6 @@ export default {
      * @param currentDocId doc id of stop to update
      */
     resortAndPrepareStops (newInitDate, currentDocId) {
-      let lastScrollPos = document.documentElement.scrollTop
-
       // update date
       this.stops[this.stops.findIndex(x => x.DocId === currentDocId)].InitDate = date.formatDate(newInitDate, 'DD.MM.YYYY HH:mm')
 
@@ -2520,14 +2522,10 @@ export default {
       })
 
       this.getTripDuration()
-
-      setTimeout(function () {
-        sharedMethods.scrollToOffset(lastScrollPos)
-      }, 200)
     },
     /**
-   * sorts trip stps after their init dates (must be placed in sort())
-   */
+    * sorts trip stops after their init dates (must be placed in sort())
+    */
     compare (a, b) {
       const initDateA = sharedMethods.getDateFromString(a.InitDate)
       const initDateB = sharedMethods.getDateFromString(b.InitDate)
@@ -2536,25 +2534,6 @@ export default {
       if (initDateB > initDateA) return -1
 
       return 0
-    },
-    msToTime (duration) {
-      var ms = duration % 1000
-      duration = (duration - ms) / 1000
-
-      var secs = duration % 60
-      duration = (duration - secs) / 60
-
-      var minutes = duration % 60
-      var hours = (duration - minutes) / 60
-
-      let returnVal
-      if (hours === 0 && minutes === 0) returnVal = 0
-      if (hours < 0 || minutes < 0) returnVal = null
-      else if (hours === 0) returnVal = minutes + ' min'
-      else if (minutes === 0) returnVal = hours + ' h'
-      else returnVal = hours + ' h ' + minutes + ' min'
-
-      return returnVal
     },
     getDurationUrl (startLocation, endLocation, docId, stopProfile, stop, index) {
       let profile = this.profile
@@ -2568,7 +2547,7 @@ export default {
     },
     writeDuration (result, docId) {
       if (result !== null && typeof result !== 'undefined') {
-        let duration = this.msToTime(result.duration * 1000)
+        let duration = sharedMethods.msToTime(result.duration * 1000)
 
         let distance = Math.floor(result.distance / 1000) > 0 ? Math.floor(result.distance / 1000) : ''
         if (distance !== '') {
@@ -2612,7 +2591,7 @@ export default {
       if (duration) dateDistance = (nextInitDate.valueOf() - currentInitDate.valueOf()) - duration
       else dateDistance = nextInitDate.valueOf() - currentInitDate.valueOf()
 
-      days = this.msToTime(dateDistance)
+      days = sharedMethods.msToTime(dateDistance)
 
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.DocId), 0, { days: days, docId: stop.DocId })
 

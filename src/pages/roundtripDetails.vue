@@ -680,7 +680,7 @@ export default {
     },
     writeDuration (result, docId) {
       if (result !== null && typeof result !== 'undefined') {
-        let duration = this.msToTime(result.duration * 1000)
+        let duration = sharedMethods.msToTime(result.duration * 1000)
 
         let distance = Math.floor(result.distance / 1000) > 0 ? Math.floor(result.distance / 1000) : ''
         if (distance !== '') {
@@ -698,24 +698,6 @@ export default {
     },
     openInNewTab (link) {
       window.open(link, '_blank')
-    },
-    msToTime (duration) {
-      var ms = duration % 1000
-      duration = (duration - ms) / 1000
-
-      var secs = duration % 60
-      duration = (duration - secs) / 60
-
-      var minutes = duration % 60
-      var hours = (duration - minutes) / 60
-
-      let returnVal
-      if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
-      else if (hours === 0) returnVal = minutes + ' min'
-      else if (minutes === 0) returnVal = hours + ' h'
-      else returnVal = hours + ' h ' + minutes + ' min'
-
-      return returnVal
     },
     getProfile (profile) {
       switch (profile) {
@@ -758,7 +740,7 @@ export default {
         let nextInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
         let dateDistance = (nextInitDate.getTime() - currentInitDate.getTime()) - duration
-        days = this.msToTime(dateDistance)
+        days = sharedMethods.msToTime(dateDistance)
       }
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.docId), 0, { days: days, docId: stop.DocId })
       if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true

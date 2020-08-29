@@ -175,5 +175,28 @@ export default {
         const offset = el.offsetTop
         const duration = 400
         setScrollPosition(target, offset, duration)
+    },
+    /**
+     * creates a string from milliseconds (fontmat: 5h 10min)
+     * @param duration the milliseconds to format
+     */
+    msToTime (duration) {
+        var ms = duration % 1000
+        duration = (duration - ms) / 1000
+
+        var secs = duration % 60
+        duration = (duration - secs) / 60
+
+        var minutes = duration % 60
+        var hours = (duration - minutes) / 60
+
+        let returnVal
+        if (hours === 0 && minutes === 0) returnVal = 0
+        if (hours < 0 || minutes < 0) returnVal = null
+        else if (hours === 0) returnVal = minutes + 'min'
+        else if (minutes === 0) returnVal = hours + 'h'
+        else returnVal = hours + 'h ' + minutes + 'min'
+
+        return returnVal
     }
 }

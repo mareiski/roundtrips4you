@@ -27,6 +27,7 @@
                   v-model="dailyTrip.date"
                   today-btn
                   mask="DD.MM.YYYY HH:mm"
+                  :options="dailyTripDateOptions"
                 />
                 <div
                   class="flex justify-between"
@@ -82,12 +83,6 @@
                   >fertig</q-btn>
                 </div>
               </q-popup-proxy>
-              Zeit ändern
-              <q-icon
-                v-if="editor"
-                size="16px"
-                name="access_time"
-              />
             </span>
             <div v-if="editor">
               <q-select
@@ -380,6 +375,9 @@ export default {
     },
     formatOn () {
       this.preventPasting = !this.preventPasting
+    },
+    dailyTripDateOptions (date) {
+      return this.getParent('stop').dailyTripDateOptions(date)
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol

@@ -351,7 +351,7 @@
 
                 <q-item-section>
                   <q-item-label
-                    lines="1"
+                    lines="2"
                     class="flex"
                     style="flex-wrap:wrap; white-space:normal;"
                   >
@@ -365,17 +365,25 @@
                       color="gold"
                       style="margin-right:10px; padding-right:5px;"
                     />
-                    <div>
+                    <div
+                      class="flex"
+                      style="flex-wrap:wrap; white-space:normal;"
+                    >
                       <span
                         v-if="guestRating"
                         class="raleway"
                       >
-                        {{guestRating}}
+                        {{guestRating}},&nbsp;
                       </span>
                       <span v-if="hotelPrice">
                         <span class="raleway">ca. € </span>
                         <span class="raleway">{{hotelPrice}}</span>
-                        <q-tooltip>ungefährer Durchschnittspreis</q-tooltip>
+                        <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
+                      </span>
+                      <span v-if="hotelPrice">
+                        <span class="raleway">ca. € </span>
+                        <span class="raleway">{{hotelPrice}}</span>
+                        <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
                       </span>
                     </div>
                   </q-item-label>
@@ -709,6 +717,7 @@
               :editor="editor"
               :addedSights="dailyTrip.addedSights"
               :galeryImgUrls="galeryImgUrls"
+              :dateOptions="dailyTripDateOptions"
             ></DailyTrip>
           </div>
           <div
@@ -810,7 +819,6 @@
                 label="Hizufügen"
                 color="primary"
                 @click="addDailyTrip()"
-                v-close-popup
               />
             </q-card-actions>
           </q-card>
@@ -965,6 +973,11 @@ export default {
     nextStopDate: String,
     profile: String
   },
+  watch: {
+    date: function (newVal, oldVal) {
+      this.tempDailyTripDate = this.date
+    }
+  },
   data () {
     return {
       titleInput: this.title,
@@ -987,7 +1000,7 @@ export default {
       generalTempLink: '',
       formattedDate: date.formatDate(timeStamp, 'DD.MM.YYYY'),
       addDailyTripDialogVisible: false,
-      tempDailyTripLocation: {},
+      tempDailyTripLocation: null,
       tempDailyTripDate: this.date,
       dailyTripProfile: 'Auto',
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
@@ -1089,14 +1102,13 @@ export default {
     },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
       var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
-      let context = this
 
       axios.get(url)
         .then(response => {
           var data = response.data.routes[0]
 
           if (data !== null && typeof data !== 'undefined') {
-            let duration = context.msToTime(data.duration * 1000)
+            let duration = sharedMethods.msToTime(data.duration * 1000)
 
             let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : ''
             if (distance !== '') distance = ' (' + distance + ')'
@@ -1134,27 +1146,9 @@ export default {
       if (duration) dateDistance = (nextInitDate.valueOf() - currentInitDate.valueOf()) - duration
       else dateDistance = nextInitDate.valueOf() - currentInitDate.valueOf()
 
-      dailyTripDays = this.msToTime(dateDistance)
+      dailyTripDays = sharedMethods.msToTime(dateDistance)
 
       this.dailyTrips[this.dailyTrips.findIndex(x => x.id === trip.id)].days = { days: dailyTripDays, id: trip.id }
-    },
-    msToTime (duration) {
-      var ms = duration % 1000
-      duration = (duration - ms) / 1000
-
-      var secs = duration % 60
-      duration = (duration - secs) / 60
-
-      var minutes = duration % 60
-      var hours = (duration - minutes) / 60
-
-      let returnVal
-      if ((hours === 0 && minutes === 0) || (hours < 0 || minutes < 0)) returnVal = null
-      else if (hours === 0) returnVal = minutes + ' min'
-      else if (minutes === 0) returnVal = hours + ' h'
-      else returnVal = hours + ' h ' + minutes + ' min'
-
-      return returnVal
     },
     isDateTimeValid () {
       var testDate = this.date
@@ -1350,7 +1344,9 @@ export default {
       })
     },
     addDailyTrip () {
+      let context = this
       if (this.tempDailyTripDate && this.tempDailyTripLocation && this.dailyTripProfile) {
+        context.addDailyTripDialogVisible = false
         let createdStop = { id: this.dailyTrips.length, date: this.tempDailyTripDate, location: this.tempDailyTripLocation, descriptionInput: 'Tagesausflug nach ' + this.tempDailyTripLocation.label.split(',')[0], profile: this.getDailyTripProfile() }
         this.dailyTrips.push(createdStop)
 
@@ -1369,13 +1365,10 @@ export default {
           DailyTrips: this.dailyTrips
 
         }).then(results => {
-          this.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Tagesausflug wurde hinzugefügt'
-          })
+          sharedMethods.showSuccessNotification('Tagesausflug wurde hinzugefügt')
         })
+      } else {
+        sharedMethods.showErrorNotification('Bitte überprüfe deine Angaben')
       }
     },
     changeAllDates () {
@@ -1454,16 +1447,8 @@ export default {
         db.collection('RoundtripDetails').doc(this.docId).update({
           ['' + field]: value
         }).then(function () {
-          if (field !== 'Description') {
-            // context.$q.notify({
-            //   message: 'Deine Änderungen wurde gespeichert',
-            //   color: 'green-4',
-            //   textColor: 'white',
-            //   icon: 'check_circle'
-            // })
-          }
           if (field === 'Location') context.getParent('EditRoundtrips').fetchAndSaveCountries()
-          if (updateParent) context.getParent('EditRoundtrips').loadRoundtripDetails(context.$route.params.id, false)
+          if (updateParent) context.getParent('EditRoundtrips').getDataOutOfStops(false)
         })
       } catch (e) {
         console.log(e)
@@ -1508,6 +1493,8 @@ export default {
           lat: event.y,
           label: event.label
         }
+      } else {
+        this.tempDailyTripLocation = null
       }
     },
     getDailyTripProfile () {
@@ -1621,6 +1608,10 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     },
+    /**
+     * options for the daily trip quasar date component
+     * @param date the current date to check (set by quasar automatically)
+     */
     dailyTripDateOptions (date) {
       if (this.date && this.date.length > 0) {
         let dateTimeParts = this.date.split(' ')
