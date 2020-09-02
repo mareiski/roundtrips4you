@@ -124,9 +124,33 @@
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
-        <p v-if="Array.isArray(countries)">Momentan können wir dir nur Städte für dein Hauptland ({{countries[0]}}) vorschlagen</p>
+        <div class="flex justify-center">
+          <q-select
+            outlined
+            v-model="country"
+            use-input
+            hide-selected
+            fill-input
+            input-debounce="0"
+            :options="countryOptions"
+            label="Land auswählen"
+            @filter="filterCountries"
+            :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+          >
+            <template v-slot:prepend>
+              <q-icon name="explore" />
+            </template>
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Keine Ergebnisse
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </div>
         <CitySuggestion
-          :country="countries[0]"
+          :country="country"
           :dates="initDates"
           :RTId="$route.params.id"
         ></CitySuggestion>
@@ -1227,6 +1251,7 @@ export default {
       offersSubmitting: false,
       deleting: false,
       countryOptions: countries,
+      country: Array.isArray(countries) ? countries[0] : countries,
       regionOptions: null,
       stops: [],
       documentIds: [],
@@ -1380,6 +1405,15 @@ export default {
     }
   },
   methods: {
+    /**
+     * filter countries method used in filter method of quasar select component
+     */
+    filterCountries (val, update, abort) {
+      update(() => {
+        const needle = val.toLowerCase()
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
     /**
      * Called when user goes one step back in tour
      * @param {number} currentStep current step as number (before change)

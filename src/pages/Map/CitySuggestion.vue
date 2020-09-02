@@ -3,17 +3,22 @@
     class="flex city-suggestion"
     :style="cities.length === 0 ? 'flex-direction:row; justify-content:center;' : 'flex-direction:column;'"
   >
-    <q-btn
-      v-if="cities.length === 0"
-      color="primary"
-      style="width:200px;"
-      :loading="loading"
-      @click="getCities(country)"
-    >Städte vorschlagen
-      <template v-slot:loading>
-        <q-spinner />
-      </template>
-    </q-btn>
+    <div
+      class="flex justify-center"
+      style="margin-bottom:20px;"
+    >
+      <q-btn
+        color="primary"
+        style="width:200px;"
+        :loading="loading"
+        @click="getCities()"
+        :disable="!country"
+      >Städte vorschlagen
+        <template v-slot:loading>
+          <q-spinner />
+        </template>
+      </q-btn>
+    </div>
     <div class="flex justify-stretch cards-container">
       <q-card
         class="city-card"
@@ -84,56 +89,124 @@ export default {
     RTId: String
   },
   methods: {
-    getCities (country) {
+    getCities () {
       this.loading = true
       const context = this
-      axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
-        headers: {
-          'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
-        }
-      }).then(function (response) {
-        // wait 2 secs because only 1 request per sec is allowed
-        setTimeout(function () {
-          axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
-            headers: {
-              'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
-            }
-          }).then(function (response) {
-            let tempCities = response.data.data
 
-            tempCities.forEach((city, index) => {
-              if (city.name.includes('Metropolitanstadt')) city.name = city.name.slice(city.name.indexOf('Metropolitanstadt') + 17)
-              setTimeout(function () {
-                context.getCityImage(city.name, city.country)
-              }, 1000)
-            })
-
-            context.cities = JSON.parse(JSON.stringify(tempCities))
-            for (let i; i < tempCities.lenght; i++) {
-              const city = tempCities[i]
-
-              for (let index; index < tempCities.lenght; index++) {
-                const checkCity = tempCities[index]
-
-                console.log(checkCity.name)
-                console.log(city.name)
-                if (checkCity.name === city.name) {
-                  context.cities.splice(index, 1)
-                  break
-                }
-              }
-            }
-
-            this.loading = true
-          }).catch(function (error) {
-            console.log('Error' + error)
-            this.loading = true
+      context.fetchDBSuggestions().then(function (response) {
+        if (response.length > 0) {
+          context.handleFetchedSuggestions(response)
+        } else {
+          context.fetchAPISuggestions().then(function (apiResponse) {
+            context.handleFetchedSuggestions(apiResponse)
           })
-        }, 2000)
+        }
       }).catch(function (error) {
         console.log('Error' + error)
         this.loading = true
       })
+    },
+    /**
+     * handles the city suggestion results
+     */
+    handleFetchedSuggestions (tempCities) {
+      let context = this
+      tempCities.forEach((city, index) => {
+        if (city.name.includes('Metropolitanstadt')) city.name = city.name.slice(city.name.indexOf('Metropolitanstadt') + 17)
+        setTimeout(function () {
+          context.getCityImage(city.name, city.country)
+        }, 1000)
+      })
+
+      let uniqueCities = []
+
+      tempCities.forEach((city, index) => {
+        let cityObject = {
+          name: city.name,
+          country: city.country,
+          region: city.region
+        }
+
+        if (uniqueCities.length === 0) uniqueCities.push(cityObject)
+        for (let i = 0; i < uniqueCities.length; i++) {
+          if (city.name === uniqueCities[i].name) break
+          if (i === uniqueCities.length - 1) uniqueCities.push(cityObject)
+        }
+      })
+
+      this.cities = uniqueCities
+
+      this.loading = false
+    },
+    /**
+     * fetch city suggestions from geo db api
+     */
+    fetchAPISuggestions () {
+      let context = this
+      return new Promise((resolve, reject) => {
+        axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + this.country + '&languageCode=de', {
+          headers: {
+            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+          }
+        }).then(function (response) {
+          // wait 2 secs because only 1 request per sec is allowed
+          setTimeout(function () {
+            axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
+              headers: {
+                'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+              }
+            }).then(function (response) {
+              context.writeInDB(response.data.data)
+              resolve(response.data.data)
+            })
+          }, 2000)
+        }).catch(function (error) {
+          console.log('Error' + error)
+          this.loading = true
+        })
+      })
+    },
+    /**
+     * fetch city suggestions from the database
+     */
+    fetchDBSuggestions () {
+      return new Promise((resolve, reject) => {
+        let tempCities = []
+        let roundtripsRef = db.collection('SuggestedCities')
+          .where('Country', '==', this.country)
+          .limit(1)
+        roundtripsRef.get()
+          .then(snapshot => {
+            if (snapshot.empty) resolve(tempCities)
+            snapshot.forEach(doc => {
+              let cities = doc.data().Cities
+              if (cities.length === 0) resolve(tempCities)
+              cities.forEach(city => {
+                let cityObject = {
+                  name: city.name,
+                  region: city.region,
+                  country: doc.data().Country
+                }
+                tempCities.push(cityObject)
+
+                if (cities.indexOf(city) === cities.length - 1) {
+                  resolve(tempCities)
+                }
+              })
+            })
+          })
+      })
+    },
+    writeInDB (response) {
+      let newCityObject = {}
+      newCityObject.Cities = []
+
+      response.forEach((city, index) => {
+        newCityObject.Country = city.country
+        if (!newCityObject.Cities.includes(city.name)) newCityObject.Cities.push({ name: city.name, region: city.region })
+      })
+
+      db.collection('SuggestedCities').add(newCityObject)
     },
     addStop (city) {
       let initDate = null
