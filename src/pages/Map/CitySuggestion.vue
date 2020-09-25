@@ -20,16 +20,13 @@
       </q-btn>
     </div>
     <div class="flex justify-stretch cards-container">
-      <q-card
-        class="city-card"
+      <div
         v-for="(city, index) in cities"
         :key="index"
+        @click="openCityDialog(index)"
+        class="cursor-pointer"
       >
-        <a
-          :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
-          target="_blank"
-        >
-
+        <q-card class="city-card">
           <q-img
             :alt="'Bild von'  + city.name"
             v-if="images[images.findIndex(x => x.cityName === city.name)]"
@@ -40,27 +37,52 @@
             <div class="absolute-bottom text-h6">{{city.name}}
             </div>
           </q-img>
-        </a>
 
-        <q-btn
-          round
-          color="primary"
-          class="add-to-rt"
-          icon="add"
-          @click="addStop(city)"
-        >
-        </q-btn>
+          <q-btn
+            round
+            color="primary"
+            class="add-to-rt"
+            icon="add"
+            @click="addStop(city)"
+          >
+          </q-btn>
 
-        <q-card-section>
-          {{ city.region }}, {{city.country}}
-          <br>
-          <br>
-          Photo from <a
-            style="color:black;"
-            href="https://pixabay.com"
-          >pixabay</a>
-        </q-card-section>
-      </q-card>
+          <q-card-section>
+            {{ city.region }}, {{city.country}}
+          </q-card-section>
+
+        </q-card>
+      </div>
+      <q-dialog v-model="cityDialog.showed">
+        <q-card>
+          <q-img
+            :src="cityDialog.imgSrc"
+            style="max-height:75vh;"
+          >
+            <div class="absolute-bottom">
+              <div class="text-h6">{{cityDialog.title}}</div>
+              <div class="text-subtitle2">{{cityDialog.shortDescription}}</div>
+            </div>
+          </q-img>
+
+          <q-card-section>
+            <!-- <a
+                :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
+                target="_blank"
+              ></a> -->
+            {{cityDialog.description}}
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn
+              flat
+              label="OK"
+              color="primary"
+              v-close-popup
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
     <q-btn
       v-if="cities && cities.length > 0"
@@ -80,7 +102,8 @@ export default {
     return {
       cities: [],
       images: [],
-      loading: false
+      loading: false,
+      cityDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' }
     }
   },
   props: {
@@ -89,9 +112,38 @@ export default {
     RTId: String
   },
   methods: {
+    openCityDialog (index) {
+      let city = this.cities[index]
+      this.cityDialog.title = city.name
+      this.cityDialog.imgSrc = this.images[this.images.findIndex(x => x.cityName === city.name)].url
+
+      const headers = {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+
+      // get city dialog content
+      const context = this
+      axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + city.name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+        { headers: headers })
+        .then(function (response) {
+          const pages = response.data.query.pages
+          const firstPageName = Object.keys(pages)[0]
+
+          context.cityDialog.shortDescription = pages[firstPageName].description
+          context.cityDialog.description = pages[firstPageName].extract
+          context.cityDialog.showed = true
+        }).catch(function (error) {
+          console.log('Error' + error)
+          context.cityDialog.shortDescription = ''
+          context.cityDialog.description = 'Keine Informationen gefunden.'
+          context.cityDialog.showed = true
+        })
+    },
     getCities () {
       this.loading = true
       const context = this
+
+      this.cityDialog.showed = false
 
       context.fetchDBSuggestions().then(function (response) {
         if (response.length > 0) {

@@ -144,6 +144,10 @@
             clickable
             @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
           >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
+            <q-icon
+              v-if="editor"
+              name="edit"
+            />
             <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
           </q-chip>
           <q-dialog
@@ -183,7 +187,12 @@
             icon="local_parking"
             :clickable="editor"
             @click="editParkingPlace = true"
-          >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}</q-chip>
+          >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}
+            <q-icon
+              v-if="editor"
+              name="edit"
+            />
+          </q-chip>
         </div>
         <q-dialog
           v-if="editor"
@@ -278,7 +287,7 @@
             </q-dialog>
           </div>
           <q-chip
-            v-else-if="editor && (!hotelName || typeof hotelName === 'undefined')"
+            v-else-if="editor"
             clickable
             @click="searchSights()"
           >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
@@ -290,7 +299,7 @@
             style="flex-wrap"
           >
             <q-select
-              label="Sehenswürdigkeiten hinzufügen"
+              label="Sehenswürdigkeiten"
               filled
               v-model="addedSights"
               use-input
@@ -302,7 +311,14 @@
               style="margin:10px 10px 10px 0; width:260px;"
               @blur="saveSights()"
               ref="sightInput"
-            />
+            >
+              <template v-slot:prepend>
+                <q-icon
+                  name="add"
+                  @click.stop
+                />
+              </template>
+            </q-select>
           </div>
           <div
             class="flex"
@@ -374,11 +390,6 @@
                         class="raleway"
                       >
                         {{guestRating}},&nbsp;
-                      </span>
-                      <span v-if="hotelPrice">
-                        <span class="raleway">ca. € </span>
-                        <span class="raleway">{{hotelPrice}}</span>
-                        <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
                       </span>
                       <span v-if="hotelPrice">
                         <span class="raleway">ca. € </span>
@@ -457,7 +468,7 @@
                     >Hotelwebsite</q-chip>
                   </div>
                   <q-chip
-                    icon="fab fa-bootstrap"
+                    icon="launch"
                     v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
                     style="width:117px;"
@@ -468,7 +479,7 @@
                     <q-tooltip>Hotel auf booking.com</q-tooltip>
                   </q-chip>
                   <q-chip
-                    icon="house"
+                    icon="launch"
                     v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
                     style="width:117px;"
@@ -1626,7 +1637,7 @@ export default {
           const nextStopDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
 
           // date must be between current and next stop date
-          return currentDate >= currentStopDate && currentDate < nextStopDate
+          return currentDate >= currentStopDate && currentDate <= nextStopDate
         } else {
           return currentDate >= currentStopDate
         }

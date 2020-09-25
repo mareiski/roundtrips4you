@@ -86,7 +86,7 @@
             </span>
             <div v-if="editor">
               <q-select
-                label="Sehenswürdigkeiten hinzufügen"
+                label="Sehenswürdigkeiten"
                 filled
                 v-model="addedSights"
                 use-input
@@ -97,7 +97,14 @@
                 new-value-mode="add-unique"
                 style="margin:10px 10px 10px 0; width:260px;"
                 @blur="saveSights()"
-              />
+              >
+                <template v-slot:prepend>
+                  <q-icon
+                    name="add"
+                    @click.stop
+                  />
+                </template>
+              </q-select>
               <q-editor
                 v-model="dailyTrip.descriptionInput"
                 min-height="5rem"

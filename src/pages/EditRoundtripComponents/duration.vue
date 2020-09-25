@@ -5,6 +5,10 @@
       :clickable="editor"
       @click="editStopProfile = true"
     >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}
+      <q-icon
+        v-if="editor"
+        name="edit"
+      />
       <q-tooltip>Reisemittel ändern</q-tooltip>
     </q-chip>
     <q-dialog
