@@ -1461,7 +1461,7 @@ export default {
           ['' + field]: value
         }).then(function () {
           if (field === 'Location') context.getParent('EditRoundtrips').fetchAndSaveCountries()
-          if (updateParent) context.getParent('EditRoundtrips').getDataOutOfStops(false)
+          if (updateParent) context.getParent('EditRoundtrips').fetchRoundtripStops(context.$route.params.id, false)
         })
       } catch (e) {
         console.log(e)
