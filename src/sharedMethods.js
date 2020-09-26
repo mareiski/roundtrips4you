@@ -198,5 +198,39 @@ export default {
         else returnVal = hours + 'h ' + minutes + 'min'
 
         return returnVal
+    },
+    /**
+     * gets data from wikivoyage for a given page name
+     * @param {string} pageName the page name to get data from
+     * @returns {object} object that contains title, shortDescription, description and imgSrc for the given page
+     */
+    getWikivoyageData (pageName) {
+        return new Promise((resolve, reject) => {
+            const headers = {
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+
+            let returnData = {}
+
+            getAxios().then(axios => {
+                axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + pageName + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+                    { headers: headers })
+                    .then(function (response) {
+                        const pages = response.data.query.pages
+                        const firstPageName = Object.keys(pages)[0]
+
+                        returnData.title = pages[firstPageName].title
+                        returnData.shortDescription = pages[firstPageName].description
+                        returnData.description = pages[firstPageName].extract
+                        returnData.imgSrc = pages[firstPageName].original ? pages[firstPageName].original.source : ''
+
+                        resolve(returnData)
+                    }).catch(function (error) {
+                        console.log('Error' + error)
+
+                        resolve(null)
+                    })
+            })
+        })
     }
 }

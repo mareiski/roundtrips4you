@@ -237,7 +237,7 @@
               <q-chip
                 v-if="editor"
                 clickable
-                @click="sightDialogs[sightDialogs.findIndex(x=> x.title === sight.name)].showed = true"
+                @click="openSightDialog(sight)"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>
@@ -248,33 +248,35 @@
               :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
             >weitere auf Google</a>
             oder auf der Karte
-            <q-dialog
-              v-for="(sightDialog, index) in sightDialogs"
-              :key="'dialog' + index"
-              v-model="sightDialog.showed"
-            >
+            <q-dialog v-model="sightDialog.showed">
               <q-card>
+                <q-card-section
+                  class="row flex justify-end q-pb-none"
+                  style="z-index:100; width:100%; position:absolute; color:white;"
+                >
+                  <q-btn
+                    icon="close"
+                    flat
+                    round
+                    dense
+                    v-close-popup
+                  />
+                </q-card-section>
                 <q-img
-                  :src="sightDialog.src"
+                  :src="sightDialog.imgSrc"
                   style="max-height:75vh;"
                 >
                   <div class="absolute-bottom">
                     <div class="text-h6">{{sightDialog.title}}</div>
-                    <div class="text-subtitle2">{{sightDialog.description}}</div>
+                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
                   </div>
                 </q-img>
 
                 <q-card-section>
-                  {{sightDialog.extract}}
+                  {{sightDialog.description}}
                 </q-card-section>
 
                 <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="zurück"
-                    color="primary"
-                    v-close-popup
-                  />
                   <q-btn
                     flat
                     label="hinzufügen"
@@ -588,7 +590,7 @@
             <q-card style="width:100%; max-width:100vh; overflow:hidden;">
               <q-card-section
                 class="row flex justify-end q-pb-none"
-                style="z-index:100;"
+                style="z-index:100; width:100%; position:absolute; color:white;"
               >
                 <q-btn
                   icon="close"
@@ -598,7 +600,7 @@
                   v-close-popup
                 />
               </q-card-section>
-              <q-card-section style="margin-top:-35px;">
+              <q-card-section>
                 <q-img
                   style="width:100%;"
                   :src="dialogImgSrc"
@@ -1018,7 +1020,7 @@ export default {
       expanded: false,
       changeAllDatesActive: false,
       oldDate: null,
-      sightDialogs: [],
+      sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
       showTransportDialog: false,
       addHotelDisabled: true,
 
@@ -1655,36 +1657,30 @@ export default {
       }
       return false
     },
+    openSightDialog (sight) {
+      // get sight dialog content from wikivoyage
+      const context = this
+      sharedMethods.getWikivoyageData(sight.name).then(result => {
+        if (result !== null) {
+          context.sightDialog.title = result.title || sight.name
+          context.sightDialog.description = result.description || 'Es konnten leider keine Informationen gefunden werden'
+          context.sightDialog.shortDescription = result.shortDescription
+          context.sightDialog.imgSrc = result.imgSrc
+          context.sightDialog.showed = true
+        } else {
+          context.sightDialog.title = sight.name
+          context.sightDialog.description = 'Es konnten leider keine Informationen gefunden werden'
+          context.sightDialog.shortDescription = ''
+          context.sightDialog.imgSrc = ''
+          context.sightDialog.showed = true
+        }
+      })
+    },
     searchSights () {
       if (this.location.lng && this.location.lat) {
         this.getSights(this.location.lng, this.location.lat).then((results) => {
           if (results !== null) {
             this.sights = results.data.data
-
-            const headers = {
-              'Content-Type': 'application/json; charset=UTF-8'
-            }
-
-            // get sight dialog content
-            const context = this
-            this.sights.forEach((sight, index) => {
-              axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + sight.name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-                { headers: headers })
-                .then(function (response) {
-                  const pages = response.data.query.pages
-                  const firstPageName = Object.keys(pages)[0]
-
-                  const title = pages[firstPageName].title
-                  const description = pages[firstPageName].description
-                  const extract = pages[firstPageName].extract
-                  const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
-
-                  context.sightDialogs.splice(index, 0, { title: title || sight.name, showed: false, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src })
-                }).catch(function (error) {
-                  console.log('Error' + error)
-                  context.sightDialogs.splice(index, 0, { title: sight.name, showed: false, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' })
-                })
-            })
           } else {
             this.sights = 'error'
           }

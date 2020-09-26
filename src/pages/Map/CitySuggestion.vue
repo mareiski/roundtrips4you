@@ -20,13 +20,16 @@
       </q-btn>
     </div>
     <div class="flex justify-stretch cards-container">
-      <div
+
+      <q-card
+        class="city-card"
         v-for="(city, index) in cities"
         :key="index"
-        @click="openCityDialog(index)"
-        class="cursor-pointer"
       >
-        <q-card class="city-card">
+        <div
+          @click="openCityDialog(index)"
+          class="cursor-pointer"
+        >
           <q-img
             :alt="'Bild von'  + city.name"
             v-if="images[images.findIndex(x => x.cityName === city.name)]"
@@ -46,15 +49,32 @@
             @click="addStop(city)"
           >
           </q-btn>
+        </div>
 
-          <q-card-section>
-            {{ city.region }}, {{city.country}}
+        <a
+          :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
+          target="_blank"
+        >
+          <q-card-section style="color:#707070;">
+            <q-icon name="location_on" />
+            {{city.name}}, {{ city.region }}
           </q-card-section>
-
-        </q-card>
-      </div>
+        </a>
+      </q-card>
       <q-dialog v-model="cityDialog.showed">
         <q-card>
+          <q-card-section
+            class="row flex justify-end q-pb-none"
+            style="z-index:100; width:100%; position:absolute; color:white;"
+          >
+            <q-btn
+              icon="close"
+              flat
+              round
+              dense
+              v-close-popup
+            />
+          </q-card-section>
           <q-img
             :src="cityDialog.imgSrc"
             style="max-height:75vh;"
@@ -96,6 +116,7 @@
 <script>
 import axios from 'axios'
 import { db } from '../../firebaseInit.js'
+import sharedMethods from '../../sharedMethods.js'
 
 export default {
   data () {
@@ -117,27 +138,20 @@ export default {
       this.cityDialog.title = city.name
       this.cityDialog.imgSrc = this.images[this.images.findIndex(x => x.cityName === city.name)].url
 
-      const headers = {
-        'Content-Type': 'application/json; charset=UTF-8'
-      }
+      let context = this
 
-      // get city dialog content
-      const context = this
-      axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + city.name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-        { headers: headers })
-        .then(function (response) {
-          const pages = response.data.query.pages
-          const firstPageName = Object.keys(pages)[0]
-
-          context.cityDialog.shortDescription = pages[firstPageName].description
-          context.cityDialog.description = pages[firstPageName].extract
+      // get city dialog content from wikivoyage
+      sharedMethods.getWikivoyageData(city.name).then(result => {
+        if (result !== null) {
+          context.cityDialog.shortDescription = result.shortDescription
+          context.cityDialog.description = result.description
           context.cityDialog.showed = true
-        }).catch(function (error) {
-          console.log('Error' + error)
+        } else {
           context.cityDialog.shortDescription = ''
           context.cityDialog.description = 'Keine Informationen gefunden.'
           context.cityDialog.showed = true
-        })
+        }
+      })
     },
     getCities () {
       this.loading = true
