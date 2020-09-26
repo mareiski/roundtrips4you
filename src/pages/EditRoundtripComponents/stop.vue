@@ -66,6 +66,8 @@
                       />
                     </q-popup-proxy>
                   </q-icon>
+                  <q-tooltip>Datum ändern</q-tooltip>
+
                 </template>
               </q-input>
             </q-card-section>
@@ -117,14 +119,19 @@
           </q-card>
         </q-dialog>
       </div>
-      <q-icon
-        v-if="editor && !firstStop"
-        name="delete"
-        class="cursor-pointer"
-        @click="deleteEntry()"
-      >
-        <q-tooltip>Stopp löschen</q-tooltip>
-      </q-icon>
+      <div>
+        <q-btn
+          v-if="editor"
+          :disable="firstStop"
+          @click="deleteEntry()"
+          flat
+          round
+          icon="delete"
+        >
+          <q-tooltip>Stopp löschen</q-tooltip>
+        </q-btn>
+        <q-tooltip v-if="firstStop">Der erste Stopp kann nicht gelöscht werden</q-tooltip>
+      </div>
     </div>
     <q-list
       bordered
@@ -781,6 +788,7 @@
                       />
                     </q-popup-proxy>
                   </q-icon>
+                  <q-tooltip>Datum ändern</q-tooltip>
                 </template>
 
                 <template v-slot:append>
@@ -799,6 +807,8 @@
                       />
                     </q-popup-proxy>
                   </q-icon>
+                  <q-tooltip>Zeit ändern</q-tooltip>
+
                 </template>
               </q-input>
               <CitySearch

@@ -120,7 +120,7 @@
       animated
       ref="tabPanels"
       keep-alive
-      @transition="sharedMethods.scrollToOffset(220)"
+      @transition="sharedMethods.scrollToOffset(200)"
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
@@ -550,6 +550,8 @@
                     class="cursor-pointer"
                   >
                   </q-icon>
+                  <q-tooltip>Datum ändern</q-tooltip>
+
                 </template>
               </q-input>
               <q-input
@@ -576,6 +578,7 @@
                     class="cursor-pointer"
                   >
                   </q-icon>
+                  <q-tooltip>Datum ändern</q-tooltip>
                 </template>
               </q-input>
               <q-select
