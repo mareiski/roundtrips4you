@@ -612,6 +612,9 @@ export default {
         roundtripsRef.get()
           .then(snapshot => {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          }).catch(function (error) {
+            console.log('Error ' + error)
+            resolve(null)
           })
       })
     },

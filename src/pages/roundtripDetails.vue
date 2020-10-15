@@ -614,6 +614,8 @@ export default {
 
                     this.writeDuration(result.data.routes[0], docId)
                   })
+                }).catch(function (error) {
+                  console.log(error)
                 })
               }
             })
@@ -658,6 +660,9 @@ export default {
         roundtripsRef.get()
           .then(snapshot => {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          }).catch(function (error) {
+            console.log('Error ' + error)
+            resolve(null)
           })
       })
     },

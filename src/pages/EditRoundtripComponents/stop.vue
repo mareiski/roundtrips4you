@@ -170,7 +170,8 @@
                   @update="updateLocation($event)"
                 ></CitySearch>
                 <p>oder</p>
-                <q-btn @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)">auf google anzeigen</q-btn>
+                <!-- openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label) -->
+                <q-btn @click="[getParent('EditRoundtrips').flyToPointOnEditRTMap(location.lat, location.lng), editLocation = false]">auf karte anzeigen</q-btn>
               </q-card-section>
               <q-card-actions align="right">
                 <q-btn
@@ -183,7 +184,7 @@
                   flat
                   label="OK"
                   color="primary"
-                  @click="saveData('Location', tempLocation, true)"
+                  @click="location !== tempLocation ? saveData('Location', tempLocation, true) : null"
                   v-close-popup
                 />
               </q-card-actions>

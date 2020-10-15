@@ -100,6 +100,9 @@ export default {
             console.log('Error' + error)
             resolve(null)
           })
+        }).catch(function (error) {
+          console.log('Error ' + error)
+          resolve(null)
         })
       })
     }

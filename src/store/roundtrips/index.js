@@ -49,6 +49,9 @@ export default {
                 commit('addRoundtrip', roundtrip)
                 resolve(roundtrip)
               })
+            }).catch(function (error) {
+              console.log('Error ' + error)
+              resolve(null)
             })
         }
       })

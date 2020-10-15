@@ -125,6 +125,9 @@ export default {
                     console.log('Error on Authentication' + error)
                     resolve(null)
                 })
+            }).catch(function (error) {
+                console.log('Error ' + error)
+                resolve(null)
             })
         })
     },
@@ -230,6 +233,9 @@ export default {
 
                         resolve(null)
                     })
+            }).catch(function (error) {
+                console.log('Error ' + error)
+                resolve(null)
             })
         })
     }

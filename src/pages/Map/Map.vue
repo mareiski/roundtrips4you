@@ -141,7 +141,7 @@
               ></q-img>
               <q-card-section>
                 <div class="text-h6">
-                  {{dailyTrip.location.label.split(',')[0]}} - Tagesausflug von {{stop.Location.label.split(',')[0]}}
+                  {{dailyTrip.location.label.split(',')[0]}} - Tagesausflug von {{stop.Location.label ? stop.Location.label.split(',')[0] : ''}}
                 </div>
                 <div class="text-subtitle2">
                   <p style="margin-bottom:5px;">
@@ -390,6 +390,7 @@ export default {
       this.loadMap(this.map)
     },
     onMapLoaded (event) {
+      console.log('onmaploaded')
       this.map = event.map
       this.loadMap(event.map).then(e => {
         // wait 1 second to ensure map is realy loaded
@@ -636,7 +637,13 @@ export default {
         }
       })
     },
-
+    flyToPointOnMap (lat, lng) {
+      let context = this
+      setTimeout(function () {
+        console.log('fly to')
+        context.map.flyTo({ center: [lng, lat], speed: 0.8, curve: 1, zoom: 12 })
+      }, context.map == null ? 3000 : 100)
+    },
     deg2rad (deg) {
       return deg * (Math.PI / 180)
     },
@@ -722,10 +729,12 @@ export default {
                 })
 
                 map.on('click', id, function (e) {
-                  context.$refs[id][0].togglePopup()
+                  if (!context.markerClicked) context.$refs[id][0].togglePopup()
                 })
                 map.getSource(id).setData(geojson)
               }
+            }).catch(function (error) {
+              console.log(error)
             })
         })
       } else {

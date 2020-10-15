@@ -124,33 +124,7 @@
     >
       <q-tab-panel name="inspiration">
         <h4>Inspiration</h4>
-        <div class="flex justify-center">
-          <q-select
-            outlined
-            v-model="country"
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            :options="countryOptions"
-            label="Land auswählen"
-            @filter="filterCountries"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="explore" />
-            </template>
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  Keine Ergebnisse
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-        </div>
         <CitySuggestion
-          :country="country"
           :dates="initDates"
           :RTId="$route.params.id"
         ></CitySuggestion>
@@ -1200,7 +1174,6 @@
 <script>
 import { date, Loading } from 'quasar'
 import { auth, db, storage } from '../firebaseInit.js'
-import { countries } from '../countries'
 import axios from 'axios'
 import { TaskQueue } from 'cwait'
 import sharedMethods from '../sharedMethods'
@@ -1228,12 +1201,14 @@ let tempLastClickLocation = {}
 // context of vue app (set in mounted)
 let context
 
+import Map from '../pages/Map/Map'
+
 export default {
   name: 'EditRoundtrips',
   components: {
     Stop: () => import('../pages/EditRoundtripComponents/stop'),
     CitySearch: () => import('../pages/Map/CitySearch'),
-    Map: () => import('../pages/Map/Map'),
+    Map,
     Duration: () => import('../pages/EditRoundtripComponents/duration'),
     // HotelSearch: () => import('../pages/Map/HotelSearch'),
     RegionSearch: () => import('../pages/Map/RegionSearch'),
@@ -1253,8 +1228,6 @@ export default {
       submitting: false,
       offersSubmitting: false,
       deleting: false,
-      countryOptions: countries,
-      country: Array.isArray(countries) ? countries[0] : countries,
       regionOptions: null,
       stops: [],
       documentIds: [],
@@ -1409,15 +1382,6 @@ export default {
   },
   methods: {
     /**
-     * filter countries method used in filter method of quasar select component
-     */
-    filterCountries (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    },
-    /**
      * Called when user goes one step back in tour
      * @param {number} currentStep current step as number (before change)
      */
@@ -1458,6 +1422,19 @@ export default {
      */
     onTourStart () {
       this.$store.commit('demoSession/setTourShowed', true)
+    },
+    /**
+     * show a POI on the edit roundtrips map
+     * @param {Number} lat lat coordinate of POI
+     * @param {Number} lng lng coordinate of POI
+     */
+    flyToPointOnEditRTMap (lat, lng) {
+      this.tab = 'map'
+
+      let context = this
+      setTimeout(function () {
+        context.$refs.map.flyToPointOnMap(lat, lng)
+      }, 500)
     },
     /**
      * Copy share link of roundtrip to clipboard
@@ -1866,6 +1843,8 @@ export default {
               const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
               this.writeDuration(result.data.routes[0], docId)
             })
+          }).catch(function (error) {
+            console.log(error)
           })
         }
       })
@@ -1978,6 +1957,8 @@ export default {
               const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
               this.writeDuration(result.data.routes[0], docId)
             })
+          }).catch(function (error) {
+            console.log(error)
           })
         }
       })
@@ -2053,6 +2034,8 @@ export default {
           axios.get(url)
             .then(response => {
               if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
+            }).catch(function (error) {
+              console.log(error)
             })
         )
       })
@@ -2474,6 +2457,8 @@ export default {
               const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
               this.writeDuration(result.data.routes[0], docId)
             })
+          }).catch(function (error) {
+            console.log(error)
           })
           this.getTripDuration()
           this.saveFrequentlyChangingData()
@@ -2554,6 +2539,8 @@ export default {
               const docId = tempUrlDocObjects[tempUrlDocObjects.findIndex(x => x.url === result.config.url)].id
               this.writeDuration(result.data.routes[0], docId)
             })
+          }).catch(function (error) {
+            console.log(error)
           })
         }
       })
@@ -2988,6 +2975,9 @@ export default {
         roundtripsRef.get()
           .then(snapshot => {
             resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+          }).catch(function (error) {
+            console.log('Error ' + error)
+            resolve(null)
           })
       })
     },

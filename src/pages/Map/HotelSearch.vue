@@ -211,11 +211,13 @@ export default {
             }
           }).then((response) => {
             resolve(response)
+          }).catch((error) => {
+            console.log(error)
+            resolve(null)
           })
-            .catch((error) => {
-              console.log(error)
-              resolve(null)
-            })
+        }).catch(function (error) {
+          console.log('Error ' + error)
+          resolve(null)
         })
       })
     }

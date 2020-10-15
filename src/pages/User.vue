@@ -408,6 +408,9 @@ export default {
         roundtripsRef.get()
           .then(snapshot => {
             resolve(snapshot.size === 0 || 'Dieser Name ist bereits vergeben')
+          }).catch(function (error) {
+            console.log('Error ' + error)
+            resolve(null)
           })
       })
     },

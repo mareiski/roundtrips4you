@@ -7,7 +7,31 @@
       class="flex justify-center"
       style="margin-bottom:20px;"
     >
-      <q-btn
+      <q-select
+        outlined
+        v-model="country"
+        use-input
+        hide-selected
+        fill-input
+        input-debounce="0"
+        :options="countryOptions"
+        label="Land auswählen"
+        @filter="filterCountries"
+        @input="getCities()"
+        :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+      >
+        <template v-slot:prepend>
+          <q-icon name="explore" />
+        </template>
+        <template v-slot:no-option>
+          <q-item>
+            <q-item-section class="text-grey">
+              Keine Ergebnisse
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
+      <!-- <q-btn
         color="primary"
         style="width:200px;"
         :loading="loading"
@@ -17,7 +41,7 @@
         <template v-slot:loading>
           <q-spinner />
         </template>
-      </q-btn>
+      </q-btn> -->
     </div>
     <div class="flex justify-stretch cards-container">
 
@@ -26,41 +50,54 @@
         v-for="(city, index) in cities"
         :key="index"
       >
-        <div
-          @click="openCityDialog(index)"
-          class="cursor-pointer"
-        >
-          <q-img
-            :alt="'Bild von'  + city.name"
-            v-if="images[images.findIndex(x => x.cityName === city.name)]"
-            :src="images[images.findIndex(x => x.cityName === city.name)].url"
-            style="height:170px;"
-            placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
+        <div>
+          <div
+            @click="openCityDialog(index)"
+            class="cursor-pointer"
           >
-            <div class="absolute-bottom text-h6">{{city.name}}
-            </div>
-          </q-img>
+            <q-img
+              :alt="'Bild von'  + city.name"
+              v-if="images[images.findIndex(x => x.cityName === city.name)]"
+              :src="images[images.findIndex(x => x.cityName === city.name)].url"
+              style="height:170px;"
+              placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
+            >
+              <div class="absolute-bottom text-h6">{{city.name}}
+              </div>
+            </q-img>
 
-          <q-btn
-            round
-            color="primary"
-            class="add-to-rt"
-            icon="add"
-            @click="addStop(city)"
+            <q-btn
+              round
+              color="primary"
+              class="add-to-rt"
+              icon="add"
+              @click="addStop(city)"
+            >
+              <q-tooltip>zur Reise hinzügen</q-tooltip>
+            </q-btn>
+          </div>
+
+          <a
+            :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
+            target="_blank"
           >
-          </q-btn>
+            <q-card-section style="color:#707070;">
+              <q-icon name="location_on" />
+              {{city.name}}, {{ city.region }}
+            </q-card-section>
+          </a>
         </div>
 
-        <a
-          :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
-          target="_blank"
-        >
-          <q-card-section style="color:#707070;">
-            <q-icon name="location_on" />
-            {{city.name}}, {{ city.region }}
-          </q-card-section>
-        </a>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="Infos"
+            color="secondary"
+            @click="openCityDialog(index)"
+          />
+        </q-card-actions>
       </q-card>
+
       <q-dialog v-model="cityDialog.showed">
         <q-card>
           <q-card-section
@@ -117,22 +154,35 @@
 import axios from 'axios'
 import { db } from '../../firebaseInit.js'
 import sharedMethods from '../../sharedMethods.js'
+import { countries } from '../../countries.js'
 
 export default {
   data () {
     return {
       cities: [],
       images: [],
-      loading: false,
+      country: Array.isArray(countries) ? countries[0] : countries,
+      countryOptions: countries,
       cityDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' }
     }
   },
   props: {
-    country: String,
     dates: Array,
     RTId: String
   },
   methods: {
+    /**
+     * filter countries method used in filter method of quasar select component
+     */
+    filterCountries (val, update, abort) {
+      update(() => {
+        const needle = val.toLowerCase()
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
+    /**
+     * open the city dialog for city with index
+     */
     openCityDialog (index) {
       let city = this.cities[index]
       this.cityDialog.title = city.name
@@ -153,9 +203,13 @@ export default {
         }
       })
     },
+    /**
+     * get all cities for country cities
+     */
     getCities () {
-      this.loading = true
       const context = this
+
+      this.cities = []
 
       this.cityDialog.showed = false
 
@@ -169,7 +223,6 @@ export default {
         }
       }).catch(function (error) {
         console.log('Error' + error)
-        this.loading = true
       })
     },
     /**
@@ -201,8 +254,6 @@ export default {
       })
 
       this.cities = uniqueCities
-
-      this.loading = false
     },
     /**
      * fetch city suggestions from geo db api
@@ -224,11 +275,12 @@ export default {
             }).then(function (response) {
               context.writeInDB(response.data.data)
               resolve(response.data.data)
+            }).catch(function (error) {
+              console.log(error)
             })
           }, 2000)
         }).catch(function (error) {
           console.log('Error' + error)
-          this.loading = true
         })
       })
     },
@@ -336,6 +388,8 @@ export default {
             else {
               context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: '../../statics/dummy-image-landscape-1-150x150.jpg', cityName: cityName })
             }
+          }).catch(function (error) {
+            console.log(error)
           })
         }
       })
@@ -343,6 +397,9 @@ export default {
     openInNewTab (link) {
       window.open(link, '_blank')
     }
+  },
+  created () {
+    this.getCities()
   }
 }
 </script>
