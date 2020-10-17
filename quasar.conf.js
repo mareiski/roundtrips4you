@@ -5,12 +5,15 @@ module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
+    preFetch: true,
+
     boot: [
       'initialMain'
     ],
 
     css: [
-      'app.styl'
+      'app.styl',
+      'site.less'
     ],
 
     extras: [

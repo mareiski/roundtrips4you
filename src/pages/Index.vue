@@ -1,7 +1,7 @@
 <template>
   <q-page style="overflow: hidden;">
-    <div class="home q-px-lg q-pb-md">
-      <div
+    <div class="home q-px-xl q-pb-xl">
+      <!-- <div
         id="flyingPlane"
         v-show="imgLoaded"
       >
@@ -19,7 +19,7 @@
           @load="imgLoaded = true"
           src="../statics/plane.png"
         />
-      </div>
+      </div> -->
       <div id="MainImg"></div>
       <div id="MainImgOverlay">
       </div>
@@ -36,14 +36,14 @@
             <p>Plane deine Reise jetzt kostenlos und ohne Registrierung</p>
             <!-- @click="$router.push('/registrieren')" -->
             <q-btn
-              @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
+              @click="sharedMethods.scrollToRef($refs['tools'])"
               color="primary"
-            >Los geht's</q-btn>
+            >So geht's</q-btn>
           </div>
           <q-dialog v-model="showCreateTempRTDialog">
             <q-card>
               <q-card-section class="row items-center">
-                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine erste Reise ohne Anmeldung</span>
+                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine Reise ohne Anmeldung</span>
                 <q-input
                   v-model="title"
                   :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
@@ -116,14 +116,6 @@
         <h1>Plane deine eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
       </div>
       <div class="box-seperator-placholder"></div>
-      <div class="register-container">
-        <h4 style="text-align:center;">Lästige Reiseplanung war gestern, registriere dich jetzt kostenlos und entdecke Roundtrips4you</h4>
-        <q-btn
-          @click="$router.push('/registrieren')"
-          color="primary"
-          style="font-size:18px;"
-        >JETZT REGISTRIEREN</q-btn>
-      </div>
       <div class="card-container">
         <div
           class="card-wrap left"
@@ -165,6 +157,14 @@
           </div>
         </div>
       </div>
+      <div class="register-container">
+        <h4 style="text-align:center;">Beginne kostenlos und ohne Anmeldung mit der Planung deiner eigenen Reise</h4>
+        <q-btn
+          @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
+          color="primary"
+          style="font-size:18px;"
+        >Reise selbst Planen</q-btn>
+      </div>
       <!-- <div
         class="description-container"
         v-in-viewport.once
@@ -178,7 +178,7 @@
       </div> -->
       <h4
         ref="tools"
-        style="text-align:center;"
+        style="text-align:center; padding-top: 30px;"
       >Mit diesen Tools planst du deine eigene Reise in unter 5 Minuten</h4>
       <ol class="create-roundtrip-ol">
         <li v-in-viewport.once>
@@ -255,7 +255,7 @@
       </ol>
       <div class="section-img"></div>
       <div class="section-img-placeholder">
-        <h3>Beginne jetzt gleich und ohne Anmeldung mit der Planung deiner ganz eigenen Reise</h3>
+        <h3>Plane jetzt gleich und ohne Anmeldung mit der deine ganz eigenen Reise</h3>
         <q-btn
           color="primary"
           v-in-viewport.once
@@ -316,14 +316,6 @@
         <p>Zusätzlich erstellen wir automatisch zu deiner Reise eine interaktive <a @click="scrollTo('map')">Karte</a> mit Mapbox, die dir deine Route im Überblick zeigt.
           <p>Unser Ziel ist es deinen Planungsaufwand so zu minimieren, damit du mehr Zeit für das Wichtigste hast: Dem Reisen selbst!</p>
       </div> -->
-      <div class="register-container">
-        <h4 style="text-align:center;">Beginne jetzt gleich kostenlos und ohne Anmeldung mit der Planung deiner eigenen Reise</h4>
-        <q-btn
-          @click="[showCreateTempRTDialog = true, createTempRTClicked()]"
-          color="primary"
-          style="font-size:18px;"
-        >Reise selbst Planen</q-btn>
-      </div>
     </div>
   </q-page>
 </template>

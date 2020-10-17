@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hhh lpr fFf">
     <div
       id="Header"
       ref="Header"
@@ -449,9 +449,6 @@
     </div> -->
   </q-layout>
 </template>
-<style lang="less">
-@import "../css/site.less";
-</style>
 <script>
 // import(/* webpackPrefetch: true */ '../css/site.less')
 import { auth, db } from '../firebaseInit.js'
