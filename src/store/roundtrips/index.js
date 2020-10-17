@@ -104,6 +104,7 @@ export default {
           }).catch(function (error) {
             console.log(error)
           })
+        resolve(null)
       })
     },
     addRoundtrip ({ commit }, payload) {

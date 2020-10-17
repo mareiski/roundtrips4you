@@ -179,7 +179,7 @@
       <h4
         ref="tools"
         style="text-align:center; padding-top: 30px;"
-      >Mit diesen Tools planst du deine eigene Reise in unter 5 Minuten</h4>
+      >Mit diesen Tools planst du deine eigene Reise in kürzester Zeit</h4>
       <ol class="create-roundtrip-ol">
         <li v-in-viewport.once>
           <div>

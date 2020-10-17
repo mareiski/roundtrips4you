@@ -253,165 +253,147 @@
       <router-view />
     </q-page-container>
     <footer>
-      <div
-        id="SocialMediaContainer"
-        class="flex"
-      >
-        <q-icon
-          style="color: #1f892f"
-          name="fab fa-tripadvisor"
-          @click="openInNewTab('https://www.tripadvisor.de/Profile/Roundtrips4you')"
-        />
-        <q-icon
-          style="color: #d73532"
-          name="fab fa-pinterest-p"
-          @click="openInNewTab('https://www.pinterest.de/roundtrips4you/')"
-        />
-        <q-icon
-          style="color: #C13584"
-          name="fab fa-instagram"
-          @click="openInNewTab('https://www.instagram.com/roundtrips4you/')"
-        />
-        <q-icon
-          style="color: #3b5999"
-          name="fab fa-facebook-f"
-          @click="openInNewTab('https://www.facebook.com/roundtrips4you/')"
-        />
-      </div>
       <div class="main-footer">
-        <div class="left-footer-col">
-          <a href="/">
-            <img
-              alt="logo"
-              style="width:auto; height:100px; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"
-              src="~assets/submark.svg"
-            />
-          </a>
+        <div class="footer-menu">
+          <h3 class="footer-title">Menü</h3>
+          <router-link
+            class="footer-link"
+            to="/"
+          >Home</router-link>
+          <router-link
+            class="footer-link"
+            to="/rundreisen-uebersicht"
+          >Reisen</router-link>
+          <router-link
+            class="footer-link"
+            to="/blog"
+          >Blog</router-link>
+          <router-link
+            class="footer-link"
+            to="/ueber"
+          >Über uns</router-link>
         </div>
-        <div class="right-footer-col">
-          <div class="footer-menu">
-            <h3 class="footer-title">Menü</h3>
-            <router-link
-              class="footer-link"
-              to="/"
-            >Home</router-link>
-            <router-link
-              class="footer-link"
-              to="/rundreisen-uebersicht"
-            >Reisen</router-link>
-            <router-link
-              class="footer-link"
-              to="/blog"
-            >Blog</router-link>
-            <router-link
-              class="footer-link"
-              to="/ueber"
-            >Über uns</router-link>
-          </div>
-          <div class="footer-infos">
-            <h3 class="footer-title">Infos</h3>
-            <router-link
-              v-if="!isOnNetlifyPage"
-              class="footer-link"
-              rel="nofollow"
-              to="/faq"
-            >FAQs</router-link>
-            <router-link
-              v-if="!isOnNetlifyPage"
-              class="footer-link"
-              rel="nofollow"
-              to="/impressum"
-            >Impressum</router-link>
-            <router-link
-              v-if="!isOnNetlifyPage"
-              rel="nofollow"
-              class="footer-link"
-              to="/haftungsausschluss"
-            >Haftungsausschluss</router-link>
-            <router-link
-              v-if="!isOnNetlifyPage"
-              class="footer-link"
-              rel="nofollow"
-              to="/datenschutz"
-            >Datenschutz</router-link>
-          </div>
-          <div class="footer-contact">
-            <h3 class="footer-title">Kontakt</h3>
-            <a
-              class="footer-link contact-link-box"
-              v-if="!isOnNetlifyPage"
-              href="https://roundtrips4you.de"
-            >
-              <span class="footer-text">roundtrips4you</span>
-            </a>
-            <a
-              class="footer-link"
-              href="mailto:hello@roundtrips4you.de"
-            >hello@roundtrips4you.de</a>
-            <div
-              class="fb-like"
-              data-href="https://facebook.com/roundtrips4you"
-              data-width="100"
-              data-layout="button"
-              data-action="like"
-              data-size="small"
-              data-share="true"
-              style="margin-top:10px;"
-            ></div>
-            <!-- Begin Mailchimp Signup Form -->
-            <div
-              style="margin-top:10px;"
-              id="mc_embed_signup"
-            >
-              <form
-                action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&amp;id=c64c971288"
-                method="post"
-                id="mc-embedded-subscribe-form"
-                name="mc-embedded-subscribe-form"
-                class="validate"
-                target="_blank"
-                novalidate
+        <div class="footer-infos">
+          <h3 class="footer-title">Infos</h3>
+          <router-link
+            v-if="!isOnNetlifyPage"
+            class="footer-link"
+            rel="nofollow"
+            to="/faq"
+          >FAQs</router-link>
+          <router-link
+            v-if="!isOnNetlifyPage"
+            class="footer-link"
+            rel="nofollow"
+            to="/impressum"
+          >Impressum</router-link>
+          <router-link
+            v-if="!isOnNetlifyPage"
+            rel="nofollow"
+            class="footer-link"
+            to="/haftungsausschluss"
+          >Haftungsausschluss</router-link>
+          <router-link
+            v-if="!isOnNetlifyPage"
+            class="footer-link"
+            rel="nofollow"
+            to="/datenschutz"
+          >Datenschutz</router-link>
+        </div>
+        <div class="footer-contact">
+          <h3 class="footer-title">Kontakt</h3>
+          <a
+            class="footer-link contact-link-box"
+            v-if="!isOnNetlifyPage"
+            href="https://roundtrips4you.de"
+          >
+            <span class="footer-text">roundtrips4you</span>
+          </a>
+          <a
+            class="footer-link"
+            href="mailto:hello@roundtrips4you.de"
+          >hello@roundtrips4you.de</a>
+        </div>
+        <!-- Begin Mailchimp Signup Form -->
+        <div
+          style="margin-top:10px;"
+          id="mc_embed_signup"
+        >
+          <form
+            action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&amp;id=c64c971288"
+            method="post"
+            id="mc-embedded-subscribe-form"
+            name="mc-embedded-subscribe-form"
+            class="validate"
+            target="_blank"
+            novalidate
+          >
+            <div id="mc_embed_signup_scroll">
+              <label
+                for="mce-EMAIL"
+                style="font-size:18px"
+              >Newsletter</label>
+              <input
+                type="email"
+                value=""
+                name="EMAIL"
+                class="email"
+                id="mce-EMAIL"
+                placeholder="Email Adresse"
+                required
               >
-                <div id="mc_embed_signup_scroll">
-                  <label
-                    for="mce-EMAIL"
-                    style="font-size:18px"
-                  >Newsletter</label>
-                  <input
-                    type="email"
-                    value=""
-                    name="EMAIL"
-                    class="email"
-                    id="mce-EMAIL"
-                    placeholder="Email Adresse"
-                    required
-                  >
-                  <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                  <div
-                    style="position: absolute; left: -5000px;"
-                    aria-hidden="true"
-                  ><input
-                      type="text"
-                      name="b_ca8f607f808c8e5a9812aec8f_c64c971288"
-                      tabindex="-1"
-                      value=""
-                    ></div>
-                  <div class="clear">
-                    <q-btn
-                      type="submit"
-                      value="Subscribe"
-                      name="subscribe"
-                      id="mc-embedded-subscribe"
-                      color="primary"
-                      style="margin-top:5px;"
-                    >Anmelden</q-btn>
-                  </div>
-                </div>
-              </form>
+              <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+              <div
+                style="position: absolute; left: -5000px;"
+                aria-hidden="true"
+              ><input
+                  type="text"
+                  name="b_ca8f607f808c8e5a9812aec8f_c64c971288"
+                  tabindex="-1"
+                  value=""
+                ></div>
+              <div class="clear">
+                <q-btn
+                  dense
+                  type="submit"
+                  value="Subscribe"
+                  name="subscribe"
+                  id="mc-embedded-subscribe"
+                  color="primary"
+                  style="margin-top:5px;"
+                >Anmelden</q-btn>
+              </div>
             </div>
+          </form>
+        </div>
 
-            <!--End mc_embed_signup-->
-          </div>
+        <!--End mc_embed_signup-->
+      </div>
+      <div class="flex justify-center">
+        <div
+          id="SocialMediaContainer"
+          class="flex"
+        >
+          <q-icon
+            style="color: #1f892f"
+            name="fab fa-tripadvisor"
+            @click="openInNewTab('https://www.tripadvisor.de/Profile/Roundtrips4you')"
+          />
+          <q-icon
+            style="color: #d73532"
+            name="fab fa-pinterest-p"
+            @click="openInNewTab('https://www.pinterest.de/roundtrips4you/')"
+          />
+          <q-icon
+            style="color: #C13584"
+            name="fab fa-instagram"
+            @click="openInNewTab('https://www.instagram.com/roundtrips4you/')"
+          />
+          <q-icon
+            style="color: #3b5999"
+            name="fab fa-facebook-f"
+            @click="openInNewTab('https://www.facebook.com/roundtrips4you/')"
+          />
         </div>
       </div>
       <CookieBanner></CookieBanner>

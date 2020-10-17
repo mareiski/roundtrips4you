@@ -77,7 +77,7 @@
           </q-item>
         </q-intersection>
       </div>
-      <div v-else>
+      <div v-else-if="!showNoRoundtripsText">
         <q-item
           v-for="n in 3"
           :key="n"
@@ -785,10 +785,11 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
-      uid = auth.user().uid
+      uid = user.uid
       this.$store.dispatch('roundtrips/fetchAllRoundtrips', uid).then(result => {
         if (typeof result === 'undefined' || !result || !result.roundtrips || result.roundtrips === null || result.roundtrips.length === 0) {
           this.showNoRoundtripsText = true
+          this.showRoundtrips = true
         } else {
           this.showRoundtrips = true
           this.roundtrips = result.roundtrips
