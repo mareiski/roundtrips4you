@@ -185,13 +185,14 @@ export default {
         var provider = new firebase.auth.GoogleAuthProvider()
         let context = this
         auth.authRef().signInWithPopup(provider).then(function (result) {
+          context.$router.replace('meine-rundreisen')
+
           // This gives you a Google Access Token. You can use it to access the Google API.
           var token = result.credential.accessToken
           const credential = firebase.auth.GoogleAuthProvider().credential(token)
 
           // Sign in with credential from the Google user.
           auth.signInWithCredential(credential).then(function () {
-            context.$router.replace('meine-rundreisen')
           }).catch(function (error) {
             console.log(error)
           })

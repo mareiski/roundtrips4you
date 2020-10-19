@@ -20,8 +20,8 @@
           </q-avatar>
         </q-item-section>
         <q-item-section side>
-          <q-item-label lines="2">Du hast leider noch keine Reisen erstellt. <br>
-            Klicke einfach auf den Button unten um deine erste Rundreise zu erstellen.</q-item-label>
+          <q-item-label lines="2">Wenn du eine Reise erstellst erscheint sie hier. <br>
+            Fülle einfach die Schritte unten aus um deine erste Reise zu erstellen.</q-item-label>
         </q-item-section>
       </q-item>
       <div v-if="showRoundtrips">
@@ -785,11 +785,12 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
-      uid = user.uid
+      uid = auth.user().uid
       this.$store.dispatch('roundtrips/fetchAllRoundtrips', uid).then(result => {
         if (typeof result === 'undefined' || !result || !result.roundtrips || result.roundtrips === null || result.roundtrips.length === 0) {
           this.showNoRoundtripsText = true
           this.showRoundtrips = true
+          this.addExpanded = true
         } else {
           this.showRoundtrips = true
           this.roundtrips = result.roundtrips
