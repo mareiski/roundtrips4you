@@ -249,7 +249,7 @@
         </q-list> -->
       </q-scroll-area>
     </q-drawer>
-    <q-page-container>
+    <q-page-container v-if="!isOnNetlifyPage">
       <router-view />
     </q-page-container>
     <footer>
@@ -429,6 +429,24 @@
         />
       </router-link>
     </div> -->
+    <q-dialog
+      v-model="isOnNetlifyPage"
+      persistent
+      maximized
+      transition-show="slide-up"
+      transition-hide="slide-down"
+    >
+      <q-card class="bg-primary text-white">
+
+        <q-card-section>
+          <div class="text-h6">Warnung! Du befinest dich nicht auf Roundtrips4you.</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          Dies ist eine Website die Ausschließlich zum debugging existiert.
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 <script>
@@ -651,7 +669,14 @@ export default {
     this.$storyblok.init({
       accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
     })
-    this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.app' || this.getHost === 'www.roundtrips4you.netlify.app')
+
+    this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.app' || this.getHost() === 'www.roundtrips4you.netlify.app')
+
+    // redirect user to roundtrips4you.de if on netlify page
+    if (this.isOnNetlifyPage) {
+      this.showWelcomeTooltip = false
+      window.location.replace('https://roundtrips4you.de')
+    }
 
     auth.authRef().onAuthStateChanged((user) => {
       this.$router.beforeEach((to, from, next) => {
@@ -671,6 +696,7 @@ export default {
       })
 
       let isOnDetailsPage = false
+
       if (!forEachCalled) {
         let loggedIn = auth.user() !== null
         let currentRoute = this.$router.currentRoute
