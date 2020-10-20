@@ -121,6 +121,7 @@
         expand-separator
         v-model="addExpanded"
         class="add-item"
+        :disable="!showRoundtrips"
         @click="[addButtonActive = !addButtonActive,  scrollOnAddButtonClicked()]"
       >
         <template v-slot:header>
@@ -507,7 +508,6 @@ import { db, auth } from '../firebaseInit.js'
 import { date } from 'quasar'
 import sharedMethods from '../sharedMethods'
 
-let uid = null
 import axios from 'axios'
 
 let timeStamp = Date.now()
@@ -785,8 +785,7 @@ export default {
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {
-      uid = auth.user().uid
-      this.$store.dispatch('roundtrips/fetchAllRoundtrips', uid).then(result => {
+      this.$store.dispatch('roundtrips/fetchAllRoundtrips', auth.user().uid).then(result => {
         if (typeof result === 'undefined' || !result || !result.roundtrips || result.roundtrips === null || result.roundtrips.length === 0) {
           this.showNoRoundtripsText = true
           this.showRoundtrips = true

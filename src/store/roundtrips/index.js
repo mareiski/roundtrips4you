@@ -71,6 +71,8 @@ export default {
         roundtripsRef.get()
           .then(snapshot => {
             let index = 0
+
+            if (snapshot.size === 0) resolve(null)
             snapshot.forEach(doc => {
               roundtripArr.push(doc.data())
 
@@ -103,8 +105,8 @@ export default {
             })
           }).catch(function (error) {
             console.log(error)
+            resolve(null)
           })
-        resolve(null)
       })
     },
     addRoundtrip ({ commit }, payload) {
