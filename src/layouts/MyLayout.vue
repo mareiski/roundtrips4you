@@ -443,7 +443,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-none">
-          Dies ist eine Website die Ausschließlich zum debugging existiert.
+          Dies ist eine Website die ausschließlich zum Debugging existiert.
         </q-card-section>
       </q-card>
     </q-dialog>

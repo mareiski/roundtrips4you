@@ -85,6 +85,10 @@ const routes = [
         component: () => import('pages/EditRoundtrips.vue')
       },
       {
+        path: 'rundreisen-wizard/:id',
+        component: () => import('pages/RoundtripWizard.vue')
+      },
+      {
         path: 'benutzerprofil/:id',
         component: () => import(/* webpackChunkName: "publicUser" */ 'pages/PublicUserProfile.vue')
       },

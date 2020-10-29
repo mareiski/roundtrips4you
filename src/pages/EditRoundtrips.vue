@@ -127,6 +127,7 @@
         <CitySuggestion
           :dates="initDates"
           :RTId="$route.params.id"
+          :predefinedCountry="countries[0] && countries[0].length > 0 ? countries[0] : null"
         ></CitySuggestion>
       </q-tab-panel>
       <q-tab-panel name="route">
@@ -2341,6 +2342,7 @@ export default {
           documentIds.splice(stops.findIndex(x => x.docId === stop.Docid), 0, stop.DocId)
         })
         this.getDataOutOfStops(refreshAll)
+        Loading.hide()
       } else {
         let roundtripsRef = db.collection('RoundtripDetails')
           .where('RTId', '==', RTId)
@@ -2353,10 +2355,13 @@ export default {
               documentIds.splice(details.findIndex(x => x.docId === doc.id), 0, doc.id)
             })
             this.getDataOutOfStops(refreshAll)
+            this.stops.sort(this.compare)
+            Loading.hide()
           })
           .catch(err => {
             console.log('Error getting Roundtrips', err)
             sharedMethods.showErrorNotification('Deine Rundreise konnte nicht geladen werden, bitte versuche es erneut')
+            Loading.hide()
           })
       }
     },
@@ -3004,7 +3009,7 @@ export default {
           .then(RTDetailsSnapshot => {
             // if the user has only one Roundtrip and also just one Stopp was added
             if (Number(result.roundtrips.length) === 1 && Number(RTDetailsSnapshot.size) === 1) {
-              if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
+              // if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
               setTimeout(function () {
                 sharedMethods.scrollToOffset(0)
               }, 2000)
@@ -3043,7 +3048,7 @@ export default {
         this.fetchCategories()
 
         // always start tour here
-        if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
+        // if (!this.$store.getters['demoSession/tourShowed']) this.$tours['myTour'].start()
 
         setTimeout(function () {
           sharedMethods.scrollToOffset(0)

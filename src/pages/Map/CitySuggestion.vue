@@ -51,10 +51,7 @@
         :key="index"
       >
         <div>
-          <div
-            @click="openCityDialog(index)"
-            class="cursor-pointer"
-          >
+          <div>
             <q-img
               :alt="'Bild von'  + city.name"
               v-if="images[images.findIndex(x => x.cityName === city.name)]"
@@ -73,7 +70,7 @@
               icon="add"
               @click="addStop(city)"
             >
-              <q-tooltip>zur Reise hinzügen</q-tooltip>
+              <q-tooltip>zur Reise hinzufügen</q-tooltip>
             </q-btn>
           </div>
 
@@ -143,8 +140,24 @@
     </div>
     <q-btn
       v-if="cities && cities.length > 0"
+      style="width:245px; margin-top:20px;"
       @click="openInNewTab('https://www.google.de/search?q=' + country)"
     >weitere Städte auf Google</q-btn>
+    <h4>Ort direkt zur Reise hinzufügen</h4>
+    <div class="flex">
+      <CitySearch
+        ref="citySearch"
+        :parkingPlaceSearch="false"
+        :defaultLocation="null"
+        @update="updateLocation($event)"
+        style="margin-right:10px;"
+      ></CitySearch>
+      <q-btn
+        :disable="directSetCity == {}"
+        @click="addStop(directSetCity)"
+        style="height: 40px; margin-top:10px;"
+      >Ort hinzufügen</q-btn>
+    </div>
   </div>
 </template>
 <style lang="less" scoped>
@@ -157,18 +170,23 @@ import sharedMethods from '../../sharedMethods.js'
 import { countries } from '../../countries.js'
 
 export default {
+  components: {
+    CitySearch: () => import('./CitySearch.vue')
+  },
   data () {
     return {
       cities: [],
       images: [],
       country: Array.isArray(countries) ? countries[0] : countries,
       countryOptions: countries,
-      cityDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' }
+      cityDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
+      directSetCity: {}
     }
   },
   props: {
     dates: Array,
-    RTId: String
+    RTId: String,
+    predefinedCountry: String
   },
   methods: {
     /**
@@ -212,6 +230,7 @@ export default {
       this.cities = []
 
       this.cityDialog.showed = false
+      // context.fetchAPISuggestions()
 
       context.fetchDBSuggestions().then(function (response) {
         if (response.length > 0) {
@@ -243,7 +262,9 @@ export default {
         let cityObject = {
           name: city.name,
           country: city.country,
-          region: city.region
+          region: city.region,
+          longitude: city.longitude ? city.longitude : null,
+          latitude: city.latitude ? city.latitude : null
         }
 
         if (uniqueCities.length === 0) uniqueCities.push(cityObject)
@@ -303,8 +324,11 @@ export default {
                 let cityObject = {
                   name: city.name,
                   region: city.region,
+                  longitude: city.location ? city.location.lng : null,
+                  latitude: city.location ? city.location.lat : null,
                   country: doc.data().Country
                 }
+
                 tempCities.push(cityObject)
 
                 if (cities.indexOf(city) === cities.length - 1) {
@@ -315,23 +339,42 @@ export default {
           })
       })
     },
+    /**
+   * update location object witch city search results
+   * @param event event from city search update callback
+   */
+    updateLocation (event) {
+      if (event !== null) {
+        this.directSetCity = {
+          name: event.label,
+          longitude: event.x,
+          latitude: event.y
+        }
+      } else {
+        this.directSetCity = {}
+      }
+    },
+    /**
+     * writes a fetched stop into the db
+     */
     writeInDB (response) {
       let newCityObject = {}
       newCityObject.Cities = []
 
       response.forEach((city, index) => {
         newCityObject.Country = city.country
-        if (!newCityObject.Cities.includes(city.name)) newCityObject.Cities.push({ name: city.name, region: city.region })
+        if (!newCityObject.Cities.includes(city.name)) newCityObject.Cities.push({ name: city.name, region: city.region, location: { lng: city.longitude, lat: city.latitude } })
       })
 
       db.collection('SuggestedCities').add(newCityObject)
     },
     addStop (city) {
-      let initDate = null
+      let initDate = new Date()
       Date(Math.max.apply(null, this.dates.map(function (e) {
         initDate = e
       })))
 
+      // add one day
       // initDate.setDate(initDate.getDate() + 1)
 
       let cityName = city.name
@@ -344,7 +387,7 @@ export default {
         InitDate: initDate,
         Price: 0,
         RTId: this.RTId,
-        Title: cityName,
+        Title: 'Zwischenstopp in ' + cityName,
         Location: {
           lng: city.longitude,
           lat: city.latitude,
@@ -356,7 +399,8 @@ export default {
         HotelContact: null,
         HotelName: null
       })
-      this.getParent('EditRoundtrips').loadRoundtripDetails(this.RTId)
+
+      this.getParent('EditRoundtrips').fetchRoundtripStops(this.RTId, false)
 
       this.$q.notify({
         color: 'green-4',
@@ -399,6 +443,7 @@ export default {
     }
   },
   created () {
+    if (this.predefinedCountry) this.country = this.predefinedCountry
     this.getCities()
   }
 }
