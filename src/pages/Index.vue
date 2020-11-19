@@ -38,7 +38,7 @@
             <q-btn
               @click="sharedMethods.scrollToRef($refs['tools'])"
               color="primary"
-            >So geht's</q-btn>
+            >Los geht's</q-btn>
           </div>
           <q-dialog v-model="showCreateTempRTDialog">
             <q-card>
