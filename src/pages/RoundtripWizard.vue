@@ -4,6 +4,9 @@
     style="padding-top:20px;"
     class="q-px-lg q-pb-md"
   >
+    <div style="margin-bottom:20px;">
+      <a @click="$router.push('meine-rundreisen')">zu meinen Rundreisen</a>
+    </div>
     <q-stepper
       v-model="step"
       header-nav
@@ -105,7 +108,7 @@
       >
         <q-input
           v-model="currentRoundtrip.Title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => sharedMethods.isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
           label="Titel"
           outlined
           ref="titleInput"
@@ -174,7 +177,7 @@
         </div>
         <q-input
           filled
-          v-model="currentStop.Date"
+          v-model="currentStop.InitDate"
           error-message="Bitte gib ein richtiges Datum an"
           :error="!isDateTimeValid()"
           lazy-rules
@@ -194,7 +197,7 @@
                 transition-hide="scale"
               >
                 <q-date
-                  v-model="currentStop.Date"
+                  v-model="currentStop.InitDate"
                   today-btn
                   mask="DD.MM.YYYY HH:mm"
                 />
@@ -212,7 +215,7 @@
                 transition-hide="scale"
               >
                 <q-time
-                  v-model="currentStop.Date"
+                  v-model="currentStop.InitDate"
                   mask="DD.MM.YYYY HH:mm"
                   format24h
                 />
@@ -553,9 +556,11 @@
           </template>
         </q-select>
 
-        <div style="margin-bottom:30px">
+        <div
+          style="margin-bottom:30px"
+          v-if="!hotelName"
+        >
           <q-btn
-            v-if="!hotelName"
             size="20"
             icon="add"
             @click="addHotel = true"
@@ -563,7 +568,7 @@
           </q-btn>
         </div>
 
-        <div>
+        <div style="margin-bottom:20px;">
           <q-list
             bordered
             padding
@@ -754,18 +759,18 @@
                 style="width:117px;margin-bottom:40px;"
                 class="linkChip"
                 clickable
-                @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + currentStop.Location.label.split(',')[0] + '&checkin_year=' + currentStop.Date.split(' ')[0].split('.')[2] + '&checkin_month=' + currentStop.Date.split('.')[1] + '&checkin_monthday=' + currentStop.Date.split('.')[0] + '&checkout_year=' + getCheckOutDate().split('.')[2] + '&checkout_month=' + getCheckOutDate().split('.')[1] + '&checkout_monthday=' + getCheckOutDate().split('.')[0] + '&group_adults=' + currentRoundtrip.Adults + getChildrenText() +  '&no_rooms=' + currentRoundtrip.Rooms + '&ac_langcode=de')"
+                @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + currentStop.Location.label.split(',')[0] + '&checkin_year=' + currentStop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + currentStop.InitDate.split('.')[1] + '&checkin_monthday=' + currentStop.InitDate.split('.')[0] + '&checkout_year=' + getCheckOutDate().split('.')[2] + '&checkout_month=' + getCheckOutDate().split('.')[1] + '&checkout_monthday=' + getCheckOutDate().split('.')[0] + '&group_adults=' + currentRoundtrip.Adults + getChildrenText() +  '&no_rooms=' + currentRoundtrip.Rooms + '&ac_langcode=de')"
               > booking.com
               </q-chip>
 
               <h6 style="margin:0;">Hotel hinzufügen:</h6>
 
               <HotelSearch
-                v-if="currentStop.Location"
+                v-if="currentStop.Location && currentStop.Location.lat"
                 :disabled="!getCheckOutDate()"
                 :lat="currentStop.Location.lat.toString()"
                 :long="currentStop.Location.lng.toString()"
-                :checkInDate="currentStop.Date"
+                :checkInDate="currentStop.InitDate"
                 :checkOutDate="getCheckOutDate()"
                 :roomAmount="parseInt(currentRoundtrip.Rooms)"
                 :adults="parseInt(currentRoundtrip.Adults)"
@@ -795,6 +800,7 @@
                 label="Abbrechen"
                 color="primary"
                 v-close-popup
+                @click="removeHotel()"
               />
               <q-btn
                 flat
@@ -961,7 +967,7 @@
                 class="flex justify-center"
                 style="flex-direction:column; height:100%;"
               >
-                {{stop.Date.split(' ')[0]}}
+                {{stop.InitDate.split(' ')[0]}}
               </div>
               <div>
                 <q-btn
@@ -1081,7 +1087,7 @@ export default {
         Description: 'Raum für Notizen, Beschreibungen...',
         Location: null,
         Sights: [],
-        Date: formattedScheduleDate + ' 10:00',
+        InitDate: formattedScheduleDate + ' 10:00',
         Profile: 'driving'
       },
 
@@ -1177,15 +1183,13 @@ export default {
      * adds the current stop to the stops array
      */
     addStop () {
-      console.log(this.addedStops)
-
       // remove placeholder if not changed
       if (this.currentStop.Description === 'Raum für Notizen, Beschreibungen...') this.currentStop.Description = ''
 
       this.addedStops.push(this.currentStop)
 
       // add days of current stop to current date
-      const currentDate = sharedMethods.getDateFromString(this.currentStop.Date)
+      const currentDate = sharedMethods.getDateFromString(this.currentStop.InitDate)
       currentDate.setDate(currentDate.getDate() + this.currentStopDayDuration)
 
       this.currentStop = {
@@ -1193,7 +1197,7 @@ export default {
         Description: 'Raum für Notizen, Beschreibungen...',
         Location: null,
         Sights: [],
-        Date: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
+        InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
         Profile: 'driving'
       }
 
@@ -1217,20 +1221,34 @@ export default {
      * creates the roundtrip (write the temp data into db)
      */
     createTrip () {
+      // need this json stringify to prevent update of location when the click location changes
+      let stops = JSON.parse(JSON.stringify(this.addedStops))
+
+      // make all date strings to real dates
+      stops.forEach((stop, index) => {
+        stop.InitDate = sharedMethods.getDateFromString(this.addedStops[index].InitDate)
+      })
+
       try {
-        this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: this.addedStops[0].Location, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: this.addedStops }).then(docId => {
+        this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: this.addedStops[0].Location, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops }).then(docId => {
           if (docId && docId !== null) {
-            this.saveArrivalDepature(docId)
-            // this.$router.push('/rundreise-bearbeiten/' + docId)
+            let context = this
+            // wait to ensure roundtrip is fully added
+            setTimeout(function () {
+              context.$router.push('/rundreise-bearbeiten/' + docId)
+            }, 500)
           } else {
-            this.sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+            sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
           }
         })
       } catch (error) {
         console.log(error)
-        this.sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+        sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
         return false
       }
+    },
+    isUniqueTitle (val) {
+      return sharedMethods.isUniqueTitle(val)
     },
     getChildrenText () {
       let text = '&group_children=' + this.currentRoundtrip.ChildrenAges.length
@@ -1271,13 +1289,13 @@ export default {
      */
     getCheckOutDate () {
       // add days of current stop to current date
-      let checkOutDate = sharedMethods.getDateFromString(this.currentStop.Date)
+      let checkOutDate = sharedMethods.getDateFromString(this.currentStop.InitDate)
       checkOutDate.setDate(checkOutDate.getDate() + this.currentStopDayDuration)
       checkOutDate = date.formatDate(checkOutDate, 'DD.MM.YYYY')
       return checkOutDate
     },
     isDateTimeValid () {
-      return sharedMethods.isDateTimeValid(this.currentStop.Date)
+      return sharedMethods.isDateTimeValid(this.currentStop.InitDate)
     },
     /**
      * filter countries method used in filter method of quasar select component
@@ -1313,6 +1331,7 @@ export default {
         lat: event.latitude,
         label: event.name
       }
+
       this.currentStop.Title = 'Zwischenstopp in ' + event.name.split(',')[0]
       this.step = 5
       this.inspirationDone = true
@@ -1469,6 +1488,7 @@ export default {
       }
     },
     destinationChanged (val) {
+      // todo destination codes are not defined
       this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
     },
     getLocationFromIataCode (code, countryName) {
@@ -1509,7 +1529,7 @@ export default {
   mounted () {
     // listen to add stop method called from map
     this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
-      let lastDate = this.currentStop.Date
+      let lastDate = this.currentStop.InitDate
 
       // check if we didn't add this stop before
       if (this.currentStop.Location !== lastClickLocation) {
@@ -1518,7 +1538,7 @@ export default {
           Description: 'Raum für Notizen, Beschreibungen...',
           Location: lastClickLocation,
           Sights: [],
-          Date: lastDate,
+          InitDate: lastDate,
           Profile: 'driving'
         }
 

@@ -173,9 +173,14 @@ export default {
                   }
 
                   if (payload.stops) {
-                    payload.stops.forEach(stop => {
-                      console.log(stop)
-                      db.collection('RoundtripDetails').add(stop)
+                    payload.stops.forEach((stop, index) => {
+                      try {
+                        stop.RTId = doc.id
+                        db.collection('RoundtripDetails').add(stop)
+                      } catch (e) {
+                        console.log(e)
+                      }
+                      if (index === payload.stops.length - 1) resolve(doc.id)
                     })
                   } else {
                     db.collection('RoundtripDetails').add({
@@ -194,7 +199,7 @@ export default {
                         lat: '52.5170365',
                         label: 'Berlin, 10117, Germany'
                       }
-                    }).then(results => {
+                    }).then(() => {
                       resolve(doc.id)
                     })
                   }

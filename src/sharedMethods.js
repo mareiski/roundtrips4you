@@ -99,7 +99,6 @@ export default {
                         } else {
                             context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                             context.destinationCodes.push(city.iataCode)
-                            context.destinationAddresses.push(this.capitalize(city.address.cityName))
                         }
                     })
                 }).catch(e => {
