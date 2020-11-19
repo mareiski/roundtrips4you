@@ -230,8 +230,8 @@
         </q-card>
       </q-dialog>
       <div
-        v-for="stop in stops"
-        :key="'StopContainer' + stop.DocId"
+        v-for="(stop, index) in stops"
+        :key="'StopContainer' + stop.DocId + index"
       >
         <MglMarker
           v-if="stop.Parking && typeof stop.Parking !== 'undefined' && !isNaN(stop.Parking.lng)"
@@ -345,7 +345,8 @@ export default {
     childrenAges: Array,
     adults: Number,
     rooms: Number,
-    editor: Boolean
+    editor: Boolean,
+    defaultInitDate: String
   },
   data () {
     return {
@@ -391,6 +392,7 @@ export default {
     },
     onMapLoaded (event) {
       console.log('onmaploaded')
+
       this.map = event.map
       this.loadMap(event.map).then(e => {
         // wait 1 second to ensure map is realy loaded
@@ -462,20 +464,24 @@ export default {
       this.lastClickLocation.lat = this.lastClickCoordinates[1]
       this.lastClickLocation.lng = this.lastClickCoordinates[0]
 
-      const initDate = this.stops[this.stops.length - 1].InitDate
+      if (this.stops[this.stops.length - 1] && this.stops[this.stops.length - 1].InitDate) {
+        const initDate = this.stops[this.stops.length - 1].InitDate
 
-      let dateTimeParts = initDate.split(' ')
-      let dateParts = dateTimeParts[0].split('.')
-      let timeParts = dateTimeParts[1].split(':')
-      let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+        let dateTimeParts = initDate.split(' ')
+        let dateParts = dateTimeParts[0].split('.')
+        let timeParts = dateTimeParts[1].split(':')
+        let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-      const defaultCheckOutDate = currentInitDate
-      defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
+        const defaultCheckOutDate = currentInitDate
+        defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
 
-      const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
+        const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
 
-      // need this json stringify to prevent update of location when the click location changes
-      this.$root.$emit('addStop', formattedDate, JSON.parse(JSON.stringify(this.lastClickLocation)))
+        // need this json stringify to prevent update of location when the click location changes
+        this.$root.$emit('addStop', formattedDate, JSON.parse(JSON.stringify(this.lastClickLocation)))
+      } else {
+        this.$root.$emit('addStop', null, JSON.parse(JSON.stringify(this.lastClickLocation)))
+      }
 
       // reload map and fly to coords
       this.lastClickCoordinates = [0, 0]
@@ -496,9 +502,6 @@ export default {
         }
       }
       return false
-    },
-    openInNewTab (link) {
-      window.open(link, '_blank')
     },
     getChildrenText () {
       let text = '&group_children=' + this.childrenAges.length
@@ -813,7 +816,7 @@ export default {
   },
   created () {
     bounds = []
-    this.centerLocation = [0, 0]
+    this.centerLocation = [10.451526, 51.165691]
     if (this.stops[0] && this.stops[0].Location) {
       this.centerLocation = [this.stops[0].Location.lng, this.stops[0].Location.lat]
     }

@@ -85,7 +85,7 @@ const routes = [
         component: () => import('pages/EditRoundtrips.vue')
       },
       {
-        path: 'rundreisen-wizard/:id',
+        path: 'rundreisen-wizard',
         component: () => import('pages/RoundtripWizard.vue')
       },
       {

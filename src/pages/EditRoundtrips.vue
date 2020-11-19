@@ -36,7 +36,7 @@
             >
               <q-input
                 v-model="title"
-                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+                :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => sharedMethods.isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
                 dense
                 autofocus
               >
@@ -128,6 +128,7 @@
           :dates="initDates"
           :RTId="$route.params.id"
           :predefinedCountry="countries[0] && countries[0].length > 0 ? countries[0] : null"
+          :shouldAddCity="true"
         ></CitySuggestion>
       </q-tab-panel>
       <q-tab-panel name="route">
@@ -308,7 +309,7 @@
                     filled
                     v-model="date"
                     error-message="Bitte gib ein richtiges Datum an"
-                    :error="!isDateTimeValid()"
+                    :error="!isDateTimeValid"
                     lazy-rules
                     bottom-slots
                     style="width:300px"
@@ -398,7 +399,7 @@
         >
           <q-card>
             <q-card-section class="row items-center">
-              <span class="q-ml-sm">Wenn du eine automatische Route erstellst geht die aktuelle Reihenfolge deiner Reise verloren.</span>
+              <span class="q-ml-sm">Wenn du eine automatische Route erstellst wird die aktuelle Reihenfolge deiner Reise verändert. Möchtest du Fortfahren</span>
             </q-card-section>
 
             <q-card-actions align="right">
@@ -1382,6 +1383,9 @@ export default {
     }
   },
   methods: {
+    isDateTimeValid () {
+      return sharedMethods.isDateTimeValid(this.date)
+    },
     /**
      * Called when user goes one step back in tour
      * @param {number} currentStep current step as number (before change)
@@ -1619,7 +1623,7 @@ export default {
      * @see addStop()
      */
     onAddStop () {
-      if (!this.isDateTimeValid()) return false
+      if (!sharedMethods.isDateTimeValid()) return false
       this.addExpanded = false
       this.addButtonActive = false
 
@@ -2631,7 +2635,7 @@ export default {
       }
     },
     saveTitle (val) {
-      this.isUniqueTitle(val).then(uniqueTitle => {
+      sharedMethods.isUniqueTitle(val).then(uniqueTitle => {
         if (uniqueTitle !== 'Dieser Titel ist bereits vergeben') {
           this.saveData('Title', val)
         } else {
@@ -2810,28 +2814,6 @@ export default {
         context.resortAndPrepareStops(currentStopDate, stopId)
       })
     },
-    isDateTimeValid () {
-      var testDate = this.date
-      if (testDate === null || testDate.length === 0) return false
-      var matches = testDate.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/)
-      if (matches === null) return false
-      var year = parseInt(matches[3], 10)
-      var month = parseInt(matches[2], 10) - 1
-      var day = parseInt(matches[1], 10)
-      var hour = parseInt(matches[4], 10)
-      var minute = parseInt(matches[5], 10)
-      var date = new Date(year, month, day, hour, minute)
-      if (date.getFullYear() !== year ||
-        date.getMonth() !== month ||
-        date.getDate() !== day ||
-        date.getHours() !== hour ||
-        date.getMinutes() !== minute
-      ) {
-        return false
-      } else {
-        return true
-      }
-    },
     getGeneralProfile () {
       switch (this.inputProfile) {
         case 'zu Fuß':
@@ -2866,7 +2848,7 @@ export default {
       })
     },
     copyRT (originalRT, UserId, newTitle) {
-      this.isUniqueTitle(newTitle).then(uniqueTitle => {
+      sharedMethods.isUniqueTitle(newTitle).then(uniqueTitle => {
         if (newTitle === null || newTitle === '' || uniqueTitle === 'Dieser Titel ist bereits vergeben') {
           this.$q.notify({
             color: 'red-5',
@@ -2969,23 +2951,6 @@ export default {
       const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
       this.tripDuration = diffDays
     },
-    isUniqueTitle (value) {
-      return new Promise((resolve, reject) => {
-        value = value.toLowerCase()
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.trim()
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          }).catch(function (error) {
-            console.log('Error ' + error)
-            resolve(null)
-          })
-      })
-    },
     getUserData () {
       let userRef = db.collection('User')
         .where('UserUID', '==', auth.user().uid)
@@ -3019,6 +2984,7 @@ export default {
     }
   },
   mounted () {
+    // listen to add stop method called from map
     context = this
     this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
       // check if we didn't add this stop before

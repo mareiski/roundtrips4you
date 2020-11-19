@@ -765,7 +765,7 @@
                 filled
                 v-model="tempDailyTripDate"
                 error-message="Bitte gib ein richtiges Datum an"
-                :error="!isDateTimeValid()"
+                :error="!sharedMethods.isDateTimeValid()"
                 lazy-rules
                 bottom-slots
                 style="width:300px"
@@ -949,7 +949,6 @@ import { date, scroll } from 'quasar'
 import axios from 'axios'
 import sharedMethods from '../../sharedMethods'
 
-var querystring = require('querystring')
 const { setScrollPosition } = scroll
 
 let timeStamp = Date.now()
@@ -1101,6 +1100,9 @@ export default {
     }
   },
   methods: {
+    isDateTimeValid () {
+      return sharedMethods.isDateTimeValid(this.tempDailyTripDate)
+    },
     saveDate (refresh) {
       const lastScrollPos = document.documentElement.scrollTop
       let newInitDate = sharedMethods.getDateFromString(this.date)
@@ -1173,28 +1175,6 @@ export default {
       dailyTripDays = sharedMethods.msToTime(dateDistance)
 
       this.dailyTrips[this.dailyTrips.findIndex(x => x.id === trip.id)].days = { days: dailyTripDays, id: trip.id }
-    },
-    isDateTimeValid () {
-      var testDate = this.date
-      if (testDate === null || testDate.length === 0) return false
-      var matches = testDate.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/)
-      if (matches === null) return false
-      var year = parseInt(matches[3], 10)
-      var month = parseInt(matches[2], 10) - 1
-      var day = parseInt(matches[1], 10)
-      var hour = parseInt(matches[4], 10)
-      var minute = parseInt(matches[5], 10)
-      var date = new Date(year, month, day, hour, minute)
-      if (date.getFullYear() !== year ||
-        date.getMonth() !== month ||
-        date.getDate() !== day ||
-        date.getHours() !== hour ||
-        date.getMinutes() !== minute
-      ) {
-        return false
-      } else {
-        return true
-      }
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -1629,9 +1609,6 @@ export default {
         this.$store.commit('demoSession/removeStop', this.docId)
       }
     },
-    openInNewTab (link) {
-      window.open(link, '_blank')
-    },
     /**
      * options for the daily trip quasar date component
      * @param date the current date to check (set by quasar automatically)
@@ -1689,7 +1666,7 @@ export default {
     },
     searchSights () {
       if (this.location.lng && this.location.lat) {
-        this.getSights(this.location.lng, this.location.lat).then((results) => {
+        sharedMethods.getSights(this.location.lng, this.location.lat).then((results) => {
           if (results !== null) {
             this.sights = results.data.data
           } else {
@@ -1697,49 +1674,6 @@ export default {
           }
         })
       }
-    },
-    getSights (long, lat) {
-      return new Promise((resolve, reject) => {
-        const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-        const headers = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-
-        const data = querystring.stringify({
-          grant_type: 'client_credentials', // gave the values directly for testing
-          client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-          client_secret: 'lHQlUheyyAZtGQDA'
-        })
-
-        axios.post(url, data, {
-          headers: headers,
-          form: {
-            'grant_type': 'client_credentials',
-            'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-            'client_secret': 'lHQlUheyyAZtGQDA'
-          }
-        }).then(function (response) {
-          let token = response.data.access_token
-          const tokenString = 'Bearer ' + token
-
-          console.log(token)
-
-          axios.get('https://api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=10&page[limit]=5&page[offset]=0&categories=SIGHTS', {
-            headers: {
-              'Authorization': tokenString
-            }
-          }).then(function (response) {
-            resolve(response)
-          }).catch(function (error) {
-            console.log('Error' + error)
-            resolve(null)
-          })
-        }).catch(function (error) {
-          console.log('Error on Authentication' + error)
-          resolve(null)
-        })
-      })
     },
     compare (a, b) {
       const dateA = sharedMethods.getDateFromString(a.date)

@@ -289,9 +289,6 @@ export default {
           this.showRoundtrips = true
         })
     },
-    openInNewTab (link) {
-      window.open(link, '_blank')
-    },
     getReputation (userId) {
       let publicRT = this.publishedRoundtrips * 50
       let editedRT = this.userRTEdited * 25
