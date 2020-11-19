@@ -8,8 +8,10 @@ let getAxios = () => import('axios')
 var querystring = require('querystring')
 import { Notify, scroll } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
+import { db } from './firebaseInit.js'
 
 export default {
+
     /**
      * @returns a date from a date string in format dd.mm.yy MM:hh
      * @param {String} string date string to get date from
@@ -19,6 +21,31 @@ export default {
         const dateParts = dateTimeParts[0].split('.')
         const timeParts = dateTimeParts[1].split(':')
         return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+    },
+    /**
+     * check if a date time string is valid
+     * @param {String} testDate date to check
+     */
+    isDateTimeValid (testDate) {
+        if (!testDate || testDate === null || testDate.length === 0) return false
+        var matches = testDate.match(/^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/)
+        if (matches === null) return false
+        var year = parseInt(matches[3], 10)
+        var month = parseInt(matches[2], 10) - 1
+        var day = parseInt(matches[1], 10)
+        var hour = parseInt(matches[4], 10)
+        var minute = parseInt(matches[5], 10)
+        var date = new Date(year, month, day, hour, minute)
+        if (date.getFullYear() !== year ||
+            date.getMonth() !== month ||
+            date.getDate() !== day ||
+            date.getHours() !== hour ||
+            date.getMinutes() !== minute
+        ) {
+            return false
+        } else {
+            return true
+        }
     },
     /**
      * Sets all expansion states of all stops to true (expanded)
@@ -72,7 +99,6 @@ export default {
                         } else {
                             context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
                             context.destinationCodes.push(city.iataCode)
-                            context.destinationAddresses.push(this.capitalize(city.address.cityName))
                         }
                     })
                 }).catch(e => {
@@ -236,6 +262,74 @@ export default {
             }).catch(function (error) {
                 console.log('Error ' + error)
                 resolve(null)
+            })
+        })
+    },
+    /**
+     * check if there is no other roundtrip with given name
+     */
+    isUniqueTitle (value) {
+        return new Promise((resolve, reject) => {
+            value = value.toLowerCase()
+            value = value.charAt(0).toUpperCase() + value.slice(1)
+            value = value.trim()
+            let roundtripsRef = db.collection('Roundtrips')
+                .where('Title', '==', value)
+                .limit(1)
+            roundtripsRef.get()
+                .then(snapshot => {
+                    resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
+                }).catch(function (error) {
+                    console.log('Error ' + error)
+                    resolve(null)
+                })
+        })
+    },
+    /**
+     * gets suggested sights from amadeus api for given coordinates
+     */
+    getSights (long, lat) {
+        return new Promise((resolve, reject) => {
+            const url = 'https://api.amadeus.com/v1/security/oauth2/token'
+
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+
+            const data = querystring.stringify({
+                grant_type: 'client_credentials', // gave the values directly for testing
+                client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+                client_secret: 'lHQlUheyyAZtGQDA'
+            })
+
+            getAxios().then(axios => {
+                axios.post(url, data, {
+                    headers: headers,
+                    form: {
+                        'grant_type': 'client_credentials',
+                        'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
+                        'client_secret': 'lHQlUheyyAZtGQDA'
+                    }
+                }).then(function (response) {
+                    let token = response.data.access_token
+                    const tokenString = 'Bearer ' + token
+
+                    console.log(token)
+
+                    axios.get('https://api.amadeus.com/v1/reference-data/locations/pois?latitude=' + lat + '&longitude=' + long + '&radius=10&page[limit]=5&page[offset]=0&categories=SIGHTS', {
+                        headers: {
+                            'Authorization': tokenString
+                        }
+                    }).then(function (response) {
+                        resolve(response)
+                    }).catch(function (error) {
+                        console.log('Error' + error)
+                        resolve(null)
+                    })
+                }).catch(function (error) {
+                    console.log('Error on Authentication' + error)
+                    resolve(null)
+                })
             })
         })
     }

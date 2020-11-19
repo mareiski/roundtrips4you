@@ -366,7 +366,7 @@
                     autofocus
                     outlined
                     @input="checkDisableEditBtn($event)"
-                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => sharedMethods.isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
                     label="Titel der Rundreise"
                     style="text-transform:capitalize;"
                   />
@@ -516,6 +516,7 @@ import(/* webpackPrefetch: true */ '../css/roundtrips.less')
 import { date } from 'quasar'
 import { db, storage } from '../firebaseInit.js'
 import { countries } from '../countries'
+import sharedMethods from '../sharedMethods.js'
 
 let timeStamp = Date.now()
 let formattedDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
@@ -601,25 +602,8 @@ export default {
 
       return currentDate >= compareDate
     },
-    isUniqueTitle (value) {
-      return new Promise((resolve, reject) => {
-        value = value.toLowerCase()
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.trim()
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          }).catch(function (error) {
-            console.log('Error ' + error)
-            resolve(null)
-          })
-      })
-    },
     checkDisableEditBtn (val) {
-      this.isUniqueTitle(val).then(uniqueTitle => {
+      sharedMethods.isUniqueTitle(val).then(uniqueTitle => {
         if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
         this.disableEditBtn = val === null || val === '' || !uniqueTitle
       })

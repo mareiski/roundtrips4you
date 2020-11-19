@@ -111,7 +111,23 @@
       </div>
     </q-list>
     <span ref="AddRoundtripExpansionItem"></span>
-    <q-list
+    <div
+      style="align-items: center; flex-direction:row; margin-bottom:20px;"
+      class="flex cursor-pointer"
+      @click="$router.push('/rundreisen-wizard')"
+    >
+      <q-btn
+        class="add-button"
+        side
+        round
+        color="primary"
+        icon="add"
+      >
+      </q-btn>
+      <span style="font-size:20px;">Reise hinzufügen</span>
+    </div>
+
+    <!-- <q-list
       bordered
       class="rounded-borders"
       v-if="roundtrips.length < 20 && ((user && user.emailVerified) || roundtrips.length === 0)"
@@ -164,7 +180,7 @@
                 >
                   <q-input
                     v-model="title"
-                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+                    :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => sharedMethods.isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
                     label="Titel"
                     outlined
                     ref="titleInput"
@@ -174,7 +190,7 @@
                       <q-icon name="title" />
                     </template>
                   </q-input>
-                  <!-- <div
+                   <div
                     v-for="(countryNum, index) in parseInt(countryAmount)"
                     :key="countryNum"
                     class="flex"
@@ -206,11 +222,11 @@
                         style="transform:rotate(45deg)"
                       />
                     </div>
-                  </div> -->
-                  <!-- <q-btn
+                  </div>
+                  <q-btn
                     @click="countryAmount = parseInt(countryAmount) + 1"
                     label="Land hinzufügen"
-                  /> -->
+                  />
                   <q-stepper-navigation>
                     <q-btn
                       @click="step = 2"
@@ -490,7 +506,7 @@
         </q-card>
 
       </q-expansion-item>
-    </q-list>
+    </q-list> -->
     <div v-if="user && !user.emailVerified">
       <span style="font-size:18px;">Deine Email Adresse wurde noch nicht bestätigt. Bitte bestätige diese {{ roundtrips.length > 0 ? 'bevor du eine weitere Reise erstellst' : 'sobald wie möglich'}}.</span>
       <br>
@@ -525,9 +541,6 @@ export default {
     meta: {
       description: { name: 'description', content: 'Deine Reisen auf roundtrips4you bearbeiten, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
     }
-  },
-  components: {
-    CitySearch: () => import('./Map/CitySearch')
   },
   name: 'myRoundtrips',
   data () {
@@ -748,24 +761,6 @@ export default {
         return false
       }
       return true
-    },
-    isUniqueTitle (value) {
-      return new Promise((resolve, reject) => {
-        value = value.toLowerCase()
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.trim()
-        // value = value.replace(/ /g, '')
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          }).catch(function (error) {
-            console.log('Error ' + error)
-            resolve(null)
-          })
-      })
     },
     getCreatedAtDate (timeStamp) {
       return date.formatDate(new Date(timeStamp.seconds * 1000), 'DD.MM.YYYY')

@@ -558,9 +558,6 @@ export default {
     getHost () {
       return location.host
     },
-    openInNewTab (link) {
-      window.open(link, '_blank')
-    },
     leaving () {
       window.addEventListener('beforeunload', (event) => {
         if ((this.user && (document.activeElement.tagName === 'INPUT' || document.activeElement.classList.contains('q-editor__content'))) || this.$store.getters['demoSession/isInDemoSession']) {

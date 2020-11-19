@@ -29,7 +29,7 @@
               autofocus
               outlined
               @input="checkDisableEditBtn($event)"
-              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+              :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => sharedMethods.isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
               label="Titel der Rundreise"
               style="text-transform:capitalize;"
             />
@@ -649,25 +649,8 @@ export default {
           console.log('Error getting Roundtripdetails', err)
         })
     },
-    isUniqueTitle (value) {
-      return new Promise((resolve, reject) => {
-        value = value.toLowerCase()
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.trim()
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          }).catch(function (error) {
-            console.log('Error ' + error)
-            resolve(null)
-          })
-      })
-    },
     checkDisableEditBtn (val) {
-      this.isUniqueTitle(val).then(uniqueTitle => {
+      sharedMethods.isUniqueTitle(val).then(uniqueTitle => {
         if (uniqueTitle === 'Dieser Titel ist bereits vergeben') uniqueTitle = false
         this.disableEditBtn = val === null || val === '' || !uniqueTitle
       }
@@ -700,9 +683,6 @@ export default {
         this.durations.splice(this.stops.findIndex(x => x.DocId === docId), 0, { duration: null, distance: null, docId: docId })
         if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
       }
-    },
-    openInNewTab (link) {
-      window.open(link, '_blank')
     },
     getProfile (profile) {
       switch (profile) {

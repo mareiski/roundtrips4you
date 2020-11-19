@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex city-suggestion"
-    :style="cities.length === 0 ? 'flex-direction:row; justify-content:center;' : 'flex-direction:column;'"
+    style="flex-direction:column;"
   >
     <div
       class="flex justify-center"
@@ -43,7 +43,10 @@
         </template>
       </q-btn> -->
     </div>
-    <div class="flex justify-stretch cards-container">
+    <div
+      class="flex justify-stretch cards-container"
+      style="min-heigth:20px;"
+    >
 
       <q-card
         class="city-card"
@@ -65,12 +68,11 @@
 
             <q-btn
               round
-              color="primary"
-              class="add-to-rt"
-              icon="add"
-              @click="addStop(city)"
+              color="secondary"
+              class="city-info"
+              icon="info"
+              @click="openCityDialog(index)"
             >
-              <q-tooltip>zur Reise hinzufügen</q-tooltip>
             </q-btn>
           </div>
 
@@ -87,10 +89,11 @@
 
         <q-card-actions align="right">
           <q-btn
-            flat
-            label="Infos"
-            color="secondary"
-            @click="openCityDialog(index)"
+            label="Hinzufügen"
+            outline
+            dense
+            color="primary"
+            @click="addStop(city)"
           />
         </q-card-actions>
       </q-card>
@@ -186,7 +189,8 @@ export default {
   props: {
     dates: Array,
     RTId: String,
-    predefinedCountry: String
+    predefinedCountry: String,
+    shouldAddCity: Boolean
   },
   methods: {
     /**
@@ -369,6 +373,11 @@ export default {
       db.collection('SuggestedCities').add(newCityObject)
     },
     addStop (city) {
+      if (!this.shouldAddCity) {
+        this.$emit('update', city)
+        return
+      }
+
       let initDate = new Date()
       Date(Math.max.apply(null, this.dates.map(function (e) {
         initDate = e
@@ -437,9 +446,6 @@ export default {
           })
         }
       })
-    },
-    openInNewTab (link) {
-      window.open(link, '_blank')
     }
   },
   created () {

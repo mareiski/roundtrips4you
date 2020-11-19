@@ -324,7 +324,7 @@
 import(/* webpackPrefetch: true */ '../css/home.less')
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
-import { db, auth } from '../firebaseInit.js'
+import { auth } from '../firebaseInit.js'
 import sharedMethods from '../sharedMethods'
 
 export default {
@@ -356,24 +356,6 @@ export default {
       const offset = el.offsetTop
       const duration = 400
       setScrollPosition(target, offset, duration)
-    },
-    isUniqueTitle (value) {
-      return new Promise((resolve, reject) => {
-        value = value.toLowerCase()
-        value = value.charAt(0).toUpperCase() + value.slice(1)
-        value = value.trim()
-        // value = value.replace(/ /g, '')
-        let roundtripsRef = db.collection('Roundtrips')
-          .where('Title', '==', value)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            resolve(snapshot.size === 0 || 'Dieser Titel ist bereits vergeben')
-          }).catch(function (error) {
-            console.log('Error ' + error)
-            resolve(null)
-          })
-      })
     },
     createTempRTClicked () {
       if (this.$store.getters['demoSession/isInDemoSession']) {
