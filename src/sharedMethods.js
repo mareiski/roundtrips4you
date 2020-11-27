@@ -17,9 +17,16 @@ export default {
      * @param {String} string date string to get date from
      */
     getDateFromString (string) {
-        const dateTimeParts = string.split(' ')
-        const dateParts = dateTimeParts[0].split('.')
-        const timeParts = dateTimeParts[1].split(':')
+        let dateParts
+        let timeParts = ['00', '00']
+
+        if (string.includes(' ')) {
+            const dateTimeParts = string.split(' ')
+            dateParts = dateTimeParts[0].split('.')
+            timeParts = dateTimeParts[1].split(':')
+        } else {
+            dateParts = string.split('.')
+        }
         return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
     },
     /**

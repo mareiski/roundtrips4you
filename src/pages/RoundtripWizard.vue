@@ -67,6 +67,7 @@
             <template v-else-if="step === 5">
               <q-btn
                 flat
+                :disable="stopToEdit > -1"
                 @click="!inspirationDone ? step = 3 : step = 4"
                 color="primary"
                 label="zurück"
@@ -74,9 +75,9 @@
               />
               <q-btn
                 color="primary"
-                :disable="!currentStop.Title && currentStopDayDuration <= 0"
+                :disable="!currentStop.Title && currentStop.DayDuration <= 0"
                 @click="() => { done3 = true; step = 6; addStop() }"
-                label="hinzufügen"
+                :label="stopToEdit > -1 ? 'ändern' : 'hinzufügen'"
               />
             </template>
 
@@ -534,7 +535,7 @@
         />
 
         <q-input
-          v-model.number="currentStopDayDuration"
+          v-model.number="currentStop.DayDuration"
           type="number"
           filled
           label="Dauer in Tagen"
@@ -545,7 +546,7 @@
           outlined
           v-model="inputProfile"
           :options="['zu Fuß', 'Fahrrad', 'Auto']"
-          label="Reisemittel"
+          label="Reisemittel ab Ort"
           use-input
           :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
           class="input-item"
@@ -833,7 +834,7 @@
           <a
             target="_blank"
             v-if="currentStop.Location"
-            :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' sehenswürdigkeiten'"
+            :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' Sehenswürdigkeiten'"
           >weitere auf Google</a>
           <q-dialog v-model="sightDialog.showed">
             <q-card>
@@ -942,46 +943,63 @@
           >{{currentRoundtrip.Title}}</q-item-label>
 
           <q-separator />
-          <q-item
-            v-for="(stop, index) in addedStops"
-            :key="stop"
+          <draggable
+            v-model="addedStops"
+            @end="onStopsDragged"
           >
-            <q-item-section>
-              <q-item-label lines="1">{{stop.Title}}</q-item-label>
-              <q-item-label
-                caption
-                lines="2"
+            <transition-group name="flip-list">
+              <q-item
+                v-for="(stop, index) in addedStops"
+                :key="stop"
               >
-                <span class="text-weight-bold">{{stop.Location.label.split(',')[0]}}</span>
-                {{stop.Description ? ' - ' + stop.Description : ''}}
-              </q-item-label>
-            </q-item-section>
-
-            <q-item-section
-              side
-              top
-              class="flex"
-              style="flex-direction:row;"
-            >
-              <div
-                class="flex justify-center"
-                style="flex-direction:column; height:100%;"
-              >
-                {{stop.InitDate.split(' ')[0]}}
-              </div>
-              <div>
-                <q-btn
-                  @click="removeStop(index)"
-                  flat
-                  round
-                  icon="delete"
+                <q-item-section avatar>
+                  <q-icon
+                    color="primary"
+                    name="drag_indicator"
+                    class="cursor-DandD"
+                  />
+                </q-item-section>
+                <q-item-section
+                  clickable
+                  v-ripple
+                  @click="editStop(index)"
                 >
-                  <q-tooltip>Stopp löschen</q-tooltip>
-                </q-btn>
-              </div>
-            </q-item-section>
-          </q-item>
+                  <q-item-label lines="1">{{stop.Title}}</q-item-label>
+                  <q-item-label
+                    caption
+                    lines="2"
+                  >
+                    <span class="text-weight-bold">{{stop.Location.label.split(',')[0]}}</span>
+                    {{stop.Description ? ' - ' + stop.Description : ''}}
+                  </q-item-label>
+                </q-item-section>
 
+                <q-item-section
+                  side
+                  top
+                  class="flex"
+                  style="flex-direction:row;"
+                >
+                  <div
+                    class="flex justify-center"
+                    style="flex-direction:column; height:100%;"
+                  >
+                    {{stop.InitDate.split(' ')[0]}}
+                  </div>
+                  <div>
+                    <q-btn
+                      @click="removeStop(index)"
+                      flat
+                      round
+                      icon="delete"
+                    >
+                      <q-tooltip>Stopp löschen</q-tooltip>
+                    </q-btn>
+                  </div>
+                </q-item-section>
+              </q-item>
+            </transition-group>
+          </draggable>
           <q-separator inset="item" />
         </q-list>
         <div style="display:inline-block; margin-top:30px;">
@@ -1047,6 +1065,7 @@ import axios from 'axios'
 import sharedMethods from '../sharedMethods.js'
 import { date } from 'quasar'
 import Map from '../pages/Map/Map'
+import draggable from 'vuedraggable'
 import { auth } from '../firebaseInit.js'
 
 let timeStamp = Date.now()
@@ -1057,7 +1076,8 @@ export default {
     CitySearch: () => import('../pages/Map/CitySearch.vue'),
     CitySuggestion: () => import('../pages/Map/CitySuggestion.vue'),
     HotelSearch: () => import('../pages/Map/HotelSearch'),
-    Map
+    Map,
+    draggable
   },
   data () {
     return {
@@ -1088,7 +1108,8 @@ export default {
         Location: null,
         Sights: [],
         InitDate: formattedScheduleDate + ' 10:00',
-        Profile: 'driving'
+        Profile: 'driving',
+        DayDuration: 1
       },
 
       // leave this outside of current stop to avoid to much fields in db (will only be added to current stop if need to)
@@ -1104,7 +1125,6 @@ export default {
       addedStops: [],
       suggestedSights: null,
       sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
-      currentStopDayDuration: 1,
       addHotel: false,
       addHotelDisabled: true,
       inputProfile: 'Auto',
@@ -1186,11 +1206,36 @@ export default {
       // remove placeholder if not changed
       if (this.currentStop.Description === 'Raum für Notizen, Beschreibungen...') this.currentStop.Description = ''
 
-      this.addedStops.push(this.currentStop)
+      // add days of current stop to current date to get next stop init date
+      let currentDate = sharedMethods.getDateFromString(this.currentStop.InitDate)
+      currentDate.setDate(currentDate.getDate() + this.currentStop.DayDuration)
 
-      // add days of current stop to current date
-      const currentDate = sharedMethods.getDateFromString(this.currentStop.InitDate)
-      currentDate.setDate(currentDate.getDate() + this.currentStopDayDuration)
+      // this stop was already added to addedStops (edit mode)
+      if (this.stopToEdit > -1) {
+        if (this.addedStops[this.stopToEdit].DayDuration !== this.currentStop.DayDuration) {
+          const dayDistance = this.currentStop.DayDuration - this.addedStops[this.stopToEdit].DayDuration
+          console.log(dayDistance)
+
+          // update dates of all following stops
+          for (let i = this.stopToEdit + 1; i < this.addedStops.length; i++) {
+            const currentStopDate = sharedMethods.getDateFromString(this.addedStops[i].InitDate)
+
+            currentStopDate.setDate(currentStopDate.getDate() + dayDistance)
+
+            this.addedStops[i].InitDate = date.formatDate(currentStopDate, 'DD.MM.YYYY HH:mm')
+          }
+        }
+
+        this.addedStops[this.stopToEdit] = this.currentStop
+
+        // set next stop init date to last stops one
+        currentDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
+        currentDate.setDate(currentDate.getDate() + this.addedStops[this.addedStops.length - 1].DayDuration)
+
+        this.stopToEdit = -1
+      } else {
+        this.addedStops.push(this.currentStop)
+      }
 
       this.currentStop = {
         Title: 'neuer Stopp',
@@ -1198,7 +1243,8 @@ export default {
         Location: null,
         Sights: [],
         InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
-        Profile: 'driving'
+        Profile: 'driving',
+        DayDuration: 1
       }
 
       // reload both maps
@@ -1210,6 +1256,8 @@ export default {
      */
     removeStop (index) {
       this.addedStops.splice(index, 1)
+
+      // todo update dates
 
       // reload both maps
       if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
@@ -1246,6 +1294,48 @@ export default {
         sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
         return false
       }
+    },
+    onStopsDragged (event) {
+      // dont do anything if stop was not moved
+      if (event.newIndex === event.oldIndex) return
+
+      // stop was moved > recalculate dates
+      // set dragged stop date to dragged on stop
+      // set next date to this date + dragged stop date days etc.
+      // set previous date to this date - previos date days etc.
+
+      let draggedStop = this.addedStops[event.newIndex]
+
+      let draggedUp = event.oldIndex > event.newIndex
+
+      let draggedOnStop = this.addedStops[event.newIndex - 1]
+      if (draggedUp) draggedOnStop = this.addedStops[event.newIndex + 1]
+
+      // set dragged stop date to dragged on stop date
+      draggedStop.InitDate = JSON.parse(JSON.stringify(draggedOnStop.InitDate))
+
+      // set all following dates to previous date +  previous date day duration
+      for (let i = event.newIndex + 1; i < this.addedStops.length; i++) {
+        let previousStopDate = sharedMethods.getDateFromString(this.addedStops[i - 1].InitDate)
+
+        previousStopDate.setDate(previousStopDate.getDate() + this.addedStops[i - 1].DayDuration)
+        this.addedStops[i].InitDate = date.formatDate(previousStopDate, 'DD.MM.YYYY')
+      }
+
+      // set all previous dates to following date - previous date day duration
+      for (let i = event.newIndex - 1; i >= 0; i--) {
+        let followingStopDate = sharedMethods.getDateFromString(this.addedStops[i + 1].InitDate)
+
+        followingStopDate.setDate(followingStopDate.getDate() - this.addedStops[i].DayDuration)
+
+        console.log(followingStopDate)
+        this.addedStops[i].InitDate = date.formatDate(followingStopDate, 'DD.MM.YYYY')
+      }
+    },
+    editStop (index) {
+      this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
+      this.stopToEdit = index
+      this.step = 5
     },
     isUniqueTitle (val) {
       return sharedMethods.isUniqueTitle(val)
@@ -1290,7 +1380,7 @@ export default {
     getCheckOutDate () {
       // add days of current stop to current date
       let checkOutDate = sharedMethods.getDateFromString(this.currentStop.InitDate)
-      checkOutDate.setDate(checkOutDate.getDate() + this.currentStopDayDuration)
+      checkOutDate.setDate(checkOutDate.getDate() + this.currentStop.DayDuration)
       checkOutDate = date.formatDate(checkOutDate, 'DD.MM.YYYY')
       return checkOutDate
     },
@@ -1539,7 +1629,8 @@ export default {
           Location: lastClickLocation,
           Sights: [],
           InitDate: lastDate,
-          Profile: 'driving'
+          Profile: 'driving',
+          DayDuration: 1
         }
 
         this.step = 5

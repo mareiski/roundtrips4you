@@ -302,7 +302,7 @@
                   class="flex justify-center"
                   style="flex-direction:column; text-decoration:none;"
                   target="_blank"
-                  :href="'https://www.google.com/search?q=' + dailyTrip.location.label.split(',')[0] + ' sehenswürdigkeiten'"
+                  :href="'https://www.google.com/search?q=' + dailyTrip.location.label.split(',')[0] + ' Sehenswürdigkeiten'"
                 >weitere anzeigen</a>
               </div>
               <div v-html="dailyTrip.descriptionInput"></div>
