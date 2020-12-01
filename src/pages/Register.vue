@@ -152,16 +152,21 @@ export default {
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
           context.createUserEntry(user)
-          if (context.isInDemoSession) context.$store.dispatch('demoSession/saveRoundtrip', user.user.uid)
-          context.$store.commit('demoSession/resetRoundtrip')
-          sharedMethods.showSuccessNotification('Juhuuu dein Konto wurde erfolgreich erstellt')
 
-          evt.target.submit()
-          context.$router.replace('meine-rundreisen')
+          sharedMethods.showSuccessNotification('Juhuuu dein Konto wurde erfolgreich erstellt')
+          if (context.isInDemoSession) {
+            context.$store.dispatch('demoSession/saveRoundtrip', user.user.uid).then((newRTId) => {
+              evt.target.submit()
+              context.$router.replace('rundreise-bearbeiten/' + newRTId)
+            })
+          } else {
+            evt.target.submit()
+            context.$router.replace('meine-rundreisen')
+          }
         },
         (err) => {
           console.log(err)
-          sharedMethods.showErrorNotification('Oh nein, du konntest leider nicht registriert werden')
+          sharedMethods.showErrorNotification('Oh nein, du konntest leider nicht registriert werden, schreibe uns bitte ein email')
         }
       )
     },

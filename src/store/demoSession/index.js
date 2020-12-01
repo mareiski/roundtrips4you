@@ -4,15 +4,18 @@ import firebase from 'firebase'
 export default {
   namespaced: true,
   state: {
+    isInDemoSession: false,
     roundtrip: null,
     stops: null,
+
+    // todo remove
     tourShowed: false
   },
   getters: {
     getRoundtrip: state => state.roundtrip,
     getStops: state => state.stops,
-    isInDemoSession: state => (state.roundtrip !== null),
-    getRoundtripId: state => state.roundtrip.RTId,
+    isInDemoSession: state => state.isInDemoSession,
+    getRoundtripId: state => state.roundtrip ? state.roundtrip.RTId : null,
     tourShowed: state => state.tourShowed
   },
   mutations: {
@@ -37,61 +40,41 @@ export default {
     resetRoundtrip: (state) => {
       state.roundtrip = null
       state.stops = null
+      state.isInDemoSession = false
+    },
+    setAsDemoSession: (state) => {
+      state.isInDemoSession = true
     }
   },
   actions: {
-    createRoundtrip ({ commit }, title) {
+    addRoundtrip ({ commit }, payload) {
       return new Promise((resolve, reject) => {
         let tempRTId = Math.floor(Math.random() * 10000000000000)
         let timeStamp = Date.now()
         let firebaseTimeStamp = firebase.firestore.Timestamp.fromDate(new Date(timeStamp))
 
-        let newRoundtripObject = {
-          Category: 'Gruppenreise',
-          Days: '< 5 Tage',
-          Description: 'Kurze Beschreibung deiner Rundreise',
-          Hotels: '0',
-          Location: ['Deutschland'],
-          Region: null,
-          Price: 100,
-          Public: false,
-          RTId: tempRTId,
-          Stars: 3,
-          Profile: 'Auto',
-          Highlights: ['Highlight 1', 'Highlight 2', 'Highlight 3'],
-          Title: title,
-          OfferEndPeriod: firebaseTimeStamp,
-          OfferStartPeriod: firebaseTimeStamp,
-          OfferWholeYear: true,
-          ChildrenAges: [],
-          Rooms: 1,
-          Adults: 1,
-          createdAt: firebaseTimeStamp,
-          docId: tempRTId
-        }
-        commit('setRoundtrip', newRoundtripObject)
+        payload.roundtripObject.Location = payload.tempLocation
+        payload.roundtripObject.OriginCode = payload.originCode
+        payload.roundtripObject.DestinationCode = payload.destinationCode
 
-        let tempStopDocId = (Math.floor(Math.random() * 10000000000000)).toString() + 'A'
+        payload.roundtripObject.Category = 'Gruppenreise'
+        payload.roundtripObject.Description = 'Kurze Beschreibung deiner Rundreise'
+        payload.roundtripObject.Hotels = '0'
+        payload.roundtripObject.Region = null
+        payload.roundtripObject.Price = 100
+        payload.roundtripObject.Public = false
+        payload.roundtripObject.RTId = tempRTId
+        payload.roundtripObject.Stars = 3
+        payload.roundtripObject.Profile = 'Auto'
+        payload.roundtripObject.Highlights = ['Highlight 1', 'Highlight 2', 'Highlight 3']
+        payload.roundtripObject.OfferEndPeriod = firebaseTimeStamp
+        payload.roundtripObject.OfferStartPeriod = firebaseTimeStamp
+        payload.roundtripObject.OfferWholeYear = true
+        payload.roundtripObject.createdAt = firebaseTimeStamp
+        payload.roundtripObject.docId = tempRTId
 
-        let newStopArray = [{
-          BookingComLink: '',
-          DateDistance: '',
-          Description: 'Beschreibung dieses Stopps',
-          ExpediaLink: '',
-          GeneralLink: '',
-          ImageUrl: '',
-          InitDate: firebaseTimeStamp,
-          Price: 0,
-          RTId: tempRTId,
-          Title: 'Titel des 1. Stopps',
-          DocId: tempStopDocId,
-          Location: {
-            lng: '13.3888599',
-            lat: '52.5170365',
-            label: 'Berlin, 10117, Germany'
-          }
-        }]
-        commit('setStops', newStopArray)
+        commit('setRoundtrip', payload.roundtripObject)
+        commit('setStops', payload.stops)
 
         resolve(tempRTId)
       })
@@ -104,7 +87,7 @@ export default {
       return new Promise((resolve, reject) => {
         try {
           state.roundtrip.UserId = userId
-          db.collection('Roundtrips').add(state.roundtrip).then(r => {
+          db.collection('Roundtrips').add(state.roundtrip).then(() => {
             let roundtripsRef = db.collection('Roundtrips')
               .where('RTId', '==', state.roundtrip.RTId)
               .limit(1)
@@ -115,8 +98,12 @@ export default {
                     'RTId': doc.id
                   })
 
+                  let promiseList = []
                   state.stops.forEach((stop, index) => {
-                    db.collection('RoundtripDetails').add(stop).then(results => {
+                    stop.RTId = doc.id
+                    promiseList.push(db.collection('RoundtripDetails').add(stop))
+
+                    Promise.all(promiseList).then(() => {
                       if (index === state.stops.length - 1) {
                         commit('resetRoundtrip')
                         resolve(doc.id)

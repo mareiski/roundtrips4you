@@ -38,7 +38,7 @@
             to="/login"
           >anmelden</router-link>
           <router-link
-            v-if="!user"
+            v-if="!user && getActionButtonText()"
             :to="getActionButtonLink()"
             class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
@@ -46,7 +46,7 @@
             <q-btn color="primary">{{getActionButtonText()}}</q-btn>
           </router-link>
           <q-avatar
-            v-else
+            v-else-if="user"
             size="50px"
             style="width: 50px; margin:auto 10px auto 10px;"
             :style="user ? 'padding:0;' : 'font-size:60px;'"
@@ -69,8 +69,9 @@
                 :value="showWelcomeTooltip"
                 content-style="font-size: 14px;"
                 content-class="tooltip"
+                v-if="!user || user.displayName"
               >
-                {{user && user.displayName ? 'Hallo, ' + user.displayName : 'Anmelden'}}
+                {{user ? 'Hallo, ' + user.displayName : 'Anmelden'}}
               </q-tooltip>
             </div>
             <q-menu v-if="user">
@@ -530,18 +531,17 @@ export default {
     getActionButtonText () {
       if (this.$store.getters['demoSession/isInDemoSession']) {
         let currentRoute = this.$router.currentRoute
-        let isOnEditRoundtripsPage = currentRoute.fullPath.split('/')[1] === 'rundreise-bearbeiten'
+        let isOnWizardPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-wizard'
 
-        if (isOnEditRoundtripsPage) return 'speichern'
-        else return 'reise bearbeiten'
+        if (!isOnWizardPage) return 'reise bearbeiten'
       } else return 'registrieren'
     },
     getActionButtonLink () {
       let currentRoute = this.$router.currentRoute
-      let isOnEditRoundtripsPage = currentRoute.fullPath.split('/')[1] === 'rundreise-bearbeiten'
+      let isOnWizardPage = currentRoute.fullPath === 'rundreisen-wizard'
 
-      if (this.$store.getters['demoSession/isInDemoSession'] && !isOnEditRoundtripsPage) {
-        return '/rundreise-bearbeiten/' + this.$store.getters['demoSession/getRoundtripId']
+      if (this.$store.getters['demoSession/isInDemoSession'] && !isOnWizardPage) {
+        return '/rundreisen-wizard'
       } else return '/registrieren'
     },
     hideLoading () {

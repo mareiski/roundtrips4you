@@ -115,6 +115,7 @@
       style="align-items: center; flex-direction:row; margin-bottom:20px;"
       class="flex cursor-pointer"
       @click="$router.push('/rundreisen-wizard')"
+      v-if="user && (user.emailVerified || roundtrips.length === 0)"
     >
       <q-btn
         class="add-button"
@@ -511,10 +512,7 @@
       <span style="font-size:18px;">Deine Email Adresse wurde noch nicht bestätigt. Bitte bestätige diese {{ roundtrips.length > 0 ? 'bevor du eine weitere Reise erstellst' : 'sobald wie möglich'}}.</span>
       <br>
       <br>
-      <q-btn
-        color="primary"
-        @click="verifyMail()"
-      >Jetzt bestätigen</q-btn>
+      <q-btn @click="verifyMail()">Email erneut senden</q-btn>
     </div>
   </div>
 </template>
@@ -639,7 +637,7 @@ export default {
           color: 'green-4',
           textColor: 'white',
           icon: 'check_circle',
-          message: 'Deine Email wurde bereits bestätigt'
+          message: 'Deine Email wurde bestätigt'
         })
       }
     },

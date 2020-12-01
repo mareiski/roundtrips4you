@@ -4,7 +4,10 @@
     style="padding-top:20px;"
     class="q-px-lg q-pb-md"
   >
-    <div style="margin-bottom:20px;">
+    <div
+      style="margin-bottom:20px;"
+      v-if="!$store.getters['demoSession/isInDemoSession']"
+    >
       <a @click="$router.push('meine-rundreisen')">zu meinen Rundreisen</a>
     </div>
     <q-stepper
@@ -1277,23 +1280,83 @@ export default {
         stop.InitDate = sharedMethods.getDateFromString(this.addedStops[index].InitDate)
       })
 
-      try {
-        this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: this.addedStops[0].Location, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops }).then(docId => {
-          if (docId && docId !== null) {
-            let context = this
-            // wait to ensure roundtrip is fully added
-            setTimeout(function () {
-              context.$router.push('/rundreise-bearbeiten/' + docId)
-            }, 500)
-          } else {
-            sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-          }
-        })
-      } catch (error) {
-        console.log(error)
-        sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-        return false
+      this.currentRoundtrip.Title = this.currentRoundtrip.Title.charAt(0).toUpperCase() + this.currentRoundtrip.Title.slice(1)
+      this.currentRoundtrip.Title = this.currentRoundtrip.Title.trim()
+
+      let tripDuration = this.getTripDuration()
+      let daysString = '< 5 Tage'
+
+      if (tripDuration < 5) {
+        daysString = '< 5 Tage'
+      } else if (tripDuration >= 5 && tripDuration <= 8) {
+        daysString = '5-8 Tage'
+      } else if (tripDuration >= 9 && tripDuration <= 11) {
+        daysString = '9-11 Tage'
+      } else if (tripDuration >= 12 && tripDuration <= 15) {
+        daysString = '12-15 Tage'
+      } else if (tripDuration > 15) {
+        daysString = '> 15 Tage'
       }
+
+      this.currentRoundtrip.Days = daysString
+
+      this.getRoundtripCountries().then(countries => {
+        if (this.$store.getters['demoSession/isInDemoSession'] && auth.user() === null) {
+          this.$store.dispatch({ type: 'demoSession/addRoundtrip', roundtripObject: this.currentRoundtrip, tempLocation: countries, originCode: null, destinationCode: null, stops: stops }).then(() => {
+            this.$router.push('/registrieren')
+          })
+        } else {
+          try {
+            this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, days: daysString, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: countries, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops }).then(docId => {
+              if (docId && docId !== null) {
+                let context = this
+                // wait to ensure roundtrip is fully added
+                setTimeout(function () {
+                  context.$router.push('/rundreise-bearbeiten/' + docId)
+                }, 500)
+              } else {
+                sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+              }
+            })
+          } catch (error) {
+            console.log(error)
+            sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+            return false
+          }
+        }
+      })
+    },
+    getRoundtripCountries () {
+      return new Promise((resolve, reject) => {
+        let tempCountries = []
+        let promiseList = []
+
+        this.addedStops.forEach((stop, index) => {
+          let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
+
+          promiseList.push(
+            axios.get(url)
+              .then(response => {
+                if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
+              }).catch(function (error) {
+                console.log(error)
+              })
+          )
+        })
+
+        Promise.all(promiseList).then(vals => {
+          resolve(tempCountries)
+        })
+      })
+    },
+    getTripDuration () {
+      let startDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
+
+      let stopDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
+      const oneDay = 24 * 60 * 60 * 1000
+
+      const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
+      this.tripDuration = diffDays
     },
     onStopsDragged (event) {
       // dont do anything if stop was not moved
@@ -1636,6 +1699,9 @@ export default {
         this.step = 5
       }
     })
+  },
+  created () {
+    if (!this.$store.getters['demoSession/isInDemoSession'] && !auth.user()) this.$store.commit('demoSession/setAsDemoSession')
   }
 }
 </script>

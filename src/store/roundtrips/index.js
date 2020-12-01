@@ -117,7 +117,7 @@ export default {
 
           let newRoundtripObject = {
             Category: 'Gruppenreise',
-            Days: '< 5 Tage',
+            Days: payload.days || '< 5 Tage',
             Description: 'Kurze Beschreibung deiner Rundreise',
             Hotels: '0',
 

@@ -86,10 +86,7 @@ const routes = [
       },
       {
         path: 'rundreisen-wizard',
-        component: () => import('pages/RoundtripWizard.vue'),
-        meta: {
-          requireAuth: true
-        }
+        component: () => import('pages/RoundtripWizard.vue')
       },
       {
         path: 'benutzerprofil/:id',
