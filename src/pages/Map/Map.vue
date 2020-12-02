@@ -12,7 +12,6 @@
     >
       <MglGeocoderControl
         :accessToken="accTo"
-        :input.sync="defaultInput"
         @result="handleSearch"
         placeholder="Ort suchen"
         v-if="editor"
@@ -358,7 +357,6 @@ export default {
       lastClickLocation: {},
       title: null,
       mapbox: null,
-      defaultInput: null,
       whitelistedLabels: ['airport-label', 'place-label', 'country-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'],
       centerLocation: [0, 0],
       markerClicked: false,
