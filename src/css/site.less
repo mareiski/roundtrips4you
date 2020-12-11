@@ -31,7 +31,7 @@ footer {
     #SocialMediaContainer {
         font-size: 40px;
         justify-content: space-between;
-        padding: 10px 10% 30px 10%;
+        padding: 40px 10px 30px 10px;
         width: 600px;
 
         &>i {
@@ -55,7 +55,7 @@ footer {
 
     .main-footer {
         display: flex;
-        width: 800px;
+        max-width: 800px;
         margin-left: 10%;
         justify-content: space-between;
 
@@ -390,6 +390,7 @@ h2 {
 .q-page-container {
     min-height: 90vh;
     margin-top: 80px;
+    padding-left: 0 !important;
 }
 
 .q-avatar {
@@ -611,7 +612,10 @@ h2 {
         }
     }
 
-    h1,
+    h1 {
+        font-size: @size-very-large  !important;
+    }
+
     h2,
     h3,
     h4,
