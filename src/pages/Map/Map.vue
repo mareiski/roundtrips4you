@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    style="overflow:hidden;"
+    class="map"
+  >
     <MglMap
       :accessToken="accTo"
       :mapStyle.sync="mapStyle"
@@ -16,52 +19,57 @@
         placeholder="Ort suchen"
         v-if="editor"
       />
-      <MglFullscreenControl position="bottom-right" />
       <MglNavigationControl position="top-right" />
-      <q-btn
-        color="white"
-        text-color="secondary"
-        icon="layers"
-        style="position:absolute; right:9px; top:175px;"
+      <MapLayerPlugin
+        class="mapboxgl-ctrl"
+        position="top-right"
+      />
+      <MglFullscreenControl position="bottom-right" />
+
+      <q-drawer
+        v-model="drawerLeft"
+        show-if-above
+        v-if="editor"
+        elevated
+        :breakpoint="0"
+        :mini="miniState"
+        @mouseover="!miniDisabled ? miniState = false : null"
+        @mouseout="!miniDisabled ? miniState = true : null"
+        content-class="bg-secondary text-white"
       >
-        <q-menu>
-          <q-list style="min-width: 100px">
+        <q-scroll-area
+          class="fit"
+          ref="DrawerScrollArea"
+        >
+          <q-list
+            padding
+            v-show="showDrawerList"
+          >
             <q-item
               clickable
-              @click="switchMapStyle(null)"
-              v-close-popup
+              v-ripple
+              @click="showDrawerList = false; miniDisabled = true; showCityMarkers = true;"
             >
-              <q-item-section>Standard</q-item-section>
-            </q-item>
-            <q-separator />
+              <q-item-section avatar>
+                <q-icon name="apartment" />
+              </q-item-section>
 
-            <q-item
-              clickable
-              @click="switchMapStyle('nav')"
-              v-close-popup
-            >
-              <q-item-section>Navigation</q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item
-              clickable
-              @click="switchMapStyle('sat')"
-              v-close-popup
-            >
-              <q-item-section>Satellit</q-item-section>
-            </q-item>
-            <q-separator />
-
-            <q-item
-              clickable
-              @click="switchMapStyle('out')"
-              v-close-popup
-            >
-              <q-item-section>Outdoor</q-item-section>
+              <q-item-section>
+                Städte vorschlagen
+              </q-item-section>
             </q-item>
           </q-list>
-        </q-menu>
-      </q-btn>
+
+          <MapDrawerItem
+            ref="MapDrawerItem"
+            v-show="!showDrawerList"
+            :alreadyAddedCities="stops"
+            @update="update($event)"
+          ></MapDrawerItem>
+        </q-scroll-area>
+
+      </q-drawer>
+
       <MglMarker
         v-for="stop in stops"
         :key="stop.DocId"
@@ -70,6 +78,7 @@
         @click="onMarkerClicked($event)"
       >
         <MglPopup>
+
           <q-card>
             <q-img
               v-if="stop.StopImages"
@@ -158,9 +167,10 @@
       </template>
       <MglMarker
         :coordinates="lastClickCoordinates"
-        color="#d56026a1"
+        color="#70707075"
         @click="onMarkerClicked($event)"
         v-if="editor"
+        :offset="[5, 10]"
         ref="addStopMarker"
       >
         <MglPopup>
@@ -254,6 +264,34 @@
           </MglPopup>
         </MglMarker>
       </div>
+      <!-- city markers -->
+      <template v-if="showCityMarkers">
+        <MglMarker
+          v-for="(city, index) in suggestedCities"
+          :key="city.name + index"
+          :coordinates="[city.longitude, city.latitude]"
+          :offset="[10, 5]"
+          @click="onMarkerClicked($event); goToCity(city.name)"
+        >
+          <q-icon
+            :ref="'cityMarkerIcon' + index"
+            slot="marker"
+            name="place"
+            color="amber-14"
+            size="30px"
+          />
+          <MglPopup>
+            <q-card>
+              <q-card-section>
+                <div class="text-h6">
+                  {{city.name}}
+                </div>
+                <p style="font-size: 14px">vorgeschlagene Stadt für {{city.country}}</p>
+              </q-card-section>
+            </q-card>
+          </MglPopup>
+        </MglMarker>
+      </template>
       <MglMarker
         v-for="(route, index) in addedRoutes"
         :key="route.id + index"
@@ -319,7 +357,9 @@ import(/* webpackPrefetch: true */ '../../css/map.less')
 
 const getAxios = () => import('axios')
 import { date } from 'quasar'
-import sharedMethods from '../../sharedMethods'
+import sharedMethods from '../../sharedMethods.js'
+import MapLayerPlugin from './MapLayerPlugin.vue'
+import MapDrawerItem from './MapDrawerItem.vue'
 
 let hoveredStateId = null
 
@@ -336,10 +376,14 @@ export default {
     MglPopup,
     MglNavigationControl,
     MglFullscreenControl,
-    MglGeocoderControl
+    MglGeocoderControl,
+    MapLayerPlugin,
+    MapDrawerItem
   },
   props: {
     stops: Array,
+
+    // fallback profile if stop has nothing set
     profile: String,
     childrenAges: Array,
     adults: Number,
@@ -357,10 +401,16 @@ export default {
       lastClickLocation: {},
       title: null,
       mapbox: null,
-      whitelistedLabels: ['airport-label', 'place-label', 'country-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'],
+      whitelistedLabels: ['airport-label', 'place-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'], // 'country-label',
       centerLocation: [0, 0],
       markerClicked: false,
-      sightDialog: {}
+      sightDialog: {},
+      drawerLeft: false,
+      miniState: true,
+      showDrawerList: true,
+      miniDisabled: false,
+      suggestedCities: [],
+      showCityMarkers: false
     }
   },
   watch: {
@@ -371,22 +421,8 @@ export default {
     }
   },
   methods: {
-    switchMapStyle (styleName) {
-      switch (styleName) {
-        case 'nav':
-          this.mapStyle = 'mapbox://styles/mareiski/ckcevjmf81b7t1imouvv52xrh'
-          break
-        case 'out':
-          this.mapStyle = 'mapbox://styles/mareiski/ckcew03vc12dy1imgq1eonlvt'
-          break
-        case 'sat':
-          this.mapStyle = 'mapbox://styles/mareiski/ckcevopcq123g1imgb36xu37s'
-          break
-        default:
-          this.mapStyle = 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn'
-          break
-      }
-      this.loadMap(this.map)
+    update (event) {
+      this.$emit('update', event)
     },
     onMapLoaded (event) {
       console.log('onmaploaded')
@@ -409,12 +445,57 @@ export default {
         }, 1000)
       })
     },
+    markCityOnMap (location) {
+      this.changeCityMarkerSize('50px', location)
+    },
+    hideCityOnMap (location) {
+      this.changeCityMarkerSize('30px', location)
+    },
+    /**
+     * changes the size of the city marker for given location
+     */
+    changeCityMarkerSize (size, location) {
+      const context = this
+      this.suggestedCities.forEach((city, index) => {
+        const currentLocation = [city.latitude, city.longitude]
+        if (location[0] === currentLocation[0] && location[1] === currentLocation[1]) {
+          context.$refs['cityMarkerIcon' + index][0].size = size
+        }
+      })
+    },
+    /**
+     * show markers for suggested cities (called from city suggestion)
+     */
+    showCitiesOnMap (cities) {
+      this.suggestedCities = cities
+    },
+    goToCity (name) {
+      const drawerScrollArea = this.$refs['DrawerScrollArea']
+
+      const el = document.getElementById('CitySuggestion' + name)
+
+      const offset = el.offsetTop
+
+      drawerScrollArea.setScrollPosition(offset - 20, 400)
+    },
+    /**
+    * switches the map drawer back to list (called from MapDrawerItem)
+    */
+    switchDrawerToList () {
+      this.miniDisabled = false
+      this.showDrawerList = true
+      this.showCityMarkers = false
+    },
     handleSearch (event) {
       let result = event.result
 
       if (!this.markerClicked) {
         this.lastClickCoordinates = result.geometry.coordinates
-        this.title = result.place_name
+        let placeName = result.place_name
+
+        if (placeName.includes(',')) placeName = placeName.split(',')[0]
+
+        this.title = 'Zwischenstopp in ' + placeName
         this.showAddStopMarker = true
 
         let context = this
@@ -476,9 +557,9 @@ export default {
         const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
 
         // need this json stringify to prevent update of location when the click location changes
-        this.$root.$emit('addStop', formattedDate, JSON.parse(JSON.stringify(this.lastClickLocation)))
+        this.$emit('addStop', { date: formattedDate, location: JSON.parse(JSON.stringify(this.lastClickLocation)) })
       } else {
-        this.$root.$emit('addStop', null, JSON.parse(JSON.stringify(this.lastClickLocation)))
+        this.$emit('addStop', { date: null, location: JSON.parse(JSON.stringify(this.lastClickLocation)) })
       }
 
       // reload map and fly to coords
@@ -489,17 +570,6 @@ export default {
         // we only want to hide the popup
         this.$refs.addStopMarker.marker._popup.remove()
       })
-    },
-    getParent (name) {
-      let p = this.$parent
-      while (typeof p !== 'undefined') {
-        if (p.$options.name === name) {
-          return p
-        } else {
-          p = p.$parent
-        }
-      }
-      return false
     },
     getChildrenText () {
       let text = '&group_children=' + this.childrenAges.length
@@ -634,6 +704,25 @@ export default {
             }
             context.markerClicked = false
           })
+
+          // map.on('move', () => {
+          // var features = map.queryRenderedFeatures(map.getCenter())
+          // var displayProperties = [
+          //   'properties'
+          // ]
+
+          // var displayFeatures = features.map(function (feat) {
+          //   var displayFeat = {}
+          //   displayProperties.forEach(function (prop) {
+          //     displayFeat[prop] = feat[prop]
+          //   })
+          //   return displayFeat
+          // })
+
+          // displayFeatures.forEach(feature => {
+          //   if (feature.layer.id === 'country-label') console.log(feature.properties.name_de)
+          // })
+          // })
           resolve(true)
         }
       })
@@ -730,6 +819,8 @@ export default {
                 })
 
                 map.on('click', id, function (e) {
+                  // close all popups
+                  context.closeAllPopups()
                   if (!context.markerClicked) context.$refs[id][0].togglePopup()
                 })
                 map.getSource(id).setData(geojson)
@@ -810,6 +901,15 @@ export default {
         }
         hoveredStateId = null
       })
+    },
+    closeAllPopups () {
+      const popups = document.getElementsByClassName('mapboxgl-popup')
+
+      console.log(popups)
+      for (let i = 0; i < popups.length; i++) {
+        console.log(popups[i])
+        popups[i].remove()
+      }
     }
   },
   created () {

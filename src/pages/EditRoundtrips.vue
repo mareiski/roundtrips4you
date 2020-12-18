@@ -1159,6 +1159,7 @@
           :adults="Number(adults)"
           :editor="true"
           ref="map"
+          @addStop="handleOnMapAddStop($event)"
         ></Map>
       </q-tab-panel>
     </q-tab-panels>
@@ -1214,7 +1215,7 @@ export default {
     Duration: () => import('../pages/EditRoundtripComponents/duration'),
     // HotelSearch: () => import('../pages/Map/HotelSearch'),
     RegionSearch: () => import('../pages/Map/RegionSearch'),
-    CitySuggestion: () => import('../pages/Map/CitySuggestion')
+    CitySuggestion: () => import('../pages/CitySuggestion/CitySuggestion.vue')
   },
   data () {
     return {
@@ -1622,13 +1623,13 @@ export default {
      * Called when add new stop event is fired -> call add stop method
      * @see addStop()
      */
-    onAddStop () {
+    handleOnMapAddStop (event) {
       if (!sharedMethods.isDateTimeValid()) return false
       this.addExpanded = false
       this.addButtonActive = false
 
       try {
-        this.addStop(this.date, this.location, this.generalTempLink, this.parkingPlace)
+        this.addStop(event.date || this.date, event.location || this.location, this.generalTempLink, this.parkingPlace)
       } catch (e) {
         console.log(e)
         this.$q.notify({

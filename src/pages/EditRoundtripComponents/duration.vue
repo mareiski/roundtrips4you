@@ -1,17 +1,17 @@
 <template>
   <q-timeline-entry icon="speed">
-    <q-chip
+    <!-- <q-chip
       icon="commute"
       :clickable="editor"
       @click="editStopProfile = true"
     >{{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}
-      <q-icon
+       <q-icon
         v-if="editor"
         name="edit"
       />
       <q-tooltip>Reisemittel ändern</q-tooltip>
-    </q-chip>
-    <q-dialog
+    </q-chip> -->
+    <!-- <q-dialog
       v-if="editor"
       v-model="editStopProfile"
       persistent
@@ -54,9 +54,9 @@
           />
         </q-card-actions>
       </q-card>
-    </q-dialog>
+    </q-dialog> -->
     <template v-slot:subtitle>
-      <template v-if="duration || duration === 0">{{duration}}</template>
+      <template v-if="duration || duration === 0">{{duration}} {{defaultProfile && typeof defaultProfile !== 'undefined' ? defaultProfile : (editor ? 'Reisemittel hinzufügen' : roundtripProfile) }}</template>
       <template v-else>
         <q-skeleton
           width="100px"
@@ -69,6 +69,8 @@
 </template>
 <script>
 import { db } from '../../firebaseInit.js'
+import sharedMethods from '../../sharedMethods.js'
+
 export default {
   props: {
     duration: String,
@@ -103,17 +105,6 @@ export default {
           break
       }
     },
-    getParent (name) {
-      let p = this.$parent
-      while (typeof p !== 'undefined') {
-        if (p.$options.name === name) {
-          return p
-        } else {
-          p = p.$parent
-        }
-      }
-      return false
-    },
     saveData (field, value) {
       if (!value) return
       let context = this
@@ -128,7 +119,7 @@ export default {
           //   icon: 'check_circle'
           // })
           context.defaultProfile = context.inputProfile
-          let parent = context.getParent('EditRoundtrips')
+          let parent = sharedMethods.getParent('EditRoundtrips', context)
           parent.getDataOutOfStops(false)
         })
       } catch (e) {

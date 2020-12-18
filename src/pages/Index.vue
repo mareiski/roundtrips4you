@@ -40,40 +40,6 @@
               color="primary"
             >Los geht's</q-btn>
           </div>
-          <q-dialog v-model="showCreateTempRTDialog">
-            <q-card>
-              <q-card-section class="row items-center">
-                <span style="width:100%; text-align:center; font-size:18px;">Erstelle deine Reise ohne Anmeldung</span>
-                <q-input
-                  v-model="title"
-                  :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
-                  label="Titel der Reise"
-                  outlined
-                  ref="titleInput"
-                  style="margin:auto; margin-top:20px; width:300px;"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="title" />
-                  </template>
-                </q-input>
-              </q-card-section>
-
-              <q-card-actions align="right">
-                <q-btn
-                  label="Reise erstellen"
-                  @click="createTempRT()"
-                  color="primary"
-                  v-close-popup
-                />
-                <q-btn
-                  flat
-                  label="Abbrechen"
-                  color="primary"
-                  v-close-popup
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
           <!-- <div>
             <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
             <q-select
@@ -340,7 +306,6 @@ export default {
       date: '2019/02/01',
       searchLocation: '',
       imgLoaded: false,
-      showCreateTempRTDialog: false,
       title: 'Meine Reise'
     }
   },
@@ -364,42 +329,6 @@ export default {
     createTempRTClicked () {
       if (this.$store.getters['demoSession/isInDemoSession']) {
         this.$router.push('/rundreisen-wizard/')
-      }
-    },
-    createTempRT () {
-      if (!this.title) {
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Bitte überprüfe deine Angaben'
-        })
-        return false
-      }
-
-      let Title = this.title
-
-      // set as default country (will be overitten)
-      Title = Title.charAt(0).toUpperCase() + Title.slice(1)
-      Title = Title.trim()
-
-      if (auth.user() !== null) {
-        try {
-          this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: Title, uid: auth.user().uid, rooms: 1, adults: 2, childrenAges: [], tempLocation: null, depatureDate: null }).then(docId => {
-            if (docId && docId !== null) {
-              this.$router.push('/rundreise-bearbeiten/' + docId)
-            } else {
-              sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-            }
-          })
-        } catch (error) {
-          console.log(error)
-          sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-        }
-      } else {
-        this.$store.dispatch('demoSession/createRoundtrip', Title).then(docId => {
-          this.$router.push('/rundreise-bearbeiten/' + docId)
-        })
       }
     }
   }

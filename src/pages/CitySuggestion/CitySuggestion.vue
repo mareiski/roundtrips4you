@@ -16,6 +16,7 @@
         input-debounce="0"
         :options="countryOptions"
         label="Land auswählen"
+        bg-color="white"
         @filter="filterCountries"
         @input="getCities()"
         :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
@@ -52,6 +53,9 @@
         class="city-card"
         v-for="(city, index) in cities"
         :key="index"
+        :id="'CitySuggestion' + city.name"
+        @mouseover="markCityOnMap(city)"
+        @mouseleave="hideCityOnMap(city)"
       >
         <div>
           <div>
@@ -68,7 +72,7 @@
 
             <q-btn
               round
-              color="secondary"
+              color="primary"
               class="city-info"
               icon="info"
               @click="openCityDialog(index)"
@@ -89,6 +93,15 @@
 
         <q-card-actions align="right">
           <q-btn
+            v-if="cityAlreadyAdded(city)"
+            label="Hinzugefügt"
+            outline
+            dense
+            disable
+            color="primary"
+          />
+          <q-btn
+            v-else
             label="Hinzufügen"
             outline
             dense
@@ -141,12 +154,19 @@
         </q-card>
       </q-dialog>
     </div>
-    <q-btn
-      v-if="cities && cities.length > 0"
-      style="width:245px; margin-top:20px;"
-      @click="openInNewTab('https://www.google.de/search?q=' + country)"
-    >weitere Städte auf Google</q-btn>
-    <h4>Ort direkt zur Reise hinzufügen</h4>
+
+    <!-- <div class="flex justify-center">
+      <q-btn
+        color="white"
+        text-color="secondary"
+        v-if="cities && cities.length > 0"
+        style="width:245px; margin-top:20px;"
+        @click="openInNewTab('https://www.google.de/search?q=' + country)"
+      >weitere Städte auf Google</q-btn>
+
+      <h5 style="padding-left:10px; text-align:center;">Ort direkt zur Reise hinzufügen</h5>
+    </div>
+
     <div class="flex">
       <CitySearch
         ref="citySearch"
@@ -160,22 +180,20 @@
         @click="addStop(directSetCity)"
         style="height: 40px; margin-top:10px;"
       >Ort hinzufügen</q-btn>
-    </div>
+    </div> -->
+
   </div>
 </template>
 <style lang="less" scoped>
 @import url("../../css/citySuggestion.less");
 </style>
 <script>
-import axios from 'axios'
 import { db } from '../../firebaseInit.js'
 import sharedMethods from '../../sharedMethods.js'
 import { countries } from '../../countries.js'
+import CitySuggestionMethods from './CitySuggestionMethods.js'
 
 export default {
-  components: {
-    CitySearch: () => import('./CitySearch.vue')
-  },
   data () {
     return {
       cities: [],
@@ -190,6 +208,7 @@ export default {
     dates: Array,
     RTId: String,
     predefinedCountry: String,
+    alreadyAddedCities: Array,
     shouldAddCity: Boolean
   },
   methods: {
@@ -226,6 +245,15 @@ export default {
       })
     },
     /**
+     * marks the hovered city on the map (if its parent)
+     */
+    markCityOnMap (city) {
+      sharedMethods.getParent('Map', this).markCityOnMap([city.latitude, city.longitude])
+    },
+    hideCityOnMap (city) {
+      sharedMethods.getParent('Map', this).hideCityOnMap([city.latitude, city.longitude])
+    },
+    /**
      * get all cities for country cities
      */
     getCities () {
@@ -234,18 +262,9 @@ export default {
       this.cities = []
 
       this.cityDialog.showed = false
-      // context.fetchAPISuggestions()
 
-      context.fetchDBSuggestions().then(function (response) {
-        if (response.length > 0) {
-          context.handleFetchedSuggestions(response)
-        } else {
-          context.fetchAPISuggestions().then(function (apiResponse) {
-            context.handleFetchedSuggestions(apiResponse)
-          })
-        }
-      }).catch(function (error) {
-        console.log('Error' + error)
+      CitySuggestionMethods.getCities(this.country).then(response => {
+        if (response) context.handleFetchedSuggestions(response)
       })
     },
     /**
@@ -254,9 +273,10 @@ export default {
     handleFetchedSuggestions (tempCities) {
       let context = this
       tempCities.forEach((city, index) => {
-        if (city.name.includes('Metropolitanstadt')) city.name = city.name.slice(city.name.indexOf('Metropolitanstadt') + 17)
         setTimeout(function () {
-          context.getCityImage(city.name, city.country)
+          CitySuggestionMethods.getCityImage(city.name, city.country).then(image => {
+            context.images.splice(context.cities.findIndex(x => x.name === city.name), 0, image)
+          })
         }, 1000)
       })
 
@@ -268,7 +288,8 @@ export default {
           country: city.country,
           region: city.region,
           longitude: city.longitude ? city.longitude : null,
-          latitude: city.latitude ? city.latitude : null
+          latitude: city.latitude ? city.latitude : null,
+          added: false
         }
 
         if (uniqueCities.length === 0) uniqueCities.push(cityObject)
@@ -279,74 +300,24 @@ export default {
       })
 
       this.cities = uniqueCities
+      sharedMethods.getParent('Map', this).showCitiesOnMap(uniqueCities)
     },
-    /**
-     * fetch city suggestions from geo db api
-     */
-    fetchAPISuggestions () {
-      let context = this
-      return new Promise((resolve, reject) => {
-        axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + this.country + '&languageCode=de', {
-          headers: {
-            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+    cityAlreadyAdded (city) {
+      if (this.alreadyAddedCities) {
+        for (let i = 0; i < this.alreadyAddedCities.length; i++) {
+          const addedCity = this.alreadyAddedCities[i]
+
+          if (addedCity.Location.lat === city.latitude && addedCity.Location.lng === city.longitude) {
+            return true
           }
-        }).then(function (response) {
-          // wait 2 secs because only 1 request per sec is allowed
-          setTimeout(function () {
-            axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
-              headers: {
-                'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
-              }
-            }).then(function (response) {
-              context.writeInDB(response.data.data)
-              resolve(response.data.data)
-            }).catch(function (error) {
-              console.log(error)
-            })
-          }, 2000)
-        }).catch(function (error) {
-          console.log('Error' + error)
-        })
-      })
+        }
+      }
+      return false
     },
     /**
-     * fetch city suggestions from the database
+     * update location object witch city search results
+     * @param event event from city search update callback
      */
-    fetchDBSuggestions () {
-      return new Promise((resolve, reject) => {
-        let tempCities = []
-        let roundtripsRef = db.collection('SuggestedCities')
-          .where('Country', '==', this.country)
-          .limit(1)
-        roundtripsRef.get()
-          .then(snapshot => {
-            if (snapshot.empty) resolve(tempCities)
-            snapshot.forEach(doc => {
-              let cities = doc.data().Cities
-              if (cities.length === 0) resolve(tempCities)
-              cities.forEach(city => {
-                let cityObject = {
-                  name: city.name,
-                  region: city.region,
-                  longitude: city.location ? city.location.lng : null,
-                  latitude: city.location ? city.location.lat : null,
-                  country: doc.data().Country
-                }
-
-                tempCities.push(cityObject)
-
-                if (cities.indexOf(city) === cities.length - 1) {
-                  resolve(tempCities)
-                }
-              })
-            })
-          })
-      })
-    },
-    /**
-   * update location object witch city search results
-   * @param event event from city search update callback
-   */
     updateLocation (event) {
       if (event !== null) {
         this.directSetCity = {
@@ -357,20 +328,6 @@ export default {
       } else {
         this.directSetCity = {}
       }
-    },
-    /**
-     * writes a fetched stop into the db
-     */
-    writeInDB (response) {
-      let newCityObject = {}
-      newCityObject.Cities = []
-
-      response.forEach((city, index) => {
-        newCityObject.Country = city.country
-        if (!newCityObject.Cities.includes(city.name)) newCityObject.Cities.push({ name: city.name, region: city.region, location: { lng: city.longitude, lat: city.latitude } })
-      })
-
-      db.collection('SuggestedCities').add(newCityObject)
     },
     addStop (city) {
       if (!this.shouldAddCity) {
@@ -409,42 +366,13 @@ export default {
         HotelName: null
       })
 
-      this.getParent('EditRoundtrips').fetchRoundtripStops(this.RTId, false)
+      sharedMethods.getParent('EditRoundtrips', this).fetchRoundtripStops(this.RTId, false)
 
       this.$q.notify({
         color: 'green-4',
         textColor: 'white',
         icon: 'check_circle',
         message: 'Zur Reise hinzugefügt'
-      })
-    },
-    getParent (name) {
-      let p = this.$parent
-      while (typeof p !== 'undefined') {
-        if (p.$options.name === name) {
-          return p
-        } else {
-          p = p.$parent
-        }
-      }
-      return false
-    },
-    getCityImage (cityName, cityCountry) {
-      let context = this
-      axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
-      ).then(function (response) {
-        if (response.data.hits[0]) context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
-        else {
-          axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName, {}
-          ).then(function (response) {
-            if (response.data.hits[0]) context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: response.data.hits[0].webformatURL, cityName: cityName })
-            else {
-              context.images.splice(context.cities.findIndex(x => x.name === cityName), 0, { url: '../../statics/dummy-image-landscape-1-150x150.jpg', cityName: cityName })
-            }
-          }).catch(function (error) {
-            console.log(error)
-          })
-        }
       })
     }
   },

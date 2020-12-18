@@ -2,30 +2,53 @@
   <div class="roundtrip-details q-px-lg q-pb-md">
     <div
       class="edit-btn-container"
-      v-if="user !== null && (!roundtrip || user.uid !== roundtrip.UserId)"
-      style="position:absolute; z-index:1; right:0; padding: 10px"
+      v-if="user !== null"
+      style="position:fixed; z-index:1; right:0; padding: 10px"
     >
       <q-btn
         round
         color="primary"
         icon="edit"
-        @click="editRTDialog = true"
+        v-if="isUserCreator"
+        @click="$router.push('/rundreisen-wizard/' + RTId)"
       >
-        <q-tooltip>Diese Reise bearbeiten</q-tooltip>
+        <q-tooltip>Reise bearbeiten</q-tooltip>
       </q-btn>
+
+      <q-btn
+        round
+        color="primary"
+        icon="content_copy"
+        v-else
+        @click="copyRTDialog = true"
+      >
+        <q-tooltip>Reise bearbeiten</q-tooltip>
+      </q-btn>
+
+      <q-btn
+        round
+        color="primary"
+        icon="settings"
+        style="margin-left:10px;"
+        v-if="isUserCreator"
+        @click="$router.push('/rundreisen-einstellungen/' + RTId)"
+      >
+        <q-tooltip>Reiseeinstellungen</q-tooltip>
+      </q-btn>
+
       <q-dialog
-        v-model="editRTDialog"
+        v-model="copyRTDialog"
         persistent
       >
         <q-card style="min-width: 350px">
           <q-card-section>
-            <div class="text-h6">Reise bearbeiten</div>
-            <span>Diese Reise wird zu deinen eigenen Reisen hinzugefügt, damit du sie bearbeiten kannst. Bitte gib dafür den Titel der Rundreise ein.</span>
+            <div class="text-h6">Reise kopieren</div>
+            <span>Diese Reise wird kopiert und zu deinen eigenen Reisen hinzugefügt. <br /> Bitte gib dafür den neuen Titel der Reise ein.</span>
           </q-card-section>
 
           <q-card-section>
             <q-input
-              v-model="title"
+              v-model="copyRTTitle"
               autofocus
               outlined
               @input="checkDisableEditBtn($event)"
@@ -46,26 +69,38 @@
             />
             <q-btn
               type="submit"
-              label="Rundreise bearbeiten"
+              label="Rundreise kopieren"
               flat
               v-close-popup
               :disable="disableEditBtn"
-              @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
+              @click="copyRoundtrip()"
             />
           </q-card-actions>
         </q-card>
       </q-dialog>
     </div>
-    <div class="back-link">
+    <div
+      class="back-link"
+      style="padding-top:10px; padding-left:10px;"
+    >
       <a
+        v-if="!isUserCreator"
         @click="prevRouteParams && prevRouteParams.length > 0 ? $router.go(-1) : $router.push('/rundreisen/'  + roundtrip.Location[0])"
         style="text-decoration:none;"
       >
         <q-icon name="keyboard_arrow_left"></q-icon>
-        zurück zu allen Rundreisen
+        alle Rundreisen
+      </a>
+      <a
+        v-else
+        @click="$router.push('/meine-rundreisen')"
+        style="text-decoration:none;"
+      >
+        <q-icon name="keyboard_arrow_left"></q-icon>
+        meine Rundreisen
       </a>
     </div>
-    <q-carousel
+    <!-- <q-carousel
       animated
       v-model="slide"
       infinite
@@ -86,10 +121,10 @@
           :src="url"
         />
       </q-carousel-slide>
-    </q-carousel>
-    <div class="carousel-placeholder">
-      <h1>{{roundtrip ? roundtrip.Title : null}}</h1>
-    </div>
+    </q-carousel> -->
+    <!-- <div class="carousel-placeholder"> -->
+    <!-- <h1>{{roundtrip ? roundtrip.Title : null}}</h1> -->
+    <!-- </div> -->
     <q-tabs
       v-model="tab"
       dense
@@ -98,7 +133,7 @@
       indicator-color="primary"
       align="justify"
       narrow-indicator
-      style="padding-top:20px;"
+      style="padding-top:50px;"
     >
       <q-tab
         name="overview"
@@ -110,7 +145,7 @@
       />
       <q-tab
         name="ratings"
-        label="Bewertungen"
+        label="Chat"
       />
     </q-tabs>
 
@@ -126,7 +161,7 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>Reiseverlauf {{roundtrip ? '- ' + roundtrip.Title : null}}</span>
+              <span>{{roundtrip ? roundtrip.Title : 'Reiseverlauf'}}</span>
               <q-toggle
                 style="font-size:18px"
                 @input="sharedMethods.expandAllStops(getContext, stops)"
@@ -235,32 +270,35 @@
               <Stop
                 :key="stop.DocId"
                 :title="stop.Title"
-                :date="dates[index]"
+                :date="typeof stops[index].InitDate === 'string' ? stop.InitDate : sharedMethods.getStringDateFromTimestamp(stop.InitDate)"
+                :nextStopDate="stops[index + 1] ? (typeof stops[index + 1].InitDate === 'string' ? stops[index + 1].InitDate : sharedMethods.getStringDateFromTimestamp(stops[index + 1].InitDate.seconds)) : null"
                 :editor-placeholder="stop.Description"
+                :editor="false"
+                :docId="stop.DocId"
                 :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
-                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking.label ? stop.Parking : null"
-                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
+                :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
+                :lastItem="index === stops.length -1"
                 :hotelStars="parseInt(stop.HotelStars)"
                 :hotelName="stop.HotelName"
-                :hotelPrice="stop.hotelPrice"
-                :guestRating="stop.guestRating"
-                :transportLocations="stop.transportLocations"
+                :hotelPrice="stop.HotelPrice"
+                :guestRating="stop.GuestRating"
+                :transportLocations="stop.TransportLocations"
                 :hotelLocation="stop.HotelLocation"
                 :hotelContact="stop.HotelContact"
-                :checkOutDate="dates[index + 1] ? dates[index + 1] : dates[index]"
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
+                :firstStop="index === 0"
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
+                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
-                :doc-id="stop.DocId"
+                :expanded="stop.expanded"
                 :profile="stop.Profile"
-                :lastItem="index === stops.length -1"
-                :firstStop="index === 0"
+                @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
+                :class="'stop' + stop.DocId"
                 :ref="stop.DocId"
               ></Stop>
               <Duration
@@ -292,12 +330,12 @@
         <a @click="$refs.tabPanels.goTo('overview')">zur Routenübersicht</a>
       </q-tab-panel>
       <q-tab-panel name="ratings">
-        <h3>Bewertungen</h3>
+        <h3>Chat</h3>
         <div class="q-pa-md row">
           <div style="width: 100%;">
             <div v-if="messages.length === 0">
               <span style="font-size:18px;">Momentan sind leider keine Kommentare oder Bewertungen vorhanden.<br>
-                {{ user ? 'Sei der Erste und schreibe jetzt eine Bewertung!' : 'Melde dich an um die erste Bewertung abzugeben.'}}</span>
+                {{ !isUserCreator ? (user ? 'Sei der Erste und schreibe jetzt eine Bewertung!' : 'Melde dich an um die erste Bewertung abzugeben.') : ''}}</span>
             </div>
             <template v-for="message in messages">
               <!-- <q-chat-message
@@ -355,7 +393,7 @@
 
           </div>
           <div
-            v-if="user"
+            v-if="user && !isUserCreator"
             class="flex"
             style="margin-top:30px;"
           >
@@ -417,8 +455,8 @@ export default {
       durations: [],
       accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       days: [],
-      editRTDialog: false,
-      title: null,
+      copyRTDialog: false,
+      copyRTTitle: null,
       inputProfile: null,
       childrenAges: [],
       adults: 0,
@@ -438,7 +476,8 @@ export default {
       tempMessage: null,
       RTId: null,
       tempCommentStars: 3,
-      ratingEnabled: true
+      ratingEnabled: true,
+      isUserCreator: false
     }
   },
   beforeRouteEnter (to, from, next) {
@@ -469,6 +508,14 @@ export default {
     loadSingleRoundtrip (RTId) {
       this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
         this.roundtrip = roundtrip
+
+        if ((!auth.user() || (auth.user().uid !== roundtrip.UserId)) && !roundtrip.Public) {
+          sharedMethods.showErrorNotification('Diese Reise wurde nicht veröffentlicht')
+          this.$router.push('/rundreisen/' + roundtrip.Location[0])
+        } else {
+          if (auth.user() && auth.user().uid === roundtrip.UserId) this.isUserCreator = true
+        }
+
         this.loadUserData(roundtrip.UserId)
         this.inputProfile = roundtrip.Profile
 
@@ -477,6 +524,7 @@ export default {
         this.rooms = 1
         this.adults = 2
         this.roundtrip = roundtrip
+
         this.profile = this.getProfile(roundtrip.Profile)
         this.tripWebsite = roundtrip.tripWebsite
 
@@ -485,6 +533,17 @@ export default {
       }).catch(err => {
         console.log('Error getting Roundtrip', err)
       })
+    },
+    getDefaultCheckOutDate (stop) {
+      let initDate = null
+      if (stop.InitDate.seconds) initDate = new Date(stop.InitDate.seconds * 1000)
+      else initDate = sharedMethods.getDateFromString(stop.InitDate)
+
+      // add one day
+      const defaultCheckOutDate = initDate
+      defaultCheckOutDate.setDate(initDate.getDate() + 1)
+
+      return date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY')
     },
     getStringDateFromTimestamp (timestamp) {
       const initDate = new Date(timestamp.seconds * 1000)
@@ -544,9 +603,12 @@ export default {
             let index = details.push(doc.data()) - 1
             details[index].DocId = doc.id
           })
+
           this.stops = details
+          this.stops.sort(this.compare)
 
           let initDates = []
+
           // get dates
           details.forEach((detail, index) => {
             const initDate = new Date(detail.InitDate.seconds * 1000)
@@ -640,14 +702,120 @@ export default {
                 }
               }
             })
-            context.getParent('MyLayout').hideLoading()
             this.firstLoad = false
           }, 500)
         })
         .catch(err => {
-          this.getParent('MyLayout').hideLoading()
           console.log('Error getting Roundtripdetails', err)
         })
+    },
+    /**
+     * copies the current trip and adds it to current user
+     */
+    copyRoundtrip () {
+      if (!this.isUserCreator) {
+        const originalRT = this.roundtrip
+        const UserId = auth.user().uid
+        const newTitle = this.copyRTTitle
+
+        sharedMethods.isUniqueTitle(newTitle).then(uniqueTitle => {
+          if (newTitle === null || newTitle === '' || uniqueTitle === 'Dieser Titel ist bereits vergeben') {
+            sharedMethods.showErrorNotification('Bitte überprüfe den Titel deiner Reise')
+            return false
+          } else {
+            sharedMethods.showSuccessNotification('Rundreise wird zum kopiert...')
+          }
+
+          let timeStamp = Date.now()
+
+          // create a temporary random id for rtid
+          let tempRTId = Math.floor(Math.random() * 10000000000000)
+
+          let newRoundtrip = {}
+
+          let originalRTId = originalRT.RTId
+
+          // copy all values
+          newRoundtrip = originalRT
+
+          // change all different values here
+          newRoundtrip.RTId = tempRTId
+          newRoundtrip.UserId = UserId
+          newRoundtrip.Public = false
+          newRoundtrip.Title = newTitle
+          newRoundtrip.createdAt = new Date(timeStamp)
+
+          // create new document with original rt data
+          db.collection('Roundtrips').add(newRoundtrip).then(result => {
+            console.log(originalRTId)
+            const newRTId = result.id
+
+            // remove temp RTId and update it with doc id
+            db.collection('Roundtrips').doc(newRTId).update({
+              'RTId': newRTId
+            }).catch(ex => {
+              console.log(ex)
+            })
+
+            // get roundtrip details and update with original rt data
+            let roundtripDetailsRef = db.collection('RoundtripDetails')
+              .where('RTId', '==', originalRTId)
+            roundtripDetailsRef.get()
+              .then(detailsSnapshot => {
+                detailsSnapshot.forEach(detailDoc => {
+                  let docData = detailDoc.data()
+
+                  // copy all original values
+                  let newRoundtripDetails = docData
+
+                  // change different values here
+                  newRoundtripDetails.RTId = newRTId
+
+                  db.collection('RoundtripDetails').add(newRoundtripDetails).then(() => {
+                    // -- everything succeeded --
+
+                    // add new copy entry to user
+                    let userRef = db.collection('User')
+                      .where('UserUID', '==', UserId)
+                      .limit(1)
+                    userRef.get()
+                      .then(snapshot => {
+                        snapshot.forEach(doc => {
+                          let userRTEdited = doc.data().RTEdited
+                          db.collection('User').doc(UserId).update({
+                            'RTEdited': (userRTEdited + 1)
+                          })
+                        })
+                      }).catch(ex => {
+                        console.log(ex)
+                      })
+
+                    // refresh page
+                    this.$router.push('/rundreise-ansehen/' + newRTId)
+                    this.isUserCreator = true
+                  }).catch(ex => {
+                    console.log(ex)
+                  })
+                })
+              })
+          }).catch(ex => {
+            console.log(ex)
+          })
+        }
+        )
+      }
+    },
+    /**
+    * sorts trip stops after their init dates (must be placed in sort())
+    */
+    compare (a, b) {
+      const initDateA = typeof a.InitDate === 'string' ? sharedMethods.getDateFromString(a.InitDate) : new Date(a.InitDate.seconds * 1000)
+      const initDateB = typeof b.InitDate === 'string' ? sharedMethods.getDateFromString(b.InitDate) : new Date(b.InitDate.seconds * 1000)
+
+      if (initDateA > initDateB) return 1
+      if (initDateB > initDateA) return -1
+
+      return 0
     },
     checkDisableEditBtn (val) {
       sharedMethods.isUniqueTitle(val).then(uniqueTitle => {
@@ -712,13 +880,22 @@ export default {
       let days = null
 
       if (this.stops.indexOf(stop) < this.stops.length - 1) {
-        let formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        let formattedDate = stop.InitDate
+        if (typeof stop.InitDate !== 'string') {
+          formattedDate = date.formatDate(new Date(stop.InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        }
+
         let dateTimeParts = formattedDate.split(' ')
         let dateParts = dateTimeParts[0].split('.')
         let timeParts = dateTimeParts[1].split(':')
         let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
 
-        formattedDate = date.formatDate(new Date(this.stops[this.stops.indexOf(stop) + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        if (typeof stop.InitDate !== 'string') {
+          formattedDate = date.formatDate(new Date(this.stops[this.stops.indexOf(stop) + 1].InitDate.seconds * 1000), 'DD.MM.YYYY HH:mm')
+        } else {
+          formattedDate = this.stops[this.stops.indexOf(stop) + 1].InitDate
+        }
+
         dateTimeParts = formattedDate.split(' ')
         dateParts = dateTimeParts[0].split('.')
         timeParts = dateTimeParts[1].split(':')
@@ -745,17 +922,6 @@ export default {
       }).catch(function (error) {
         console.log(error)
       })
-    },
-    getParent (name) {
-      let p = this.$parent
-      while (typeof p !== 'undefined') {
-        if (p.$options.name === name) {
-          return p
-        } else {
-          p = p.$parent
-        }
-      }
-      return false
     }
   },
   mounted () {

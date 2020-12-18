@@ -17,7 +17,7 @@ const routes = [
         component: () => import(/* webpackChunkName: "roundtrips" */ 'pages/Roundtrips.vue')
       },
       {
-        path: 'rundreisen-details/:id',
+        path: 'rundreise-ansehen/:id',
         component: () => import(/* webpackChunkName: "roundtrips" */ 'pages/roundtripDetails.vue')
       },
       {
@@ -81,11 +81,14 @@ const routes = [
         component: () => import(/* webpackChunkName: "legal" */ 'pages/Haftungsausschluss.vue')
       },
       {
-        path: 'rundreise-bearbeiten/:id',
-        component: () => import('pages/EditRoundtrips.vue')
+        path: 'rundreisen-einstellungen/:id',
+        component: () => import('pages/RoundtripSettings.vue'),
+        meta: {
+          requireAuth: true
+        }
       },
       {
-        path: 'rundreisen-wizard',
+        path: 'rundreisen-wizard/:id?',
         component: () => import('pages/RoundtripWizard.vue')
       },
       {

@@ -6,7 +6,7 @@
     >
       <q-toolbar-title style="min-width:150px;">
         <a
-          :href="'https://roundtrips4you.de/rundreisen-details/' + RTId + '&' + 1590184800000"
+          :href="'https://roundtrips4you.de/rundreise-ansehen/' + RTId + '&' + 1590184800000"
           target="_blank"
           style="text-decoration:none; color:white;"
           class="cursor-pointer"

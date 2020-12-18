@@ -5,16 +5,67 @@
     class="q-px-lg q-pb-md"
   >
     <div
+      class="edit-btn-container"
+      v-if="user !== null"
+      style="position:fixed; z-index:1; right:0; padding: 10px"
+    >
+      <q-btn
+        round
+        color="primary"
+        icon="visibility"
+        @click="unsavedChanges ? showCancelDialog = true : $router.push('/rundreise-ansehen/' + $route.params.id)"
+      >
+        <q-tooltip>Reise ansehen</q-tooltip>
+      </q-btn>
+    </div>
+
+    <q-dialog
+      v-model="showCancelDialog"
+      persistent
+    >
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Ungesicherte Änderungen</div>
+          <span>Wenn du jetzt zurück gehst werden deine Änderungen werden verworfen! <br /> Möchtest du trotzdem zurück?</span>
+        </q-card-section>
+        <q-card-actions
+          align="right"
+          class="text-primary"
+        >
+          <q-btn
+            label="Änderungen verwerfen"
+            v-close-popup
+            flat
+            @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
+          />
+          <q-btn
+            type="submit"
+            label="Abbrechen"
+            flat
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <div
       style="margin-bottom:20px;"
       v-if="!$store.getters['demoSession/isInDemoSession']"
     >
-      <a @click="$router.push('meine-rundreisen')">zu meinen Rundreisen</a>
+      <a
+        v-show="!isRTEditMode"
+        @click="$router.push('/meine-rundreisen')"
+      >
+        <q-icon name="keyboard_arrow_left"></q-icon>
+        meine Rundreisen
+      </a>
     </div>
     <q-stepper
       v-model="step"
       header-nav
       ref="stepper"
       color="primary"
+      :contracted="isMobile"
       animated
       keep-alive
     >
@@ -58,12 +109,23 @@
                 color="primary"
                 label="zurück"
                 class="q-ml-sm"
+                v-if="!isRTEditMode"
               />
               <q-btn
                 color="primary"
                 v-if="addedStops.length > 0"
                 @click="step = 6"
                 label="zur Reiseübersicht"
+              />
+            </template>
+
+            <template v-else-if="step === 4">
+              <q-btn
+                flat
+                @click="step = 3"
+                color="primary"
+                label="Zurück"
+                class="q-ml-sm"
               />
             </template>
 
@@ -94,9 +156,10 @@
               <q-btn
                 flat
                 color="primary"
-                label="Reise fertigstellen"
+                :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
                 class="q-ml-sm"
-                @click="createTrip()"
+                :loading="saving"
+                @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
               />
             </template>
           </q-stepper-navigation>
@@ -109,6 +172,7 @@
         icon="settings"
         :done="step > 1"
         :header-nav="step > 1"
+        v-if="!isRTEditMode"
       >
         <q-input
           v-model="currentRoundtrip.Title"
@@ -186,7 +250,6 @@
           :error="!isDateTimeValid()"
           lazy-rules
           bottom-slots
-          style="width:300px"
           class="input-item"
           outlined
           label="Startdatum"
@@ -235,6 +298,7 @@
         icon="flight"
         :done="step > 2"
         :header-nav="step > 2"
+        v-if="!isRTEditMode"
       >
         <q-select
           outlined
@@ -266,7 +330,6 @@
             label="Abflugsort"
             :options="originOptions"
             @filter="getOrigins"
-            style="width:300px;"
             :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
           >
             <template v-slot:no-option>
@@ -293,7 +356,6 @@
             label="Ankunftsort"
             :options="destinationOptions"
             @filter="getDestinations"
-            style="width:300px;"
             @input="destinationChanged($event)"
             :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
           >
@@ -396,110 +458,25 @@
         :header-nav="step > 3"
       >
 
-        <div class="flex justify-around add-stop-choose-container">
-          <q-card bordered>
-            <q-card-section>
-              <div class="text-h6">Land wählen</div>
-              <p>Wähle ein Land aus, damit dir Städte vorgeschlagen werden können</p>
-            </q-card-section>
+        <div class="font-medium">Klicke auf einen Ort um ihn zur Reise hinzuzufügen</div>
 
-            <q-separator inset />
+        <q-separator
+          inset
+          style="margin: 20px 0 20px 0; width:100%; "
+        />
 
-            <q-card-section>
-              <q-select
-                outlined
-                v-model="country"
-                use-input
-                hide-selected
-                fill-input
-                input-debounce="0"
-                :options="countryOptions"
-                label="Land auswählen"
-                @filter="filterCountries"
-                @input="step = 4"
-                :rules="[val => val !== null && val !== '' && val !== 'Land wählen' || 'Bitte wähle ein Land']"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="explore" />
-                </template>
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      Keine Ergebnisse
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </q-card-section>
+        <Map
+          :profile="addedStops[0] && addedStops[0].Profile ? addedStops[0].Profile : 'driving'"
+          :stops="addedStops"
+          :childrenAges="currentRoundtrip.ChildrenAges"
+          :rooms="Number(currentRoundtrip.Rooms)"
+          :adults="Number(currentRoundtrip.Adults)"
+          :editor="true"
+          @addStop="handleAddStopFromMap($event)"
+          @update="updateFromSuggestedCity($event)"
+          ref="addStopMap"
+        ></Map>
 
-            <q-card-actions align="right">
-              <q-btn
-                :disable="!country || country === 'Land wählen'"
-                @click="step = 4"
-                flat
-              >Städte vorschlagen</q-btn>
-            </q-card-actions>
-          </q-card>
-
-          <q-card bordered>
-            <q-card-section>
-              <div class="text-h6">Ort direkt hinzufügen</div>
-              <p>Wähle einen Ort aus um in direkt zur Reise hinzuzufügen</p>
-
-            </q-card-section>
-
-            <q-separator inset />
-
-            <q-card-section>
-              <CitySearch
-                ref="citySearch"
-                :parkingPlaceSearch="false"
-                :defaultLocation="currentStop.Location"
-                @update="updateLocation($event)"
-              ></CitySearch>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                :disable="!currentStop.Location"
-                flat
-                @click="inspirationDone = false; step = 5"
-              >wählen</q-btn>
-            </q-card-actions>
-          </q-card>
-          <q-card
-            bordered
-            class="map-card"
-          >
-            <q-card-section>
-              <div class="text-h6">Auf Karte wählen</div>
-              <p>Wähle einen Ort auf der Karte um ihn zur Reise hinzuzufügen</p>
-
-            </q-card-section>
-
-            <q-separator inset />
-
-            <q-card-section>
-              <Map
-                :profile="addedStops[0] ? addedStops[0].Profile : 'driving'"
-                :stops="addedStops"
-                :childrenAges="currentRoundtrip.ChildrenAges"
-                :rooms="Number(currentRoundtrip.Rooms)"
-                :adults="Number(currentRoundtrip.Adults)"
-                :editor="true"
-                ref="addStopMap"
-              ></Map>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                :disable="!currentStop.Location"
-                flat
-                @click="inspirationDone = false; step = 5"
-              >wählen</q-btn>
-            </q-card-actions>
-          </q-card>
-        </div>
       </q-step>
       <q-step
         :name="4"
@@ -512,7 +489,6 @@
 
         <CitySuggestion
           :dates="null"
-          :RTId="$route.params.id"
           :predefinedCountry="country"
           :shouldAddCity="false"
           @update="updateFromSuggestedCity($event)"
@@ -788,7 +764,6 @@
                 v-model="generalTempLink"
                 ref="urlInput"
                 type="url"
-                style="width:300px;"
                 :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
                 label="Hotel link (optional)"
                 outlined
@@ -897,7 +872,7 @@
           hide-dropdown-icon
           input-debounce="0"
           new-value-mode="add-unique"
-          style="margin:10px 10px 10px 0; width:260px;"
+          style="margin:10px 10px 10px 0;"
           ref="sightInput"
         >
           <template v-slot:prepend>
@@ -965,6 +940,7 @@
                 <q-item-section
                   clickable
                   v-ripple
+                  class="cursor-pointer"
                   @click="editStop(index)"
                 >
                   <q-item-label lines="1">{{stop.Title}}</q-item-label>
@@ -972,8 +948,14 @@
                     caption
                     lines="2"
                   >
-                    <span class="text-weight-bold">{{stop.Location.label.split(',')[0]}}</span>
-                    {{stop.Description ? ' - ' + stop.Description : ''}}
+                    <!-- <span class="text-weight-bold">{{stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '')}}</span> -->
+
+                    <span
+                      v-if="stop.Description"
+                      v-html="'<span class=&quot;text-weight-bold&quot;>' + stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '') + '</span>' + stop.Description"
+                    >
+
+                    </span>
                   </q-item-label>
                 </q-item-section>
 
@@ -1046,12 +1028,14 @@
         </q-dialog>
         <div style="margin-top:20px;">
           <Map
-            :profile="addedStops[0] ? addedStops[0].Profile : 'driving'"
+            :profile="addedStops[0] && addedStops[0].Profile ? addedStops[0].Profile : 'driving'"
             :stops="addedStops"
             :childrenAges="currentRoundtrip.ChildrenAges"
             :rooms="Number(currentRoundtrip.Rooms)"
             :adults="Number(currentRoundtrip.Adults)"
             :editor="true"
+            @addStop="handleAddStopFromMap($event)"
+            @update="updateFromSuggestedCity($event)"
             ref="overviewMap"
           ></Map>
         </div>
@@ -1061,6 +1045,11 @@
 </template>
 <style lang="less">
 @import "../css/roundtripWizard.less";
+
+// dont remove this, neccessary for inline display of editor content in trip overview
+.MsoListParagraph {
+  display: inline !important;
+}
 </style>
 <script>
 import { countries } from '../countries.js'
@@ -1069,18 +1058,22 @@ import sharedMethods from '../sharedMethods.js'
 import { date } from 'quasar'
 import Map from '../pages/Map/Map'
 import draggable from 'vuedraggable'
-import { auth } from '../firebaseInit.js'
+import { auth, db } from '../firebaseInit.js'
 
 let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
   components: {
-    CitySearch: () => import('../pages/Map/CitySearch.vue'),
-    CitySuggestion: () => import('../pages/Map/CitySuggestion.vue'),
+    CitySuggestion: () => import('../pages/CitySuggestion/CitySuggestion.vue'),
     HotelSearch: () => import('../pages/Map/HotelSearch'),
     Map,
     draggable
+  },
+  computed: {
+    isMobile () {
+      return window.matchMedia('(max-width: 550px)').matches
+    }
   },
   data () {
     return {
@@ -1091,6 +1084,7 @@ export default {
       preventPasting: false,
       originOptions: [],
       destinationOptions: [],
+      unsavedChanges: false,
       currentRoundtrip: {
         Title: 'meine Reise',
         Rooms: 1,
@@ -1124,6 +1118,7 @@ export default {
       hotelPrice: 0,
       guestRating: 0,
       transportLocations: [],
+      showCancelDialog: false,
 
       addedStops: [],
       suggestedSights: null,
@@ -1132,6 +1127,9 @@ export default {
       addHotelDisabled: true,
       inputProfile: 'Auto',
       showAutoRoutedialog: false,
+
+      isRTEditMode: false,
+      saving: false,
 
       // -1 if no stop to edit (normal mode) else put index of stop to edit
       stopToEdit: -1,
@@ -1206,6 +1204,8 @@ export default {
      * adds the current stop to the stops array
      */
     addStop () {
+      this.unsavedChanges = true
+
       // remove placeholder if not changed
       if (this.currentStop.Description === 'Raum für Notizen, Beschreibungen...') this.currentStop.Description = ''
 
@@ -1258,9 +1258,35 @@ export default {
      *  removes the stop with the given index
      */
     removeStop (index) {
+      this.unsavedChanges = true
+
+      // all following dates of deleted stop must be updated
+      // following stop of deleted stop gets deleted stops date
+
+      // get date of stop to delete
+      const deletedStopDate = this.addedStops[index].InitDate
+
+      // delete this stop from db
+      if (this.addedStops[index].DocId) db.collection('RoundtripDetails').doc(this.addedStops[index].DocId).delete()
+
+      // delete stop
       this.addedStops.splice(index, 1)
 
-      // todo update dates
+      // set following date to delete stop date
+      this.addedStops[index].InitDate = deletedStopDate
+
+      for (let i = index + 1; i < this.addedStops.length; i++) {
+        let previousStopDate = sharedMethods.getDateFromString(this.addedStops[i - 1].InitDate)
+
+        previousStopDate.setDate(previousStopDate.getDate() + this.addedStops[i - 1].DayDuration)
+        this.addedStops[i].InitDate = date.formatDate(previousStopDate, 'DD.MM.YYYY')
+      }
+
+      let lastStop = this.addedStops[this.addedStops.length - 1]
+      let currentDate = sharedMethods.getDateFromString(lastStop.InitDate)
+      currentDate.setDate(currentDate.getDate() + lastStop.DayDuration)
+
+      this.currentStop.InitDate = date.formatDate(currentDate, 'DD.MM.YYYY HH:mm')
 
       // reload both maps
       if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
@@ -1272,6 +1298,8 @@ export default {
      * creates the roundtrip (write the temp data into db)
      */
     createTrip () {
+      if (this.unsavedChanges) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+
       // need this json stringify to prevent update of location when the click location changes
       let stops = JSON.parse(JSON.stringify(this.addedStops))
 
@@ -1305,21 +1333,52 @@ export default {
           this.$store.dispatch({ type: 'demoSession/addRoundtrip', roundtripObject: this.currentRoundtrip, tempLocation: countries, originCode: null, destinationCode: null, stops: stops }).then(() => {
             this.$router.push('/registrieren')
           })
+        } else if (this.isRTEditMode) {
+          let promiseList = []
+
+          // update existing roundtrip
+          this.addedStops.forEach(stop => {
+            if (stop.DocId) {
+              // this stop is existing
+              promiseList.push(db.collection('RoundtripDetails').doc(stop.DocId).update(stop))
+            } else {
+              // this is a new stop
+              stop.RTId = this.$route.params.id
+              promiseList.push(db.collection('RoundtripDetails').add(stop))
+            }
+          })
+
+          this.saving = true
+
+          Promise.all(promiseList).then(() => {
+            this.saving = false
+            sharedMethods.showSuccessNotification('Reise wurde gespeichert')
+
+            setTimeout(function () {
+              this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+            }, 1000)
+          })
         } else {
+          // add roundtrip normally
+
+          this.saving = true
           try {
             this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, days: daysString, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: countries, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops }).then(docId => {
               if (docId && docId !== null) {
                 let context = this
                 // wait to ensure roundtrip is fully added
                 setTimeout(function () {
-                  context.$router.push('/rundreise-bearbeiten/' + docId)
+                  this.saving = false
+                  context.$router.push('/rundreise-ansehen/' + docId)
                 }, 500)
               } else {
+                this.saving = false
                 sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
               }
             })
           } catch (error) {
             console.log(error)
+            this.saving = false
             sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
             return false
           }
@@ -1359,6 +1418,8 @@ export default {
       this.tripDuration = diffDays
     },
     onStopsDragged (event) {
+      this.unsavedChanges = true
+
       // dont do anything if stop was not moved
       if (event.newIndex === event.oldIndex) return
 
@@ -1479,6 +1540,8 @@ export default {
      * called from city suggestions, when user adds a new city
      */
     updateFromSuggestedCity (event) {
+      this.unsavedChanges = true
+
       this.currentStop.Location = {
         lng: event.longitude,
         lat: event.latitude,
@@ -1677,19 +1740,17 @@ export default {
       returnDate.setDate(depatureDate.getDate() + 1)
 
       this.currentRoundtrip.ReturnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
-    }
-  },
-  mounted () {
-    // listen to add stop method called from map
-    this.$root.$on('addStop', (formattedDate, lastClickLocation) => {
+    },
+    handleAddStopFromMap (event) {
+      this.unsavedChanges = true
       let lastDate = this.currentStop.InitDate
 
       // check if we didn't add this stop before
-      if (this.currentStop.Location !== lastClickLocation) {
+      if (this.currentStop.Location !== event.location) {
         this.currentStop = {
-          Title: 'Zwischenstopp in ' + lastClickLocation.label,
+          Title: 'Zwischenstopp in ' + event.location.label,
           Description: 'Raum für Notizen, Beschreibungen...',
-          Location: lastClickLocation,
+          Location: event.location,
           Sights: [],
           InitDate: lastDate,
           Profile: 'driving',
@@ -1698,10 +1759,61 @@ export default {
 
         this.step = 5
       }
-    })
+    },
+    /**
+    * sorts trip stops after their init dates (must be placed in sort())
+    */
+    compare (a, b) {
+      const initDateA = sharedMethods.getDateFromString(a.InitDate)
+      const initDateB = sharedMethods.getDateFromString(b.InitDate)
+
+      if (initDateA > initDateB) return 1
+      if (initDateB > initDateA) return -1
+
+      return 0
+    }
   },
   created () {
-    if (!this.$store.getters['demoSession/isInDemoSession'] && !auth.user()) this.$store.commit('demoSession/setAsDemoSession')
+    auth.authRef().onAuthStateChanged((user) => {
+      if (!this.$store.getters['demoSession/isInDemoSession'] && !auth.user()) {
+        this.$store.commit('demoSession/setAsDemoSession')
+      } else {
+        let RTId = this.$route.params.id
+        if (RTId) {
+          // we are in edit rt mode
+          this.isRTEditMode = true
+          this.step = 6
+
+          this.currentRoundtrip.Title = 'Laden...'
+          this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
+            this.currentRoundtrip = roundtrip
+          })
+
+          // get stops
+          let roundtripsRef = db.collection('RoundtripDetails')
+            .where('RTId', '==', RTId)
+            .orderBy('InitDate')
+          roundtripsRef.get()
+            .then(snapshot => {
+              snapshot.forEach(doc => {
+                let stop = doc.data()
+
+                if (typeof stop.InitDate !== 'string') {
+                  let initDate = new Date(stop.InitDate.seconds * 1000)
+                  stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+                }
+
+                if (!stop.DayDuration) stop.DayDuration = 0
+
+                stop.DocId = doc.id
+
+                this.addedStops.push(stop)
+                this.addedStops.sort(this.compare)
+              })
+            })
+        }
+      }
+    })
   }
 }
 </script>

@@ -157,7 +157,7 @@ export default {
           if (context.isInDemoSession) {
             context.$store.dispatch('demoSession/saveRoundtrip', user.user.uid).then((newRTId) => {
               evt.target.submit()
-              context.$router.replace('rundreise-bearbeiten/' + newRTId)
+              context.$router.replace('rundreise-ansehen/' + newRTId)
             })
           } else {
             evt.target.submit()

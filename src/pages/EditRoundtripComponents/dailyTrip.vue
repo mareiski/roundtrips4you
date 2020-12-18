@@ -342,6 +342,7 @@
   </div>
 </template>
 <script>
+import sharedMethods from '../../sharedMethods'
 export default {
   props: {
     dailyTrip: Object,
@@ -370,21 +371,21 @@ export default {
   },
   methods: {
     deleteEntry () {
-      this.getParent('stop').deleteDailyTrip(this.index)
+      sharedMethods.getParent('stop', this).deleteDailyTrip(this.index)
     },
     saveWork () {
-      this.getParent('stop').saveDailyTrips(this.index, this.dailyTrip.descriptionInput, 'description')
+      sharedMethods.getParent('stop', this).saveDailyTrips(this.index, this.dailyTrip.descriptionInput, 'description')
       this.savedEditorContent = this.dailyTrip.descriptionInput
     },
     saveDate () {
-      this.getParent('stop').saveDailyTrips(this.index, this.dailyTrip.date, 'date')
+      sharedMethods.getParent('stop', this).saveDailyTrips(this.index, this.dailyTrip.date, 'date')
       this.oldDate = this.dailyTrip.date
     },
     formatOn () {
       this.preventPasting = !this.preventPasting
     },
     dailyTripDateOptions (date) {
-      return this.getParent('stop').dailyTripDateOptions(date)
+      return sharedMethods.getParent('stop', this).dailyTripDateOptions(date)
     },
     validURL (str) {
       var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
@@ -399,7 +400,7 @@ export default {
       if (this.addedSights !== this.oldAddedSights) {
         this.oldAddedSights = this.addedSights
 
-        this.getParent('stop').saveDailyTrips(this.index, this.addedSights, 'sights')
+        sharedMethods.getParent('stop', this).saveDailyTrips(this.index, this.addedSights, 'sights')
       }
     },
     showImgDialog (src) {
@@ -415,7 +416,7 @@ export default {
       // let parentStops = this.getParent('EditRoundtrips').stops
       // parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
 
-      this.getParent('stop').saveDailyTripImgs(this.index, this.dailyTrip.stopImages)
+      sharedMethods.getParent('stop', this).saveDailyTripImgs(this.index, this.dailyTrip.stopImages)
     },
     removeImg (index) {
       if (!this.dailyTrip.stopImages) return
@@ -424,7 +425,7 @@ export default {
       // let parentStops = this.getParent('EditRoundtrips').stops
       // parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
 
-      this.getParent('stop').saveDailyTripImgs(this.index, this.dailyTrip.stopImages)
+      sharedMethods.getParent('stop', this).saveDailyTripImgs(this.index, this.dailyTrip.stopImages)
     },
     openInNewTab (link) {
       window.open(link, '_blank')
@@ -447,17 +448,6 @@ export default {
           onPasteStripFormattingIEPaste = false
         }
       }
-    },
-    getParent (name) {
-      let p = this.$parent
-      while (typeof p !== 'undefined') {
-        if (p.$options.name === name) {
-          return p
-        } else {
-          p = p.$parent
-        }
-      }
-      return false
     }
   },
   created () {

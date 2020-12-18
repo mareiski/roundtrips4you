@@ -338,7 +338,7 @@
           v-for="roundtrip in roundtrips"
           :key="roundtrip.RTId"
         >
-          <div
+          <!-- <div
             class="edit-btn-container"
             v-if="user === null || user.uid !== roundtrip.UserId"
           >
@@ -387,15 +387,15 @@
                     flat
                     v-close-popup
                     :disable="disableEditBtn"
-                    @click=" $router.push('/rundreise-bearbeiten/' + roundtrip.RTId +'&' + title)"
+                    @click=" $router.push('/rundreise-ansehen/' + roundtrip.RTId +'&' + title)"
                   />
                 </q-card-actions>
               </q-card>
             </q-dialog>
-          </div>
+          </div> -->
           <router-link
             class="roundtrip-card"
-            :to="{ path: '/rundreisen-details/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
+            :to="{ path: '/rundreise-ansehen/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
           >
             <div class="card-left-col">
               <q-img
@@ -472,7 +472,7 @@
               <div class="card-bottom-row">
                 <router-link
                   class="button details-button"
-                  :to="{ path: '/rundreisen-details/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
+                  :to="{ path: '/rundreise-ansehen/' + roundtrip.RTId + '&' + getParamsDate(OfferPeriod)}"
                 >Details</router-link>
                 <!--<a class="button price-button"><span>&euro;</span>{{roundtrip.Price}}<span>p.P.</span></a>-->
               </div>

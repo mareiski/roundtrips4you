@@ -6,7 +6,7 @@
  */
 let getAxios = () => import('axios')
 var querystring = require('querystring')
-import { Notify, scroll } from 'quasar'
+import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
 import { db } from './firebaseInit.js'
 
@@ -165,6 +165,13 @@ export default {
         })
     },
     /**
+     * @return a string date from given timestamp
+     */
+    getStringDateFromTimestamp (timestamp) {
+        const initDate = new Date(timestamp.seconds * 1000)
+        return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+    },
+    /**
      * Capitalizes the given string
      */
     capitalize (s) {
@@ -199,8 +206,7 @@ export default {
      * @param {Number} offset numer in pixels from top
      */
     scrollToOffset (offset) {
-        const duration = 400
-        setScrollPosition(document.documentElement, offset, duration)
+        setScrollPosition(document.documentElement, offset, 400)
     },
     /**
      * Scrolls to a element
@@ -209,8 +215,7 @@ export default {
     scrollToRef (el) {
         const target = getScrollTarget(el)
         const offset = el.offsetTop
-        const duration = 400
-        setScrollPosition(target, offset, duration)
+        setScrollPosition(target, offset, 400)
     },
     /**
      * creates a string from milliseconds (fontmat: 5h 10min)
@@ -291,6 +296,21 @@ export default {
                     resolve(null)
                 })
         })
+    },
+    /**
+     * gets a parent component
+     * @param {String} name name of the parent to get
+     */
+    getParent (name, context) {
+        let p = context.$parent
+        while (typeof p !== 'undefined') {
+            if (p.$options.name === name) {
+                return p
+            } else {
+                p = p.$parent
+            }
+        }
+        return false
     },
     /**
      * gets suggested sights from amadeus api for given coordinates

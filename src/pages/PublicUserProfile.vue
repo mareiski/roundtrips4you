@@ -123,7 +123,7 @@
           </div>
           <q-item
             clickable
-            @click="$router.push('/rundreisen-details/' + roundtrip.RTId)"
+            @click="$router.push('/rundreise-ansehen/' + roundtrip.RTId)"
             v-ripple
             v-for="(roundtrip, index) in createdRoundtrips"
             :key="roundtrip.RTId"

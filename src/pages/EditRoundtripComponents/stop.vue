@@ -7,7 +7,7 @@
       <div class="flex">
         <div class="flex">
           <h6 class="q-timeline__title">{{titleInput}}
-            <q-popup-edit
+            <!-- <q-popup-edit
               v-model="titleInput"
               v-if="editor"
               @save="saveData('Title', titleInput)"
@@ -22,9 +22,9 @@
             <q-icon
               v-if="editor"
               name="edit"
-            />
+            /> -->
           </h6>
-          <q-chip
+          <!-- <q-chip
             size="20"
             clickable
             icon="add"
@@ -32,9 +32,9 @@
             v-if="editor && !hotelName"
           >Hotel
             <q-tooltip>Hotel hinzufügen</q-tooltip>
-          </q-chip>
+          </q-chip> -->
         </div>
-        <q-dialog
+        <!-- <q-dialog
           v-if="editor"
           v-model="addHotel"
         >
@@ -51,10 +51,7 @@
                 outlined
               >
                 <template v-slot:prepend>
-                  <q-icon
-                    name="event"
-                    class="cursor-pointer"
-                  >
+                  <q-icon name="event">
                     <q-popup-proxy
                       transition-show="scale"
                       transition-hide="scale"
@@ -117,9 +114,9 @@
               />
             </q-card-actions>
           </q-card>
-        </q-dialog>
+        </q-dialog> -->
       </div>
-      <div>
+      <!-- <div>
         <q-btn
           v-if="editor"
           :disable="firstStop"
@@ -131,7 +128,7 @@
           <q-tooltip>Stopp löschen</q-tooltip>
         </q-btn>
         <q-tooltip v-if="firstStop">Der erste Stopp kann nicht gelöscht werden</q-tooltip>
-      </div>
+      </div> -->
     </div>
     <q-list
       bordered
@@ -151,13 +148,13 @@
             clickable
             @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
           >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
-            <q-icon
+            <!-- <q-icon
               v-if="editor"
               name="edit"
-            />
+            /> -->
             <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
           </q-chip>
-          <q-dialog
+          <!-- <q-dialog
             v-if="editor"
             v-model="editLocation"
           >
@@ -170,7 +167,6 @@
                   @update="updateLocation($event)"
                 ></CitySearch>
                 <p>oder</p>
-                <!-- openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label) -->
                 <q-btn @click="[getParent('EditRoundtrips').flyToPointOnEditRTMap(location.lat, location.lng), editLocation = false]">auf karte anzeigen</q-btn>
               </q-card-section>
               <q-card-actions align="right">
@@ -189,20 +185,20 @@
                 />
               </q-card-actions>
             </q-card>
-          </q-dialog>
+          </q-dialog> -->
           <q-chip
             v-if="parkingPlace || editor"
             icon="local_parking"
             :clickable="editor"
             @click="editParkingPlace = true"
           >{{ parkingPlace && typeof parkingPlace !== 'undefined' &&  parkingPlace.label && typeof parkingPlace.label !== 'undefined' ?  parkingPlace.label.split(',')[0] : 'Parkplatz hinzufügen'}}
-            <q-icon
+            <!-- <q-icon
               v-if="editor"
               name="edit"
-            />
+            /> -->
           </q-chip>
         </div>
-        <q-dialog
+        <!-- <q-dialog
           v-if="editor"
           v-model="editParkingPlace"
           persistent
@@ -232,7 +228,7 @@
               />
             </q-card-actions>
           </q-card>
-        </q-dialog>
+        </q-dialog> -->
         <div>
           <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
             <span
@@ -242,13 +238,13 @@
               target="_blank"
               style="text-decoration:none;"
             >
-              <q-chip
+              <!-- <q-chip
                 v-if="editor"
                 clickable
                 @click="openSightDialog(sight)"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
-              </q-chip>
+              </q-chip> -->
 
             </span>
             <a
@@ -296,14 +292,14 @@
               </q-card>
             </q-dialog>
           </div>
-          <q-chip
+          <!-- <q-chip
             v-else-if="editor"
             clickable
             @click="searchSights()"
           >{{sights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
             <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
-          </q-chip>
-          <div
+          </q-chip> -->
+          <!-- <div
             v-if="editor"
             class="flex"
             style="flex-wrap"
@@ -329,7 +325,7 @@
                 />
               </template>
             </q-select>
-          </div>
+          </div> -->
           <div
             class="flex"
             v-else-if="addedSights && typeof addedSights !== 'undefined' && addedSights.length > 0"
@@ -522,7 +518,7 @@
                   </div>
                 </q-item-section>
 
-                <q-item-section
+                <!-- <q-item-section
                   side
                   v-if="editor"
                 >
@@ -531,7 +527,7 @@
                     color="primary"
                     @click="removeHotel()"
                   />
-                </q-item-section>
+                </q-item-section> -->
               </q-item>
             </q-list>
           </div>
@@ -540,7 +536,7 @@
             v-if="!editor"
             v-html="descriptionInput"
           ></div>
-          <q-editor
+          <!-- <q-editor
             v-else
             v-model="descriptionInput"
             min-height="5rem"
@@ -560,7 +556,7 @@
           handler: formatOn
         }
         }"
-          />
+          /> -->
           <div
             class="flex"
             v-if="stopImages"
@@ -575,7 +571,7 @@
                 style="height:100%;"
                 :src="stopImage"
               ></q-img>
-              <q-btn
+              <!-- <q-btn
                 round
                 v-if="editor"
                 color="primary"
@@ -583,7 +579,7 @@
                 style="position: absolute; transform: rotate(45deg)"
                 @click="removeImg(index)"
               >
-              </q-btn>
+              </q-btn> -->
               <q-btn
                 round
                 color="primary"
@@ -617,7 +613,7 @@
             </q-card>
 
           </q-dialog>
-          <div
+          <!-- <div
             style="margin-top:10px;"
             class="uploader"
             v-if="editor"
@@ -632,7 +628,7 @@
             >
               <q-tooltip>Bilder hinzufügen</q-tooltip>
             </q-btn>
-          </div>
+          </div> -->
           <q-dialog
             keep-alive
             v-model="chooseImgDialog"
@@ -741,7 +737,7 @@
               :dateOptions="dailyTripDateOptions"
             ></DailyTrip>
           </div>
-          <div
+          <!-- <div
             v-if="editor"
             class="flex justify-center"
             style="padding-top:30px;"
@@ -755,7 +751,7 @@
             >Tagesausflug
               <q-tooltip>Stopp ohne Übernachtung hinzufügen</q-tooltip>
             </q-btn>
-          </div>
+          </div> -->
         </div>
         <!-- Place for add daily trip dialog -->
         <q-dialog v-model="addDailyTripDialogVisible">
@@ -773,10 +769,7 @@
                 outlined
               >
                 <template v-slot:prepend>
-                  <q-icon
-                    name="event"
-                    class="cursor-pointer"
-                  >
+                  <q-icon name="event">
                     <q-popup-proxy
                       transition-show="scale"
                       transition-hide="scale"
@@ -793,10 +786,7 @@
                 </template>
 
                 <template v-slot:append>
-                  <q-icon
-                    name="access_time"
-                    class="cursor-pointer"
-                  >
+                  <q-icon name="access_time">
                     <q-popup-proxy
                       transition-show="scale"
                       transition-hide="scale"
@@ -808,8 +798,6 @@
                       />
                     </q-popup-proxy>
                   </q-icon>
-                  <q-tooltip>Zeit ändern</q-tooltip>
-
                 </template>
               </q-input>
               <CitySearch
@@ -850,9 +838,9 @@
       </q-expansion-item>
     </q-list>
     <template v-slot:subtitle>
-      <span class="q-timeline__title cursor-pointer">
-        {{date !== null && date.length > 0 ? date.split(' ')[0]: date}}
-        <q-popup-proxy
+      <span class="q-timeline__title">
+        {{date !== null && typeof date !== 'undefined' && date.length > 0 ? date.split(' ')[0]: date}}
+        <!-- <q-popup-proxy
           v-if="editor"
           ref="qDateProxy"
           transition-show="scale"
@@ -880,20 +868,19 @@
               v-close-popup
             >weiter</q-btn>
           </div>
-        </q-popup-proxy>
-        <q-icon
+        </q-popup-proxy> -->
+        <!-- <q-icon
           v-if="editor"
           size="16px"
           name="event"
-        />
-        <q-tooltip>Datum/Zeit ändern</q-tooltip>
+        /> -->
       </span>
       <span
-        class="q-timeline__title cursor-pointer"
+        class="q-timeline__title"
         style="padding-right:10px;"
       >
         {{date !== null && date.length > 0 ? date.split(' ')[1]: date}}
-        <q-popup-proxy
+        <!-- <q-popup-proxy
           v-if="editor"
           ref="qTimeProxy"
           transition-show="scale"
@@ -931,13 +918,12 @@
               v-close-popup
             >fertig</q-btn>
           </div>
-        </q-popup-proxy>
-        <q-icon
+        </q-popup-proxy> -->
+        <!-- <q-icon
           v-if="editor"
           size="16px"
           name="access_time"
-        />
-        <q-tooltip>Zeit ändern</q-tooltip>
+        /> -->
       </span>
       <!-- <span class="q-timeline__title">{{days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem ? '' : 'keine Verbleibende Zeit für den Aufenthalt') }}</span> -->
     </template>
@@ -958,7 +944,7 @@ export default {
   name: 'stop',
   components: {
     CitySearch: () => import('../Map/CitySearch'),
-    HotelSearch: () => import('../Map/HotelSearch'),
+    // HotelSearch: () => import('../Map/HotelSearch'),
     DailyTrip: () => import('./dailyTrip')
   },
   computed: {
@@ -1379,6 +1365,9 @@ export default {
       let millis = sharedMethods.getDateFromString(this.date).valueOf() - sharedMethods.getDateFromString(this.oldDate).valueOf()
       this.oldDate = this.date
       this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.docId, millis, sharedMethods.getDateFromString(this.date))
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
     },
     deleteDailyTrip (index) {
       if (this.docId === null || this.docId === '' || this.docId === 'undefined') {

@@ -692,8 +692,6 @@ export default {
         redirected = true
       })
 
-      let isOnDetailsPage = false
-
       if (!forEachCalled) {
         let loggedIn = auth.user() !== null
         let currentRoute = this.$router.currentRoute
@@ -705,13 +703,12 @@ export default {
         if (!isOnLoginPage && requireAuth && !loggedIn) this.$router.replace('login')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn) this.$router.replace('meine-rundreisen')
 
-        isOnDetailsPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-details'
         redirected = true
       }
 
       this.getNotifications()
 
-      if (redirected && !isOnDetailsPage) {
+      if (redirected) {
         redirected = false
         this.showPreload = false
         Loading.hide()
