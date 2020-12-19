@@ -229,14 +229,20 @@ export default {
         duration = (duration - secs) / 60
 
         var minutes = duration % 60
-        var hours = (duration - minutes) / 60
+        duration = (duration - minutes) / 60
 
-        let returnVal
-        if (hours === 0 && minutes === 0) returnVal = 0
-        if (hours < 0 || minutes < 0) returnVal = null
-        else if (hours === 0) returnVal = minutes + 'min'
-        else if (minutes === 0) returnVal = hours + 'h'
-        else returnVal = hours + 'h ' + minutes + 'min'
+        var hours = duration % 24
+        duration = (duration - hours) / 24
+
+        var days = duration % 24
+
+        let returnVal = ''
+        if (days === 0 && hours === 0 && minutes === 0) returnVal = 0
+        else if (days < 0 || hours < 0 || minutes < 0) returnVal = null
+
+        if (days && days > 0) returnVal += days + ' Tag '
+        if (hours && hours > 0) returnVal += hours + 'h '
+        if (minutes && minutes > 0) returnVal += minutes + 'min '
 
         return returnVal
     },

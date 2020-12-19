@@ -1,4 +1,4 @@
-import { db, storage } from '../../firebaseInit.js'
+import { db, storage, auth } from '../../firebaseInit.js'
 
 export default {
   namespaced: true,
@@ -46,7 +46,7 @@ export default {
 
                 let roundtrip = doc.data()
                 roundtrip.docId = doc.id
-                commit('addRoundtrip', roundtrip)
+                if (auth.user() && roundtrip.UserId === auth.user().uid) commit('addRoundtrip', roundtrip)
                 resolve(roundtrip)
               })
             }).catch(function (error) {
@@ -57,7 +57,7 @@ export default {
       })
     },
     fetchAllRoundtrips ({ commit, getters }, userUid) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (getters.getAllRoundtrips && getters.getTitleImages) resolve({ roundtrips: getters.getAllRoundtrips, titleImages: getters.getTitleImages })
 
         let roundtripArr = []
@@ -213,7 +213,7 @@ export default {
       })
     },
     deleteRoundtrip ({ commit }, roundtripDocId) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         let roundtripsRef = db.collection('RoundtripDetails')
           .where('RTId', '==', roundtripDocId)
         roundtripsRef.get()

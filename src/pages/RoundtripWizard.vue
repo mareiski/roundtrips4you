@@ -10,6 +10,7 @@
       style="position:fixed; z-index:1; right:0; padding: 10px"
     >
       <q-btn
+        v-if="$route.params.id"
         round
         color="primary"
         icon="visibility"
@@ -478,7 +479,7 @@
         ></Map>
 
       </q-step>
-      <q-step
+      <!-- <q-step
         :name="4"
         title="Inspiration"
         icon="star"
@@ -493,7 +494,7 @@
           :shouldAddCity="false"
           @update="updateFromSuggestedCity($event)"
         ></CitySuggestion>
-      </q-step>
+      </q-step> -->
 
       <q-step
         :name="5"
@@ -521,6 +522,36 @@
           :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
           lazy-rules
         />
+        <div style="margin-bottom:20px;">
+          <span>Ankunftsdatum:</span>
+          <span class="cursor-pointer font-medium">
+            {{ currentStop.InitDate.split(' ')[1] }}
+            <q-icon
+              name="access_time"
+              class="cursor-pointer"
+            ></q-icon>
+            <q-popup-proxy
+              transition-show="scale"
+              transition-hide="scale"
+            >
+              <q-time
+                v-model="currentStop.InitDate"
+                mask="DD.MM.YYYY HH:mm"
+                format24h
+              >
+                <div class="row items-center justify-end">
+                  <q-btn
+                    v-close-popup
+                    label="Fertig"
+                    color="primary"
+                    flat
+                  />
+                </div>
+              </q-time>
+            </q-popup-proxy>
+
+          </span>
+        </div>
         <q-select
           outlined
           v-model="inputProfile"
@@ -1065,7 +1096,6 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
   components: {
-    CitySuggestion: () => import('../pages/CitySuggestion/CitySuggestion.vue'),
     HotelSearch: () => import('../pages/Map/HotelSearch'),
     Map,
     draggable
