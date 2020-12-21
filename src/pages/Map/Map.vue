@@ -30,6 +30,7 @@
         v-model="drawerLeft"
         show-if-above
         v-if="editor"
+        width="250"
         elevated
         :breakpoint="0"
         :mini="miniState"
@@ -483,6 +484,7 @@ export default {
     */
     switchDrawerToList () {
       this.miniDisabled = false
+      this.miniState = true
       this.showDrawerList = true
       this.showCityMarkers = false
     },

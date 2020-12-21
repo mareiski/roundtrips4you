@@ -1,3 +1,5 @@
+@import './imports.less';
+
 #roundtripWizard {
 
     .q-stepper__step-inner {
@@ -18,7 +20,23 @@
         }
     }
 
+    .auto-route-btn {
+        display: inline-block;
+        margin-top: 30px;
+    }
+
     .flip-list-move {
         transition: transform 0.8s ease;
+    }
+
+    @media @mobile {
+        .q-stepper--horizontal .q-stepper__step-inner {
+            padding: 0;
+        }
+
+        .auto-route-btn {
+            padding-left: 10px;
+        }
+
     }
 }

@@ -17,6 +17,7 @@
         :options="countryOptions"
         label="Land auswählen"
         bg-color="white"
+        style="padding-left:10px; padding-right:10px; width:250px;"
         @filter="filterCountries"
         @input="getCities()"
         :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
@@ -48,7 +49,6 @@
       class="flex justify-stretch cards-container"
       style="min-heigth:20px;"
     >
-
       <q-card
         class="city-card"
         v-for="(city, index) in cities"
@@ -209,7 +209,8 @@ export default {
     RTId: String,
     predefinedCountry: String,
     alreadyAddedCities: Array,
-    shouldAddCity: Boolean
+    shouldAddCity: Boolean,
+    isInSuggestionMode: Boolean
   },
   methods: {
     /**

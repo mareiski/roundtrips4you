@@ -260,7 +260,7 @@ export default {
             let returnData = {}
 
             getAxios().then(axios => {
-                axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + pageName + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+                axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&exsentences=2&prop=description%7Cextracts%7Cpageimages&titles=' + pageName + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
                     { headers: headers })
                     .then(function (response) {
                         const pages = response.data.query.pages
@@ -272,6 +272,48 @@ export default {
                         returnData.imgSrc = pages[firstPageName].original ? pages[firstPageName].original.source : ''
 
                         resolve(returnData)
+                    }).catch(function (error) {
+                        console.log('Error' + error)
+
+                        resolve(null)
+                    })
+            }).catch(function (error) {
+                console.log('Error ' + error)
+                resolve(null)
+            })
+        })
+    },
+    getGooglePlacesData (lat, lng) {
+        return new Promise((resolve, reject) => {
+            const headers = {
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+
+            getAxios().then(axios => {
+                axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=5000&language=de&type=tourist_attraction&key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
+                    { headers: headers })
+                    .then(function (response) {
+                        console.log(response)
+
+                        let returnDataArr = []
+
+                        const results = response.data.results
+
+                        results.forEach(poi => {
+                            let returnData = {}
+                            returnData.title = poi.name
+                            returnData.photoReference = poi.photos[0].photo_reference
+                            returnData.placeId = poi.place_id
+                            returnData.rating = poi.rating
+                            returnData.totalRatings = poi.user_ratings_total
+                            returnData.location = poi.geometry.location
+                            returnData.location.label = poi.vicinity
+                            returnData.tags = poi.types
+
+                            returnDataArr.push(returnData)
+                        })
+
+                        resolve(returnDataArr)
                     }).catch(function (error) {
                         console.log('Error' + error)
 

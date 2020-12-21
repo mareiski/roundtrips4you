@@ -7,7 +7,7 @@
     <div
       class="edit-btn-container"
       v-if="user !== null"
-      style="position:fixed; z-index:1; right:0; padding: 10px"
+      style="position:fixed; z-index:101; right:0; padding: 10px"
     >
       <q-btn
         v-if="$route.params.id"
@@ -152,7 +152,7 @@
                 color="primary"
                 @click="step = 3"
                 icon="add"
-                label="weiteren Stopp"
+                label="Stopp"
               />
               <q-btn
                 flat
@@ -1018,7 +1018,7 @@
           </draggable>
           <q-separator inset="item" />
         </q-list>
-        <div style="display:inline-block; margin-top:30px;">
+        <div class="auto-route-btn">
           <q-btn
             @click="showAutoRoutedialog = true"
             class="q-mt-md"

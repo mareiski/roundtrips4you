@@ -11,6 +11,7 @@
       ref="CitySuggestion"
       @update="update($event)"
       :alreadyAddedCities="alreadyAddedCities"
+      :isInSuggestionMode="isInSuggestionMode"
     ></CitySuggestion>
   </div>
 </template>
@@ -25,7 +26,8 @@ export default {
     CitySuggestion
   },
   props: {
-    alreadyAddedCities: Array
+    alreadyAddedCities: Array,
+    isInSuggestionMode: Boolean
   },
   methods: {
     switchToList () {
