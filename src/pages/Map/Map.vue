@@ -11,6 +11,9 @@
       :zoom="6"
       :mapboxGl="mapbox"
       :attributionControl="false"
+      logoPosition="bottom-right"
+      keyboard
+      doubleClickZoom
       @load="onMapLoaded"
     >
       <MglGeocoderControl
@@ -24,16 +27,26 @@
         class="mapboxgl-ctrl"
         position="top-right"
       />
+      <q-btn
+        v-show="isMobile"
+        color="white"
+        text-color="secondary"
+        icon="apartment"
+        style="position:absolute; right:9px; top:220px;"
+        @click="suggestionDialogVisible = true; showDrawerList = false; miniDisabled = true; showCityMarkers = true;"
+      >
+      </q-btn>
       <MglFullscreenControl position="bottom-right" />
 
+      <!-- drawer is used on tablets and desktops only -->
       <q-drawer
         v-model="drawerLeft"
         show-if-above
         v-if="editor"
-        width="250"
+        :width="250"
         elevated
-        :breakpoint="0"
-        :mini="miniState"
+        :breakpoint="550"
+        :mini="isTablet ? miniState : false"
         @mouseover="!miniDisabled ? miniState = false : null"
         @mouseout="!miniDisabled ? miniState = true : null"
         content-class="bg-secondary text-white"
@@ -68,8 +81,34 @@
             @update="update($event)"
           ></MapDrawerItem>
         </q-scroll-area>
-
       </q-drawer>
+
+      <!-- dialog is used on mobile devices -->
+      <q-dialog
+        v-model="suggestionDialogVisible"
+        position="bottom"
+        seamless
+        full-width
+      >
+        <q-swipe-to-close v-model="suggestionDialogVisible">
+          <q-card style="height:70vh;">
+            <q-card-section class="scroll bg-secondary">
+              <div class="flex justify-center">
+                <q-icon
+                  name="drag_handle"
+                  color="white"
+                  size="40px"
+                />
+              </div>
+              <MapDrawerItem
+                ref="MapDrawerItem"
+                :alreadyAddedCities="stops"
+                @update="update($event)"
+              ></MapDrawerItem>
+            </q-card-section>
+          </q-card>
+        </q-swipe-to-close>
+      </q-dialog>
 
       <MglMarker
         v-for="stop in stops"
@@ -293,6 +332,35 @@
           </MglPopup>
         </MglMarker>
       </template>
+      <!-- POI Markers -->
+      <template v-if="showPOIMarkers">
+        <MglMarker
+          v-for="(poi, index) in suggestedPOIs"
+          :key="poi.name + index"
+          :coordinates="[poi.location.lng, poi.location.lat]"
+          :offset="[10, 5]"
+          @click="onMarkerClicked($event); goToCity(poi.name)"
+        >
+          <q-icon
+            :ref="'poiMarkerIcon' + index"
+            slot="marker"
+            name="place"
+            color="amber-14"
+            size="30px"
+          />
+          <MglPopup>
+            <q-card>
+              <q-card-section>
+                <div class="text-h6">
+                  {{poi.name}}
+                </div>
+                <p style="font-size: 14px">vorgeschlagener Ort für {{poi.location.label.substring(poi.location.label.lastIndexOf(',') + 1, poi.location.label.length)}}</p>
+              </q-card-section>
+            </q-card>
+          </MglPopup>
+        </MglMarker>
+      </template>
+
       <MglMarker
         v-for="(route, index) in addedRoutes"
         :key="route.id + index"
@@ -392,6 +460,14 @@ export default {
     editor: Boolean,
     defaultInitDate: String
   },
+  computed: {
+    isMobile () {
+      return window.matchMedia('(max-width: 550px)').matches
+    },
+    isTablet () {
+      return window.matchMedia('(max-width: 958px)').matches
+    }
+  },
   data () {
     return {
       accTo: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
@@ -411,7 +487,10 @@ export default {
       showDrawerList: true,
       miniDisabled: false,
       suggestedCities: [],
-      showCityMarkers: false
+      showCityMarkers: false,
+      showPOIMarkers: false,
+      suggestedPOIs: [],
+      suggestionDialogVisible: false
     }
   },
   watch: {
@@ -429,22 +508,27 @@ export default {
       console.log('onmaploaded')
 
       this.map = event.map
+      let context = this
+
       this.loadMap(event.map).then(e => {
         // wait 1 second to ensure map is realy loaded
         setTimeout(function () {
-          try {
-            if (bounds.length > 1) {
-              turf().then(turf => {
-                var line = turf.lineString(bounds)
-                var bbox = turf.bbox(line)
-                event.map.fitBounds(new Mapbox.LngLatBounds(bbox), { padding: 70 })
-              })
-            }
-          } catch (e) {
-            console.log(e)
-          }
+          context.fitToBounds(bounds)
         }, 1000)
       })
+    },
+    fitToBounds (bounds) {
+      try {
+        if (bounds.length > 1) {
+          turf().then(turf => {
+            var line = turf.lineString(bounds)
+            var bbox = turf.bbox(line)
+            this.map.fitBounds(new Mapbox.LngLatBounds(bbox), { padding: 80 })
+          })
+        }
+      } catch (e) {
+        console.log(e)
+      }
     },
     markCityOnMap (location) {
       this.changeCityMarkerSize('50px', location)
@@ -464,11 +548,42 @@ export default {
         }
       })
     },
+    markPOIOnMap (location) {
+      this.changePOIMarkerSize('50px', location)
+    },
+    hidePOIOnMap (location) {
+      this.changePOIMarkerSize('30px', location)
+    },
+    /**
+     * changes the size of the city marker for given location
+     */
+    changePOIMarkerSize (size, location) {
+      const context = this
+      this.suggestedPOIs.forEach((poi, index) => {
+        const currentLocation = [poi.location.lat, poi.location.lng]
+        if (location[0] === currentLocation[0] && location[1] === currentLocation[1]) {
+          context.$refs['poiMarkerIcon' + index][0].size = size
+        }
+      })
+    },
     /**
      * show markers for suggested cities (called from city suggestion)
      */
     showCitiesOnMap (cities) {
       this.suggestedCities = cities
+
+      if (this.showPOIMarkers) {
+        this.showPOIMarkers = false
+        this.showCityMarkers = true
+      }
+
+      // set map to city boundaries
+      let cityBounds = []
+      this.suggestedCities.forEach(city => {
+        cityBounds.push([city.longitude, city.latitude])
+      })
+
+      this.fitToBounds(cityBounds)
     },
     goToCity (name) {
       const drawerScrollArea = this.$refs['DrawerScrollArea']
@@ -478,6 +593,22 @@ export default {
       const offset = el.offsetTop
 
       drawerScrollArea.setScrollPosition(offset - 20, 400)
+    },
+    /**
+     * shows the given pois on map
+     */
+    showPOIsOnMap (pois) {
+      this.showCityMarkers = false
+      this.suggestedPOIs = pois
+      this.showPOIMarkers = true
+
+      // set map to city boundaries
+      let poisBounds = []
+      this.suggestedPOIs.forEach(poi => {
+        poisBounds.push([poi.location.lng, poi.location.lat])
+      })
+
+      this.fitToBounds(poisBounds)
     },
     /**
     * switches the map drawer back to list (called from MapDrawerItem)

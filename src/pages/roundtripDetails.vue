@@ -144,6 +144,7 @@
         label="Karte"
       />
       <q-tab
+        v-if="roundtrip.Public"
         name="ratings"
         label="Chat"
       />

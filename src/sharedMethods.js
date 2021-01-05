@@ -9,6 +9,7 @@ var querystring = require('querystring')
 import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
 import { db } from './firebaseInit.js'
+import { Loader } from '@googlemaps/js-api-loader'
 
 export default {
 
@@ -285,44 +286,90 @@ export default {
     },
     getGooglePlacesData (lat, lng) {
         return new Promise((resolve, reject) => {
-            const headers = {
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
-
-            getAxios().then(axios => {
-                axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=5000&language=de&type=tourist_attraction&key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
-                    { headers: headers })
-                    .then(function (response) {
-                        console.log(response)
-
-                        let returnDataArr = []
-
-                        const results = response.data.results
-
-                        results.forEach(poi => {
-                            let returnData = {}
-                            returnData.title = poi.name
-                            returnData.photoReference = poi.photos[0].photo_reference
-                            returnData.placeId = poi.place_id
-                            returnData.rating = poi.rating
-                            returnData.totalRatings = poi.user_ratings_total
-                            returnData.location = poi.geometry.location
-                            returnData.location.label = poi.vicinity
-                            returnData.tags = poi.types
-
-                            returnDataArr.push(returnData)
-                        })
-
-                        resolve(returnDataArr)
-                    }).catch(function (error) {
-                        console.log('Error' + error)
-
-                        resolve(null)
-                    })
-            }).catch(function (error) {
-                console.log('Error ' + error)
-                resolve(null)
+            const loader = new Loader({
+                apiKey: 'AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
+                version: 'weekly',
+                libraries: ['places']
             })
+
+            // google is available here
+            loader.load().then(() => {
+                // eslint-disable-next-line no-undef
+                let map = new google.maps.Map(document.createElement('div'), {})
+
+                // eslint-disable-next-line no-undef
+                let service = new google.maps.places.PlacesService(map)
+
+                let request = {
+                    radius: 5000,
+                    language: 'de',
+                    type: 'tourist_attraction',
+                    location: { 'lat': lat, 'lng': lng }
+                }
+
+                service.nearbySearch(request, (response) => {
+                    let returnDataArr = []
+
+                    response.forEach(poi => {
+                        let returnData = {}
+                        returnData.name = poi.name
+                        returnData.photoUrl = poi.photos[0].getUrl()
+                        returnData.placeId = poi.place_id
+                        returnData.rating = poi.rating
+                        returnData.totalRatings = poi.user_ratings_total
+                        returnData.location = poi.geometry.location
+                        returnData.location.lat = returnData.location.lat()
+                        returnData.location.lng = returnData.location.lng()
+                        returnData.nowOpen = poi.opening_hours ? poi.opening_hours.open_now : false
+
+                        returnData.location.label = poi.vicinity
+                        returnData.tags = poi.types
+
+                        returnDataArr.push(returnData)
+                    })
+
+                    resolve(returnDataArr)
+                })
+            })
+
+            //     const headers = {
+            //         'Content-Type': 'application/json; charset=UTF-8'
+            //     }
+
+            //     getAxios().then(axios => {
+            //         axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=5000&language=de&type=tourist_attraction&key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
+            //             { headers: headers })
+            //             .then(function (response) {
+            //                 console.log(response)
+
+            //                 let returnDataArr = []
+
+            //                 const results = response.data.results
+
+            //                 results.forEach(poi => {
+            //                     let returnData = {}
+            //                     returnData.name = poi.name
+            //                     returnData.photoReference = poi.photos[0].photo_reference
+            //                     returnData.placeId = poi.place_id
+            //                     returnData.rating = poi.rating
+            //                     returnData.totalRatings = poi.user_ratings_total
+            //                     returnData.location = poi.geometry.location
+            //                     returnData.location.label = poi.vicinity
+            //                     returnData.tags = poi.types
+
+            //                     returnDataArr.push(returnData)
+            //                 })
+
+            //                 resolve(returnDataArr)
+            //             }).catch(function (error) {
+            //                 console.log('Error' + error)
+
+            //                 resolve(null)
+            //             })
+            //     }).catch(function (error) {
+            //         console.log('Error ' + error)
+            //         resolve(null)
+            //     })
         })
     },
     /**

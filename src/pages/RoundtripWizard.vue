@@ -1103,6 +1103,9 @@ export default {
   computed: {
     isMobile () {
       return window.matchMedia('(max-width: 550px)').matches
+    },
+    user () {
+      return auth.user()
     }
   },
   data () {

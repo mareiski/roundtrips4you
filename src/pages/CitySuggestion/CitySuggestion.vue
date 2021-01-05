@@ -8,6 +8,7 @@
       style="margin-bottom:20px;"
     >
       <q-select
+        v-show="!POIMode"
         outlined
         v-model="country"
         use-input
@@ -49,113 +50,187 @@
       class="flex justify-stretch cards-container"
       style="min-heigth:20px;"
     >
-      <q-card
-        class="city-card"
-        v-for="(city, index) in cities"
-        :key="index"
-        :id="'CitySuggestion' + city.name"
-        @mouseover="markCityOnMap(city)"
-        @mouseleave="hideCityOnMap(city)"
-      >
-        <div>
+      <div v-show="!POIMode">
+        <q-card
+          class="city-card cursor-pointer"
+          v-for="(city, index) in cities"
+          :key="index"
+          :id="'CitySuggestion' + city.name"
+          @mouseover="markCityOnMap(city)"
+          @mouseleave="hideCityOnMap(city)"
+          @click="switchToPOIMode(city)"
+        >
           <div>
-            <q-img
-              :alt="'Bild von'  + city.name"
-              v-if="images[images.findIndex(x => x.cityName === city.name)]"
-              :src="images[images.findIndex(x => x.cityName === city.name)].url"
-              style="height:170px;"
-              placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
-            >
-              <div class="absolute-bottom text-h6">{{city.name}}
-              </div>
-            </q-img>
+            <div>
+              <q-img
+                :alt="'Bild von'  + city.name"
+                v-if="images[images.findIndex(x => x.cityName === city.name)]"
+                :src="images[images.findIndex(x => x.cityName === city.name)].url"
+                style="height:170px;"
+                placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
+              >
+                <div class="absolute-bottom text-h6">{{city.name}}
+                </div>
+              </q-img>
 
-            <q-btn
+              <!-- <q-btn
               round
               color="primary"
               class="city-info"
               icon="info"
               @click="openCityDialog(index)"
             >
-            </q-btn>
-          </div>
-
-          <a
-            :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
-            target="_blank"
-          >
-            <q-card-section style="color:#707070;">
-              <q-icon name="location_on" />
-              {{city.name}}, {{ city.region }}
-            </q-card-section>
-          </a>
-        </div>
-
-        <q-card-actions align="right">
-          <q-btn
-            v-if="cityAlreadyAdded(city)"
-            label="Hinzugefügt"
-            outline
-            dense
-            disable
-            color="primary"
-          />
-          <q-btn
-            v-else
-            label="Hinzufügen"
-            outline
-            dense
-            color="primary"
-            @click="addStop(city)"
-          />
-        </q-card-actions>
-      </q-card>
-
-      <q-dialog v-model="cityDialog.showed">
-        <q-card>
-          <q-card-section
-            class="row flex justify-end q-pb-none"
-            style="z-index:100; width:100%; position:absolute; color:white;"
-          >
-            <q-btn
-              icon="close"
-              flat
-              round
-              dense
-              v-close-popup
-            />
-          </q-card-section>
-          <q-img
-            :src="cityDialog.imgSrc"
-            style="max-height:75vh;"
-          >
-            <div class="absolute-bottom">
-              <div class="text-h6">{{cityDialog.title}}</div>
-              <div class="text-subtitle2">{{cityDialog.shortDescription}}</div>
+            </q-btn> -->
             </div>
-          </q-img>
 
-          <q-card-section>
-            <!-- <a
-                :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
-                target="_blank"
-              ></a> -->
-            {{cityDialog.description}}
-          </q-card-section>
+            <a
+              :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
+              target="_blank"
+            >
+              <q-card-section style="color:#707070;">
+                <q-icon name="location_on" />
+                {{city.name}}, {{ city.region }}
+              </q-card-section>
+            </a>
+          </div>
 
           <q-card-actions align="right">
             <q-btn
-              flat
-              label="OK"
+              v-if="cityAlreadyAdded(city)"
+              label="Hinzugefügt"
+              outline
+              dense
+              disable
               color="primary"
-              v-close-popup
+            />
+            <q-btn
+              v-else
+              label="Hinzufügen"
+              outline
+              dense
+              color="primary"
+              @click="addStop(city)"
             />
           </q-card-actions>
         </q-card>
-      </q-dialog>
-    </div>
+      </div>
 
-    <!-- <div class="flex justify-center">
+      <div v-show="POIMode">
+        <div v-if="lastPOICityData">
+          <q-img :src="lastPOICityData.img" />
+          <div style="padding-left:10px; padding-top:10px;">
+            <span class="font-large">{{lastPOICityData.title}}</span>
+            <div>
+              {{ lastPOICityData.shortDescription }}
+            </div>
+            <div
+              class="font-medium"
+              style="padding-top:20px; padding-bottom:10px;"
+            >{{POIs.length}} Top Sehenswürdigkeiten</div>
+          </div>
+          <q-card
+            class="city-card cursor-pointer"
+            v-for="(poi, index) in POIs"
+            :key="index"
+            :id="'POI' + poi.name"
+            @mouseover="markPOIOnMap(poi)"
+            @mouseleave="hidePOIOnMap(poi)"
+            @click="flyTo(poi.location.lat, poi.location.lng)"
+          >
+            <div>
+              <div>
+                <q-img
+                  :alt="'Bild von'  + poi.name"
+                  v-if="poi.photoUrl"
+                  :src="poi.photoUrl"
+                  style="height:170px;"
+                  placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
+                >
+                  <div class="absolute-bottom text-h6 ellipsis">{{poi.name}}
+                    <q-tooltip>{{poi.name}}</q-tooltip>
+                  </div>
+                </q-img>
+
+                <!-- <q-btn
+              round
+              color="primary"
+              class="city-info"
+              icon="info"
+              @click="openCityDialog(index)"
+            >
+            </q-btn> -->
+              </div>
+
+              <div class="rating-text">
+                {{poi.rating}}
+                <q-rating
+                  class="stars"
+                  :value="poi.rating"
+                  size="15px"
+                  color="gold"
+                  readonly
+                  style="margin-right:10px;"
+                />
+                ({{ poi.totalRatings }})
+              </div>
+              <a
+                :href="'https://www.google.com/maps/search/?api=1&query=' + poi.name"
+                target="_blank"
+              >
+                <q-card-section style="color:#707070;">
+                  <q-icon name="location_on" />
+                  {{poi.location.label}}
+                </q-card-section>
+              </a>
+            </div>
+          </q-card>
+        </div>
+
+        <q-dialog v-model="cityDialog.showed">
+          <q-card>
+            <q-card-section
+              class="row flex justify-end q-pb-none"
+              style="z-index:100; width:100%; position:absolute; color:white;"
+            >
+              <q-btn
+                icon="close"
+                flat
+                round
+                dense
+                v-close-popup
+              />
+            </q-card-section>
+            <q-img
+              :src="cityDialog.imgSrc"
+              style="max-height:75vh;"
+            >
+              <div class="absolute-bottom">
+                <div class="text-h6">{{cityDialog.title}}</div>
+                <div class="text-subtitle2">{{cityDialog.shortDescription}}</div>
+              </div>
+            </q-img>
+
+            <q-card-section>
+              <!-- <a
+                :href="'https://www.google.com/maps/search/?api=1&query=' + city.name"
+                target="_blank"
+              ></a> -->
+              {{cityDialog.description}}
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="OK"
+                color="primary"
+                v-close-popup
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+      </div>
+
+      <!-- <div class="flex justify-center">
       <q-btn
         color="white"
         text-color="secondary"
@@ -182,6 +257,7 @@
       >Ort hinzufügen</q-btn>
     </div> -->
 
+    </div>
   </div>
 </template>
 <style lang="less" scoped>
@@ -201,7 +277,11 @@ export default {
       country: Array.isArray(countries) ? countries[0] : countries,
       countryOptions: countries,
       cityDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
-      directSetCity: {}
+      directSetCity: {},
+      POIMode: false,
+      POIs: [],
+      lastPOICity: null,
+      lastPOICityData: null
     }
   },
   props: {
@@ -211,6 +291,16 @@ export default {
     alreadyAddedCities: Array,
     shouldAddCity: Boolean,
     isInSuggestionMode: Boolean
+  },
+  metaInfo () {
+    return {
+      script: [{
+        src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc&libraries=places`,
+        async: true,
+        defer: true,
+        callback: () => this.MapsInit() // will declare it in methods
+      }]
+    }
   },
   methods: {
     /**
@@ -223,29 +313,6 @@ export default {
       })
     },
     /**
-     * open the city dialog for city with index
-     */
-    openCityDialog (index) {
-      let city = this.cities[index]
-      this.cityDialog.title = city.name
-      this.cityDialog.imgSrc = this.images[this.images.findIndex(x => x.cityName === city.name)].url
-
-      let context = this
-
-      // get city dialog content from wikivoyage
-      sharedMethods.getWikivoyageData(city.name).then(result => {
-        if (result !== null) {
-          context.cityDialog.shortDescription = result.shortDescription
-          context.cityDialog.description = result.description
-          context.cityDialog.showed = true
-        } else {
-          context.cityDialog.shortDescription = ''
-          context.cityDialog.description = 'Keine Informationen gefunden.'
-          context.cityDialog.showed = true
-        }
-      })
-    },
-    /**
      * marks the hovered city on the map (if its parent)
      */
     markCityOnMap (city) {
@@ -253,6 +320,45 @@ export default {
     },
     hideCityOnMap (city) {
       sharedMethods.getParent('Map', this).hideCityOnMap([city.latitude, city.longitude])
+    },
+    /**
+     * marks the hovered city on the map (if its parent)
+     */
+    markPOIOnMap (poi) {
+      sharedMethods.getParent('Map', this).markPOIOnMap([poi.location.lat, poi.location.lng])
+    },
+    hidePOIOnMap (poi) {
+      sharedMethods.getParent('Map', this).hidePOIOnMap([poi.location.lat, poi.location.lng])
+    },
+    /**
+     * sets poi mode to true
+     */
+    switchToPOIMode (city) {
+      if (this.lastPOICity !== city) {
+        sharedMethods.getGooglePlacesData(city.latitude, city.longitude).then((POIArr) => {
+          this.POIs = POIArr
+          sharedMethods.getParent('Map', this).showPOIsOnMap(this.POIs)
+        }).catch((e) => {
+          console.log(e)
+        })
+
+        sharedMethods.getWikivoyageData(city.name).then(result => {
+          this.lastPOICityData = result
+          this.lastPOICityData.img = this.images[this.images.findIndex(x => x.cityName === city.name)].url
+        }).catch((e) => {
+          console.log(e)
+        })
+      }
+
+      this.POIMode = true
+      this.lastPOICity = city
+    },
+    /**
+     * switch back to country mode
+     */
+    switchToCountryMode () {
+      this.POIMode = false
+      sharedMethods.getParent('Map', this).showCitiesOnMap(this.cities)
     },
     /**
      * get all cities for country cities
@@ -329,6 +435,9 @@ export default {
       } else {
         this.directSetCity = {}
       }
+    },
+    flyTo (lat, lng) {
+      sharedMethods.getParent('Map', this).flyToPointOnMap(lat, lng)
     },
     addStop (city) {
       if (!this.shouldAddCity) {
