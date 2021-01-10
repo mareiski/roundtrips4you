@@ -758,6 +758,9 @@ export default {
 
           this.addedRoutes = []
 
+          // reset total trip count
+          this.$emit('distanceUpdate', -1)
+
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
               this.getRoute(this.stops[index - 1].Location, stop.Location, map, index, this.stops[index - 1].Profile, false)
@@ -909,7 +912,10 @@ export default {
               // get duration
               let duration = sharedMethods.msToTime(data.duration * 1000)
 
-              let distance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) + ' km' : null
+              let rawDistance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : 0
+              let distance = rawDistance > 0 ? rawDistance + ' km' : null
+
+              this.$emit('distanceUpdate', rawDistance)
 
               // add route marker
               if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: startLocation.label.split(',')[0], destination: endLocation.label.split(',')[0], id: id })

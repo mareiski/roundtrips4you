@@ -1002,6 +1002,11 @@
           </draggable>
           <q-separator inset="item" />
         </q-list>
+        <p
+          style="padding-top:10px; font-family:Raleway;"
+          v-if="totalTripDuration && totalTripDistance"
+        >Insgesamt {{totalTripDuration}} Tage und {{totalTripDistance}} km</p>
+
         <div class="auto-route-btn">
           <q-btn
             @click="showAutoRoutedialog = true"
@@ -1051,6 +1056,7 @@
             :editor="true"
             @addStop="handleAddStopFromMap($event)"
             @update="updateFromSuggestedCity($event)"
+            @distanceUpdate="updateTotalTripDistance($event)"
             ref="overviewMap"
           ></Map>
         </div>
@@ -1146,6 +1152,9 @@ export default {
 
       isRTEditMode: false,
       saving: false,
+
+      totalTripDuration: 0,
+      totalTripDistance: 0,
 
       // -1 if no stop to edit (normal mode) else put index of stop to edit
       stopToEdit: -1,
@@ -1269,6 +1278,8 @@ export default {
       // reload both maps
       if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
       if (this.$refs.addStopMap) this.$refs.addStopMap.loadMap(null, this.addedStops)
+
+      this.updateTotalTripDuration()
     },
     /**
      * Set roundtrip to shortest route possible (get it from getShortestRoute & reset init dates)
@@ -1284,8 +1295,8 @@ export default {
 
         if (index === suggestedStops.length - 1) this.addedStops = suggestedStops
       })
-      // this.fetchSingleRoundtrip(this.$route.params.id)
-      // this.fetchRoundtripStops(this.$route.params.id, false)
+
+      this.updateTotalTripDuration()
     },
     /**
      * Get shortest route in comparing the distances between every stop
@@ -1388,6 +1399,8 @@ export default {
       if (this.$refs.addStopMap) this.$refs.addStopMap.loadMap(null, this.addedStops)
 
       if (this.addedStops.length === 0) this.step = 3
+
+      this.updateTotalTripDuration()
     },
     /**
      * creates the roundtrip (write the temp data into db)
@@ -1480,6 +1493,27 @@ export default {
         }
       })
     },
+    /**
+     * updates total trip duration
+     */
+    updateTotalTripDuration () {
+      let startDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
+
+      let stopDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
+      const oneDay = 24 * 60 * 60 * 1000
+
+      const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
+      this.totalTripDuration = diffDays + this.addedStops[this.addedStops.length - 1].DayDuration
+    },
+    /**
+     * called from map
+     * resets amount if -1 will be passed
+     */
+    updateTotalTripDistance (distance) {
+      console.log(distance)
+      if (distance === -1) this.totalTripDistance = 0
+      else this.totalTripDistance += distance
+    },
     getRoundtripCountries () {
       return new Promise((resolve, reject) => {
         let tempCountries = []
@@ -1551,6 +1585,9 @@ export default {
         this.addedStops[i].InitDate = date.formatDate(followingStopDate, 'DD.MM.YYYY')
       }
     },
+    /**
+     * called when a user clicks on a stop to edit it
+     */
     editStop (index) {
       this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
       this.stopToEdit = index
@@ -1902,6 +1939,8 @@ export default {
 
                 this.addedStops.push(stop)
                 this.addedStops.sort(this.compare)
+
+                this.updateTotalTripDuration()
               })
             })
         }
