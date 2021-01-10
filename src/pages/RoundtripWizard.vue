@@ -98,7 +98,7 @@
               <q-btn
                 @click="step = 3"
                 color="primary"
-                :disable="(currentRoundtrip.TransportProfile === 'Flugzeug' && (!currentRoundtrip.TransportProfile || !currentRoundtrip.Origin || !currentRoundtrip.Destination || !currentRoundtrip.DepatureDate || !currentRoundtrip.ReturnDate || !currentRoundtrip.TravelClass || !currentRoundtrip.NonStop))"
+                :disable="currentRoundtrip.TransportProfile === 'Reisemittel wählen' || (currentRoundtrip.TransportProfile === 'Flugzeug' && (!currentRoundtrip.TransportProfile || !currentRoundtrip.Origin || !currentRoundtrip.Destination || !currentRoundtrip.DepatureDate || !currentRoundtrip.ReturnDate || !currentRoundtrip.TravelClass || !currentRoundtrip.NonStop))"
                 label="Weiter"
               />
             </template>
@@ -133,8 +133,7 @@
             <template v-else-if="step === 5">
               <q-btn
                 flat
-                :disable="stopToEdit > -1"
-                @click="!inspirationDone ? step = 3 : step = 4"
+                @click="stopToEdit <= -1 ? step = 3 : step = 6"
                 color="primary"
                 label="zurück"
                 class="q-ml-sm"
@@ -445,7 +444,7 @@
             </template>
           </q-select>
         </div>
-        <div v-else>
+        <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
           <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
           <p style="text-align:left;">Du kannst dafür sofort mit der Reiseplanung beginnen!</p>
         </div>
@@ -479,22 +478,6 @@
         ></Map>
 
       </q-step>
-      <!-- <q-step
-        :name="4"
-        title="Inspiration"
-        icon="star"
-        :done="inspirationDone"
-        :disable="step != 4 && !inspirationDone"
-        :header-nav="step > 4"
-      >
-
-        <CitySuggestion
-          :dates="null"
-          :predefinedCountry="country"
-          :shouldAddCity="false"
-          @update="updateFromSuggestedCity($event)"
-        ></CitySuggestion>
-      </q-step> -->
 
       <q-step
         :name="5"
@@ -955,6 +938,7 @@
           <draggable
             v-model="addedStops"
             @end="onStopsDragged"
+            handle=".handle"
           >
             <transition-group name="flip-list">
               <q-item
@@ -965,7 +949,7 @@
                   <q-icon
                     color="primary"
                     name="drag_indicator"
-                    class="cursor-DandD"
+                    class="cursor-DandD handle"
                   />
                 </q-item-section>
                 <q-item-section
@@ -977,7 +961,8 @@
                   <q-item-label lines="1">{{stop.Title}}</q-item-label>
                   <q-item-label
                     caption
-                    lines="2"
+                    lines="1"
+                    style="max-width:400px;"
                   >
                     <!-- <span class="text-weight-bold">{{stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '')}}</span> -->
 
@@ -985,7 +970,6 @@
                       v-if="stop.Description"
                       v-html="'<span class=&quot;text-weight-bold&quot;>' + stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '') + '</span>' + stop.Description"
                     >
-
                     </span>
                   </q-item-label>
                 </q-item-section>
@@ -1111,7 +1095,6 @@ export default {
   data () {
     return {
       step: 1,
-      inspirationDone: false,
       countryOptions: countries,
       country: 'Land wählen',
       preventPasting: false,
@@ -1124,7 +1107,7 @@ export default {
         Adults: 2,
         ChildrenAges: [],
         Children: 0,
-        TransportProfile: 'Flugzeug',
+        TransportProfile: 'Reisemittel wählen',
         Origin: null,
         Destination: null,
         DepatureDate: formattedScheduleDate,
@@ -1286,6 +1269,85 @@ export default {
       // reload both maps
       if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
       if (this.$refs.addStopMap) this.$refs.addStopMap.loadMap(null, this.addedStops)
+    },
+    /**
+     * Set roundtrip to shortest route possible (get it from getShortestRoute & reset init dates)
+     * @see getShortestRoute()
+     */
+    setTripToShortestRoute () {
+      let suggestedStops = this.getShortestRoute()
+      let initDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
+
+      suggestedStops.forEach((stop, index) => {
+        stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+        initDate.setDate(initDate.getDate() + 1)
+
+        if (index === suggestedStops.length - 1) this.addedStops = suggestedStops
+      })
+      // this.fetchSingleRoundtrip(this.$route.params.id)
+      // this.fetchRoundtripStops(this.$route.params.id, false)
+    },
+    /**
+     * Get shortest route in comparing the distances between every stop
+     * @see getShortestDistance()
+     */
+    getShortestRoute () {
+      let stopsTaken = [this.addedStops[0]]
+      this.addedStops.forEach((stop, index) => {
+        if (index > 0) {
+          let foundStop = this.getShortestDistance(stopsTaken[stopsTaken.length - 1], stopsTaken)
+          if (foundStop !== null) {
+            stopsTaken.push(foundStop)
+          }
+        }
+      })
+      return stopsTaken
+    },
+    /**
+     * Get shortest distance between two stops
+     * @param originStop the origin to start from
+     * @param {Array} stopsTaken array of stops already in suggested route
+     * @see getDinstanceFromLatLonInKm()
+     */
+    getShortestDistance (originStop, stopsTaken) {
+      let distances = []
+      let stop = null
+      this.addedStops.forEach(stop => {
+        if (!stopsTaken.includes(stop)) {
+          distances.push({ distance: this.getDistanceFromLatLonInKm(originStop.Location.lng, originStop.Location.lat, stop.Location.lng, stop.Location.lat), stop: stop })
+        }
+      })
+      if (distances.length > 0) {
+        let distanceValues = []
+
+        distances.forEach(distanceArr => {
+          distanceValues.push(distanceArr.distance)
+        })
+
+        let minVal = Math.min.apply(null, distanceValues)
+        stop = distances[distances.findIndex(x => x.distance === minVal)].stop
+      }
+      return stop
+    },
+    /**
+     * Get the distance between two lat lng positions in km
+     * @example getDistanceFromLatLonInKm(42.2, 11.2, 42.6, 11.6)
+     */
+    getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
+      var R = 6371 // Radius of the earth in km
+      var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
+      var dLon = this.deg2rad(lon2 - lon1)
+      var a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      var d = R * c // Distance in km
+      return d
+    },
+    deg2rad (deg) {
+      return deg * (Math.PI / 180)
     },
     /**
      *  removes the stop with the given index
@@ -1583,7 +1645,6 @@ export default {
 
       this.currentStop.Title = 'Zwischenstopp in ' + event.name.split(',')[0]
       this.step = 5
-      this.inspirationDone = true
     },
     /**
    * update location object with location serch results
@@ -1598,7 +1659,6 @@ export default {
         }
         this.currentStop.Title = 'Zwischenstopp in ' + event.label.split(',')[0]
         this.step = 5
-        this.inspirationDone = false
       } else {
         this.currentStop.Location = null
       }

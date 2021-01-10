@@ -314,7 +314,6 @@ top of page > end of page
 }
 
 .create-roundtrip-ol {
-    font-size: @size-large;
     font-family: @primary-number-font;
 
     h2 {
@@ -348,6 +347,11 @@ top of page > end of page
             justify-content: center;
             display: flex;
             width: 100%;
+        }
+
+        &::marker {
+            font-size: @size-large;
+            font-family: @primary-number-font;
         }
     }
 }
