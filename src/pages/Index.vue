@@ -145,26 +145,80 @@
         <p>Somit ist deine Reise zu 100% individualisiert und trotzdem perfekt durchgeplant.</p>
         <p><b>Roundtrips4you</b> - deine Reiseplanungs App für deinen nächsten Urlaub.</p>
       </div> -->
-      <h4 style="text-align:center; padding-top: 30px;">Mit diesen Tools planst du deine eigene Reise in kürzester Zeit</h4>
-      <ol class="create-roundtrip-ol">
+      <h4 style="text-align:center; padding-top: 30px;">In diesen Schritten planst du deine Reise in kürzester Zeit</h4>
+      <q-timeline
+        color="secondary"
+        id="HomeTimeLine"
+      >
+        <q-timeline-entry
+          title="An-/Abreise"
+          side="left"
+          icon="commute"
+        >
+          <div>
+            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug bzw. ein Hotel zu suchen.</p>
+            <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
+            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen.</p>
+          </div>
+        </q-timeline-entry>
+
+        <q-timeline-entry
+          title="Reiseziele wählen"
+          side="right"
+          icon="add"
+        >
+          <div>
+            <p>Mit dem Klick auf eine Stadt auf der Karte kannst du diese sofort hinzufügen</p>
+            <p>Außerdem werden dir automatisch die beliebtesten Städte vorgeschlagen, solltest du ein wenig inspiration brauchen.</p>
+            <p>Zu jeder Stadt werden dir Bilder und die besten Sehenswürdigkeiten angezeigt, damit du alles auf einen Blick vergleichen kannst.</p>
+          </div>
+        </q-timeline-entry>
+
+        <q-timeline-entry
+          title="Details eingeben"
+          side="left"
+          icon="create"
+        >
+          <div>
+            <p>Wenn du einen Stopp hinzufügst kannst du ganz individuell alles rund um das Ziel anpassen.</p>
+            <p>Natürlich kannst du hier auch ein Hotel hinzufügen, welches du bei den bekanntesten Anbietern buchen kannst.</p>
+            <p>Die Daten für die Hotelsuche musst du nur einmal eingeben, so sparst du dir eine Menge Zeit!</p>
+          </div>
+        </q-timeline-entry>
+
+        <q-timeline-entry
+          title="Reiseübersicht"
+          side="right"
+          icon="format_list_bulleted"
+        >
+          <div>
+            <p>Am Schluss deiner Reiseplanung erhältst du eine übersichtliche Zusammenfassung deiner Reise mit all deinen Stopps und Routen.</p>
+            <p>Du kannst dir auch automatisch die kürzeste Route errechnen lassen.</p>
+            <p>Wenn du möchtest kannst du auch deine Reise auf Roundtrips4you veröffentlichen um sie der ganzen Welt zu zeigen.</p>
+          </div>
+        </q-timeline-entry>
+
+      </q-timeline>
+
+      <!-- <ol class="create-roundtrip-ol">
         <li v-in-viewport.once>
           <div>
-            <h2>Flug- & Hotelsuche</h2>
-            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Flug- und Hotelanbietern einen Flug bzw. ein Hotel zu suchen.</p>
+            <h2>An-/Abreise</h2>
+            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug bzw. ein Hotel zu suchen.</p>
             <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
-            <p>Anschließend kannst du deinen Flug/Hotel direkt auf der Seite des Anbieters buchen.</p>
+            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen.</p>
           </div>
           <div>
           </div>
         </li>
         <li v-in-viewport.once>
           <div>
-            <h2>Städtevorschläge</h2>
-            <p>Mit Roundtrips4you werden dir automatisch die schönsten und beliebtesten Städte in dem jeweiligen Land deiner Reise vorgeschlagen.</p>
-            <p>Dadurch siehst du auf einen Blick welche Orte du unbedingt gesehen haben musst.</p>
-            <p>Mit einem Klick kannst du diese zu deiner erstellten Reise hizufügen.</p>
+            <h2>Reiseziele wählen</h2>
+            <p>Mit dem Klick auf eine Stadt auf der Karte kannst du diese sofort hinzufügen</p>
+            <p>Außerdem werden dir automatisch die beliebtesten Städte vorgeschlagen, solltest du ein wenig inspiration brauchen.</p>
+            <p>Zu jeder Stadt werden dir Bilder und die besten Sehenswürdigkeiten angezeigt, damit du alles auf einen Blick vergleichen kannst.</p>
           </div>
-          <div>
+           <div>
             <q-img
               style="width:1000px;"
               alt="Städtevorschläge"
@@ -172,24 +226,25 @@
               src="https://roundtrips4you.de/statics/cities.jpeg"
             />
           </div>
-        </li>
-        <li v-in-viewport.once>
-          <div>
-            <h2>Rundreise automatisch zusammenstellen</h2>
-            <p>Nachdem du alle Ziele auf deiner Reise gefunden hast, kannst du dir automatisch die Route zu jedem Ort anzeigen lassen.</p>
-            <p>Die Route wird so berechnet, dass du immer am wenigsten Zeit zwischen den Orten benötigst und somit mehr Zeit für die Besichtigung der Reiseziele bleibt.</p>
-          </div>
-          <div>
-          </div>
-        </li>
-        <li v-in-viewport.once>
-          <div>
-            <h2>Vorschlag von Sehenswürdigkeiten</h2>
-            <p>Die besten Sehenswürdigkeiten zu finden ist schwierig, deshalb unterstützen wir dich mit unseren automatischen Vorschlägen.</p>
-            <p>Bei jedem Stopp auf deiner Reise kannst du dir die Points of Interest anzeigen lassen und diese in der Beschreibung des Ortes speichern, damit du sie immer parat hast.</p>
-            <p>Mit einem Klick auf die jeweilige Sehenswürdigkeit kannst du dir genaue Informationen und Wissenswerte Tipps anzeigen lassen.</p>
-          </div>
-          <div>
+      </li>
+      <li v-in-viewport.once>
+        <div>
+          <h2>Details eingeben</h2>
+          <p>Wenn du einen Stopp hinzufügst kannst du ganz individuell alles rund um das Ziel anpassen.</p>
+          <p>Natürlich kannst du hier auch ein Hotel hinzufügen, welches du bei den bekanntesten Anbietern buchen kannst.</p>
+          <p>Die Daten für die Hotelsuche musst du nur einmal eingeben, so sparst du dir eine Menge Zeit!</p>
+        </div>
+        <div>
+        </div>
+      </li>
+      <li v-in-viewport.once>
+        <div>
+          <h2>Reiseübersicht</h2>
+          <p>Am Schluss deiner Reiseplanung erhältst du eine übersichtliche Zusammenfassung deiner Reise mit all deinen Stopps und Routen.</p>
+          <p>Du kannst dir auch automatisch die kürzeste Route errechnen lassen.</p>
+          <p>Wenn du möchtest kannst du auch deine Reise auf Roundtrips4you veröffentlichen um sie der ganzen Welt zu zeigen.</p>
+        </div>
+         <div>
             <q-img
               style="width:1000px;"
               alt="Vorschlag von Sehenswürdigkeiten"
@@ -197,28 +252,8 @@
               src="https://roundtrips4you.de/statics/pois.jpeg"
             />
           </div>
-        </li>
-        <li
-          v-in-viewport.once
-          ref="map"
-        >
-          <div>
-            <h2>Karte</h2>
-            <p>Wenn du deine Reise auf einer Karte begutachten möchtest, musst du dafür nicht jeden Stopp einzeln zu einer Karte hinzufügen.</p>
-            <p>Wir übernehmen die Kartenerstellung komplett für dich, sodass du nur auf den entsprechenden Reiter klicken musst um alle deine Stopps zu sehen.</p>
-            <p>Natürlich zeichnen wir auch gleich die Route die zwischen den einzelnen Reisezielen liegt ein.</p>
-            <p>Möchtest du deine Reise lieber komplett mit der Karte erstellen kannst du natürlich auch dort mit nur 1 Klick die einzelnen Stopps hinzufügen</p>
-          </div>
-          <div>
-            <q-img
-              style="width:1000px;"
-              alt="Karte"
-              @click="createDemoRTClicked()"
-              src="https://roundtrips4you.de/statics/map.jpeg"
-            />
-          </div>
-        </li>
-      </ol>
+      </li>
+      </ol> -->
       <div class="section-img"></div>
       <div class="section-img-placeholder">
         <h3>Plane jetzt gleich und ohne Anmeldung mit der deine ganz eigenen Reise</h3>

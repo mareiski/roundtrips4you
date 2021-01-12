@@ -9,8 +9,8 @@
       style="align-items:center;"
       method="post"
       target="_blank"
-      action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&id=c64c971288&gdpr[71542]=true"
     >
+      <!-- add this above for auto mailchimp subcribtion action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&id=c64c971288&gdpr[71542]=true" -->
       <q-input
         v-model="userEmail"
         outlined
