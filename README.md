@@ -1,4 +1,4 @@
-# roundtrips4you (roundtrips4you)
+# Roundtrips4you
 
 Roundtrips4you - tripplaner and organizer for individual trips
 developed by Marco Reisinger
