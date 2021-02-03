@@ -25,9 +25,11 @@ export default {
       state.roundtrips.push(newRoundtripObject)
     },
     removeRoundtrip: (state, roundtripDocId) => {
-      let index = state.roundtrips.findIndex(x => x.docId === roundtripDocId)
-      state.roundtrips.splice(index, 1)
-      state.titleImages.splice(index, 1)
+      if (state.roundtrips) {
+        let index = state.roundtrips.findIndex(x => x.docId === roundtripDocId)
+        state.roundtrips.splice(index, 1)
+        state.titleImages.splice(index, 1)
+      }
     }
   },
   actions: {
@@ -110,7 +112,7 @@ export default {
       })
     },
     addRoundtrip ({ commit }, payload) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         try {
           let timeStamp = Date.now()
           let tempRTId = Math.floor(Math.random() * 10000000000000)
@@ -153,7 +155,7 @@ export default {
             newRoundtripObject.NonStop = payload.nonStop
           }
 
-          db.collection('Roundtrips').add(newRoundtripObject).then(r => {
+          db.collection('Roundtrips').add(newRoundtripObject).then(() => {
             commit('addRoundtrip', newRoundtripObject)
 
             let roundtripsRef = db.collection('Roundtrips')
@@ -164,45 +166,48 @@ export default {
                 snapshot.forEach(doc => {
                   db.collection('Roundtrips').doc(doc.id).update({
                     'RTId': doc.id
+                  }).then(() => {
+                    let depatureDate = null
+                    if (payload.depatureDate) {
+                      const dateParts = payload.depatureDate.split('.')
+                      depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+                    }
+
+                    if (payload.stops) {
+                      let promiseList = []
+                      payload.stops.forEach((stop) => {
+                        try {
+                          stop.RTId = doc.id
+                          promiseList.push(db.collection('RoundtripDetails').add(stop))
+                        } catch (e) {
+                          console.log(e)
+                        }
+                      })
+                      Promise.all(promiseList).then(() => {
+                        resolve(doc.id)
+                      })
+                    } else {
+                      db.collection('RoundtripDetails').add({
+                        BookingComLink: '',
+                        DateDistance: '',
+                        Description: 'Beschreibung dieses Stopps',
+                        ExpediaLink: '',
+                        GeneralLink: '',
+                        ImageUrl: '',
+                        InitDate: depatureDate || new Date(timeStamp),
+                        Price: 0,
+                        RTId: doc.id,
+                        Title: payload.tempLocation ? 'Start in ' + payload.tempLocation.label.split(',')[0] : 'Titel des 1. Stopps',
+                        Location: payload.tempLocation ? payload.tempLocation : {
+                          lng: '13.3888599',
+                          lat: '52.5170365',
+                          label: 'Berlin, 10117, Germany'
+                        }
+                      }).then(() => {
+                        resolve(doc.id)
+                      })
+                    }
                   })
-
-                  let depatureDate = null
-                  if (payload.depatureDate) {
-                    const dateParts = payload.depatureDate.split('.')
-                    depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
-                  }
-
-                  if (payload.stops) {
-                    payload.stops.forEach((stop, index) => {
-                      try {
-                        stop.RTId = doc.id
-                        db.collection('RoundtripDetails').add(stop)
-                      } catch (e) {
-                        console.log(e)
-                      }
-                      if (index === payload.stops.length - 1) resolve(doc.id)
-                    })
-                  } else {
-                    db.collection('RoundtripDetails').add({
-                      BookingComLink: '',
-                      DateDistance: '',
-                      Description: 'Beschreibung dieses Stopps',
-                      ExpediaLink: '',
-                      GeneralLink: '',
-                      ImageUrl: '',
-                      InitDate: depatureDate || new Date(timeStamp),
-                      Price: 0,
-                      RTId: doc.id,
-                      Title: payload.tempLocation ? 'Start in ' + payload.tempLocation.label.split(',')[0] : 'Titel des 1. Stopps',
-                      Location: payload.tempLocation ? payload.tempLocation : {
-                        lng: '13.3888599',
-                        lat: '52.5170365',
-                        label: 'Berlin, 10117, Germany'
-                      }
-                    }).then(() => {
-                      resolve(doc.id)
-                    })
-                  }
                 })
               })
           })
@@ -222,6 +227,7 @@ export default {
               db.collection('RoundtripDetails').doc(doc.id).delete()
             })
           })
+
         db.collection('Roundtrips').doc(roundtripDocId).delete().then(function () {
           commit('removeRoundtrip', roundtripDocId)
           resolve(true)

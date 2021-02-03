@@ -505,6 +505,9 @@ export default {
       const initDate = new Date(timestamp.seconds * 1000)
       return date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
     },
+    openInNewTab (link) {
+      window.open(link, '_blank')
+    },
     onScroll () {
       const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop
       if (currentScrollPosition < 0) {

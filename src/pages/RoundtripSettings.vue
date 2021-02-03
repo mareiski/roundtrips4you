@@ -486,6 +486,9 @@ let context
 
 export default {
   name: 'RoundtripSettings',
+  components: {
+    RegionSearch: () => import('../pages/Map/RegionSearch')
+  },
   data () {
     return {
       stops: [],

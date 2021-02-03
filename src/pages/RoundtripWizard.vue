@@ -1,8 +1,8 @@
 <template>
   <div
     id="roundtripWizard"
-    style="padding-top:20px;"
-    class="q-px-lg q-pb-md"
+    :style="!isRTEditMode ? 'padding-top:20px;' : ''"
+    :class="!isRTEditMode ? 'q-px-lg q-pb-md' : ''"
   >
     <div
       class="edit-btn-container"
@@ -69,6 +69,7 @@
       :contracted="isMobile"
       animated
       keep-alive
+      v-if="!isRTEditMode"
     >
       <template v-slot:navigation>
         <!-- placholder for sticky nav -->
@@ -76,7 +77,10 @@
       </template>
 
       <template v-slot:message>
-        <div class="sticky-navigation">
+        <div
+          class="sticky-navigation"
+          :style="!isRTEditMode ? 'top: 93vh;' : ''"
+        >
           <q-stepper-navigation class="flex justify-end">
             <template v-if="step === 1">
               <q-btn
@@ -113,49 +117,9 @@
                 v-if="!isRTEditMode"
               />
               <q-btn
-                color="primary"
-                v-if="addedStops.length > 0"
-                @click="step = 6"
-                label="zur Reiseübersicht"
-              />
-            </template>
-
-            <template v-else-if="step === 4">
-              <q-btn
-                flat
-                @click="step = 3"
-                color="primary"
-                label="Zurück"
-                class="q-ml-sm"
-              />
-            </template>
-
-            <template v-else-if="step === 5">
-              <q-btn
-                flat
-                @click="stopToEdit <= -1 ? step = 3 : step = 6"
-                color="primary"
-                label="zurück"
-                class="q-ml-sm"
-              />
-              <q-btn
-                color="primary"
-                :disable="!currentStop.Title && currentStop.DayDuration <= 0"
-                @click="() => { done3 = true; step = 6; addStop() }"
-                :label="stopToEdit > -1 ? 'ändern' : 'hinzufügen'"
-              />
-            </template>
-
-            <template v-else-if="step === 6">
-              <q-btn
-                color="primary"
-                @click="step = 3"
-                icon="add"
-                label="Stopp"
-              />
-              <q-btn
                 flat
                 color="primary"
+                :disable="addedStops.length <= 1"
                 :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
                 class="q-ml-sm"
                 :loading="saving"
@@ -187,6 +151,7 @@
         </q-input>
 
         <div>
+          <p>Die folgenden Infos benötigen wir, um bei der Hotelsuche bereits alle Daten für dich einzugeben. <br /> Du kannst dies auch später noch ändern</p>
           <q-input
             v-model="currentRoundtrip.Rooms"
             label="Zimmer"
@@ -243,6 +208,7 @@
             </q-input>
           </div>
         </div>
+        <p>Wenn du das genaue Datum noch nicht weißt, kannst du es auch später noch ändern.</p>
         <q-input
           filled
           v-model="currentStop.InitDate"
@@ -452,462 +418,547 @@
 
       <q-step
         :name="3"
-        title="Reiseziel"
+        title="Reise erstellen"
         icon="place"
         :done="step > 3"
         :header-nav="step > 3"
       >
 
-        <div class="font-medium">Klicke auf einen Ort um ihn zur Reise hinzuzufügen</div>
-
-        <q-separator
-          inset
-          style="margin: 20px 0 20px 0; width:100%; "
-        />
-
-        <Map
-          :profile="addedStops[0] && addedStops[0].Profile ? addedStops[0].Profile : 'driving'"
-          :stops="addedStops"
-          :childrenAges="currentRoundtrip.ChildrenAges"
-          :rooms="Number(currentRoundtrip.Rooms)"
-          :adults="Number(currentRoundtrip.Adults)"
-          :editor="true"
+        <TripOverview
+          :addedStops="addedStops"
+          :currentRoundtrip="currentRoundtrip"
+          :isEditMode="isRTEditMode"
+          @stopsDragged="onStopsDragged($event)"
+          @editStop="editStop($event);"
+          @removeStop="removeStop($event)"
           @addStop="handleAddStopFromMap($event)"
           @update="updateFromSuggestedCity($event)"
-          ref="addStopMap"
-        ></Map>
-
+          @distanceUpdate="updateTotalTripDistance($event)"
+          ref="tripOverview"
+        ></TripOverview>
       </q-step>
 
-      <q-step
-        :name="5"
-        title="Details"
-        icon="subject"
-        :done="step > 5"
-        :header-nav="step > 5"
-      >
-        <q-input
-          v-model="currentStop.Title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an']"
-          style="font-family:Raleway; font-size:1.25rem;"
-          autofocus
-          label="Titel"
-          label-color="secondary"
-          filled
-          lazy-rules
+    </q-stepper>
+    <div v-else>
+      <TripOverview
+        :addedStops="addedStops"
+        :currentRoundtrip="currentRoundtrip"
+        :isEditMode="isRTEditMode"
+        @stopsDragged="onStopsDragged($event)"
+        @editStop="editStop($event);"
+        @removeStop="removeStop($event)"
+        @addStop="handleAddStopFromMap($event)"
+        @update="updateFromSuggestedCity($event)"
+        @distanceUpdate="updateTotalTripDistance($event)"
+      ></TripOverview>
+      <div class="sticky-navigation">
+        <q-btn
+          flat
+          color="primary"
+          :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
+          class="q-ml-sm"
+          :loading="saving"
+          @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
         />
+      </div>
+    </div>
 
-        <q-input
-          v-model.number="currentStop.DayDuration"
-          type="number"
-          filled
-          label="Dauer in Tagen"
-          :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
-          lazy-rules
-        />
-        <div style="margin-bottom:20px;">
-          <span>Ankunftsdatum:</span>
-          <span class="cursor-pointer font-medium">
-            {{ currentStop.InitDate.split(' ')[1] }}
-            <q-icon
-              name="access_time"
-              class="cursor-pointer"
-            ></q-icon>
-            <q-popup-proxy
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-time
-                v-model="currentStop.InitDate"
-                mask="DD.MM.YYYY HH:mm"
-                format24h
+    <q-dialog
+      v-model="showAddStopDialog"
+      class="bg-white"
+    >
+      <q-card>
+        <q-card-section>
+          <q-input
+            v-model="currentStop.Title"
+            :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an']"
+            style="font-family:Raleway; font-size:1.25rem;"
+            autofocus
+            label="Titel"
+            label-color="secondary"
+            filled
+            lazy-rules
+          />
+
+          <q-input
+            v-model.number="currentStop.DayDuration"
+            type="number"
+            filled
+            label="Dauer in Tagen"
+            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            lazy-rules
+          />
+          <div style="margin-bottom:20px;">
+            <span>Ankunftszeit:</span>
+            <span class="cursor-pointer font-medium">
+              {{ currentStop.InitDate.split(' ')[1] }}
+              <q-icon
+                name="access_time"
+                class="cursor-pointer"
+              ></q-icon>
+              <q-popup-proxy
+                transition-show="scale"
+                transition-hide="scale"
               >
-                <div class="row items-center justify-end">
-                  <q-btn
-                    v-close-popup
-                    label="Fertig"
-                    color="primary"
-                    flat
-                  />
-                </div>
-              </q-time>
-            </q-popup-proxy>
-
-          </span>
-        </div>
-        <q-select
-          outlined
-          v-model="inputProfile"
-          :options="['zu Fuß', 'Fahrrad', 'Auto']"
-          label="Reisemittel ab Ort"
-          use-input
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
-          class="input-item"
-          @input="getGeneralProfile()"
-        >
-          <template v-slot:prepend>
-            <q-icon name="commute" />
-          </template>
-        </q-select>
-
-        <div
-          style="margin-bottom:30px"
-          v-if="!hotelName"
-        >
+                <q-time
+                  v-model="currentStop.InitDate"
+                  mask="DD.MM.YYYY HH:mm"
+                  format24h
+                >
+                  <div class="row items-center justify-end">
+                    <q-btn
+                      v-close-popup
+                      label="Fertig"
+                      color="primary"
+                      flat
+                    />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
+            </span>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
           <q-btn
-            size="20"
-            icon="add"
-            @click="addHotel = true"
-          >Hotel hinzufügen
-          </q-btn>
-        </div>
+            v-close-popup
+            label="Abbrechen"
+          />
+          <q-btn
+            color="primary"
+            :disable="!currentStop.Title && currentStop.DayDuration <= 0"
+            @click="() => { addStop() }"
+            v-close-popup
+            :label="stopToEdit > -1 ? 'ändern' : 'hinzufügen'"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
-        <div style="margin-bottom:20px;">
-          <q-list
-            bordered
-            padding
-            dense
-            class="rounded-borders"
-            v-if="hotelName"
-          >
-            <q-item class="hotel-list">
-              <q-item-section
-                avatar
-                top
+    <q-dialog v-model="showEditStopDialog">
+      <q-card>
+        <q-card-section>
+          <q-input
+            v-model="currentStop.Title"
+            :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an']"
+            style="font-family:Raleway; font-size:1.25rem;"
+            autofocus
+            label="Titel"
+            label-color="secondary"
+            filled
+            lazy-rules
+          />
+
+          <q-input
+            v-model.number="currentStop.DayDuration"
+            type="number"
+            filled
+            label="Dauer in Tagen"
+            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            lazy-rules
+          />
+          <div style="margin-bottom:20px;">
+            <span>Ankunft:</span>
+            <span class="cursor-pointer font-medium">
+              {{ currentStop.InitDate.split(' ')[1] }}
+              <q-icon
+                name="access_time"
+                class="cursor-pointer"
+              ></q-icon>
+              <q-popup-proxy
+                transition-show="scale"
+                transition-hide="scale"
               >
-                <q-avatar
-                  color="secondary"
-                  text-color="white"
-                  font-size="20px"
-                  icon="hotel"
+                <q-time
+                  v-model="currentStop.InitDate"
+                  mask="DD.MM.YYYY HH:mm"
+                  format24h
                 >
-                </q-avatar>
-              </q-item-section>
+                  <div class="row items-center justify-end">
+                    <q-btn
+                      v-close-popup
+                      label="Fertig"
+                      color="primary"
+                      flat
+                    />
+                  </div>
+                </q-time>
+              </q-popup-proxy>
 
-              <q-item-section>
-                <q-item-label
-                  lines="2"
-                  class="flex"
-                  style="flex-wrap:wrap; white-space:normal;"
+            </span>
+          </div>
+          <q-select
+            outlined
+            v-model="inputProfile"
+            :options="['zu Fuß', 'Fahrrad', 'Auto']"
+            label="Reisemittel ab Ort"
+            use-input
+            :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+            class="input-item"
+            @input="getGeneralProfile()"
+          >
+            <template v-slot:prepend>
+              <q-icon name="commute" />
+            </template>
+          </q-select>
+
+          <div
+            style="margin-bottom:30px"
+            v-if="!hotelName"
+          >
+            <q-btn
+              size="20"
+              icon="add"
+              @click="addHotel = true"
+            >Hotel hinzufügen
+            </q-btn>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <q-list
+              bordered
+              padding
+              dense
+              class="rounded-borders"
+              v-if="hotelName"
+            >
+              <q-item class="hotel-list">
+                <q-item-section
+                  avatar
+                  top
                 >
-                  <span style="padding-right:5px;">{{capitalize(hotelName)}}</span>
-                  <q-rating
-                    v-if="hotelStars && !isNaN(hotelStars)"
-                    class="stars"
-                    v-model="hotelStars"
-                    readonly
-                    size="15px"
-                    color="gold"
-                    style="margin-right:10px; padding-right:5px;"
-                  />
-                  <div
+                  <q-avatar
+                    color="secondary"
+                    text-color="white"
+                    font-size="20px"
+                    icon="hotel"
+                  >
+                  </q-avatar>
+                </q-item-section>
+
+                <q-item-section>
+                  <q-item-label
+                    lines="2"
                     class="flex"
                     style="flex-wrap:wrap; white-space:normal;"
                   >
-                    <span
-                      v-if="guestRating"
-                      class="raleway"
-                    >
-                      {{guestRating}},&nbsp;
-                    </span>
-                    <span v-if="hotelPrice">
-                      <span class="raleway">ca. € </span>
-                      <span class="raleway">{{hotelPrice}}</span>
-                      <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
-                    </span>
-                  </div>
-                </q-item-label>
-                <q-item-label
-                  caption
-                  style="overflow:hidden;"
-                >
-                  <a
-                    class="ellipsis"
-                    @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
-                  >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
-                </q-item-label>
-              </q-item-section>
-              <q-item-section>
-                <q-btn
-                  v-if="transportLocations && transportLocations.lenght > 0"
-                  style="width:150px;"
-                  @click="showTransportDialog = true"
-                >Transport
-                </q-btn>
-              </q-item-section>
-              <q-dialog v-model="showTransportDialog">
-                <q-card>
-                  <q-card-section
-                    class="row items-center flex"
-                    style="flex-direction:column;"
-                  >
-                    <q-list>
-                      <div
-                        class="flex"
-                        style="flex-direction:column;"
-                        v-for="location in transportLocations"
-                        :key="location"
-                      >
-                        <q-item
-                          v-for="sublocation in location.locations"
-                          :key="sublocation"
-                          clickable
-                          @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + sublocation.name)"
-                        >
-                          <q-item-section>
-                            <span>
-                              <q-icon :name="getHotelTransportationIcon(location.category)" />
-                              <span>{{sublocation.name}}</span>
-                            </span>
-                            <p>{{sublocation.distanceInTime}}</p>
-                          </q-item-section>
-                        </q-item>
-                      </div>
-                    </q-list>
-                  </q-card-section>
-
-                  <q-card-actions align="right">
-                    <q-btn
-                      flat
-                      label="OK"
-                      color="primary"
-                      v-close-popup
+                    <span style="padding-right:5px;">{{capitalize(hotelName)}}</span>
+                    <q-rating
+                      v-if="hotelStars && !isNaN(hotelStars)"
+                      class="stars"
+                      v-model="hotelStars"
+                      readonly
+                      size="15px"
+                      color="gold"
+                      style="margin-right:10px; padding-right:5px;"
                     />
-                  </q-card-actions>
-                </q-card>
-              </q-dialog>
-              <q-item-section side>
-                <div v-if="generalTempLink && generalTempLink.length > 0">
+                    <div
+                      class="flex"
+                      style="flex-wrap:wrap; white-space:normal;"
+                    >
+                      <span
+                        v-if="guestRating"
+                        class="raleway"
+                      >
+                        {{guestRating}},&nbsp;
+                      </span>
+                      <span v-if="hotelPrice">
+                        <span class="raleway">ca. € </span>
+                        <span class="raleway">{{hotelPrice}}</span>
+                        <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
+                      </span>
+                    </div>
+                  </q-item-label>
+                  <q-item-label
+                    caption
+                    style="overflow:hidden;"
+                  >
+                    <a
+                      class="ellipsis"
+                      @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
+                    >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section>
+                  <q-btn
+                    v-if="transportLocations && transportLocations.lenght > 0"
+                    style="width:150px;"
+                    @click="showTransportDialog = true"
+                  >Transport
+                  </q-btn>
+                </q-item-section>
+                <q-dialog v-model="showTransportDialog">
+                  <q-card>
+                    <q-card-section
+                      class="row items-center flex"
+                      style="flex-direction:column;"
+                    >
+                      <q-list>
+                        <div
+                          class="flex"
+                          style="flex-direction:column;"
+                          v-for="location in transportLocations"
+                          :key="location"
+                        >
+                          <q-item
+                            v-for="sublocation in location.locations"
+                            :key="sublocation"
+                            clickable
+                            @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + sublocation.name)"
+                          >
+                            <q-item-section>
+                              <span>
+                                <q-icon :name="getHotelTransportationIcon(location.category)" />
+                                <span>{{sublocation.name}}</span>
+                              </span>
+                              <p>{{sublocation.distanceInTime}}</p>
+                            </q-item-section>
+                          </q-item>
+                        </div>
+                      </q-list>
+                    </q-card-section>
+
+                    <q-card-actions align="right">
+                      <q-btn
+                        flat
+                        label="OK"
+                        color="primary"
+                        v-close-popup
+                      />
+                    </q-card-actions>
+                  </q-card>
+                </q-dialog>
+                <q-item-section side>
+                  <div v-if="generalTempLink && generalTempLink.length > 0">
+                    <q-chip
+                      icon="link"
+                      dense
+                      class="linkChip"
+                      clickable
+                      @click="openInNewTab(generalTempLink)"
+                    >Hotelwebsite</q-chip>
+                  </div>
                   <q-chip
-                    icon="link"
+                    icon="launch"
+                    v-if="hotelName && typeof hotelName !== 'undefined'"
                     dense
+                    style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab(generalTempLink)"
-                  >Hotelwebsite</q-chip>
-                </div>
-                <q-chip
-                  icon="launch"
-                  v-if="hotelName && typeof hotelName !== 'undefined'"
-                  dense
-                  style="width:117px;"
-                  class="linkChip"
-                  clickable
-                  @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
-                > booking.com
-                  <q-tooltip>Hotel auf booking.com</q-tooltip>
-                </q-chip>
-                <q-chip
-                  icon="launch"
-                  v-if="hotelName && typeof hotelName !== 'undefined'"
-                  dense
-                  style="width:117px;"
-                  class="linkChip"
-                  clickable
-                  @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
-                > expedia
-                  <q-tooltip>Hotel auf expedia</q-tooltip>
-                </q-chip>
-              </q-item-section>
-              <q-item-section
-                side
-                v-if="hotelContact && typeof hotelContact !== 'undefined'"
-              >
-                <div class="hotel-contact">
-                  <q-chip
-                    v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
-                    icon="email"
-                    clickable
-                    @click="openInNewTab('mailto:' + hotelContact.email)"
-                  >{{ hotelContact.email}}
+                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+                  > booking.com
+                    <q-tooltip>Hotel auf booking.com</q-tooltip>
                   </q-chip>
                   <q-chip
-                    icon="phone"
-                    v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+                    icon="launch"
+                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    dense
+                    style="width:117px;"
+                    class="linkChip"
                     clickable
-                    @click="openInNewTab('tel:' + hotelContact.phone)"
-                  >{{hotelContact.phone}}
+                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
+                  > expedia
+                    <q-tooltip>Hotel auf expedia</q-tooltip>
                   </q-chip>
-                </div>
-              </q-item-section>
+                </q-item-section>
+                <q-item-section
+                  side
+                  v-if="hotelContact && typeof hotelContact !== 'undefined'"
+                >
+                  <div class="hotel-contact">
+                    <q-chip
+                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
+                      icon="email"
+                      clickable
+                      @click="openInNewTab('mailto:' + hotelContact.email)"
+                    >{{ hotelContact.email}}
+                    </q-chip>
+                    <q-chip
+                      icon="phone"
+                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+                      clickable
+                      @click="openInNewTab('tel:' + hotelContact.phone)"
+                    >{{hotelContact.phone}}
+                    </q-chip>
+                  </div>
+                </q-item-section>
 
-              <q-item-section side>
-                <q-icon
-                  name="clear"
-                  color="primary"
-                  @click="removeHotel()"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+                <q-item-section side>
+                  <q-icon
+                    name="clear"
+                    color="primary"
+                    @click="removeHotel()"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
 
-        <q-dialog v-model="addHotel">
-          <q-card>
-            <q-card-section>
-              <h6 style="margin:0;">Hotels auf booking.com ansehen:</h6>
-              <q-chip
-                icon="launch"
-                v-if="currentStop.Location"
-                dense
-                style="width:117px;margin-bottom:40px;"
-                class="linkChip"
-                clickable
-                @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + currentStop.Location.label.split(',')[0] + '&checkin_year=' + currentStop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + currentStop.InitDate.split('.')[1] + '&checkin_monthday=' + currentStop.InitDate.split('.')[0] + '&checkout_year=' + getCheckOutDate().split('.')[2] + '&checkout_month=' + getCheckOutDate().split('.')[1] + '&checkout_monthday=' + getCheckOutDate().split('.')[0] + '&group_adults=' + currentRoundtrip.Adults + getChildrenText() +  '&no_rooms=' + currentRoundtrip.Rooms + '&ac_langcode=de')"
-              > booking.com
-              </q-chip>
-
-              <h6 style="margin:0;">Hotel hinzufügen:</h6>
-
-              <HotelSearch
-                v-if="currentStop.Location && currentStop.Location.lat"
-                :disabled="!getCheckOutDate()"
-                :lat="currentStop.Location.lat.toString()"
-                :long="currentStop.Location.lng.toString()"
-                :checkInDate="currentStop.InitDate"
-                :checkOutDate="getCheckOutDate()"
-                :roomAmount="parseInt(currentRoundtrip.Rooms)"
-                :adults="parseInt(currentRoundtrip.Adults)"
-                :childrenAges="currentRoundtrip.ChildrenAges"
-                @update="updateHotelData($event)"
-                ref="hotelSearch"
-              ></HotelSearch>
-            </q-card-section>
-            <q-card-section>
-              <q-input
-                v-model="generalTempLink"
-                ref="urlInput"
-                type="url"
-                :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
-                label="Hotel link (optional)"
-                outlined
-              >
-                <template v-slot:prepend>
-                  <q-icon name="link" />
-                </template>
-              </q-input>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn
-                flat
-                label="Abbrechen"
-                color="primary"
-                v-close-popup
-                @click="removeHotel()"
-              />
-              <q-btn
-                flat
-                label="Hotel hinzufügen"
-                @click="addHotelToStop()"
-                color="primary"
-                :disable="addHotelDisabled"
-                v-close-popup
-              />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
-
-        <div v-if="suggestedSights && typeof suggestedSights !== 'undefined' && suggestedSights !== 'error'">
-          <span
-            v-for="(sight, index) in suggestedSights"
-            :key="index"
-            :href="'https://www.google.com/search?q=' + sight.name + ' ' + currentStop.Location ? currentStop.Location.label.split(',')[0] : ''"
-            target="_blank"
-            style="text-decoration:none;"
-          >
-            <q-chip
-              clickable
-              @click="openSightDialog(sight)"
-              :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
-            >{{sight.name}}
-            </q-chip>
-
-          </span>
-          <a
-            target="_blank"
-            v-if="currentStop.Location"
-            :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' Sehenswürdigkeiten'"
-          >weitere auf Google</a>
-          <q-dialog v-model="sightDialog.showed">
+          <q-dialog v-model="addHotel">
             <q-card>
-              <q-card-section
-                class="row flex justify-end q-pb-none"
-                style="z-index:100; width:100%; position:absolute; color:white;"
-              >
-                <q-btn
-                  icon="close"
-                  flat
-                  round
-                  dense
-                  v-close-popup
-                />
-              </q-card-section>
-              <q-img
-                :src="sightDialog.imgSrc"
-                style="max-height:75vh;"
-              >
-                <div class="absolute-bottom">
-                  <div class="text-h6">{{sightDialog.title}}</div>
-                  <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
-                </div>
-              </q-img>
-
               <q-card-section>
-                {{sightDialog.description}}
-              </q-card-section>
+                <h6 style="margin:0;">Hotels auf booking.com ansehen:</h6>
+                <q-chip
+                  icon="launch"
+                  v-if="currentStop.Location"
+                  dense
+                  style="width:117px;margin-bottom:40px;"
+                  class="linkChip"
+                  clickable
+                  @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + currentStop.Location.label.split(',')[0] + '&checkin_year=' + currentStop.InitDate.split(' ')[0].split('.')[2] + '&checkin_month=' + currentStop.InitDate.split('.')[1] + '&checkin_monthday=' + currentStop.InitDate.split('.')[0] + '&checkout_year=' + getCheckOutDate().split('.')[2] + '&checkout_month=' + getCheckOutDate().split('.')[1] + '&checkout_monthday=' + getCheckOutDate().split('.')[0] + '&group_adults=' + currentRoundtrip.Adults + getChildrenText() +  '&no_rooms=' + currentRoundtrip.Rooms + '&ac_langcode=de')"
+                > booking.com
+                </q-chip>
 
+                <h6 style="margin:0;">Hotel hinzufügen:</h6>
+
+                <HotelSearch
+                  v-if="currentStop.Location && currentStop.Location.lat"
+                  :disabled="!getCheckOutDate()"
+                  :lat="currentStop.Location.lat.toString()"
+                  :long="currentStop.Location.lng.toString()"
+                  :checkInDate="currentStop.InitDate"
+                  :checkOutDate="getCheckOutDate()"
+                  :roomAmount="parseInt(currentRoundtrip.Rooms)"
+                  :adults="parseInt(currentRoundtrip.Adults)"
+                  :childrenAges="currentRoundtrip.ChildrenAges"
+                  @update="updateHotelData($event)"
+                  ref="hotelSearch"
+                ></HotelSearch>
+              </q-card-section>
+              <q-card-section>
+                <q-input
+                  v-model="generalTempLink"
+                  ref="urlInput"
+                  type="url"
+                  :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
+                  label="Hotel link (optional)"
+                  outlined
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="link" />
+                  </template>
+                </q-input>
+              </q-card-section>
               <q-card-actions align="right">
                 <q-btn
                   flat
-                  label="hinzufügen"
+                  label="Abbrechen"
                   color="primary"
                   v-close-popup
-                  @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
+                  @click="removeHotel()"
+                />
+                <q-btn
+                  flat
+                  label="Hotel hinzufügen"
+                  @click="addHotelToStop()"
+                  color="primary"
+                  :disable="addHotelDisabled"
+                  v-close-popup
                 />
               </q-card-actions>
             </q-card>
           </q-dialog>
-        </div>
-        <q-chip
-          v-else
-          clickable
-          @click="searchSights()"
-        >{{suggestedSights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
-          <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
-        </q-chip>
 
-        <q-select
-          label="Sehenswürdigkeiten"
-          filled
-          v-model="currentStop.Sights"
-          use-input
-          use-chips
-          multiple
-          hide-dropdown-icon
-          input-debounce="0"
-          new-value-mode="add-unique"
-          style="margin:10px 10px 10px 0;"
-          ref="sightInput"
-        >
-          <template v-slot:prepend>
-            <q-icon
-              name="add"
-              @click.stop
-            />
-          </template>
-        </q-select>
+          <div v-if="suggestedSights && typeof suggestedSights !== 'undefined' && suggestedSights !== 'error'">
+            <span
+              v-for="(sight, index) in suggestedSights"
+              :key="index"
+              :href="'https://www.google.com/search?q=' + sight.name + ' ' + currentStop.Location ? currentStop.Location.label.split(',')[0] : ''"
+              target="_blank"
+              style="text-decoration:none;"
+            >
+              <q-chip
+                clickable
+                @click="openSightDialog(sight)"
+                :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
+              >{{sight.name}}
+              </q-chip>
 
-        <q-editor
-          v-model="currentStop.Description"
-          min-height="5rem"
-          ref="editor_ref"
-          @keyup.enter.stop
-          :toolbar="editorToolbar"
-          toolbar-toggle-color="primary"
-          :fonts="editorFonts"
-          @paste.native="evt => pasteCapture(evt)"
-          style="margin-top:10px; margin-bottom:10px;"
-          :definitions="{
+            </span>
+            <a
+              target="_blank"
+              v-if="currentStop.Location"
+              :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' Sehenswürdigkeiten'"
+            >weitere auf Google</a>
+            <q-dialog v-model="sightDialog.showed">
+              <q-card>
+                <q-card-section
+                  class="row flex justify-end q-pb-none"
+                  style="z-index:100; width:100%; position:absolute; color:white;"
+                >
+                  <q-btn
+                    icon="close"
+                    flat
+                    round
+                    dense
+                    v-close-popup
+                  />
+                </q-card-section>
+                <q-img
+                  :src="sightDialog.imgSrc"
+                  style="max-height:75vh;"
+                >
+                  <div class="absolute-bottom">
+                    <div class="text-h6">{{sightDialog.title}}</div>
+                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
+                  </div>
+                </q-img>
+
+                <q-card-section>
+                  {{sightDialog.description}}
+                </q-card-section>
+
+                <q-card-actions align="right">
+                  <q-btn
+                    flat
+                    label="hinzufügen"
+                    color="primary"
+                    v-close-popup
+                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
+          </div>
+          <q-chip
+            v-else
+            clickable
+            @click="searchSights()"
+          >{{suggestedSights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
+            <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
+          </q-chip>
+
+          <q-select
+            label="Sehenswürdigkeiten"
+            filled
+            v-model="currentStop.Sights"
+            use-input
+            use-chips
+            multiple
+            hide-dropdown-icon
+            input-debounce="0"
+            new-value-mode="add-unique"
+            style="margin:10px 10px 10px 0;"
+            ref="sightInput"
+          >
+            <template v-slot:prepend>
+              <q-icon
+                name="add"
+                @click.stop
+              />
+            </template>
+          </q-select>
+
+          <q-editor
+            v-model="currentStop.Description"
+            min-height="5rem"
+            ref="editor_ref"
+            @keyup.enter.stop
+            :toolbar="editorToolbar"
+            toolbar-toggle-color="primary"
+            :fonts="editorFonts"
+            @paste.native="evt => pasteCapture(evt)"
+            style="margin-top:10px; margin-bottom:10px;"
+            :definitions="{
         format: {
           top: 'Formatierung bei Kopieren beibehaten',
           icon: $q.iconSet.editor.formatting,
@@ -915,153 +966,25 @@
           handler: formatOn
         }
         }"
-        />
-      </q-step>
-
-      <q-step
-        :name="6"
-        title="Reiseübersicht"
-        icon="timeline"
-        :header-nav="step > 6"
-      >
-
-        <q-list
-          bordered
-          class="rounded-borders"
-        >
-          <q-item-label
-            header
-            class="text-weight-bold"
-          >{{currentRoundtrip.Title}}</q-item-label>
-
-          <q-separator />
-          <draggable
-            v-model="addedStops"
-            @end="onStopsDragged"
-            handle=".handle"
-          >
-            <transition-group name="flip-list">
-              <q-item
-                v-for="(stop, index) in addedStops"
-                :key="stop"
-              >
-                <q-item-section avatar>
-                  <q-icon
-                    color="primary"
-                    name="drag_indicator"
-                    class="cursor-DandD handle"
-                  />
-                </q-item-section>
-                <q-item-section
-                  clickable
-                  v-ripple
-                  class="cursor-pointer"
-                  @click="editStop(index)"
-                >
-                  <q-item-label lines="1">{{stop.Title}}</q-item-label>
-                  <q-item-label
-                    caption
-                    lines="1"
-                    style="max-width:400px;"
-                  >
-                    <!-- <span class="text-weight-bold">{{stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '')}}</span> -->
-
-                    <span
-                      v-if="stop.Description"
-                      v-html="'<span class=&quot;text-weight-bold&quot;>' + stop.Location.label.split(',')[0] + (stop.Description ? ' - ' : '') + '</span>' + stop.Description"
-                    >
-                    </span>
-                  </q-item-label>
-                </q-item-section>
-
-                <q-item-section
-                  side
-                  top
-                  class="flex"
-                  style="flex-direction:row;"
-                >
-                  <div
-                    class="flex justify-center"
-                    style="flex-direction:column; height:100%;"
-                  >
-                    {{stop.InitDate.split(' ')[0]}}
-                  </div>
-                  <div>
-                    <q-btn
-                      @click="removeStop(index)"
-                      flat
-                      round
-                      icon="delete"
-                    >
-                      <q-tooltip>Stopp löschen</q-tooltip>
-                    </q-btn>
-                  </div>
-                </q-item-section>
-              </q-item>
-            </transition-group>
-          </draggable>
-          <q-separator inset="item" />
-        </q-list>
-        <p
-          style="padding-top:10px; font-family:Raleway;"
-          v-if="totalTripDuration && totalTripDistance"
-        >Insgesamt {{totalTripDuration}} Tage und {{totalTripDistance}} km</p>
-
-        <div class="auto-route-btn">
+          />
+        </q-card-section>
+        <q-card-actions align="right">
           <q-btn
-            @click="showAutoRoutedialog = true"
-            class="q-mt-md"
+            flat
+            label="Abbrechen"
             color="primary"
-            text-color="white"
-            :disable="addedStops.length <= 1"
-            no-caps
-            label="automatische Route erstellen"
-          >
-          </q-btn>
-          <q-tooltip v-if="addedStops.length <= 1">Erstelle mehr als 1 Stopp um diese Funktion zu benutzen</q-tooltip>
-        </div>
-        <q-dialog
-          persistent
-          v-model="showAutoRoutedialog"
-        >
-          <q-card>
-            <q-card-section class="row items-center">
-              <span class="q-ml-sm">Wenn du eine automatische Route erstellst wird die aktuelle Reihenfolge deiner Reise verändert. Möchtest du Fortfahren</span>
-            </q-card-section>
-
-            <q-card-actions align="right">
-              <q-btn
-                flat
-                label="Rundreise automatisch erstellen"
-                @click="setTripToShortestRoute()"
-                color="primary"
-                v-close-popup
-              />
-              <q-btn
-                flat
-                label="Abbrechen"
-                color="primary"
-                v-close-popup
-              />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
-        <div style="margin-top:20px;">
-          <Map
-            :profile="addedStops[0] && addedStops[0].Profile ? addedStops[0].Profile : 'driving'"
-            :stops="addedStops"
-            :childrenAges="currentRoundtrip.ChildrenAges"
-            :rooms="Number(currentRoundtrip.Rooms)"
-            :adults="Number(currentRoundtrip.Adults)"
-            :editor="true"
-            @addStop="handleAddStopFromMap($event)"
-            @update="updateFromSuggestedCity($event)"
-            @distanceUpdate="updateTotalTripDistance($event)"
-            ref="overviewMap"
-          ></Map>
-        </div>
-      </q-step>
-    </q-stepper>
+            v-close-popup
+          />
+          <q-btn
+            label="Speichern"
+            color="primary"
+            :disable="!currentStop.DayDuration || currentStop.DayDuration <= 0"
+            @click="() => { addStop() }"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <style lang="less">
@@ -1077,8 +1000,7 @@ import { countries } from '../countries.js'
 import axios from 'axios'
 import sharedMethods from '../sharedMethods.js'
 import { date } from 'quasar'
-import Map from '../pages/Map/Map'
-import draggable from 'vuedraggable'
+// import draggable from 'vuedraggable'
 import { auth, db } from '../firebaseInit.js'
 
 let timeStamp = Date.now()
@@ -1086,9 +1008,9 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
   components: {
-    HotelSearch: () => import('../pages/Map/HotelSearch'),
-    Map,
-    draggable
+    HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
+    // draggable,
+    TripOverview: () => import('../pages/TripOverview/TripOverview.vue')
   },
   computed: {
     isMobile () {
@@ -1108,7 +1030,7 @@ export default {
       destinationOptions: [],
       unsavedChanges: false,
       currentRoundtrip: {
-        Title: 'meine Reise',
+        Title: '',
         Rooms: 1,
         Adults: 2,
         ChildrenAges: [],
@@ -1158,6 +1080,9 @@ export default {
 
       // -1 if no stop to edit (normal mode) else put index of stop to edit
       stopToEdit: -1,
+
+      showAddStopDialog: false,
+      showEditStopDialog: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -1275,9 +1200,8 @@ export default {
         DayDuration: 1
       }
 
-      // reload both maps
-      if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
-      if (this.$refs.addStopMap) this.$refs.addStopMap.loadMap(null, this.addedStops)
+      // reload map
+      if (this.$refs.tripOverview) this.$refs.tripOverview.refreshMap()
 
       this.updateTotalTripDuration()
     },
@@ -1406,7 +1330,7 @@ export default {
      * creates the roundtrip (write the temp data into db)
      */
     createTrip () {
-      if (this.unsavedChanges) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+      if (!this.unsavedChanges) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
 
       // need this json stringify to prevent update of location when the click location changes
       let stops = JSON.parse(JSON.stringify(this.addedStops))
@@ -1471,19 +1395,21 @@ export default {
 
           this.saving = true
           try {
-            this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, days: daysString, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: countries, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops }).then(docId => {
-              if (docId && docId !== null) {
-                let context = this
-                // wait to ensure roundtrip is fully added
-                setTimeout(function () {
+            this.$store.dispatch({ type: 'roundtrips/addRoundtrip', title: this.currentRoundtrip.Title, days: daysString, uid: auth.user().uid, rooms: this.currentRoundtrip.Rooms, adults: this.currentRoundtrip.Adults, childrenAges: this.currentRoundtrip.ChildrenAges, tempLocation: countries, depatureDate: this.currentRoundtrip.DepatureDate, transportProfile: this.currentRoundtrip.TransportProfile, origin: this.currentRoundtrip.Origin, originCode: null, destination: this.currentRoundtrip.Destination, destinationCode: null, returnDate: this.currentRoundtrip.ReturnDate, travelClass: this.currentRoundtrip.TravelClass, nonStop: this.currentRoundtrip.NonStop, stops: stops })
+              .then(docId => {
+                if (docId && docId !== null) {
+                  let context = this
+                  // wait to ensure roundtrip is fully added
+                  setTimeout(function () {
+                    this.saving = false
+                    console.log(docId)
+                    context.$router.push('/rundreise-ansehen/' + docId)
+                  }, 500)
+                } else {
                   this.saving = false
-                  context.$router.push('/rundreise-ansehen/' + docId)
-                }, 500)
-              } else {
-                this.saving = false
-                sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
-              }
-            })
+                  sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
+                }
+              })
           } catch (error) {
             console.log(error)
             this.saving = false
@@ -1591,7 +1517,7 @@ export default {
     editStop (index) {
       this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
       this.stopToEdit = index
-      this.step = 5
+      this.showEditStopDialog = true
     },
     isUniqueTitle (val) {
       return sharedMethods.isUniqueTitle(val)
@@ -1680,7 +1606,7 @@ export default {
         label: event.name
       }
 
-      this.currentStop.Title = 'Zwischenstopp in ' + event.name.split(',')[0]
+      this.currentStop.Title = 'Stopp in ' + event.name.split(',')[0]
       this.step = 5
     },
     /**
@@ -1694,7 +1620,7 @@ export default {
           lat: event.y,
           label: event.label
         }
-        this.currentStop.Title = 'Zwischenstopp in ' + event.label.split(',')[0]
+        this.currentStop.Title = 'Stopp in ' + event.label.split(',')[0]
         this.step = 5
       } else {
         this.currentStop.Location = null
@@ -1878,7 +1804,7 @@ export default {
       // check if we didn't add this stop before
       if (this.currentStop.Location !== event.location) {
         this.currentStop = {
-          Title: 'Zwischenstopp in ' + event.location.label,
+          Title: 'Stopp in ' + event.location.label,
           Description: 'Raum für Notizen, Beschreibungen...',
           Location: event.location,
           Sights: [],
@@ -1887,7 +1813,8 @@ export default {
           DayDuration: 1
         }
 
-        this.step = 5
+        this.showAddStopDialog = true
+        // this.step = 5
       }
     },
     /**

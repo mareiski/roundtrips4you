@@ -2,6 +2,10 @@
 
 #roundtripWizard {
 
+    .q-stepper__content {
+        margin-top: -40px;
+    }
+
     .q-stepper__step-inner {
         padding-top: 0;
     }
@@ -9,11 +13,13 @@
     .sticky-navigation {
         position: -webkit-sticky;
         position: sticky;
-        top: 93%;
+        bottom: 0;
         z-index: 100;
         background-color: white;
         padding: 10px 20px 10px 0;
         box-shadow: 0 -5px 5px -5px rgba(0, 0, 0, 0.19);
+        display: flex;
+        justify-content: flex-end;
 
         &>* {
             padding-top: 0;
@@ -30,7 +36,7 @@
 
     @media @mobile {
         .q-stepper--horizontal .q-stepper__step-inner {
-            padding: 0;
+            padding: 8px;
         }
 
         .auto-route-btn {

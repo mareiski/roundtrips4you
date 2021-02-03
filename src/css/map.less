@@ -1,5 +1,9 @@
 @primary-orange: #D56026;
 @primary-gray: #707070;
+@primary-font: Roboto;
+@primary-number-font: Raleway;
+@mobile: ~"only screen and (min-width: 0px) and (max-width: 719px)";
+
 
 .map {
     .mapboxgl-popup-content {
@@ -25,5 +29,55 @@
 
     .q-drawer {
         z-index: 2 !important;
+    }
+}
+
+.city-card {
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .city-info {
+        position: absolute;
+        top: -15px;
+        z-index: 1;
+        right: -17px;
+    }
+}
+
+.rating-text {
+    padding-left: 15px;
+    color: #707070;
+    padding-top: 10px;
+    font-family: @primary-number-font;
+}
+
+
+@media @mobile {
+    .mapboxgl-ctrl-geocoder {
+        font-size: 15px;
+        line-height: 20px;
+        max-width: 360px;
+    }
+
+    .mapboxgl-ctrl-geocoder--input {
+        height: 36px;
+        padding: 6px 35px;
+    }
+
+    .mapboxgl-ctrl-geocoder--icon-search {
+        left: 7px;
+        width: 20px;
+        height: 20px;
+    }
+
+    .mapboxgl-ctrl-geocoder--icon {
+        top: 8px;
     }
 }

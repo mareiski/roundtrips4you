@@ -356,10 +356,10 @@ export default {
     /**
      * switch back to country mode
      */
-    switchToCountryMode () {
-      this.POIMode = false
-      sharedMethods.getParent('Map', this).showCitiesOnMap(this.cities)
-    },
+    // switchToCountryMode () {
+    //   this.POIMode = false
+    //   sharedMethods.getParent('Map', this).showCitiesOnMap(this.cities)
+    // },
     /**
      * get all cities for country cities
      */
@@ -379,7 +379,7 @@ export default {
      */
     handleFetchedSuggestions (tempCities) {
       let context = this
-      tempCities.forEach((city, index) => {
+      tempCities.forEach((city) => {
         setTimeout(function () {
           CitySuggestionMethods.getCityImage(city.name, city.country).then(image => {
             context.images.splice(context.cities.findIndex(x => x.name === city.name), 0, image)
@@ -389,7 +389,7 @@ export default {
 
       let uniqueCities = []
 
-      tempCities.forEach((city, index) => {
+      tempCities.forEach((city) => {
         let cityObject = {
           name: city.name,
           country: city.country,
@@ -407,7 +407,7 @@ export default {
       })
 
       this.cities = uniqueCities
-      sharedMethods.getParent('Map', this).showCitiesOnMap(uniqueCities)
+      // sharedMethods.getParent('Map', this).showCitiesOnMap(uniqueCities)
     },
     cityAlreadyAdded (city) {
       if (this.alreadyAddedCities) {

@@ -6,12 +6,12 @@
     <MglMap
       :accessToken="accTo"
       :mapStyle.sync="mapStyle"
-      style="height:500px;"
+      :style="'height:' + (height ? height : '500px;')"
       :center="centerLocation"
       :zoom="6"
       :mapboxGl="mapbox"
       :attributionControl="false"
-      logoPosition="bottom-right"
+      logoPosition="bottom-left"
       keyboard
       doubleClickZoom
       @load="onMapLoaded"
@@ -28,18 +28,17 @@
         position="top-right"
       />
       <q-btn
-        v-show="isMobile"
         color="white"
         text-color="secondary"
         icon="apartment"
         style="position:absolute; right:9px; top:220px;"
-        @click="suggestionDialogVisible = true; showDrawerList = false; miniDisabled = true; showCityMarkers = true;"
+        @click="showSuggestionCountryDialog = true; showDrawerList = false; miniDisabled = true;"
       >
       </q-btn>
       <MglFullscreenControl position="bottom-right" />
 
       <!-- drawer is used on tablets and desktops only -->
-      <q-drawer
+      <!-- <q-drawer
         v-model="drawerLeft"
         show-if-above
         v-if="editor"
@@ -81,10 +80,10 @@
             @update="update($event)"
           ></MapDrawerItem>
         </q-scroll-area>
-      </q-drawer>
+      </q-drawer> -->
 
-      <!-- dialog is used on mobile devices -->
-      <q-dialog
+      <!-- city suggestion dialog -->
+      <!-- <q-dialog
         v-model="suggestionDialogVisible"
         position="bottom"
         seamless
@@ -108,14 +107,15 @@
             </q-card-section>
           </q-card>
         </q-swipe-to-close>
-      </q-dialog>
+      </q-dialog> -->
 
       <MglMarker
         v-for="stop in stops"
         :key="stop.DocId"
         :coordinates="stop.HotelName && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
-        @click="onMarkerClicked($event)"
+        ref="stopMarker"
+        @click="onMarkerClicked($event, stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label )"
       >
         <MglPopup>
 
@@ -126,18 +126,20 @@
               height="135px"
               :src="stop.StopImages[0]"
             ></q-img>
+            <q-img
+              width="240px"
+              height="135px"
+              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+            ></q-img>
             <q-card-section>
-              <div class="text-h6">
+              <div
+                class="font-large"
+                style="line-height:normal;"
+              >
                 {{stop.Title}}
               </div>
-              <div class="text-subtitle2">
-                <p style="margin-bottom:5px;">
-                  <q-icon name="location_on" />
-                  <a
-                    target="_blank"
-                    :href="!stop.HotelName || !stop.HotelLocation ? 'https://www.google.com/maps/search/?api=1&query=' + stop.Location.label : 'https://www.google.com/maps/search/?api=1&query=' + stop.HotelLocation.label"
-                  >{{stop.HotelName && stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label}}</a>
-                </p>
+              <div style="font-size:13px;">
+                {{ lastPOICityData.shortDescription }}
                 <p v-if="stop.GeneralLink && stop.GeneralLink.length > 0">
                   <q-icon name="house" />
                   <a
@@ -148,26 +150,15 @@
               </div>
             </q-card-section>
 
-            <q-card-section class="q-pt-none">
-              <q-chip
-                icon="fab fa-bootstrap"
-                v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
-                dense
-                style="width:175px;"
-                class="linkChip"
-                clickable
-                @click="openInNewTab('https://www.booking.com/searchresults.de.html?&ss=' + capitalize(stop.HotelName) + '&checkin_year=' + new Date(stop.InitDate.seconds * 1000).getFullYear() + '&checkin_month=' + new Date(stop.InitDate.seconds * 1000).getMonth() + '&checkin_monthday=' + new Date(stop.InitDate.seconds * 1000).getDay() + '&checkout_year=' + stop.CheckOutDate.split('.')[2] + '&checkout_month=' + stop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + stop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + stop.Rooms + '&ac_langcode=de')"
-              > Hotel auf booking.com</q-chip>
-              <q-chip
-                icon="house"
-                v-if="stop.HotelName && typeof stop.HotelName !== 'undefined'"
-                dense
-                style="width:175px;"
-                class="linkChip"
-                clickable
-                @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(stop.HotelName) + '&endDate=' + stop.CheckOutDate.split(' ')[0].split('.')[2] + '-' + stop.CheckOutDate.split('.')[1] + '-' + stop.CheckOutDate.split('.')[0] + '&rooms=' + stop.rooms + '&sort=RECOMMENDED&startDate=' + new Date(stop.InitDate.seconds * 1000).getFullYear() + '-' + new Date(stop.InitDate.seconds * 1000).getMonth() + '-' + new Date(stop.InitDate.seconds * 1000).getDay() + '&theme=&useRewards=true')"
-              > Hotel auf expedia</q-chip>
-            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn
+                flat
+                label="POIs"
+                @click="showSightDetails(stop.Location.lat, stop.Location.lng)"
+                color="secondary"
+                v-show="stop"
+              />
+            </q-card-actions>
           </q-card>
         </MglPopup>
       </MglMarker>
@@ -177,7 +168,7 @@
           :key="dailyTrip.id"
           :coordinates="[dailyTrip.location.lng, dailyTrip.location.lat]"
           color="#D56026"
-          @click="onMarkerClicked($event)"
+          @click="onMarkerClicked($event, dailyTrip.location.label)"
         >
           <MglPopup>
             <q-card>
@@ -205,46 +196,41 @@
           </MglPopup>
         </MglMarker>
       </template>
+      <!-- last clicked marker -->
       <MglMarker
         :coordinates="lastClickCoordinates"
         color="#70707075"
-        @click="onMarkerClicked($event)"
+        @click="onMarkerClicked($event, title)"
         v-if="editor"
         :offset="[5, 10]"
         ref="addStopMarker"
       >
         <MglPopup>
           <q-card>
-            <q-card-section class="row items-center">
+            <q-img
+              v-show="lastPOICityData.img"
+              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+            />
+            <q-card-section style="padding-left:10px; padding-top:10px;">
               <span
-                style="font-size:16px;"
-                class="q-ml-sm"
-              >{{title ? title : 'Diesen Stopp'}} zu deiner Reise hinzufügen?</span>
+                class="font-large"
+                style="line-height:normal;"
+              >{{title ? title : 'gesetzter Punkt'}}</span>
+              <div style="font-size:13px;">
+                {{ lastPOICityData.shortDescription }}
+              </div>
             </q-card-section>
-
-            <q-input
-              filled
-              v-model="title"
-              lazy-rules
-              :rules="[val => val.length > 0 || 'Bitte gib einen Titel für diesen Stopp ein']"
-              class="input-item"
-              outlined
-              label="Titel eingeben"
-              style="margin:5px; width:auto;"
-            >
-            </q-input>
 
             <q-card-actions align="right">
               <q-btn
                 flat
                 label="Infos"
-                @click="showSightDetails(title)"
+                @click="showSightDetails(lastClickCoordinates[1], lastClickCoordinates[0])"
                 color="secondary"
-                v-show="title"
               />
               <q-btn
                 flat
-                label="Punkt hinzufügen"
+                label="Ort hinzufügen"
                 @click="addStop"
                 color="primary"
               />
@@ -252,8 +238,73 @@
           </q-card>
         </MglPopup>
       </MglMarker>
-      <q-dialog v-model="sightDialog.showed">
-        <q-card>
+      <q-dialog v-model="showDetailsDialog">
+        <div v-if="lastPOICityData">
+          <q-card>
+            <!-- todo change to slideshow -->
+            <q-img :src="lastPOICityData.img" />
+            <q-card-section>
+              <div style="padding-left:10px; padding-top:10px;">
+                <span class="font-large">{{lastPOICityData.title}}</span>
+                <div>
+                  {{ lastPOICityData.description }}
+                </div>
+                <div
+                  class="font-medium"
+                  style="padding-top:20px; padding-bottom:10px;"
+                >{{suggestedPOIs.length}} Top Sehenswürdigkeiten</div>
+              </div>
+              <q-card
+                class="city-card cursor-pointer"
+                v-for="(poi, index) in suggestedPOIs"
+                :key="index"
+                :id="'POI' + poi.name"
+                @mouseover="markPOIOnMap(poi)"
+                @mouseleave="hidePOIOnMap(poi)"
+                @click="flyTo(poi.location.lat, poi.location.lng)"
+              >
+                <div>
+                  <div>
+                    <q-img
+                      :alt="'Bild von'  + poi.name"
+                      v-if="poi.photoUrl"
+                      :src="poi.photoUrl"
+                      style="height:170px;"
+                      placeholder-src="statics/dummy-image-landscape-1-150x150.jpg"
+                    >
+                      <div class="absolute-bottom text-h6 ellipsis">{{poi.name}}
+                        <q-tooltip>{{poi.name}}</q-tooltip>
+                      </div>
+                    </q-img>
+                  </div>
+
+                  <div class="rating-text">
+                    {{poi.rating}}
+                    <q-rating
+                      class="stars"
+                      :value="poi.rating"
+                      size="15px"
+                      color="gold"
+                      readonly
+                      style="margin-right:10px;"
+                    />
+                    ({{ poi.totalRatings }})
+                  </div>
+                  <a
+                    :href="'https://www.google.com/maps/search/?api=1&query=' + poi.name"
+                    target="_blank"
+                  >
+                    <q-card-section style="color:#707070;">
+                      <q-icon name="location_on" />
+                      {{poi.location.label}}
+                    </q-card-section>
+                  </a>
+                </div>
+              </q-card>
+            </q-card-section>
+          </q-card>
+        </div>
+        <!-- <q-card>
           <q-img
             :src="sightDialog.src"
             style="max-height:75vh;"
@@ -276,7 +327,7 @@
               v-close-popup
             />
           </q-card-actions>
-        </q-card>
+        </q-card> -->
       </q-dialog>
       <div
         v-for="(stop, index) in stops"
@@ -311,7 +362,7 @@
           :key="city.name + index"
           :coordinates="[city.longitude, city.latitude]"
           :offset="[10, 5]"
-          @click="onMarkerClicked($event); goToCity(city.name)"
+          @click="onMarkerClicked($event, city.name); goToCity(city.name)"
         >
           <q-icon
             :ref="'cityMarkerIcon' + index"
@@ -322,12 +373,36 @@
           />
           <MglPopup>
             <q-card>
-              <q-card-section>
-                <div class="text-h6">
-                  {{city.name}}
+              <q-img
+                v-show="lastPOICityData.img"
+                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+              />
+              <q-card-section style="padding-left:10px; padding-top:10px;">
+                <span
+                  class="font-large"
+                  style="line-height:normal;"
+                >{{city.name ? city.name : 'gesetzter Punkt'}}</span>
+                <div style="font-size:13px;">
+                  {{ lastPOICityData.shortDescription }}
+                  <br><br>
+                  vorgeschlagen für {{suggestionCountry}}
                 </div>
-                <p style="font-size: 14px">vorgeschlagene Stadt für {{city.country}}</p>
               </q-card-section>
+
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  label="Infos"
+                  @click="showSightDetails(city.latitude, city.longitude)"
+                  color="secondary"
+                />
+                <q-btn
+                  flat
+                  label="Ort hinzufügen"
+                  @click="addStop"
+                  color="primary"
+                />
+              </q-card-actions>
             </q-card>
           </MglPopup>
         </MglMarker>
@@ -339,7 +414,7 @@
           :key="poi.name + index"
           :coordinates="[poi.location.lng, poi.location.lat]"
           :offset="[10, 5]"
-          @click="onMarkerClicked($event); goToCity(poi.name)"
+          @click="onMarkerClicked($event, poi.name); goToCity(poi.name)"
         >
           <q-icon
             :ref="'poiMarkerIcon' + index"
@@ -399,6 +474,39 @@
         </MglPopup>
       </MglMarker>
     </MglMap>
+    <q-dialog v-model="showSuggestionCountryDialog">
+      <q-card>
+        <q-card-section class="font-medium">
+          <p>Land für Städtevorschläge wählen</p>
+
+          <q-select
+            outlined
+            v-model="suggestionCountry"
+            use-input
+            hide-selected
+            fill-input
+            input-debounce="0"
+            :options="countryOptions"
+            label="Land auswählen"
+            bg-color="white"
+            @filter="filterCountries"
+            @input="showCitiesOnMap(); showSuggestionCountryDialog = false;"
+            :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Land']"
+          >
+            <template v-slot:prepend>
+              <q-icon name="explore" />
+            </template>
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Keine Ergebnisse
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <style lang="less" scoped>
@@ -412,6 +520,7 @@ const MglMap = () => import('vue-mapbox')
 const MglGeocoderControl = () => import('vue-mapbox-geocoder')
 const turf = () => import('@turf/turf')
 import Mapbox from 'mapbox-gl'
+import CitySuggestionMethods from '../CitySuggestion/CitySuggestionMethods.js'
 
 let bounds = []
 
@@ -428,7 +537,7 @@ const getAxios = () => import('axios')
 import { date } from 'quasar'
 import sharedMethods from '../../sharedMethods.js'
 import MapLayerPlugin from './MapLayerPlugin.vue'
-import MapDrawerItem from './MapDrawerItem.vue'
+import { countries } from '../../countries.js'
 
 let hoveredStateId = null
 
@@ -446,8 +555,7 @@ export default {
     MglNavigationControl,
     MglFullscreenControl,
     MglGeocoderControl,
-    MapLayerPlugin,
-    MapDrawerItem
+    MapLayerPlugin
   },
   props: {
     stops: Array,
@@ -458,15 +566,16 @@ export default {
     adults: Number,
     rooms: Number,
     editor: Boolean,
-    defaultInitDate: String
+    defaultInitDate: String,
+    height: String
   },
   computed: {
     isMobile () {
       return window.matchMedia('(max-width: 550px)').matches
-    },
-    isTablet () {
-      return window.matchMedia('(max-width: 958px)').matches
     }
+    // isTablet () {
+    //   return window.matchMedia('(max-width: 958px)').matches
+    // }
   },
   data () {
     return {
@@ -481,7 +590,7 @@ export default {
       whitelistedLabels: ['airport-label', 'place-label', 'state-label', 'poi-label', 'settlement-label', 'natural-point-label'], // 'country-label',
       centerLocation: [0, 0],
       markerClicked: false,
-      sightDialog: {},
+      showDetailsDialog: false,
       drawerLeft: false,
       miniState: true,
       showDrawerList: true,
@@ -490,7 +599,13 @@ export default {
       showCityMarkers: false,
       showPOIMarkers: false,
       suggestedPOIs: [],
-      suggestionDialogVisible: false
+      suggestionDialogVisible: false,
+      lastPOICityData: {},
+      lastSightDetailsLat: 0,
+      lastSightDetailsLng: 0,
+      suggestionCountry: null,
+      showSuggestionCountryDialog: false,
+      countryOptions: countries
     }
   },
   watch: {
@@ -504,13 +619,22 @@ export default {
     update (event) {
       this.$emit('update', event)
     },
+    /**
+     * filter countries method used in filter method of quasar select component
+     */
+    filterCountries (val, update, _abort) {
+      update(() => {
+        const needle = val.toLowerCase()
+        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
+      })
+    },
     onMapLoaded (event) {
       console.log('onmaploaded')
 
       this.map = event.map
       let context = this
 
-      this.loadMap(event.map).then(e => {
+      this.loadMap(event.map).then(_e => {
         // wait 1 second to ensure map is realy loaded
         setTimeout(function () {
           context.fitToBounds(bounds)
@@ -567,23 +691,28 @@ export default {
       })
     },
     /**
-     * show markers for suggested cities (called from city suggestion)
+     * gets suggested cities and shows markers
      */
-    showCitiesOnMap (cities) {
-      this.suggestedCities = cities
+    showCitiesOnMap () {
+      CitySuggestionMethods.getCities(this.suggestionCountry).then(response => {
+        if (!response) return
 
-      if (this.showPOIMarkers) {
-        this.showPOIMarkers = false
+        this.suggestedCities = response
+
+        if (this.showPOIMarkers) {
+          this.showPOIMarkers = false
+          this.showCityMarkers = true
+        }
+
+        // set map to city boundaries
+        let cityBounds = []
+        this.suggestedCities.forEach(city => {
+          cityBounds.push([city.longitude, city.latitude])
+        })
+
+        this.fitToBounds(cityBounds)
         this.showCityMarkers = true
-      }
-
-      // set map to city boundaries
-      let cityBounds = []
-      this.suggestedCities.forEach(city => {
-        cityBounds.push([city.longitude, city.latitude])
       })
-
-      this.fitToBounds(cityBounds)
     },
     goToCity (name) {
       const drawerScrollArea = this.$refs['DrawerScrollArea']
@@ -628,8 +757,10 @@ export default {
 
         if (placeName.includes(',')) placeName = placeName.split(',')[0]
 
-        this.title = 'Zwischenstopp in ' + placeName
+        this.title = placeName
         this.showAddStopMarker = true
+
+        this.loadMarkerInfos(placeName)
 
         let context = this
         // we never want to hide the popup
@@ -641,36 +772,57 @@ export default {
       }
       this.markerClicked = false
     },
-    onMarkerClicked (event) {
+    onMarkerClicked (event, title) {
+      // reset the marker popup
+      this.lastPOICityData = {
+        title: title,
+        description: '',
+        shortDescription: '',
+        img: '',
+        imgSrc: ''
+      }
+
+      this.loadMarkerInfos(title)
+
       event.map.flyTo({ center: event.component.marker._lngLat, speed: 0.5, curve: 1 })
       this.markerClicked = true
     },
-    showSightDetails (name) {
-      const headers = {
-        'Content-Type': 'application/json; charset=UTF-8'
+    showSightDetails (lat, lng) {
+      if (lat !== this.lastSightDetailsLat || lng !== this.lastSightDetailsLng) {
+        sharedMethods.getGooglePlacesData(lat, lng).then(POIArr => {
+          this.suggestedPOIs = POIArr
+          this.showDetailsDialog = true
+        }).catch((e) => {
+          console.log(e)
+        })
+        this.lastSightDetailsLat = lat
+        this.lastSightDetailsLng = lng
       }
+      // const headers = {
+      //   'Content-Type': 'application/json; charset=UTF-8'
+      // }
 
-      let context = this
-      getAxios().then(axios => {
-        axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-          { headers: headers })
-          .then(function (response) {
-            const pages = response.data.query.pages
-            const firstPageName = Object.keys(pages)[0]
+      // let context = this
+      // getAxios().then(axios => {
+      //   axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
+      //     { headers: headers })
+      //     .then(function (response) {
+      //       const pages = response.data.query.pages
+      //       const firstPageName = Object.keys(pages)[0]
 
-            const title = pages[firstPageName].title
-            const description = pages[firstPageName].description
-            const extract = pages[firstPageName].extract
-            const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
+      //       const title = pages[firstPageName].title
+      //       const description = pages[firstPageName].description
+      //       const extract = pages[firstPageName].extract
+      //       const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
 
-            context.sightDialog = { title: title || name, showed: true, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src }
-          }).catch(function (error) {
-            console.log('Error' + error)
-            context.sightDialog = { title: name, showed: true, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' }
-          })
-      })
+      //       context.sightDialog = { title: title || name, showed: true, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src }
+      //     }).catch(function (error) {
+      //       console.log('Error' + error)
+      //       context.sightDialog = { title: name, showed: true, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' }
+      //     })
+      // })
     },
-    addStop (event) {
+    addStop () {
       this.showAddStopMarker = false
       this.lastClickLocation.label = this.title
       this.lastClickLocation.lat = this.lastClickCoordinates[1]
@@ -697,7 +849,7 @@ export default {
 
       // reload map and fly to coords
       this.lastClickCoordinates = [0, 0]
-      this.loadMap(this.map).then(success => {
+      this.loadMap(this.map).then(_success => {
         this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
 
         // we only want to hide the popup
@@ -743,7 +895,7 @@ export default {
       return s
     },
     loadMap (map, stops) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (map === null) map = this.map
 
         // if we have stops given than copy them
@@ -806,6 +958,15 @@ export default {
           let context = this
           map.on('click', function (e) {
             if (!context.markerClicked) {
+              // reset the marker popup
+              context.lastPOICityData = {
+                title: 'Laden...',
+                description: '',
+                shortDescription: '',
+                img: '',
+                imgSrc: ''
+              }
+
               var features = map.queryRenderedFeatures(e.point)
               var displayProperties = [
                 'properties',
@@ -837,6 +998,8 @@ export default {
                   }
                 }
               })
+
+              context.loadMarkerInfos(context.title)
             }
             context.markerClicked = false
           })
@@ -844,7 +1007,7 @@ export default {
           // map.on('move', () => {
           // var features = map.queryRenderedFeatures(map.getCenter())
           // var displayProperties = [
-          //   'properties'
+          //   'properties'd
           // ]
 
           // var displayFeatures = features.map(function (feat) {
@@ -862,6 +1025,23 @@ export default {
           resolve(true)
         }
       })
+    },
+    loadMarkerInfos (title) {
+      let context = this
+
+      if (title) {
+        if (title.includes(',')) title = title.split(',')[0]
+
+        // load additional infos for marker
+        sharedMethods.getWikivoyageData(title).then(result => {
+          CitySuggestionMethods.getCityImage(title, '').then(image => {
+            result.img = image.url
+            context.lastPOICityData = result
+          })
+        }).catch((e) => {
+          console.log(e)
+        })
+      }
     },
     flyToPointOnMap (lat, lng) {
       let context = this
@@ -957,7 +1137,7 @@ export default {
                   }
                 })
 
-                map.on('click', id, function (e) {
+                map.on('click', id, function (_e) {
                   // close all popups
                   context.closeAllPopups()
                   if (!context.markerClicked) context.$refs[id][0].togglePopup()

@@ -304,7 +304,7 @@ export default {
                     radius: 5000,
                     language: 'de',
                     type: 'tourist_attraction',
-                    location: { 'lat': lat, 'lng': lng }
+                    location: { 'lat': parseFloat(lat), 'lng': parseFloat(lng) }
                 }
 
                 service.nearbySearch(request, (response) => {
