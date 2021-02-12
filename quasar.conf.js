@@ -221,6 +221,10 @@ module.exports = function (ctx) {
       }
     },
 
+    capacitor: {
+
+    },
+
     cordova: {
       // id: '',
       // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing

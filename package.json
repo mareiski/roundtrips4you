@@ -14,6 +14,7 @@
     "supportedBrowsers": "(echo module.exports = && browserslist-useragent-regexp --allowHigherVersions) > supportedBrowsers.js"
   },
   "dependencies": {
+    "@capacitor/core": "^2.4.6",
     "@google/maps": "^1.0.1",
     "@googlemaps/js-api-loader": "^1.11.1",
     "@mapbox/mapbox-gl-geocoder": "^4.5.0",
