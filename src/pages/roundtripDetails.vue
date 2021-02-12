@@ -294,7 +294,7 @@
                 :galeryImgUrls="galeryImgUrls"
                 :stopImages="typeof stop.StopImages === 'undefined' ? null : stop.StopImages"
                 :addedSights="stop.Sights ? stop.Sights : []"
-                :days="typeof days[days.findIndex(x => x.docId === stop.DocId)] !== 'undefined' ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
+                :days="days[days.findIndex(x => x.docId === stop.DocId)] ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
                 :expanded="stop.expanded"
                 :profile="stop.Profile"
@@ -304,9 +304,9 @@
               ></Stop>
               <Duration
                 :key="'Stop' + stop.DocId"
-                v-if="index !== stops.length - 1 && typeof durations[durations.findIndex(x => x.docId === stop.DocId)] !== 'undefined' && durations[durations.findIndex(x => x.docId === stop.DocId)].duration !== null"
+                v-if="index !== stops.length - 1 && durations[durations.findIndex(x => x.docId === stop.DocId)] && durations[durations.findIndex(x => x.docId === stop.DocId)].duration !== null"
                 :duration="durations[durations.findIndex(x => x.docId === stop.DocId)].duration + durations[durations.findIndex(x => x.docId === stop.DocId)].distance"
-                :defaultProfile="stop.Profile && typeof stop.Profile !== 'undefined' ? getStringProfile(stop.Profile) : inputProfile"
+                :defaultProfile="stop.Profile ? getStringProfile(stop.Profile) : inputProfile"
                 :roundtripProfile="inputProfile"
               ></Duration>
             </template>

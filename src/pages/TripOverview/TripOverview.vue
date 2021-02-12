@@ -63,6 +63,7 @@
             @addStop="$emit('addStop', $event)"
             @update="$emit('update', $event)"
             @distanceUpdate="$emit('distanceUpdate', $event)"
+            @addSight="$emit('addSight', $event)"
             ref="overviewMap"
             height="90vh;"
           ></Map>
@@ -92,6 +93,7 @@
         @addStop="$emit('addStop', $event)"
         @update="$emit('update', $event)"
         @distanceUpdate="$emit('distanceUpdate', $event)"
+        @addSight="$emit('addSight', $event)"
         ref="overviewMap"
         height="90vh;"
       ></Map>
@@ -119,6 +121,7 @@ export default {
   },
   methods: {
     refreshMap () {
+      console.log('refresh')
       if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
     }
   },

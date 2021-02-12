@@ -33,9 +33,7 @@
           :disable="!user || !user.displayName"
           @input="onSaveRoundtrip"
         >
-          <q-tooltip v-if="!user || !user.displayName">
-            Bitte erstelle zuerst einen Benutzernamen
-          </q-tooltip>
+          <q-tooltip v-if="!user || !user.displayName">Bitte erstelle zuerst einen Benutzernamen</q-tooltip>
         </q-toggle>
         <div
           v-show="publish"
@@ -55,8 +53,9 @@
             type="hidden"
             id="share-link"
             :value="shareLink"
-          >
-          <br><br>
+          />
+          <br />
+          <br />
           <p>Dieser Link darf auch per Iframe in eine Website eingebettet werden. Dazu einfach den folgenden Code kopieren und an die entsprechende Stelle einfügen.</p>
           <span>&lt;iframe src='https://roundtrips4you.de/MapWidget/{{RTId}}'&gt;&lt;/iframe&gt;</span>
           <q-icon
@@ -70,7 +69,7 @@
             type="hidden"
             id="share-code"
             :value="shareCode"
-          >
+          />
         </div>
         <q-select
           outlined
@@ -109,7 +108,8 @@
           @blur="onSaveRoundtrip"
           :rules="[val => val !== null && val !== '' || 'Bitte gib eine Beschreibung an',
           val => val.length > 10 && val.length < 160 || 'Bitte gib eine Beschreibung zwischen 10 und 160 Zeichen an' ]"
-        > <template v-slot:prepend>
+        >
+          <template v-slot:prepend>
             <q-icon name="subject" />
           </template>
         </q-input>
@@ -134,25 +134,30 @@
           outlined
           @blur="onSaveRoundtrip"
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        > <template v-slot:prepend>
+        >
+          <template v-slot:prepend>
             <q-icon name="star" />
-          </template></q-input>
+          </template>
+        </q-input>
         <q-input
           v-model="highlight2"
           label="Highlight 2"
           outlined
           @blur="onSaveRoundtrip"
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        > <template v-slot:prepend>
+        >
+          <template v-slot:prepend>
             <q-icon name="star" />
-          </template></q-input>
+          </template>
+        </q-input>
         <q-input
           v-model="highlight3"
           label="Highlight 3"
           outlined
           :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
           @blur="onSaveRoundtrip"
-        > <template v-slot:prepend>
+        >
+          <template v-slot:prepend>
             <q-icon name="star" />
           </template>
         </q-input>
@@ -163,9 +168,9 @@
           type="number"
           outlined
           :rules="[val => val !== null && val !== 0 && val > 0 || 'Bitte gib einen Preis an']"
-        ><template v-slot:prepend>
-            <q-icon name="euro">
-            </q-icon>
+        >
+          <template v-slot:prepend>
+            <q-icon name="euro"></q-icon>
           </template>
         </q-input>
         <q-item-label style="padding-bottom:5px; margin-top:10px;">Angebotszeitraum</q-item-label>
@@ -174,8 +179,7 @@
           label="Ganzes Jahr"
           icon="event"
           @input="onSaveRoundtrip"
-        >
-        </q-toggle>
+        ></q-toggle>
         <q-input
           :disable="wholeYearOffer"
           outlined
@@ -200,8 +204,7 @@
             <q-icon
               name="event"
               class="cursor-pointer"
-            >
-            </q-icon>
+            ></q-icon>
           </template>
         </q-input>
         <q-input
@@ -229,8 +232,7 @@
             <q-icon
               name="event"
               class="cursor-pointer"
-            >
-            </q-icon>
+            ></q-icon>
           </template>
         </q-input>
         <RegionSearch
@@ -337,13 +339,12 @@
                 <q-spinner
                   size="42px"
                   color="primary"
-                >
-                </q-spinner>
+                ></q-spinner>
               </q-inner-loading>
             </q-btn>
           </div>
           <q-uploader
-            url=""
+            url
             label="Titelbild hochladen"
             accept=".jpg, image/*"
             style="max-width: 300px; display:none;"
@@ -353,7 +354,7 @@
           />
         </div>
         <q-uploader
-          url=""
+          url
           label="Weitere Bilder hochladen"
           multiple
           style="max-width: 300px; display:none;"
@@ -378,8 +379,7 @@
               icon="add"
               style="transform:rotate(45deg); position: absolute;"
               @click="removeFile(index)"
-            >
-            </q-btn>
+            ></q-btn>
           </div>
           <div class="uploader">
             <q-btn
@@ -397,8 +397,7 @@
                 <q-spinner
                   size="42px"
                   color="primary"
-                >
-                </q-spinner>
+                ></q-spinner>
               </q-inner-loading>
             </q-btn>
           </div>
@@ -523,7 +522,6 @@ export default {
       titleUploadDisabled: false,
       shareLink: null,
       shareCode: null
-
     }
   },
   computed: {
@@ -536,10 +534,10 @@ export default {
   },
   methods: {
     /**
-     * Copy share link of roundtrip to clipboard
-     * @param {String} elementId the id of the element, where the link to copy is
-     * @example copyShareLink('share-link-element')
-     */
+       * Copy share link of roundtrip to clipboard
+       * @param {String} elementId the id of the element, where the link to copy is
+       * @example copyShareLink('share-link-element')
+       */
     copyShareLink (elementId) {
       let testingCodeToCopy = document.querySelector('#' + elementId)
       testingCodeToCopy.setAttribute('type', 'text')
@@ -549,7 +547,9 @@ export default {
         document.execCommand('copy')
         sharedMethods.showSuccessNotification('Link wurde erfolgreich kopiert')
       } catch (err) {
-        sharedMethods.showErrorNotification('Oops da ist wohl was schiefgelaufen')
+        sharedMethods.showErrorNotification(
+          'Oops da ist wohl was schiefgelaufen'
+        )
       }
 
       // unselect the range
@@ -557,8 +557,8 @@ export default {
       window.getSelection().removeAllRanges()
     },
     /**
-     * get the average hotel rating
-     */
+       * get the average hotel rating
+       */
     hotelRatingAvg () {
       let sum = 0
       let count = 0
@@ -587,32 +587,32 @@ export default {
     },
     getStops (RTId) {
       // get stops
-      let roundtripsRef = db.collection('RoundtripDetails')
+      let roundtripsRef = db
+        .collection('RoundtripDetails')
         .where('RTId', '==', RTId)
         .orderBy('InitDate')
-      roundtripsRef.get()
-        .then(snapshot => {
-          snapshot.forEach(doc => {
-            let stop = doc.data()
+      roundtripsRef.get().then((snapshot) => {
+        snapshot.forEach((doc) => {
+          let stop = doc.data()
 
-            if (typeof stop.InitDate !== 'string') {
-              let initDate = new Date(stop.InitDate.seconds * 1000)
-              stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-            }
+          if (typeof stop.InitDate !== 'string') {
+            let initDate = new Date(stop.InitDate.seconds * 1000)
+            stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+          }
 
-            if (!stop.DayDuration) stop.DayDuration = 0
+          if (!stop.DayDuration) stop.DayDuration = 0
 
-            stop.DocId = doc.id
+          stop.DocId = doc.id
 
-            this.stops.push(stop)
-            this.stops.sort(this.compare)
-          })
+          this.stops.push(stop)
+          this.stops.sort(this.compare)
         })
+      })
     },
     /**
-   * update region object witch region search results
-   * @param event event from region search update callback
-   */
+       * update region object witch region search results
+       * @param event event from region search update callback
+       */
     updateRegion (event) {
       if (event !== null) {
         this.region = event
@@ -620,54 +620,72 @@ export default {
     },
     onSaveRoundtrip () {
       let dateParts = this.OfferStartPeriod.split('.')
-      let offerStartPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      let offerStartPeriod = new Date(
+        dateParts[2],
+        dateParts[1] - 1,
+        dateParts[0]
+      )
 
       dateParts = this.OfferEndPeriod.split('.')
-      let offerEndPeriod = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      let offerEndPeriod = new Date(
+        dateParts[2],
+        dateParts[1] - 1,
+        dateParts[0]
+      )
 
-      db.collection('Roundtrips').doc(this.RTId).update({
-        Public: this.publish,
-        Location: this.countries,
-        Category: this.category,
-        Stars: this.stars,
-        Description: this.descriptionInput,
-        Highlights: [this.highlight1, this.highlight2, this.highlight3],
-        Region: this.region,
-        Profile: this.inputProfile,
-        OfferStartPeriod: offerStartPeriod,
-        OfferEndPeriod: offerEndPeriod,
-        Price: this.price,
-        OfferWholeYear: this.wholeYearOffer,
-        Rooms: this.rooms,
-        Adults: this.adults,
-        ChildrenAges: this.childrenAges
-      }).catch(e => {
-        console.log(e)
-        sharedMethods.showErrorNotification('Bitte überprüfe deine Angaben')
-      })
+      db.collection('Roundtrips')
+        .doc(this.RTId)
+        .update({
+          Public: this.publish,
+          Location: this.countries,
+          Category: this.category,
+          Stars: this.stars,
+          Description: this.descriptionInput,
+          Highlights: [this.highlight1, this.highlight2, this.highlight3],
+          Region: this.region,
+          Profile: this.inputProfile,
+          OfferStartPeriod: offerStartPeriod,
+          OfferEndPeriod: offerEndPeriod,
+          Price: this.price,
+          OfferWholeYear: this.wholeYearOffer,
+          Rooms: this.rooms,
+          Adults: this.adults,
+          ChildrenAges: this.childrenAges
+        })
+        .catch((e) => {
+          console.log(e)
+          sharedMethods.showErrorNotification('Bitte überprüfe deine Angaben')
+        })
     },
     /**
-     * fetch trip countries and save them
-     * @important don't remove or move to another file (this method is also called from stop file)
-     */
+       * fetch trip countries and save them
+       * @important don't remove or move to another file (this method is also called from stop file)
+       */
     fetchAndSaveCountries () {
       let tempCountries = []
       let promiseList = []
 
       this.stops.forEach((stop, index) => {
-        let url = 'http://api.geonames.org/countryCodeJSON?lang=de&lat=' + stop.Location.lat + '&lng=' + stop.Location.lng + '&username=roundtrips4you'
+        let url =
+          'http://api.geonames.org/countryCodeJSON?lang=de&lat=' +
+          stop.Location.lat +
+          '&lng=' +
+          stop.Location.lng +
+          '&username=roundtrips4you'
 
         promiseList.push(
-          axios.get(url)
-            .then(response => {
-              if (!tempCountries.includes(response.data.countryName)) tempCountries.push(response.data.countryName)
-            }).catch(function (error) {
+          axios
+            .get(url)
+            .then((response) => {
+              if (!tempCountries.includes(response.data.countryName)) { tempCountries.push(response.data.countryName) }
+            })
+            .catch(function (error) {
               console.log(error)
             })
         )
       })
 
-      Promise.all(promiseList).then(vals => {
+      Promise.all(promiseList).then((vals) => {
         this.countries = []
         this.countries = tempCountries
 
@@ -676,57 +694,68 @@ export default {
       })
     },
     /**
-   * fetch all category options from firebase db
-   */
+       * fetch all category options from firebase db
+       */
     fetchCategories () {
       let roundtripsRef = db.collection('Categories')
-      roundtripsRef.get()
-        .then(snapshot => {
-          this.categoryOptions = []
-          snapshot.forEach(doc => {
-            this.categoryOptions.push(doc.data().Category)
-          })
+      roundtripsRef.get().then((snapshot) => {
+        this.categoryOptions = []
+        snapshot.forEach((doc) => {
+          this.categoryOptions.push(doc.data().Category)
         })
+      })
     },
     /**
-     * Quasar date options for offer period
-     */
+       * Quasar date options for offer period
+       */
     scheduleDateOptions (date) {
       const dateTimeParts = this.OfferStartPeriod.split(' ')
       const dateParts = dateTimeParts[0].split('.')
-      const compareDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      const compareDate = new Date(
+        dateParts[2],
+        dateParts[1] - 1,
+        dateParts[0]
+      )
       const currentDate = new Date(date)
 
       return currentDate > compareDate
     },
     /**
-     * fetches data of the roundtrip for the given id
-     * @param RTId the id of the roundtrip to fetch (current RT id)
-     */
+       * fetches data of the roundtrip for the given id
+       * @param RTId the id of the roundtrip to fetch (current RT id)
+       */
     fetchSingleRoundtrip (RTId) {
       if (this.isInDemoSession) {
         let roundtrip = this.$store.getters['demoSession/getRoundtrip']
         this.writeRoundtripIntoFields(roundtrip)
       } else {
-        this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
-          this.writeRoundtripIntoFields(roundtrip)
-        }).catch(err => {
-          console.log('Error getting Roundtrip', err)
+        this.$store
+          .dispatch('roundtrips/fetchSingleRoundtrip', RTId)
+          .then((roundtrip) => {
+            this.writeRoundtripIntoFields(roundtrip)
+          })
+          .catch((err) => {
+            console.log('Error getting Roundtrip', err)
 
-          // show this message only if it's not a user
-          if (auth.user()) {
-            sharedMethods.showErrorNotification('Es gibt fehlende Angaben bei deiner Rundreise')
-          }
-        })
+            // show this message only if it's not a user
+            if (auth.user()) {
+              sharedMethods.showErrorNotification(
+                'Es gibt fehlende Angaben bei deiner Rundreise'
+              )
+            }
+          })
       }
     },
     /**
-     * Writes the current roundtrip data into local fields
-     * @param roundtrip the roundtrip object that contains all data
-     */
+       * Writes the current roundtrip data into local fields
+       * @param roundtrip the roundtrip object that contains all data
+       */
     writeRoundtripIntoFields (roundtrip) {
       this.shareLink = 'https://roundtrips4you.de/MapWidget/' + this.RTId
-      this.shareCode = '<iframe src="https://roundtrips4you.de/MapWidget/' + this.RTId + '"></iframe>'
+      this.shareCode =
+        '<iframe src="https://roundtrips4you.de/MapWidget/' +
+        this.RTId +
+        '"></iframe>'
 
       this.title = roundtrip.Title
       this.publish = roundtrip.Public
@@ -750,7 +779,9 @@ export default {
 
       this.pageTitle = this.title + ' bearbeiten'
 
-      this.arrivalDepatureProfile = roundtrip.TransportProfile ? roundtrip.TransportProfile : 'Flugzeug'
+      this.arrivalDepatureProfile = roundtrip.TransportProfile
+        ? roundtrip.TransportProfile
+        : 'Flugzeug'
       this.origin = roundtrip.Origin
 
       let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
@@ -761,7 +792,9 @@ export default {
 
       if (this.arrivalDepatureProfile === 'Flugzeug') {
         this.destination = roundtrip.Destination
-        this.travelClass = roundtrip.TravelClass ? roundtrip.TravelClass : 'Economy'
+        this.travelClass = roundtrip.TravelClass
+          ? roundtrip.TravelClass
+          : 'Economy'
         this.nonStop = roundtrip.NonStop ? roundtrip.NonStop : 'Ja'
         this.originCode = roundtrip.OriginCode
         this.destinationCode = roundtrip.DestinationCode
@@ -787,21 +820,31 @@ export default {
       this.loadInitImgs()
     },
     loadInitImgs () {
-      var fileRef = storage.ref().child('Images/Roundtrips/' + this.RTId + '/Title/titleImg')
-      fileRef.getDownloadURL().then(function (url) {
-        context.titleImgUrl = url
-      }).catch(e => { })
+      var fileRef = storage
+        .ref()
+        .child('Images/Roundtrips/' + this.RTId + '/Title/titleImg')
+      fileRef
+        .getDownloadURL()
+        .then(function (url) {
+          context.titleImgUrl = url
+        })
+        .catch((e) => { })
 
-      fileRef = storage.ref().child('Images/Roundtrips/' + this.RTId + '/Galery')
-      fileRef.listAll().then(function (res) {
-        res.items.forEach(function (itemRef) {
-          fileRef = storage.ref().child(itemRef.fullPath)
-          context.galeryImgUrls = []
-          fileRef.getDownloadURL().then(function (url, index) {
-            context.galeryImgUrls.push(url)
+      fileRef = storage
+        .ref()
+        .child('Images/Roundtrips/' + this.RTId + '/Galery')
+      fileRef
+        .listAll()
+        .then(function (res) {
+          res.items.forEach(function (itemRef) {
+            fileRef = storage.ref().child(itemRef.fullPath)
+            context.galeryImgUrls = []
+            fileRef.getDownloadURL().then(function (url, index) {
+              context.galeryImgUrls.push(url)
+            })
           })
         })
-      }).catch(function () { })
+        .catch(function () { })
     },
     fileAdded (event, kind) {
       let files = event
@@ -817,10 +860,17 @@ export default {
     },
     uploadNext (files, kind, uploadIndex) {
       if (!this.uploading) {
-        this.upload(files[uploadIndex], kind, uploadIndex + this.galeryImgUrls.length, uploadIndex === files.length - 1, files.length, uploadIndex).then(function (success) {
+        this.upload(
+          files[uploadIndex],
+          kind,
+          uploadIndex + this.galeryImgUrls.length,
+          uploadIndex === files.length - 1,
+          files.length,
+          uploadIndex
+        ).then(function (success) {
           context.uploading = false
           uploadIndex++
-          if (uploadIndex < files.length) context.uploadNext(files, kind, uploadIndex)
+          if (uploadIndex < files.length) { context.uploadNext(files, kind, uploadIndex) }
         })
       }
     },
@@ -832,49 +882,68 @@ export default {
         if (kind === 'galery') {
           kindPath = 'Galery/galeryImg' + count
         }
-        const fileRef = storage.ref().child('Images/Roundtrips/' + this.RTId + '/' + kindPath)
+        const fileRef = storage
+          .ref()
+          .child('Images/Roundtrips/' + this.RTId + '/' + kindPath)
 
-        fileRef.put(file).then(function (snapshot) {
-          sharedMethods.showSuccessNotification('Bild ' + (uploadIndex + 1) + ' von ' + absoluteFiles + ' wurde erfolgreich hochgeladen')
-          if (lastItem) {
+        fileRef
+          .put(file)
+          .then(function (snapshot) {
+            sharedMethods.showSuccessNotification(
+              'Bild ' +
+              (uploadIndex + 1) +
+              ' von ' +
+              absoluteFiles +
+              ' wurde erfolgreich hochgeladen'
+            )
+            if (lastItem) {
+              context.visible = false
+              context.titleUploadDisabled = false
+            }
+            fileRef.getDownloadURL().then(function (url) {
+              if (kind === 'galery') {
+                context.galeryImgUrls.push(url)
+              } else if (kind === 'title') {
+                context.titleImgUrl = url
+              }
+            })
+            resolve(true)
+          })
+          .catch(function (error) {
+            console.log(error)
+            sharedMethods.showErrorNotification(
+              'Das Bild konnte nicht hochgeladen werden'
+            )
+
             context.visible = false
             context.titleUploadDisabled = false
-          }
-          fileRef.getDownloadURL().then(function (url) {
-            if (kind === 'galery') {
-              context.galeryImgUrls.push(url)
-            } else if (kind === 'title') {
-              context.titleImgUrl = url
-            }
+            resolve(false)
           })
-          resolve(true)
-        }).catch(function (error) {
-          console.log(error)
-          sharedMethods.showErrorNotification('Das Bild konnte nicht hochgeladen werden')
-
-          context.visible = false
-          context.titleUploadDisabled = false
-          resolve(false)
-        })
       })
     },
     /**
-     * delete the current roundtrip
-     */
+       * delete the current roundtrip
+       */
     deleteRoundtrip () {
-      if (this.RTId === null || this.RTId === '' || this.RTId === 'undefined') return false
+      if (this.RTId === null || this.RTId === '' || this.RTId === 'undefined') { return false }
       try {
-        this.$store.dispatch('roundtrips/deleteRoundtrip', this.RTId).then(success => {
-          if (success) {
-            sharedMethods.showSuccessNotification('Rundreise wurde gelöscht')
-            context.$router.push('/meine-rundreisen')
-          } else {
-            sharedMethods.showErrorNotification('Die Rundreise konnte nicht gelöscht werden')
-          }
-        })
+        this.$store
+          .dispatch('roundtrips/deleteRoundtrip', this.RTId)
+          .then((success) => {
+            if (success) {
+              sharedMethods.showSuccessNotification('Rundreise wurde gelöscht')
+              context.$router.push('/meine-rundreisen')
+            } else {
+              sharedMethods.showErrorNotification(
+                'Die Rundreise konnte nicht gelöscht werden'
+              )
+            }
+          })
       } catch (error) {
         console.log(error)
-        sharedMethods.showErrorNotification('Die Rundreise konnte nicht gelöscht werden')
+        sharedMethods.showErrorNotification(
+          'Die Rundreise konnte nicht gelöscht werden'
+        )
       }
     }
   },
@@ -889,7 +958,9 @@ export default {
       this.fetchCategories()
       this.fetchSingleRoundtrip(RTId)
     } else {
-      sharedMethods.showErrorNotification('Oops die Einstellungen konnten nicht geladen werden.')
+      sharedMethods.showErrorNotification(
+        'Oops die Einstellungen konnten nicht geladen werden.'
+      )
       this.$router.push('/meine-rundreisen')
     }
   }

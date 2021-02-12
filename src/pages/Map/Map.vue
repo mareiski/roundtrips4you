@@ -3,6 +3,20 @@
     style="overflow:hidden;"
     class="map"
   >
+    <q-inner-loading
+      :showing="loading"
+      style="z-index: 1;"
+    >
+      <q-spinner
+        size="42px"
+        color="primary"
+      >
+      </q-spinner>
+      <p
+        class="font-medium"
+        style="margin-top:10px;"
+      >Karte wird geladen</p>
+    </q-inner-loading>
     <MglMap
       :accessToken="accTo"
       :mapStyle.sync="mapStyle"
@@ -27,8 +41,10 @@
         class="mapboxgl-ctrl"
         position="top-right"
       />
+
       <q-btn
         color="white"
+        v-if="editor"
         text-color="secondary"
         icon="apartment"
         style="position:absolute; right:9px; top:220px;"
@@ -114,7 +130,7 @@
         :key="stop.DocId"
         :coordinates="stop.HotelName && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
-        ref="stopMarker"
+        :ref="'stopMarker' + stop.DocId"
         @click="onMarkerClicked($event, stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label )"
       >
         <MglPopup>
@@ -278,6 +294,28 @@
                     </q-img>
                   </div>
 
+                  <template v-if="isStopAlreadyAdded(lastPOICityData.title)">
+                    <q-btn
+                      class="add-button"
+                      v-show="!sightAlreadyAdded(poi.name, lastPOICityData.title)"
+                      icon="bookmark"
+                      color="primary"
+                      round
+                      @click="$emit('addSight', {poi: poi, cityName: lastPOICityData.title})"
+                    >
+                      <q-tooltip>Ort merken</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      class="add-button"
+                      v-show="sightAlreadyAdded(poi.name, lastPOICityData.title)"
+                      icon="done"
+                      color="primary"
+                      disable
+                      round
+                    >
+                    </q-btn>
+                  </template>
+
                   <div class="rating-text">
                     {{poi.rating}}
                     <q-rating
@@ -295,7 +333,7 @@
                     target="_blank"
                   >
                     <q-card-section style="color:#707070;">
-                      <q-icon name="location_on" />
+                      <q-icon name="location_on" />.marker._popup.remove()
                       {{poi.location.label}}
                     </q-card-section>
                   </a>
@@ -363,6 +401,7 @@
           :coordinates="[city.longitude, city.latitude]"
           :offset="[10, 5]"
           @click="onMarkerClicked($event, city.name); goToCity(city.name)"
+          :ref="'cityMarker' + index"
         >
           <q-icon
             :ref="'cityMarkerIcon' + index"
@@ -398,8 +437,15 @@
                 />
                 <q-btn
                   flat
+                  v-if="!isStopAlreadyAdded(city.name)"
                   label="Ort hinzufügen"
                   @click="addStop"
+                  color="primary"
+                />
+                <q-btn
+                  v-else
+                  label="Ort ansehen"
+                  @click="$refs['stopMarker' + isStopAlreadyAdded(city.name).DocId][0].marker._popup.addTo(map); $refs['cityMarker' + index][0].marker._popup.remove()"
                   color="primary"
                 />
               </q-card-actions>
@@ -438,15 +484,17 @@
 
       <MglMarker
         v-for="(route, index) in addedRoutes"
-        :key="route.id + index"
+        :key="'route' + index"
         :coordinates="route.location"
         :color="route.color"
         @click="onMarkerClicked($event)"
-        :ref="route.id"
+        :ref="'route' + route.id"
       >
         <q-icon
           slot="marker"
           :style="{'color': route.color, 'background-color': 'white', 'border-radius': '50%'}"
+          :ref="'speedMarker' + route.id"
+          :class="'speedMarker' + index"
           name="speed"
         />
         <MglPopup>
@@ -605,12 +653,13 @@ export default {
       lastSightDetailsLng: 0,
       suggestionCountry: null,
       showSuggestionCountryDialog: false,
-      countryOptions: countries
+      countryOptions: countries,
+      loading: true
     }
   },
   watch: {
     stops: function (val, oldVal) {
-      if (val !== oldVal) {
+      if (JSON.stringify(val) !== JSON.stringify(oldVal)) {
         this.loadMap(this.map)
       }
     }
@@ -628,8 +677,22 @@ export default {
         this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
       })
     },
+    /**
+     * checks if a given cityName was already added as a stop
+     */
+    isStopAlreadyAdded (cityName) {
+      return this.stops[this.stops.findIndex(x => x.Location.label === cityName)]
+    },
+    /**
+     * checks if a sight was already added to the stop for given city name
+     */
+    sightAlreadyAdded (poiName, cityName) {
+      let stopToCheck = this.stops[this.stops.findIndex(x => x.Location.label === cityName)]
+      return stopToCheck && stopToCheck.Sights.includes(poiName)
+    },
     onMapLoaded (event) {
       console.log('onmaploaded')
+      this.loading = false
 
       this.map = event.map
       let context = this
@@ -797,6 +860,8 @@ export default {
         })
         this.lastSightDetailsLat = lat
         this.lastSightDetailsLng = lng
+      } else {
+        this.showDetailsDialog = true
       }
       // const headers = {
       //   'Content-Type': 'application/json; charset=UTF-8'
@@ -831,10 +896,7 @@ export default {
       if (this.stops[this.stops.length - 1] && this.stops[this.stops.length - 1].InitDate) {
         const initDate = this.stops[this.stops.length - 1].InitDate
 
-        let dateTimeParts = initDate.split(' ')
-        let dateParts = dateTimeParts[0].split('.')
-        let timeParts = dateTimeParts[1].split(':')
-        let currentInitDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], '00')
+        let currentInitDate = sharedMethods.getDateFromString(initDate)
 
         const defaultCheckOutDate = currentInitDate
         defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
@@ -905,6 +967,7 @@ export default {
         if (map) {
           // delete all routes
           this.addedRoutes.forEach(route => {
+            // if (this.$refs['route' + route.id]) this.$delete(this.$refs['speedMarker' + route.id])
             map.setLayoutProperty(route.id, 'visibility', 'none')
           })
 
@@ -987,6 +1050,14 @@ export default {
                 if (context.whitelistedLabels.includes(feature.layer.id) && !context.markerClicked) {
                   context.lastClickCoordinates = feature.geometry.coordinates
                   context.title = feature.properties.name_de
+
+                  // check if this stop has already a popup on map
+                  let stop = context.isStopAlreadyAdded(context.title)
+                  if (stop) {
+                    context.$refs['stopMarker' + stop.DocId][0].marker._popup.addTo(map)
+                    return
+                  }
+
                   context.showAddStopMarker = true
                   map.flyTo({ center: feature.geometry.coordinates, speed: 0.5, curve: 1 })
 
@@ -1035,8 +1106,10 @@ export default {
         // load additional infos for marker
         sharedMethods.getWikivoyageData(title).then(result => {
           CitySuggestionMethods.getCityImage(title, '').then(image => {
-            result.img = image.url
-            context.lastPOICityData = result
+            if (result) {
+              result.img = image.url
+              context.lastPOICityData = result
+            }
           })
         }).catch((e) => {
           console.log(e)

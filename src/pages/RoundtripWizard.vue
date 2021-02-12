@@ -27,7 +27,7 @@
       <q-card style="min-width: 350px">
         <q-card-section>
           <div class="text-h6">Ungesicherte Änderungen</div>
-          <span>Wenn du jetzt zurück gehst werden deine Änderungen werden verworfen! <br /> Möchtest du trotzdem zurück?</span>
+          <span>Wenn du jetzt zurück gehst werden deine Änderungen verworfen! <br /> Möchtest du trotzdem zurück?</span>
         </q-card-section>
         <q-card-actions
           align="right"
@@ -108,23 +108,30 @@
             </template>
 
             <template v-else-if="step === 3">
-              <q-btn
-                flat
-                @click="step = 2"
-                color="primary"
-                label="zurück"
-                class="q-ml-sm"
-                v-if="!isRTEditMode"
-              />
-              <q-btn
-                flat
-                color="primary"
-                :disable="addedStops.length <= 1"
-                :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
-                class="q-ml-sm"
-                :loading="saving"
-                @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
-              />
+              <div class="flex justfiy-between">
+                <div>
+                  <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
+                </div>
+                <div>
+                  <q-btn
+                    flat
+                    @click="step = 2"
+                    color="primary"
+                    label="zurück"
+                    class="q-ml-sm"
+                    v-if="!isRTEditMode"
+                  />
+                  <q-btn
+                    flat
+                    color="primary"
+                    :disable="addedStops.length <= 1"
+                    :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
+                    class="q-ml-sm"
+                    :loading="saving"
+                    @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
+                  />
+                </div>
+              </div>
             </template>
           </q-stepper-navigation>
         </div>
@@ -434,6 +441,7 @@
           @addStop="handleAddStopFromMap($event)"
           @update="updateFromSuggestedCity($event)"
           @distanceUpdate="updateTotalTripDistance($event)"
+          @addSight="addSightFromMap($event)"
           ref="tripOverview"
         ></TripOverview>
       </q-step>
@@ -450,8 +458,14 @@
         @addStop="handleAddStopFromMap($event)"
         @update="updateFromSuggestedCity($event)"
         @distanceUpdate="updateTotalTripDistance($event)"
+        @addSight="addSightFromMap($event)"
+        ref="tripOverview"
       ></TripOverview>
-      <div class="sticky-navigation">
+      <div
+        class="sticky-navigation"
+        style="justify-content:space-between;"
+      >
+        <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
         <q-btn
           flat
           color="primary"
@@ -528,7 +542,7 @@
             :disable="!currentStop.Title && currentStop.DayDuration <= 0"
             @click="() => { addStop() }"
             v-close-popup
-            :label="stopToEdit > -1 ? 'ändern' : 'hinzufügen'"
+            label="hinzufügen"
           />
         </q-card-actions>
       </q-card>
@@ -739,7 +753,8 @@
                   </div>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    v-if="hotelName && typeof hotelName !== 'undefined'
+                     "
                     dense
                     style="width:117px;"
                     class="linkChip"
@@ -750,7 +765,8 @@
                   </q-chip>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    v-if="hotelName && typeof hotelName !== 'undefined'
+                    "
                     dense
                     style="width:117px;"
                     class="linkChip"
@@ -762,11 +778,13 @@
                 </q-item-section>
                 <q-item-section
                   side
-                  v-if="hotelContact && typeof hotelContact !== 'undefined'"
+                  v-if="hotelContact && typeof hotelContact !== 'undefined'
+                  "
                 >
                   <div class="hotel-contact">
                     <q-chip
-                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
+                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'
+                      "
                       icon="email"
                       clickable
                       @click="openInNewTab('mailto:' + hotelContact.email)"
@@ -774,7 +792,8 @@
                     </q-chip>
                     <q-chip
                       icon="phone"
-                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'
+                      "
                       clickable
                       @click="openInNewTab('tel:' + hotelContact.phone)"
                     >{{hotelContact.phone}}
@@ -858,7 +877,7 @@
             </q-card>
           </q-dialog>
 
-          <div v-if="suggestedSights && typeof suggestedSights !== 'undefined' && suggestedSights !== 'error'">
+          <div v-if="suggestedSights && suggestedSights !== 'error'">
             <span
               v-for="(sight, index) in suggestedSights"
               :key="index"
@@ -919,16 +938,16 @@
               </q-card>
             </q-dialog>
           </div>
-          <q-chip
+          <!-- <q-chip
             v-else
             clickable
             @click="searchSights()"
           >{{suggestedSights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
             <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
-          </q-chip>
+          </q-chip> -->
 
           <q-select
-            label="Sehenswürdigkeiten"
+            label="gemerkte Orte"
             filled
             v-model="currentStop.Sights"
             use-input
@@ -947,6 +966,8 @@
               />
             </template>
           </q-select>
+
+          <span>Klicke auf diesen Stopp auf der Karte um dir vorgeschlagene <br> Orte anzeigen zu lassen</span>
 
           <q-editor
             v-model="currentStop.Description"
@@ -1167,7 +1188,6 @@ export default {
       if (this.stopToEdit > -1) {
         if (this.addedStops[this.stopToEdit].DayDuration !== this.currentStop.DayDuration) {
           const dayDistance = this.currentStop.DayDuration - this.addedStops[this.stopToEdit].DayDuration
-          console.log(dayDistance)
 
           // update dates of all following stops
           for (let i = this.stopToEdit + 1; i < this.addedStops.length; i++) {
@@ -1223,7 +1243,14 @@ export default {
       this.updateTotalTripDuration()
     },
     /**
-     * Get shortest route in comparing the distances between every stop
+     * called when a sight via map poi button was marked (added to stop)
+     */
+    addSightFromMap (event) {
+      let stopToAddSightTo = this.addedStops[this.addedStops.findIndex(x => x.Location.label === event.cityName)]
+      stopToAddSightTo.Sights.push(event.poi.name)
+    },
+    /**
+     * get shortest route in comparing the distances between every stop
      * @see getShortestDistance()
      */
     getShortestRoute () {
@@ -1318,12 +1345,11 @@ export default {
 
       this.currentStop.InitDate = date.formatDate(currentDate, 'DD.MM.YYYY HH:mm')
 
-      // reload both maps
-      if (this.$refs.overviewMap) this.$refs.overviewMap.loadMap(null, this.addedStops)
-      if (this.$refs.addStopMap) this.$refs.addStopMap.loadMap(null, this.addedStops)
+      // reload map
+      console.log('reload from delete')
+      if (this.$refs.tripOverview) this.$refs.tripOverview.refreshMap()
 
       if (this.addedStops.length === 0) this.step = 3
-
       this.updateTotalTripDuration()
     },
     /**
@@ -1381,13 +1407,14 @@ export default {
           })
 
           this.saving = true
+          let context = this
 
           Promise.all(promiseList).then(() => {
-            this.saving = false
+            context.saving = false
             sharedMethods.showSuccessNotification('Reise wurde gespeichert')
 
             setTimeout(function () {
-              this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+              context.$router.push('/rundreise-ansehen/' + context.$route.params.id)
             }, 1000)
           })
         } else {
@@ -1423,13 +1450,16 @@ export default {
      * updates total trip duration
      */
     updateTotalTripDuration () {
-      let startDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
+      if (this.addedStops.length === 1) this.totalTripDuration = this.addedStops[0].DayDuration
+      else {
+        let startDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
 
-      let stopDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
-      const oneDay = 24 * 60 * 60 * 1000
+        let stopDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
+        const oneDay = 24 * 60 * 60 * 1000
 
-      const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
-      this.totalTripDuration = diffDays + this.addedStops[this.addedStops.length - 1].DayDuration
+        const diffDays = Math.round(Math.abs((startDate - stopDate) / oneDay))
+        this.totalTripDuration = diffDays + this.addedStops[this.addedStops.length - 1].DayDuration
+      }
     },
     /**
      * called from map
@@ -1441,7 +1471,7 @@ export default {
       else this.totalTripDistance += distance
     },
     getRoundtripCountries () {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         let tempCountries = []
         let promiseList = []
 
@@ -1478,44 +1508,52 @@ export default {
       // dont do anything if stop was not moved
       if (event.newIndex === event.oldIndex) return
 
+      // know this is messy but only solution to update added stop with right value
+      let newAddedStops = JSON.parse(JSON.stringify(event.addedStops))
+
       // stop was moved > recalculate dates
       // set dragged stop date to dragged on stop
       // set next date to this date + dragged stop date days etc.
       // set previous date to this date - previos date days etc.
 
-      let draggedStop = this.addedStops[event.newIndex]
+      let draggedStop = newAddedStops[event.newIndex]
 
       let draggedUp = event.oldIndex > event.newIndex
 
-      let draggedOnStop = this.addedStops[event.newIndex - 1]
-      if (draggedUp) draggedOnStop = this.addedStops[event.newIndex + 1]
+      let draggedOnStop = newAddedStops[event.newIndex - 1]
+      if (draggedUp) draggedOnStop = newAddedStops[event.newIndex + 1]
 
       // set dragged stop date to dragged on stop date
       draggedStop.InitDate = JSON.parse(JSON.stringify(draggedOnStop.InitDate))
 
       // set all following dates to previous date +  previous date day duration
-      for (let i = event.newIndex + 1; i < this.addedStops.length; i++) {
-        let previousStopDate = sharedMethods.getDateFromString(this.addedStops[i - 1].InitDate)
+      for (let i = event.newIndex + 1; i < newAddedStops.length; i++) {
+        let previousStopDate = sharedMethods.getDateFromString(newAddedStops[i - 1].InitDate)
 
-        previousStopDate.setDate(previousStopDate.getDate() + this.addedStops[i - 1].DayDuration)
-        this.addedStops[i].InitDate = date.formatDate(previousStopDate, 'DD.MM.YYYY')
+        previousStopDate.setDate(previousStopDate.getDate() + newAddedStops[i - 1].DayDuration)
+        newAddedStops[i].InitDate = date.formatDate(previousStopDate, 'DD.MM.YYYY HH:mm')
       }
 
       // set all previous dates to following date - previous date day duration
       for (let i = event.newIndex - 1; i >= 0; i--) {
-        let followingStopDate = sharedMethods.getDateFromString(this.addedStops[i + 1].InitDate)
+        let followingStopDate = sharedMethods.getDateFromString(newAddedStops[i + 1].InitDate)
 
-        followingStopDate.setDate(followingStopDate.getDate() - this.addedStops[i].DayDuration)
+        followingStopDate.setDate(followingStopDate.getDate() - newAddedStops[i].DayDuration)
 
         console.log(followingStopDate)
-        this.addedStops[i].InitDate = date.formatDate(followingStopDate, 'DD.MM.YYYY')
+        newAddedStops[i].InitDate = date.formatDate(followingStopDate, 'DD.MM.YYYY HH:mm')
       }
+
+      this.addedStops = JSON.parse(JSON.stringify(newAddedStops))
+
+      // important do not reload map here !!! will be done by map automatically
     },
     /**
      * called when a user clicks on a stop to edit it
      */
     editStop (index) {
       this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
+      console.log(this.currentStop)
       this.stopToEdit = index
       this.showEditStopDialog = true
     },

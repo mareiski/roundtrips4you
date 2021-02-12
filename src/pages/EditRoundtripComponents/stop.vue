@@ -138,7 +138,7 @@
         expand-separator
         v-model="expanded"
         @input="$emit('expansionChanged', { expanded: expanded, docId: docId })"
-        :label="addedSights.length + (addedSights.length === 1 ? ' Sehenswürdigkeit' : ' Sehenswürdigkeiten') + (hotelName ? ' & 1 Hotel' : '') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
+        :label="addedSights.length + (addedSights.length === 1 ? ' gemerkter Ort' : ' gemerkte Orte') + (hotelName ? ' & 1 Hotel' : '') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
         :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem || profile === 'plane' ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
         :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem && profile !== 'plane' ? 'error-color' : '' )"
       >
@@ -152,7 +152,7 @@
               v-if="editor"
               name="edit"
             /> -->
-            <q-tooltip v-if="location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined'">{{location.label}}</q-tooltip>
+            <q-tooltip v-if="location && location.label">{{location.label}}</q-tooltip>
           </q-chip>
           <!-- <q-dialog
             v-if="editor"
@@ -230,7 +230,7 @@
           </q-card>
         </q-dialog> -->
         <div>
-          <div v-if="sights && typeof sights !== 'undefined' && sights !== 'error'">
+          <div v-if="sights && sights !== 'error'">
             <span
               v-for="(sight, index) in sights"
               :key="index"
@@ -475,7 +475,7 @@
                   </div>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    v-if="hotelName"
                     dense
                     style="width:117px;"
                     class="linkChip"
@@ -486,7 +486,7 @@
                   </q-chip>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'"
+                    v-if="hotelName"
                     dense
                     style="width:117px;"
                     class="linkChip"
@@ -498,11 +498,11 @@
                 </q-item-section>
                 <q-item-section
                   side
-                  v-if="hotelContact && typeof hotelContact !== 'undefined'"
+                  v-if="hotelContact"
                 >
                   <div class="hotel-contact">
                     <q-chip
-                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'"
+                      v-if="hotelContact.email"
                       icon="email"
                       clickable
                       @click="openInNewTab('mailto:' + hotelContact.email)"
@@ -510,7 +510,7 @@
                     </q-chip>
                     <q-chip
                       icon="phone"
-                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'"
+                      v-if="hotelContact.phone"
                       clickable
                       @click="openInNewTab('tel:' + hotelContact.phone)"
                     >{{hotelContact.phone}}
