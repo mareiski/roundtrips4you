@@ -121,46 +121,21 @@ export default {
      */
     fetchAirports (val) {
         return new Promise((resolve, reject) => {
+            const headers = {
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+
             getAxios().then(axios => {
-                const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-                const headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-
-                const data = querystring.stringify({
-                    grant_type: 'client_credentials',
-                    client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                    client_secret: 'lHQlUheyyAZtGQDA'
-                })
-
-                axios.post(url, data, {
-                    headers: headers,
-                    form: {
-                        'grant_type': 'client_credentials',
-                        'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                        'client_secret': 'lHQlUheyyAZtGQDA'
-                    }
-                }).then(function (response) {
-                    let token = response.data.access_token
-                    const tokenString = 'Bearer ' + token
-
-                    axios.get('https://api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
-                        headers: {
-                            'Authorization': tokenString
-                        }
-                    }).then(function (response) {
+                axios.get('https://api.aviowiki.com/free/airports/search?query=' + val,
+                    { headers: headers })
+                    .then(function (response) {
                         resolve(response)
                     }).catch(function (error) {
-                        console.log('Error' + error)
+                        console.log('Airport Search Error ' + error)
                         resolve(null)
                     })
-                }).catch(function (error) {
-                    console.log('Error on Authentication' + error)
-                    resolve(null)
-                })
             }).catch(function (error) {
-                console.log('Error ' + error)
+                console.log('Airport Search Error ' + error)
                 resolve(null)
             })
         })
