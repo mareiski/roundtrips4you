@@ -1,0 +1,7 @@
+{
+  "appId": "com.app.roundtrips4you.app",
+  "appName": "roundtrips4you",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www"
+}
