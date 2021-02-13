@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /impressum/
+Disallow: /haftungsausschluss/
+Disallow: /datenschutz/
+Disallow: /cgi-bin/
+Sitemap: https://roundtrips4you.de/statics/sitemap.xml
