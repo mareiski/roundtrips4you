@@ -319,19 +319,13 @@ export default {
     },
     getCreatedAtDate (timeStamp) {
       return date.formatDate(new Date(timeStamp.seconds * 1000), 'DD.MM.YYYY')
-    },
+    }
     // filterFn (val, update, abort) {
     //   update(() => {
     //     const needle = val.toLowerCase()
     //     this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
     //   })
     // },
-    getOrigins (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, true, this)
-    },
-    getDestinations (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, false, this)
-    }
   },
   created () {
     auth.authRef().onAuthStateChanged((user) => {

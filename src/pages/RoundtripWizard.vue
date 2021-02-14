@@ -109,7 +109,10 @@
 
             <template v-else-if="step === 3">
               <div class="flex justfiy-between">
-                <div>
+                <div
+                  class="flex justify-center"
+                  style="flex-direction:column;"
+                >
                   <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
                 </div>
                 <div>
@@ -290,6 +293,11 @@
           v-if="currentRoundtrip.TransportProfile === 'Flugzeug'"
           class="flight-container"
         >
+          <!-- <CitySearch
+            :parkingPlaceSearch="false"
+            :defaultLocation="null"
+            @update="searchAirports($event)"
+          ></CitySearch> -->
           <q-select
             outlined=""
             use-input
@@ -1030,7 +1038,7 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 export default {
   components: {
     HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
-    // draggable,
+    // CitySearch: () => import('../pages/Map/CitySearch.vue'),
     TripOverview: () => import('../pages/TripOverview/TripOverview.vue')
   },
   computed: {
@@ -1607,15 +1615,6 @@ export default {
     isDateTimeValid () {
       return sharedMethods.isDateTimeValid(this.currentStop.InitDate)
     },
-    /**
-     * filter countries method used in filter method of quasar select component
-     */
-    filterCountries (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
-    },
     getGeneralProfile () {
       switch (this.inputProfile) {
         case 'zu Fuß':
@@ -1815,10 +1814,10 @@ export default {
       })
     },
     getOrigins (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, true, this)
+      sharedMethods.filterAirports(val, update, abort, this, 'originOptions')
     },
     getDestinations (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, false, this)
+      sharedMethods.filterAirports(val, update, abort, this, 'destinationOptions')
     },
     getLocationString (locations) {
       let locationString = ''

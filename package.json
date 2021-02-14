@@ -17,9 +17,10 @@
     "@google/maps": "^1.0.1",
     "@googlemaps/js-api-loader": "^1.11.1",
     "@mapbox/mapbox-gl-geocoder": "^4.5.0",
-    "@quasar/extras": "^1.5.2",
+    "@quasar/extras": "^1.9.17",
     "@turf/bbox": "^6.0.1",
     "@turf/turf": "^5.1.6",
+    "airport-data": "^1.0.1",
     "axios": "^0.19.0",
     "cwait": "^1.1.2",
     "express-throttle-bandwidth": "^1.0.1",
@@ -27,6 +28,7 @@
     "firebase": "^6.4.0",
     "firebase-functions": "^3.2.0",
     "formidable": "^1.2.1",
+    "gulp": "^4.0.2",
     "http2": "^3.3.7",
     "leaflet": "^1.5.1",
     "leaflet-geosearch": "^2.7.0",
@@ -59,8 +61,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
-    "prettier": "^1.12.0",
-    "quasar-app-extension-swipe-to-close": "0.0.6"
+    "prettier": "^1.12.0"
   },
   "engines": {
     "node": ">= 8.9.0",
@@ -72,5 +73,12 @@
     "not IE 11",
     "not IE_Mob 11",
     "maintained node versions"
-  ]
+  ],
+  "script": {
+    "install": "cd node_modules/ourairports && npm run gulp -- [name [name [...]]]",
+    "preinstall": "npx npm-force-resolutions"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.4"
+  }
 }

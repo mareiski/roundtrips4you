@@ -296,7 +296,7 @@
 
                   <template v-if="isStopAlreadyAdded(lastPOICityData.title)">
                     <q-btn
-                      class="add-button"
+                      class="sight-add-button"
                       v-show="!sightAlreadyAdded(poi.name, lastPOICityData.title)"
                       icon="bookmark"
                       color="primary"
@@ -306,7 +306,7 @@
                       <q-tooltip>Ort merken</q-tooltip>
                     </q-btn>
                     <q-btn
-                      class="add-button"
+                      class="sight-add-button"
                       v-show="sightAlreadyAdded(poi.name, lastPOICityData.title)"
                       icon="done"
                       color="primary"
@@ -333,7 +333,7 @@
                     target="_blank"
                   >
                     <q-card-section style="color:#707070;">
-                      <q-icon name="location_on" />.marker._popup.remove()
+                      <q-icon name="location_on" />
                       {{poi.location.label}}
                     </q-card-section>
                   </a>

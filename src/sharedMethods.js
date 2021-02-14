@@ -5,6 +5,7 @@
  *  (mostly used for EditRoundtrips and RoundtripDetails & their components)
  */
 let getAxios = () => import('axios')
+let getAirportData = () => import('airport-data')
 var querystring = require('querystring')
 import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
@@ -76,69 +77,87 @@ export default {
         context.allStopsExpanded = false
         context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
+    // filterAirports (val, update, abort, originSearch, context) {
+    //     if (val.length < 3) {
+    //         abort()
+    //         return
+    //     }
+    //     if (val.length >= 3) {
+    //         this.fetchAirports(val).then((results) => {
+    //             update(() => {
+    //                 if (!results) return false
+
+    //                 if (originSearch) {
+    //                     context.originOptions = []
+    //                     context.originCodes = []
+    //                 } else {
+    //                     context.destinationOptions = []
+    //                     context.destinationCodes = []
+    //                 }
+
+    //                 results.data.data.forEach(city => {
+    //                     if (originSearch) {
+    //                         context.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
+    //                         context.originCodes.push(city.iataCode)
+    //                     } else {
+    //                         context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
+    //                         context.destinationCodes.push(city.iataCode)
+    //                     }
+    //                 })
+    //             }).catch(e => {
+    //                 return false
+    //             })
+    //         })
+    //     }
+    // },
     /**
-     * Filter airport suggestions for select element
-     * @param {String} val search term
-     * @param {boolean} originSearch search for origin or depature
-     * @param {*} context context of file
-     */
-    filterAirports (val, update, abort, originSearch, context) {
-        if (val.length < 3) {
+    * Filter airport suggestions for select element
+    * @param {String} val search term
+    * @param {boolean} originSearch search for origin or depature
+    * @param {*} context context of file
+    * @param {String} arrayName name for array to push elements to
+    */
+    filterAirports (searchTerm, update, abort, context, arrayName) {
+        if (!searchTerm || searchTerm.length < 3) {
             abort()
             return
         }
-        if (val.length >= 3) {
-            this.fetchAirports(val).then((results) => {
-                update(() => {
-                    if (!results) return false
 
-                    if (originSearch) {
-                        context.originOptions = []
-                        context.originCodes = []
-                    } else {
-                        context.destinationOptions = []
-                        context.destinationCodes = []
-                    }
+        getAirportData().then(airportData => {
+            update(() => {
+                let results = Object.values(airportData).filter(airport => {
+                    return this.startsWith(airport.city, searchTerm) ||
+                        this.startsWith(airport.iata, searchTerm) ||
+                        this.startsWith(airport.name, searchTerm)
+                })
 
-                    results.data.data.forEach(city => {
-                        if (originSearch) {
-                            context.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                            context.originCodes.push(city.iataCode)
-                        } else {
-                            context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                            context.destinationCodes.push(city.iataCode)
-                        }
-                    })
-                }).catch(e => {
-                    return false
+                context[arrayName] = []
+                results.forEach(result => {
+                    context[arrayName].push(result.iata ? (result.name + ' (' + result.iata + ')') : result.name)
                 })
             })
-        }
+        })
+
+        // return new Promise(resolve => {
+        //     getAxios().then(axios => {
+        //         axios.get('https://cors-anywhere.herokuapp.com/https://ourairportapi.com/nearest/' + lat + ',' + lng + '?iataOnly=true&max=5')
+        //             .then(function (response) {
+        //                 resolve(response)
+        //             }).catch(function (error) {
+        //                 console.log('Airport Search Error ' + error)
+        //                 resolve(null)
+        //             })
+        //     }).catch(function (error) {
+        //         console.log('Airport Search Error ' + error)
+        //         resolve(null)
+        //     })
+        // })
     },
     /**
-     * Fetch ariport suggestions for a search term
-     * @param {*} val search term
+     * checks if string to check starts with val
      */
-    fetchAirports (val) {
-        return new Promise((resolve, reject) => {
-            const headers = {
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
-
-            getAxios().then(axios => {
-                axios.get('https://api.aviowiki.com/free/airports/search?query=' + val,
-                    { headers: headers })
-                    .then(function (response) {
-                        resolve(response)
-                    }).catch(function (error) {
-                        console.log('Airport Search Error ' + error)
-                        resolve(null)
-                    })
-            }).catch(function (error) {
-                console.log('Airport Search Error ' + error)
-                resolve(null)
-            })
-        })
+    startsWith (stringToCheck, val) {
+        return stringToCheck ? stringToCheck.substr(0, val.length).toUpperCase() === val.toUpperCase() : false
     },
     /**
      * @return a string date from given timestamp
