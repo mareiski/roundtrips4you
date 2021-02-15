@@ -1253,7 +1253,6 @@ export default {
       price: 0,
       location: {},
       wholeYearOffer: false,
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       durations: [],
       profile: '',
       region: null,
@@ -1651,16 +1650,12 @@ export default {
 
     //     const data = querystring.stringify({
     //       grant_type: 'client_credentials', // gave the values directly for testing
-    //       client_id: 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-    //       client_secret: '5NLWAdMXnOyNxWnk'
     //     })
 
     //     axios.post(url, data, {
     //       headers: headers,
     //       form: {
     //         'grant_type': 'client_credentials',
-    //         'client_id': 'NMNW1UbSmcYyd3UVUvGZ5NKUCAcOq2dp',
-    //         'client_secret': '5NLWAdMXnOyNxWnk'
     //       }
     //     }).then(function (response) {
     //       let token = response.data.access_token
@@ -2574,7 +2569,7 @@ export default {
       if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
       if (profile !== 'plane') {
-        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.$store.getters['api/getMapboxKey']
       } else {
         return null
       }

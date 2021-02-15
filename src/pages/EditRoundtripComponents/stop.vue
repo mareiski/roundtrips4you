@@ -1012,7 +1012,6 @@ export default {
       tempDailyTripLocation: null,
       tempDailyTripDate: this.date,
       dailyTripProfile: 'Auto',
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       expanded: false,
       changeAllDatesActive: false,
       oldDate: null,
@@ -1113,7 +1112,7 @@ export default {
       })
     },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.$store.getters['api/getMapboxKey']
 
       axios.get(url)
         .then(response => {
@@ -1198,7 +1197,7 @@ export default {
             headers: {
               'content-type': 'application/octet-stream',
               'x-rapidapi-host': 'hotels4.p.rapidapi.com',
-              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'x-rapidapi-key': this.$store.getters['api/getHotels4Key'],
               'useQueryString': true
             }
           })

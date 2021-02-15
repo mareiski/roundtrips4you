@@ -7,10 +7,13 @@
   "author": "Marco Reisinger",
   "private": true,
   "scripts": {
+    "dev": "QENV=development quasar dev",
+    "test-dev": "QENV=test quasar dev",
+    "combined": "QENV=development+test quasar dev",
+    "build": "QENV=production quasar build",
     "lint": "eslint --ext .js,.vue src",
     "test": "echo \"No test specified\" && exit 0",
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "supportedBrowsers": "(echo module.exports = && browserslist-useragent-regexp --allowHigherVersions) > supportedBrowsers.js"
   },
   "dependencies": {
@@ -53,6 +56,7 @@
   },
   "devDependencies": {
     "@quasar/app": "^1.5.8",
+    "@quasar/quasar-app-extension-dotenv": "^1.0.6",
     "@vue/eslint-config-standard": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "browserslist-useragent-regexp": "^2.1.0",

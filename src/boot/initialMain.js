@@ -15,6 +15,8 @@ export default async ({ app, store, router }) => {
   Loading.show({ spinnerColor: 'primary' })
   auth.init(app, store, router)
 
+  store.dispatch('api/getAllKeys')
+
   getLeaflet().then(L => {
     delete L.Icon.Default.prototype._getIconUrl
 

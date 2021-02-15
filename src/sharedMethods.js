@@ -137,21 +137,6 @@ export default {
                 })
             })
         })
-
-        // return new Promise(resolve => {
-        //     getAxios().then(axios => {
-        //         axios.get('https://cors-anywhere.herokuapp.com/https://ourairportapi.com/nearest/' + lat + ',' + lng + '?iataOnly=true&max=5')
-        //             .then(function (response) {
-        //                 resolve(response)
-        //             }).catch(function (error) {
-        //                 console.log('Airport Search Error ' + error)
-        //                 resolve(null)
-        //             })
-        //     }).catch(function (error) {
-        //         console.log('Airport Search Error ' + error)
-        //         resolve(null)
-        //     })
-        // })
     },
     /**
      * checks if string to check starts with val
@@ -325,45 +310,6 @@ export default {
                     resolve(returnDataArr)
                 })
             })
-
-            //     const headers = {
-            //         'Content-Type': 'application/json; charset=UTF-8'
-            //     }
-
-            //     getAxios().then(axios => {
-            //         axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=5000&language=de&type=tourist_attraction&key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
-            //             { headers: headers })
-            //             .then(function (response) {
-            //                 console.log(response)
-
-            //                 let returnDataArr = []
-
-            //                 const results = response.data.results
-
-            //                 results.forEach(poi => {
-            //                     let returnData = {}
-            //                     returnData.name = poi.name
-            //                     returnData.photoReference = poi.photos[0].photo_reference
-            //                     returnData.placeId = poi.place_id
-            //                     returnData.rating = poi.rating
-            //                     returnData.totalRatings = poi.user_ratings_total
-            //                     returnData.location = poi.geometry.location
-            //                     returnData.location.label = poi.vicinity
-            //                     returnData.tags = poi.types
-
-            //                     returnDataArr.push(returnData)
-            //                 })
-
-            //                 resolve(returnDataArr)
-            //             }).catch(function (error) {
-            //                 console.log('Error' + error)
-
-            //                 resolve(null)
-            //             })
-            //     }).catch(function (error) {
-            //         console.log('Error ' + error)
-            //         resolve(null)
-            //     })
         })
     },
     /**
@@ -408,14 +354,16 @@ export default {
         return new Promise((resolve, reject) => {
             const url = 'https://api.amadeus.com/v1/security/oauth2/token'
 
+            let amadeusKeys = this.$store.getters['api/getAmadeusKeys']
+
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
 
             const data = querystring.stringify({
-                grant_type: 'client_credentials', // gave the values directly for testing
-                client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                client_secret: 'lHQlUheyyAZtGQDA'
+                grant_type: 'client_credentials',
+                client_id: amadeusKeys.id,
+                client_secret: amadeusKeys.secret
             })
 
             getAxios().then(axios => {
@@ -423,8 +371,8 @@ export default {
                     headers: headers,
                     form: {
                         'grant_type': 'client_credentials',
-                        'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                        'client_secret': 'lHQlUheyyAZtGQDA'
+                        'client_id': amadeusKeys.id,
+                        'client_secret': amadeusKeys.secret
                     }
                 }).then(function (response) {
                     let token = response.data.access_token

@@ -1,20 +1,9 @@
 import Vue from 'vue'
 import firebase from 'firebase'
 import { firestorePlugin } from 'vuefire'
-
 Vue.config.productionTip = false
 
 Vue.use(firestorePlugin)
-
-const config = {
-  apiKey: 'AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
-  authDomain: 'roundtrips4you.firebaseapp.com',
-  databaseURL: 'https://roundtrips4you.firebaseio.com',
-  projectId: 'roundtrips4you',
-  storageBucket: 'gs://roundtrips4you.appspot.com',
-  messagingSenderId: '295257024914',
-  appId: '1:295257024914:web:11432138a1faf186'
-}
 
 let db = null
 let storage = null
@@ -26,6 +15,16 @@ const auth = {
 
   init (context, store, router) {
     this.context = context
+
+    let config = {
+      'apiKey': process.env.FIREBASE_KEY,
+      'authDomain': 'roundtrips4you.firebaseapp.com',
+      'databaseURL': 'https://roundtrips4you.firebaseio.com',
+      'projectId': 'roundtrips4you',
+      'storageBucket': 'gs://roundtrips4you.appspot.com',
+      'messagingSenderId': '295257024914',
+      'appId': '1:295257024914:web:11432138a1faf186'
+    }
 
     firebase.initializeApp(config)
     this.uiConfig = {

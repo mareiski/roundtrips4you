@@ -975,8 +975,144 @@
             </template>
           </q-select>
 
-          <span>Klicke auf diesen Stopp auf der Karte um dir vorgeschlagene <br> Orte anzeigen zu lassen</span>
+          <span>Klicke auf diesen Stopp auf der Karte um dir Orte vorschlagen zu lassen<br></span>
 
+          <!-- Images here -->
+          <!-- <div>
+          <div
+            class="flex"
+            v-if="stopImages"
+          >
+            <div
+              class="uploader"
+              v-for="(stopImage, index) in stopImages"
+              :key="index"
+              style="margin-right:8px;"
+            >
+              <q-img
+                style="height:100%;"
+                :src="stopImage"
+              ></q-img>
+              <q-btn
+                round
+                color="primary"
+                icon="filter"
+                style="position: absolute; margin-top:-113px; margin-left:120px;"
+                @click="showImgDialog(stopImage)"
+              >
+              </q-btn>
+            </div>
+          </div>
+          <q-dialog v-model="imgDialogVisible">
+            <q-card style="width:100%; max-width:100vh; overflow:hidden;">
+              <q-card-section
+                class="row flex justify-end q-pb-none"
+                style="z-index:100; width:100%; position:absolute; color:white;"
+              >
+                <q-btn
+                  icon="close"
+                  flat
+                  round
+                  dense
+                  v-close-popup
+                />
+              </q-card-section>
+              <q-card-section>
+                <q-img
+                  style="width:100%;"
+                  :src="dialogImgSrc"
+                ></q-img>
+              </q-card-section>
+            </q-card>
+
+          </q-dialog>
+          <q-dialog
+            keep-alive
+            v-model="chooseImgDialog"
+          >
+            <q-card>
+              <q-card-section class="row items-center galeryImgUploaderContainer flex justify-between">
+                <div
+                  class="uploader"
+                  v-for="(url, index) in galeryImgUrls"
+                  :key="index"
+                >
+                  <img
+                    style="width:100%;"
+                    v-lazy="url"
+                  />
+                  <q-btn
+                    round
+                    color="primary"
+                    icon="add"
+                    style="position: absolute;"
+                    @click="addImageToStop(url)"
+                  >
+                  </q-btn>
+                </div>
+                <div
+                  v-if="galeryImgUrls.length === 0"
+                  class="flex"
+                >
+                  <div>
+                    <q-img
+                      src="../statics/dummy-image-landscape-1.jpg"
+                      style="height:148px; width:148px;"
+                    ></q-img>
+                  </div>
+                  <div
+                    class="flex justify-center"
+                    style="max-width:300px; padding-left:10px; flex-direction:column;"
+                  >Wenn du ein Bild in den Einstellungen hochlädst kannst du es hier hinzufügen.</div>
+                </div>
+              </q-card-section>
+              <q-card-section class="row items-center flex">
+                <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br>
+                  <br>
+                  <a
+                    style="text-decoration:underline;"
+                    @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
+                  >Bildvorschläge auf Google</a>
+                  <br>
+                  <br>
+                </span>
+                <div
+                  class="flex"
+                  style="width:100%;"
+                >
+                  <q-input
+                    filled
+                    ref="tempImgLinkInput"
+                    label="Bild per Link einfügen"
+                    v-model="tempImgLink"
+                    :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
+                    lazy-rules
+                    bottom-slots
+                    outlined
+                    style="padding:0; width:80%; margin-bottom:10px;"
+                  ></q-input>
+                  <q-btn
+                    round
+                    color="primary"
+                    icon="add"
+                    style="margin-left:10px; margin-top:5px; height:45px;"
+                    :disable="!validURL(tempImgLink)"
+                    @click="addImageToStop(tempImgLink)"
+                  />
+                </div>
+              </q-card-section>
+
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  label="Fertig"
+                  color="primary"
+                  v-close-popup
+                />
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+</div> -->
           <q-editor
             v-model="currentStop.Description"
             min-height="5rem"
@@ -1079,7 +1215,8 @@ export default {
         Sights: [],
         InitDate: formattedScheduleDate + ' 10:00',
         Profile: 'driving',
-        DayDuration: 1
+        DayDuration: 1,
+        Images: []
       },
 
       // leave this outside of current stop to avoid to much fields in db (will only be added to current stop if need to)
@@ -1737,7 +1874,7 @@ export default {
             headers: {
               'content-type': 'application/octet-stream',
               'x-rapidapi-host': 'hotels4.p.rapidapi.com',
-              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'x-rapidapi-key': this.$store.getters['api/getHotels4Key'],
               'useQueryString': true
             }
           })

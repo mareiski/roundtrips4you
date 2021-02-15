@@ -35,7 +35,8 @@
         >
           <q-tooltip v-if="!user || !user.displayName">Bitte erstelle zuerst einen Benutzernamen</q-tooltip>
         </q-toggle>
-        <div
+        <!-- todo map widget is not working anymore -->
+        <!-- <div
           v-show="publish"
           style="padding-bottom:20px;"
         >
@@ -70,7 +71,7 @@
             id="share-code"
             :value="shareCode"
           />
-        </div>
+        </div> -->
         <q-select
           outlined
           v-model="category"

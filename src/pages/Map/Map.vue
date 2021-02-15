@@ -18,6 +18,7 @@
       >Karte wird geladen</p>
     </q-inner-loading>
     <MglMap
+      v-if="accTo"
       :accessToken="accTo"
       :mapStyle.sync="mapStyle"
       :style="'height:' + (height ? height : '500px;')"
@@ -620,6 +621,9 @@ export default {
   computed: {
     isMobile () {
       return window.matchMedia('(max-width: 550px)').matches
+    },
+    accTo () {
+      return this.$store.getters['api/getMapboxKey']
     }
     // isTablet () {
     //   return window.matchMedia('(max-width: 958px)').matches
@@ -627,7 +631,6 @@ export default {
   },
   data () {
     return {
-      accTo: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
       addedRoutes: [],
       showAddStopMarker: false,
