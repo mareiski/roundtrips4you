@@ -1,6 +1,6 @@
 const jsonfile = require('jsonfile')
 
-const file = 'key'
+const file = 'FirebaseKeyProd'
 let contentToWrite = process.argv[2]
 
 jsonfile.writeFile(file, contentToWrite, function (err) {
