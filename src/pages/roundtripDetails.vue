@@ -534,6 +534,7 @@ export default {
         this.getUserRatings(RTId)
       }).catch(err => {
         console.log('Error getting Roundtrip', err)
+        sharedMethods.showErrorNotification('Rundreise konnte nicht geladen werden')
       })
     },
     getDefaultCheckOutDate (stop) {
@@ -709,6 +710,7 @@ export default {
         })
         .catch(err => {
           console.log('Error getting Roundtripdetails', err)
+          sharedMethods.showErrorNotification('Rundreise konnten nicht geladen werden')
         })
     },
     /**

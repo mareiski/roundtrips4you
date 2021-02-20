@@ -266,10 +266,13 @@ export default {
     getGooglePlacesData (lat, lng) {
         return new Promise((resolve, reject) => {
             const loader = new Loader({
-                apiKey: 'AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
+                apiKey: 'AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE',
                 version: 'weekly',
                 libraries: ['places']
             })
+
+            // personal AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc
+            // AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE
 
             // google is available here
             loader.load().then(() => {

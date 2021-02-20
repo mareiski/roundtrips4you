@@ -292,16 +292,6 @@ export default {
     shouldAddCity: Boolean,
     isInSuggestionMode: Boolean
   },
-  metaInfo () {
-    return {
-      script: [{
-        src: `https://maps.googleapis.com/maps/api/js?key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc&libraries=places`,
-        async: true,
-        defer: true,
-        callback: () => this.MapsInit() // will declare it in methods
-      }]
-    }
-  },
   methods: {
     /**
      * filter countries method used in filter method of quasar select component
@@ -381,7 +371,7 @@ export default {
       let context = this
       tempCities.forEach((city) => {
         setTimeout(function () {
-          CitySuggestionMethods.getCityImage(city.name, city.country).then(image => {
+          CitySuggestionMethods.getCityImage(city.name, city.country, context).then(image => {
             context.images.splice(context.cities.findIndex(x => x.name === city.name), 0, image)
           })
         }, 1000)

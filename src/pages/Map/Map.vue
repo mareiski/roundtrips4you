@@ -135,7 +135,6 @@
         @click="onMarkerClicked($event, stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label )"
       >
         <MglPopup>
-
           <q-card>
             <q-img
               v-if="stop.StopImages"
@@ -558,8 +557,10 @@
     </q-dialog>
   </div>
 </template>
-<style lang="less" scoped>
+<style lang="less">
 @import url("../../css/map.less");
+</style>
+<style lang="less" scoped>
 .mapboxgl-marker-anchor-center {
   font-size: 40px;
   position: absolute;
@@ -1107,7 +1108,7 @@ export default {
 
         // load additional infos for marker
         sharedMethods.getWikivoyageData(title).then(result => {
-          CitySuggestionMethods.getCityImage(title, '').then(image => {
+          CitySuggestionMethods.getCityImage(title, '', context).then(image => {
             if (result) {
               result.img = image.url
               context.lastPOICityData = result

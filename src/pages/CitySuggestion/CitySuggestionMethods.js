@@ -108,8 +108,8 @@ export default {
     /**
      * gets a image from pixabay for given city name
      */
-    getCityImage (cityName, cityCountry) {
-        let key = this.$store.getters['api/getPixabayKey']
+    getCityImage (cityName, cityCountry, context) {
+        let key = context.$store.getters['api/getPixabayKey']
         return new Promise((resolve, reject) => {
             axios.get('https://pixabay.com/api/?key=' + key + '&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
             ).then(function (response) {

@@ -37,6 +37,17 @@ const auth = {
     db = firebase.firestore()
     storage = firebase.storage()
 
+    // enables offline usage of data
+    db.enablePersistence()
+      .catch((err) => {
+        console.log('firebase persistence failed')
+        if (err.code === 'failed-precondition') {
+          console.log('multiple tabs opened')
+        } else if (err.code === 'unimplemented') {
+          console.log('browser too old')
+        }
+      })
+
     firebase.auth().onAuthStateChanged((user) => {
       store.dispatch('user/setCurrentUser')
 
