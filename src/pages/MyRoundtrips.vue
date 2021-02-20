@@ -135,8 +135,10 @@
     </div>
   </div>
 </template>
+<style lang="less">
+@import url("../css/my-roundtrips.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/my-roundtrips.less')
 import { db, auth } from '../firebaseInit.js'
 import { date } from 'quasar'
 import sharedMethods from '../sharedMethods'

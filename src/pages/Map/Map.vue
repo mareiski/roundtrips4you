@@ -373,7 +373,7 @@
         :key="'StopContainer' + stop.DocId + index"
       >
         <MglMarker
-          v-if="stop.Parking && typeof stop.Parking !== 'undefined' && !isNaN(stop.Parking.lng)"
+          v-if="stop.Parking && !isNaN(stop.Parking.lng)"
           :key="'Stop' + stop.DocId"
           :coordinates="[stop.Parking.lng, stop.Parking.lat]"
           color="#D56026"
@@ -388,7 +388,7 @@
                 />
               </div>
               <q-card-section>
-                <p>{{ stop.parkingPlace && typeof stop.parkingPlace !== 'undefined' &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
+                <p>{{ stop.parkingPlace &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
               </q-card-section>
             </q-card>
           </MglPopup>
@@ -559,6 +559,7 @@
   </div>
 </template>
 <style lang="less" scoped>
+@import url("../../css/map.less");
 .mapboxgl-marker-anchor-center {
   font-size: 40px;
   position: absolute;
@@ -579,8 +580,6 @@ import {
   MglPopup,
   MglFullscreenControl
 } from 'vue-mapbox'
-
-import(/* webpackPrefetch: true */ '../../css/map.less')
 
 const getAxios = () => import('axios')
 import { date } from 'quasar'

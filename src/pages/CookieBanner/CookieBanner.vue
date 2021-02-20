@@ -13,8 +13,10 @@
     ></q-btn>
   </div>
 </template>
+<style lang="less">
+@import url("../../css/cookie.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../../css/cookie.less')
 export default {
   data () {
     return {

@@ -105,9 +105,10 @@
     </div>
   </div>
 </template>
-
+<style lang="less">
+@import url("../css/login.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit.js'
 const getFirebase = () => import('firebase')
 import sharedMethods from '../sharedMethods.js'

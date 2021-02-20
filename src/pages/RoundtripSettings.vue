@@ -311,6 +311,157 @@
           </div>
         </div>
       </q-list>
+      <h4>An-/Abreise</h4>
+      <q-select
+        outlined
+        v-model="arrivalDepatureProfile"
+        @blur="onSaveRoundtrip"
+        input-debounce="0"
+        :options="['Flugzeug', 'Andere']"
+        label="Reisemittel"
+        :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
+        style="padding-bottom: 32px"
+      >
+        <template v-slot:prepend>
+          <q-icon name="commute" />
+        </template>
+      </q-select>
+      <div
+        v-if="arrivalDepatureProfile === 'Flugzeug'"
+        class="flight-container"
+      >
+        <q-select
+          outlined=""
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="0"
+          @blur="onSaveRoundtrip"
+          clearable
+          ref="select"
+          v-model="origin"
+          hide-dropdown-icon
+          label="Abflugsort"
+          :options="originOptions"
+          @filter="getOrigins"
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                zu viele/keine Ergebnisse, bitte weitertippen
+              </q-item-section>
+            </q-item>
+          </template>
+          <template v-slot:prepend>
+            <q-icon name="flight_takeoff" />
+          </template>
+        </q-select>
+        <q-select
+          outlined=""
+          use-input
+          hide-selected
+          fill-input
+          input-debounce="0"
+          clearable
+          ref="select"
+          @blur="onSaveRoundtrip"
+          v-model="destination"
+          hide-dropdown-icon
+          label="Ankunftsort"
+          :options="destinationOptions"
+          @filter="getDestinations"
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                zu viele/keine Ergebnisse, bitte weitertippen
+              </q-item-section>
+            </q-item>
+          </template>
+          <template v-slot:prepend>
+            <q-icon name="flight_land" />
+          </template>
+        </q-select>
+        <q-input
+          outlined
+          v-model="depatureDate"
+          label="Abflugsdatum"
+          @blur="onSaveRoundtrip"
+          class="input-item rounded-borders q-field--with-bottom"
+        >
+          <q-popup-proxy
+            transition-show="scale"
+            transition-hide="scale"
+          >
+            <q-date
+              v-model="depatureDate"
+              today-btn
+              mask="DD.MM.YYYY"
+              @input="updateReturnDate()"
+            />
+          </q-popup-proxy>
+          <template v-slot:prepend>
+            <q-icon
+              name="event"
+              class="cursor-pointer"
+            >
+            </q-icon>
+          </template>
+        </q-input>
+        <q-input
+          outlined
+          v-model="returnDate"
+          label="Rückflugsdatum"
+          @blur="onSaveRoundtrip"
+          class="input-item rounded-borders q-field--with-bottom"
+        >
+          <q-popup-proxy
+            transition-show="scale"
+            transition-hide="scale"
+          >
+            <q-date
+              v-model="returnDate"
+              today-btn
+              mask="DD.MM.YYYY"
+            />
+          </q-popup-proxy>
+          <template v-slot:prepend>
+            <q-icon
+              name="event"
+              class="cursor-pointer"
+            >
+            </q-icon>
+          </template>
+        </q-input>
+        <q-select
+          outlined
+          v-model="travelClass"
+          input-debounce="0"
+          @blur="onSaveRoundtrip"
+          :options="['Economy', 'Premium Economy', 'Business', 'First']"
+          label="Reiseklasse auswählen"
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
+        >
+          <template v-slot:prepend>
+            <q-icon name="star" />
+          </template>
+        </q-select>
+        <q-select
+          outlined
+          v-model="nonStop"
+          input-debounce="0"
+          @blur="onSaveRoundtrip"
+          :options="['Ja', 'Nein']"
+          label="Non Stop"
+          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
+        >
+          <template v-slot:prepend>
+            <q-icon name="flight" />
+          </template>
+        </q-select>
+      </div>
       <h4>Bilder</h4>
       <q-list
         bordered
@@ -522,7 +673,18 @@ export default {
       galeryImgUrls: [],
       titleUploadDisabled: false,
       shareLink: null,
-      shareCode: null
+      shareCode: null,
+      arrivalDepatureProfile: null,
+      destination: null,
+      travelClass: null,
+      nonStop: null,
+      originCode: null,
+      origin: null,
+      originOptions: [],
+      destinationOptions: [],
+      destinationCode: null,
+      depatureDate: null,
+      returnDate: null
     }
   },
   computed: {
@@ -556,6 +718,12 @@ export default {
       // unselect the range
       testingCodeToCopy.setAttribute('type', 'hidden')
       window.getSelection().removeAllRanges()
+    },
+    getOrigins (val, update, abort) {
+      sharedMethods.filterAirports(val, update, abort, this, 'originOptions')
+    },
+    getDestinations (val, update, abort) {
+      sharedMethods.filterAirports(val, update, abort, this, 'destinationOptions')
     },
     /**
        * get the average hotel rating
@@ -651,7 +819,14 @@ export default {
           OfferWholeYear: this.wholeYearOffer,
           Rooms: this.rooms,
           Adults: this.adults,
-          ChildrenAges: this.childrenAges
+          ChildrenAges: this.childrenAges,
+          TransportProfile: this.arrivalDepatureProfile,
+          Origin: this.origin,
+          Destination: this.destination,
+          DepatureDate: sharedMethods.getDateFromString(this.depatureDate),
+          ReturnDate: sharedMethods.getDateFromString(this.returnDate),
+          TravelClass: this.travelClass,
+          NonStop: this.nonStop
         })
         .catch((e) => {
           console.log(e)
@@ -819,6 +994,14 @@ export default {
       this.getGeneralProfile()
 
       this.loadInitImgs()
+    },
+    updateReturnDate () {
+      let dateParts = this.depatureDate.split('.')
+      let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
+      let returnDate = depatureDate
+      returnDate.setDate(depatureDate.getDate() + 1)
+
+      this.returnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
     },
     loadInitImgs () {
       var fileRef = storage

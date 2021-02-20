@@ -320,9 +320,10 @@
     </div>
   </q-page>
 </template>
-
+<style lang="less">
+@import url("../css/home.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/home.less')
 import { scroll } from 'quasar'
 const { getScrollTarget, setScrollPosition } = scroll
 import { auth } from '../firebaseInit.js'

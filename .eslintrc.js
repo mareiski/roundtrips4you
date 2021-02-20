@@ -50,6 +50,8 @@ module.exports = {
     // allow console.log during development only
     'no-console': 'off',
     // allow debugger during development only
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    "template-curly-spacing": "off",
+    "indent": "off"
   }
 }

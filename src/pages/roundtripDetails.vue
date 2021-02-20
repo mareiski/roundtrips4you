@@ -425,8 +425,10 @@
     </q-tab-panels>
   </div>
 </template>
+<style lang="less">
+@import url("../css/editRoundtrips.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
 import { db, storage, auth } from '../firebaseInit.js'
 const getAxios = () => import('axios')
