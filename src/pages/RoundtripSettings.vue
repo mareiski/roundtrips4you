@@ -27,7 +27,7 @@
       >
         <q-item-label style="padding-bottom:5px;">Wenn deine Rundreise veröffentlicht ist kann sie jeder ansehen und kopieren.</q-item-label>
         <q-toggle
-          v-model="publish"
+          v-model="roundtrip.Public"
           label="Rundreise veröffentlichen"
           icon="share"
           :disable="!user || !user.displayName"
@@ -74,7 +74,7 @@
         </div> -->
         <q-select
           outlined
-          v-model="category"
+          v-model="roundtrip.Category"
           :options="categoryOptions"
           label="Kategorie"
           use-input
@@ -92,7 +92,7 @@
         >
           <q-rating
             class="stars"
-            v-model="stars"
+            v-model="roundtrip.Stars"
             size="15px"
             color="gold"
             :readonly="!isNaN(hotelRatingAvg())"
@@ -102,7 +102,7 @@
           <q-item-label>Durchschittliche Hotelbewertung {{!isNaN(hotelRatingAvg()) ? '(errechnet)' : ''}}</q-item-label>
         </div>
         <q-input
-          v-model="descriptionInput"
+          v-model="roundtrip.Description"
           outlined
           autogrow
           label="Kurze Beschreibung"
@@ -116,7 +116,7 @@
         </q-input>
         <q-select
           outlined
-          v-model="inputProfile"
+          v-model="roundtrip.Profile"
           :options="['zu Fuß', 'Fahrrad', 'Auto']"
           label="Reisemittel"
           use-input
@@ -129,42 +129,25 @@
             <q-icon name="commute" />
           </template>
         </q-select>
-        <q-input
-          v-model="highlight1"
-          label="Highlight 1"
-          outlined
-          @blur="onSaveRoundtrip"
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+        <div
+          v-for="(highlight, index) in roundtrip.Highlights"
+          :key="highlight"
         >
-          <template v-slot:prepend>
-            <q-icon name="star" />
-          </template>
-        </q-input>
-        <q-input
-          v-model="highlight2"
-          label="Highlight 2"
-          outlined
-          @blur="onSaveRoundtrip"
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="star" />
-          </template>
-        </q-input>
-        <q-input
-          v-model="highlight3"
-          label="Highlight 3"
-          outlined
-          :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
-          @blur="onSaveRoundtrip"
-        >
-          <template v-slot:prepend>
-            <q-icon name="star" />
-          </template>
-        </q-input>
+          <q-input
+            v-model="roundtrip.Highlights[index]"
+            :label="'Highlight' + index + 1"
+            outlined
+            @blur="onSaveRoundtrip"
+            :rules="[val => val !== null && val !== '' || 'Bitte gib ein Highlight an']"
+          >
+            <template v-slot:prepend>
+              <q-icon name="star" />
+            </template>
+          </q-input>
+        </div>
         <q-input
           @blur="onSaveRoundtrip"
-          v-model="price"
+          v-model="roundtrip.Price"
           label="Pauschalpreis ohne Freizeitgestaltung"
           type="number"
           outlined
@@ -176,12 +159,24 @@
         </q-input>
         <q-item-label style="padding-bottom:5px; margin-top:10px;">Angebotszeitraum</q-item-label>
         <q-toggle
-          v-model="wholeYearOffer"
+          v-model="roundtrip.OfferWholeYear"
           label="Ganzes Jahr"
           icon="event"
           @input="onSaveRoundtrip"
         ></q-toggle>
-        <q-input
+        <br>
+        <br>
+        <q-date
+          v-if="offerPeriod"
+          v-show="!roundtrip.OfferWholeYear"
+          v-model="offerPeriod"
+          today-btn
+          @input="onSaveRoundtrip"
+          mask="DD.MM.YYYY"
+          ref="OfferPeriodDate"
+          range
+        />
+        <!-- <q-input
           :disable="wholeYearOffer"
           outlined
           v-model="OfferStartPeriod"
@@ -235,14 +230,16 @@
               class="cursor-pointer"
             ></q-icon>
           </template>
-        </q-input>
-        <RegionSearch
-          v-if="countries.length === 1"
-          :country="countries[0]"
+        </q-input> -->
+        <!-- is not working -->
+        <!-- <RegionSearch
+          style="margin-top:20px;"
+          v-if="roundtrip.countries && roundtrip.countries.length === 1"
+          :country="roundtrip.countries[0]"
           :defaultRegion="region"
           @update="updateRegion($event)"
           @blur="onSaveRoundtrip"
-        ></RegionSearch>
+        ></RegionSearch> -->
       </q-list>
       <h4>Persönliche Informationen</h4>
       <q-list
@@ -253,7 +250,7 @@
         <p style="margin-bottom:15px;">Diese werden nur dir angezeigt und auch beim Veröffentlichen nicht berücksichtigt.</p>
         <div>
           <q-input
-            v-model="rooms"
+            v-model="roundtrip.Rooms"
             label="Zimmer"
             type="number"
             @blur="onSaveRoundtrip"
@@ -265,11 +262,11 @@
             </template>
           </q-input>
           <q-input
-            v-model="adults"
+            v-model="roundtrip.Adults"
             label="Erwachsene"
             type="number"
             @blur="onSaveRoundtrip"
-            :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(rooms) * 9 || 'Bitte wähle mehr Zimmer']"
+            :rules="[val => val !== null &&  val !== '' && val > 0  || 'Bitte gib die Anzahl der Erwachsenen Reisenden an', val => val <= parseInt(roundtrip.Rooms) * 9 || 'Bitte wähle mehr Zimmer']"
             outlined
           >
             <template v-slot:prepend>
@@ -277,11 +274,11 @@
             </template>
           </q-input>
           <q-input
-            v-model="children"
+            v-model="roundtrip.Children"
             label="Kinder"
             type="number"
-            @blur="parseInt(children) === 0 ? onSaveRoundtrip() : null"
-            @input="childrenAges.length = parseInt(children)"
+            @input="roundtrip.ChildrenAges.length = parseInt(roundtrip.Children)"
+            @blur="onSaveRoundtrip()"
             :rules="[val => val !== null &&  val !== '' && val >= 0  && val <= 20|| 'Bitte gib die Anzahl der Kinder auf der Reise an']"
             outlined
           >
@@ -291,12 +288,12 @@
           </q-input>
           <div
             class="flex"
-            v-if="parseInt(children) > 0  && parseInt(children) <= 20"
+            v-if="parseInt(roundtrip.Children) > 0  && parseInt(roundtrip.Children) <= 20"
           >
             <q-input
-              v-for="childNum in parseInt(children)"
+              v-for="childNum in parseInt(roundtrip.Children)"
               :key="childNum"
-              v-model="childrenAges[childNum - 1]"
+              v-model="roundtrip.ChildrenAges[childNum - 1]"
               :label="'Alter Kind ' + childNum"
               type="number"
               @blur="onSaveRoundtrip"
@@ -312,156 +309,11 @@
         </div>
       </q-list>
       <h4>An-/Abreise</h4>
-      <q-select
-        outlined
-        v-model="arrivalDepatureProfile"
-        @blur="onSaveRoundtrip"
-        input-debounce="0"
-        :options="['Flugzeug', 'Andere']"
-        label="Reisemittel"
-        :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
-        style="padding-bottom: 32px"
-      >
-        <template v-slot:prepend>
-          <q-icon name="commute" />
-        </template>
-      </q-select>
-      <div
-        v-if="arrivalDepatureProfile === 'Flugzeug'"
-        class="flight-container"
-      >
-        <q-select
-          outlined=""
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          @blur="onSaveRoundtrip"
-          clearable
-          ref="select"
-          v-model="origin"
-          hide-dropdown-icon
-          label="Abflugsort"
-          :options="originOptions"
-          @filter="getOrigins"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                zu viele/keine Ergebnisse, bitte weitertippen
-              </q-item-section>
-            </q-item>
-          </template>
-          <template v-slot:prepend>
-            <q-icon name="flight_takeoff" />
-          </template>
-        </q-select>
-        <q-select
-          outlined=""
-          use-input
-          hide-selected
-          fill-input
-          input-debounce="0"
-          clearable
-          ref="select"
-          @blur="onSaveRoundtrip"
-          v-model="destination"
-          hide-dropdown-icon
-          label="Ankunftsort"
-          :options="destinationOptions"
-          @filter="getDestinations"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-        >
-          <template v-slot:no-option>
-            <q-item>
-              <q-item-section class="text-grey">
-                zu viele/keine Ergebnisse, bitte weitertippen
-              </q-item-section>
-            </q-item>
-          </template>
-          <template v-slot:prepend>
-            <q-icon name="flight_land" />
-          </template>
-        </q-select>
-        <q-input
-          outlined
-          v-model="depatureDate"
-          label="Abflugsdatum"
-          @blur="onSaveRoundtrip"
-          class="input-item rounded-borders q-field--with-bottom"
-        >
-          <q-popup-proxy
-            transition-show="scale"
-            transition-hide="scale"
-          >
-            <q-date
-              v-model="depatureDate"
-              today-btn
-              mask="DD.MM.YYYY"
-              @input="updateReturnDate()"
-            />
-          </q-popup-proxy>
-          <template v-slot:prepend>
-            <q-icon
-              name="event"
-              class="cursor-pointer"
-            >
-            </q-icon>
-          </template>
-        </q-input>
-        <q-input
-          outlined
-          v-model="returnDate"
-          label="Rückflugsdatum"
-          @blur="onSaveRoundtrip"
-          class="input-item rounded-borders q-field--with-bottom"
-        >
-          <q-popup-proxy
-            transition-show="scale"
-            transition-hide="scale"
-          >
-            <q-date
-              v-model="returnDate"
-              today-btn
-              mask="DD.MM.YYYY"
-            />
-          </q-popup-proxy>
-          <template v-slot:prepend>
-            <q-icon
-              name="event"
-              class="cursor-pointer"
-            >
-            </q-icon>
-          </template>
-        </q-input>
-        <q-select
-          outlined
-          v-model="travelClass"
-          input-debounce="0"
-          @blur="onSaveRoundtrip"
-          :options="['Economy', 'Premium Economy', 'Business', 'First']"
-          label="Reiseklasse auswählen"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="star" />
-          </template>
-        </q-select>
-        <q-select
-          outlined
-          v-model="nonStop"
-          input-debounce="0"
-          @blur="onSaveRoundtrip"
-          :options="['Ja', 'Nein']"
-          label="Non Stop"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
-        >
-          <template v-slot:prepend>
-            <q-icon name="flight" />
-          </template>
-        </q-select>
-      </div>
+      <ArrivalDeparture
+        v-if="roundtrip.DepatureDate"
+        :currentRoundtrip="roundtrip"
+        @updateArrivalDeparture="updateArrivalDeparture($event)"
+      ></ArrivalDeparture>
       <h4>Bilder</h4>
       <q-list
         bordered
@@ -631,38 +483,31 @@ import sharedMethods from '../sharedMethods.js'
 import axios from 'axios'
 
 let timeStamp = Date.now()
+let currentDate = new Date(timeStamp)
+currentDate.setDate(currentDate.getDate() + 1)
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
+let formattedNextScheduleDate = date.formatDate(currentDate, 'DD.MM.YYYY')
 
 let context
 
 export default {
   name: 'RoundtripSettings',
   components: {
-    RegionSearch: () => import('../pages/Map/RegionSearch')
+    // RegionSearch: () => import('../pages/Map/RegionSearch.vue'),
+    ArrivalDeparture: () => import('../pages/EditRoundtripComponents/arrivalDeparture.vue')
   },
   data () {
     return {
+      roundtrip: {},
       stops: [],
+      offerPeriod: { from: formattedScheduleDate, to: formattedNextScheduleDate },
+
       region: null,
       profile: null,
       inputProfile: null,
       RTId: null,
       OfferStartPeriod: formattedScheduleDate,
       OfferEndPeriod: formattedScheduleDate,
-      countries: [],
-      publish: false,
-      stars: 3,
-      descriptionInput: null,
-      highlight1: null,
-      highlight2: null,
-      highlight3: null,
-      wholeYearOffer: false,
-      rooms: 0,
-      adults: 0,
-      children: 0,
-      childrenAges: [],
-      price: 0,
-      category: 'Familienreise',
       categoryOptions: [],
       deleteDialog: false,
       companyProfile: false,
@@ -719,12 +564,6 @@ export default {
       testingCodeToCopy.setAttribute('type', 'hidden')
       window.getSelection().removeAllRanges()
     },
-    getOrigins (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, this, 'originOptions')
-    },
-    getDestinations (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, this, 'destinationOptions')
-    },
     /**
        * get the average hotel rating
        */
@@ -775,6 +614,8 @@ export default {
 
           this.stops.push(stop)
           this.stops.sort(this.compare)
+
+          this.fetchAndSaveCountries()
         })
       })
     },
@@ -787,47 +628,35 @@ export default {
         this.region = event
       }
     },
-    onSaveRoundtrip () {
-      let dateParts = this.OfferStartPeriod.split('.')
-      let offerStartPeriod = new Date(
-        dateParts[2],
-        dateParts[1] - 1,
-        dateParts[0]
-      )
+    updateArrivalDeparture (event) {
+      this.roundtrip.TransportProfile = event.transportProfile
+      this.roundtrip.Origin = event.origin
+      this.roundtrip.Destination = event.destination
+      this.roundtrip.DepatureDate = event.depatureDate
+      this.roundtrip.ReturnDate = event.returnDate
+      this.roundtrip.TravelClass = event.travelClass
+      this.roundtrip.NonStop = event.nonStop
 
-      dateParts = this.OfferEndPeriod.split('.')
-      let offerEndPeriod = new Date(
-        dateParts[2],
-        dateParts[1] - 1,
-        dateParts[0]
-      )
+      this.onSaveRoundtrip()
+    },
+    onSaveRoundtrip () {
+      let newRoundtrip = JSON.parse(JSON.stringify(this.roundtrip))
+
+      // convert arrival departure string dates to dates (don't do that in updateArrivalDeparture)
+      if (newRoundtrip.DepatureDate && typeof newRoundtrip.DepatureDate === 'string') newRoundtrip.DepatureDate = sharedMethods.getDateFromString(newRoundtrip.DepatureDate)
+      if (newRoundtrip.ReturnDate && typeof newRoundtrip.ReturnDate === 'string') newRoundtrip.ReturnDate = sharedMethods.getDateFromString(newRoundtrip.ReturnDate)
+
+      if (this.offerPeriod && this.offerPeriod.from && typeof this.offerPeriod.from === 'string' && this.offerPeriod.to && typeof this.offerPeriod.to === 'string') {
+        let offerStartDate = sharedMethods.getDateFromString(this.offerPeriod.from)
+        let offerEndDate = sharedMethods.getDateFromString(this.offerPeriod.to)
+
+        newRoundtrip.OfferStartPeriod = offerStartDate
+        newRoundtrip.OfferEndPeriod = offerEndDate
+      }
 
       db.collection('Roundtrips')
         .doc(this.RTId)
-        .update({
-          Public: this.publish,
-          Location: this.countries,
-          Category: this.category,
-          Stars: this.stars,
-          Description: this.descriptionInput,
-          Highlights: [this.highlight1, this.highlight2, this.highlight3],
-          Region: this.region,
-          Profile: this.inputProfile,
-          OfferStartPeriod: offerStartPeriod,
-          OfferEndPeriod: offerEndPeriod,
-          Price: this.price,
-          OfferWholeYear: this.wholeYearOffer,
-          Rooms: this.rooms,
-          Adults: this.adults,
-          ChildrenAges: this.childrenAges,
-          TransportProfile: this.arrivalDepatureProfile,
-          Origin: this.origin,
-          Destination: this.destination,
-          DepatureDate: sharedMethods.getDateFromString(this.depatureDate),
-          ReturnDate: sharedMethods.getDateFromString(this.returnDate),
-          TravelClass: this.travelClass,
-          NonStop: this.nonStop
-        })
+        .update(newRoundtrip)
         .catch((e) => {
           console.log(e)
           sharedMethods.showErrorNotification('Bitte überprüfe deine Angaben')
@@ -841,7 +670,7 @@ export default {
       let tempCountries = []
       let promiseList = []
 
-      this.stops.forEach((stop, index) => {
+      this.stops.forEach((stop) => {
         let url =
           'http://api.geonames.org/countryCodeJSON?lang=de&lat=' +
           stop.Location.lat +
@@ -861,12 +690,9 @@ export default {
         )
       })
 
-      Promise.all(promiseList).then((vals) => {
-        this.countries = []
-        this.countries = tempCountries
-
+      Promise.all(promiseList).then(() => {
         // save countries
-        this.saveData('Location', this.countries)
+        this.roundtrip.countries = tempCountries
       })
     },
     /**
@@ -884,18 +710,18 @@ export default {
     /**
        * Quasar date options for offer period
        */
-    scheduleDateOptions (date) {
-      const dateTimeParts = this.OfferStartPeriod.split(' ')
-      const dateParts = dateTimeParts[0].split('.')
-      const compareDate = new Date(
-        dateParts[2],
-        dateParts[1] - 1,
-        dateParts[0]
-      )
-      const currentDate = new Date(date)
+    // scheduleDateOptions (date) {
+    //   const dateTimeParts = this.OfferStartPeriod.split(' ')
+    //   const dateParts = dateTimeParts[0].split('.')
+    //   const compareDate = new Date(
+    //     dateParts[2],
+    //     dateParts[1] - 1,
+    //     dateParts[0]
+    //   )
+    //   const currentDate = new Date(date)
 
-      return currentDate > compareDate
-    },
+    //   return currentDate > compareDate
+    // },
     /**
        * fetches data of the roundtrip for the given id
        * @param RTId the id of the roundtrip to fetch (current RT id)
@@ -933,75 +759,34 @@ export default {
         this.RTId +
         '"></iframe>'
 
-      this.title = roundtrip.Title
-      this.publish = roundtrip.Public
-      this.countries = roundtrip.Location
-      this.stars = roundtrip.Stars
-      this.category = roundtrip.Category
-      this.descriptionInput = roundtrip.Description
-      this.highlight1 = roundtrip.Highlights[0]
-      this.highlight2 = roundtrip.Highlights[1]
-      this.highlight3 = roundtrip.Highlights[2]
-      this.inputProfile = roundtrip.Profile
-      this.region = roundtrip.Region
-      this.price = roundtrip.Price
-      this.wholeYearOffer = roundtrip.OfferWholeYear
-      this.rooms = roundtrip.Rooms
-      this.adults = roundtrip.Adults
-      this.children = roundtrip.ChildrenAges.length
-      this.childrenAges = roundtrip.ChildrenAges
+      this.roundtrip = roundtrip
+      this.roundtrip.Children = roundtrip.ChildrenAges.length
+      if (!this.roundtrip.TransportProfile) this.roundtrip.TransportProfile = 'Flugzeug'
 
-      if (roundtrip.tripWebsite) this.tripWebsite = roundtrip.tripWebsite
+      this.pageTitle = this.roundtrip.Title + ' bearbeiten'
 
-      this.pageTitle = this.title + ' bearbeiten'
+      if (roundtrip.OfferStartPeriod && roundtrip.OfferEndPeriod) {
+        let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
+        let formattedToDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
-      this.arrivalDepatureProfile = roundtrip.TransportProfile
-        ? roundtrip.TransportProfile
-        : 'Flugzeug'
-      this.origin = roundtrip.Origin
+        retrievedDate = new Date(roundtrip.OfferStartPeriod.seconds * 1000)
+        let formattedFromDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
 
-      let retrievedDate = new Date(roundtrip.OfferEndPeriod.seconds * 1000)
-      this.OfferEndPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-
-      retrievedDate = new Date(roundtrip.OfferStartPeriod.seconds * 1000)
-      this.OfferStartPeriod = date.formatDate(retrievedDate, 'DD.MM.YYYY')
+        this.offerPeriod.from = formattedFromDate
+        this.offerPeriod.to = formattedToDate
+      } else {
+        this.roundtrip.OfferWholeYear = true
+      }
 
       if (this.arrivalDepatureProfile === 'Flugzeug') {
-        this.destination = roundtrip.Destination
-        this.travelClass = roundtrip.TravelClass
-          ? roundtrip.TravelClass
-          : 'Economy'
-        this.nonStop = roundtrip.NonStop ? roundtrip.NonStop : 'Ja'
-        this.originCode = roundtrip.OriginCode
-        this.destinationCode = roundtrip.DestinationCode
-
-        if (this.depatureDate && roundtrip.DepatureDate) {
-          retrievedDate = new Date(roundtrip.DepatureDate.seconds * 1000)
-          this.depatureDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-        } else {
-          this.depatureDate = formattedScheduleDate
-        }
-
-        if (this.returnDate && roundtrip.ReturnDate) {
-          retrievedDate = new Date(roundtrip.ReturnDate.seconds * 1000)
-          this.returnDate = date.formatDate(retrievedDate, 'DD.MM.YYYY')
-        } else {
-          this.depatureDate = formattedScheduleDate
-        }
+        if (!this.roundtrip.travelClass) this.roundtrip.travelClass = 'Economy'
+        if (!this.roundtrip.nonStop) this.roundtrip.nonStop = 'Ja'
       }
 
       // get the default profile of the roundtrip
       this.getGeneralProfile()
 
       this.loadInitImgs()
-    },
-    updateReturnDate () {
-      let dateParts = this.depatureDate.split('.')
-      let depatureDate = new Date(dateParts[2], dateParts[1] - 1, dateParts[0])
-      let returnDate = depatureDate
-      returnDate.setDate(depatureDate.getDate() + 1)
-
-      this.returnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
     },
     loadInitImgs () {
       var fileRef = storage

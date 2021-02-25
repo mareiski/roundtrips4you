@@ -276,7 +276,7 @@
         :header-nav="step > 2"
         v-if="!isRTEditMode"
       >
-        <q-select
+        <!-- <q-select
           outlined
           v-model="currentRoundtrip.TransportProfile"
           input-debounce="0"
@@ -293,11 +293,6 @@
           v-if="currentRoundtrip.TransportProfile === 'Flugzeug'"
           class="flight-container"
         >
-          <!-- <CitySearch
-            :parkingPlaceSearch="false"
-            :defaultLocation="null"
-            @update="searchAirports($event)"
-          ></CitySearch> -->
           <q-select
             outlined=""
             use-input
@@ -428,7 +423,14 @@
         <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
           <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
           <p style="text-align:left;">Du kannst dafür sofort mit der Reiseplanung beginnen!</p>
-        </div>
+        </div> -->
+
+        <ArrivalDeparture
+          v-if="currentRoundtrip.DepatureDate"
+          :currentRoundtrip="currentRoundtrip"
+          :startDate="currentStop.InitDate.split(' ')[0]"
+          @updateArrivalDeparture="updateArrivalDeparture($event)"
+        ></ArrivalDeparture>
       </q-step>
 
       <q-step
@@ -978,141 +980,163 @@
           <span>Klicke auf diesen Stopp auf der Karte um dir Orte vorschlagen zu lassen<br></span>
 
           <!-- Images here -->
-          <!-- <div>
-          <div
-            class="flex"
-            v-if="stopImages"
-          >
+          <div>
             <div
-              class="uploader"
-              v-for="(stopImage, index) in stopImages"
-              :key="index"
-              style="margin-right:8px;"
+              class="flex"
+              v-if="currentStop.Images && currentStop.Images.lenght > 0"
             >
-              <q-img
-                style="height:100%;"
-                :src="stopImage"
-              ></q-img>
+              <div
+                class="uploader"
+                v-for="(stopImage, index) in currentStop.Images"
+                :key="index"
+                style="margin-right:8px;"
+              >
+                <q-img
+                  style="height:100%;"
+                  :src="stopImage"
+                ></q-img>
+                <q-btn
+                  round
+                  color="primary"
+                  icon="filter"
+                  style="position: absolute; margin-top:-113px; margin-left:120px;"
+                  @click="showImgDialog(stopImage)"
+                >
+                </q-btn>
+              </div>
+            </div>
+            <div class="uploader">
               <q-btn
                 round
                 color="primary"
-                icon="filter"
-                style="position: absolute; margin-top:-113px; margin-left:120px;"
-                @click="showImgDialog(stopImage)"
+                icon="add"
+                :disable="visible"
+                @click="() => $refs.galeryUpload.pickFiles()"
+                style="position:relative;"
               >
+                <q-inner-loading
+                  :showing="visible"
+                  style="border-radius:50%"
+                >
+                  <q-spinner
+                    size="42px"
+                    color="primary"
+                  >
+                  </q-spinner>
+                </q-inner-loading>
               </q-btn>
             </div>
-          </div>
-          <q-dialog v-model="imgDialogVisible">
-            <q-card style="width:100%; max-width:100vh; overflow:hidden;">
-              <q-card-section
-                class="row flex justify-end q-pb-none"
-                style="z-index:100; width:100%; position:absolute; color:white;"
-              >
-                <q-btn
-                  icon="close"
-                  flat
-                  round
-                  dense
-                  v-close-popup
-                />
-              </q-card-section>
-              <q-card-section>
-                <q-img
-                  style="width:100%;"
-                  :src="dialogImgSrc"
-                ></q-img>
-              </q-card-section>
-            </q-card>
-
-          </q-dialog>
-          <q-dialog
-            keep-alive
-            v-model="chooseImgDialog"
-          >
-            <q-card>
-              <q-card-section class="row items-center galeryImgUploaderContainer flex justify-between">
-                <div
-                  class="uploader"
-                  v-for="(url, index) in galeryImgUrls"
-                  :key="index"
+            <q-dialog v-model="imgDialogVisible">
+              <q-card style="width:100%; max-width:100vh; overflow:hidden;">
+                <q-card-section
+                  class="row flex justify-end q-pb-none"
+                  style="z-index:100; width:100%; position:absolute; color:white;"
                 >
-                  <img
+                  <q-btn
+                    icon="close"
+                    flat
+                    round
+                    dense
+                    v-close-popup
+                  />
+                </q-card-section>
+                <q-card-section>
+                  <q-img
                     style="width:100%;"
-                    v-lazy="url"
-                  />
-                  <q-btn
-                    round
-                    color="primary"
-                    icon="add"
-                    style="position: absolute;"
-                    @click="addImageToStop(url)"
-                  >
-                  </q-btn>
-                </div>
-                <div
-                  v-if="galeryImgUrls.length === 0"
-                  class="flex"
-                >
-                  <div>
-                    <q-img
-                      src="../statics/dummy-image-landscape-1.jpg"
-                      style="height:148px; width:148px;"
-                    ></q-img>
-                  </div>
-                  <div
-                    class="flex justify-center"
-                    style="max-width:300px; padding-left:10px; flex-direction:column;"
-                  >Wenn du ein Bild in den Einstellungen hochlädst kannst du es hier hinzufügen.</div>
-                </div>
-              </q-card-section>
-              <q-card-section class="row items-center flex">
-                <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br>
-                  <br>
-                  <a
-                    style="text-decoration:underline;"
-                    @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
-                  >Bildvorschläge auf Google</a>
-                  <br>
-                  <br>
-                </span>
-                <div
-                  class="flex"
-                  style="width:100%;"
-                >
-                  <q-input
-                    filled
-                    ref="tempImgLinkInput"
-                    label="Bild per Link einfügen"
-                    v-model="tempImgLink"
-                    :rules="[val => validURL(val) || 'Bitte gib einen richtigen Link ein']"
-                    lazy-rules
-                    bottom-slots
-                    outlined
-                    style="padding:0; width:80%; margin-bottom:10px;"
-                  ></q-input>
-                  <q-btn
-                    round
-                    color="primary"
-                    icon="add"
-                    style="margin-left:10px; margin-top:5px; height:45px;"
-                    :disable="!validURL(tempImgLink)"
-                    @click="addImageToStop(tempImgLink)"
-                  />
-                </div>
-              </q-card-section>
+                    :src="dialogImgSrc"
+                  ></q-img>
+                </q-card-section>
+              </q-card>
 
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  label="Fertig"
-                  color="primary"
-                  v-close-popup
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
-</div> -->
+            </q-dialog>
+            <q-dialog
+              keep-alive
+              v-model="chooseImgDialog"
+            >
+              <q-card>
+                <!-- <q-card-section class="row items-center galeryImgUploaderContainer flex justify-between">
+                  <div
+                    class="uploader"
+                    v-for="(url, index) in galeryImgUrls"
+                    :key="index"
+                  >
+                    <img
+                      style="width:100%;"
+                      v-lazy="url"
+                    />
+                    <q-btn
+                      round
+                      color="primary"
+                      icon="add"
+                      style="position: absolute;"
+                      @click="addImageToStop(url)"
+                    >
+                    </q-btn>
+                  </div> -->
+                <!-- <div
+                    v-if="galeryImgUrls.length === 0"
+                    class="flex"
+                  >
+                    <div>
+                      <q-img
+                        src="../statics/dummy-image-landscape-1.jpg"
+                        style="height:148px; width:148px;"
+                      ></q-img>
+                    </div>
+                    <div
+                      class="flex justify-center"
+                      style="max-width:300px; padding-left:10px; flex-direction:column;"
+                    >Wenn du ein Bild in den Einstellungen hochlädst kannst du es hier hinzufügen.</div>
+                  </div> -->
+                <!-- </q-card-section> -->
+                <q-card-section class="row items-center flex">
+                  <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br>
+                    <br>
+                    <a
+                      style="text-decoration:underline;"
+                      @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
+                    >Bildvorschläge auf Google</a>
+                    <br>
+                    <br>
+                  </span>
+                  <div
+                    class="flex"
+                    style="width:100%;"
+                  >
+                    <q-input
+                      filled
+                      ref="tempImgLinkInput"
+                      label="Bild per Link einfügen"
+                      v-model="tempImgLink"
+                      :rules="[val => sharedMethods.validURL(val) || 'Bitte gib einen richtigen Link ein']"
+                      lazy-rules
+                      bottom-slots
+                      outlined
+                      style="padding:0; width:80%; margin-bottom:10px;"
+                    ></q-input>
+                    <q-btn
+                      round
+                      color="primary"
+                      icon="add"
+                      style="margin-left:10px; margin-top:5px; height:45px;"
+                      :disable="() => !sharedMethods.validURL(tempImgLink)"
+                      @click="addImageToStop(tempImgLink)"
+                    />
+                  </div>
+                </q-card-section>
+
+                <q-card-actions align="right">
+                  <q-btn
+                    flat
+                    label="Fertig"
+                    color="primary"
+                    v-close-popup
+                  />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
+          </div>
+          <!-- end images -->
           <q-editor
             v-model="currentStop.Description"
             min-height="5rem"
@@ -1174,7 +1198,7 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 export default {
   components: {
     HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
-    // CitySearch: () => import('../pages/Map/CitySearch.vue'),
+    ArrivalDeparture: () => import('../pages/EditRoundtripComponents/arrivalDeparture.vue'),
     TripOverview: () => import('../pages/TripOverview/TripOverview.vue')
   },
   computed: {
@@ -1249,6 +1273,9 @@ export default {
 
       showAddStopDialog: false,
       showEditStopDialog: false,
+
+      imgDialogVisible: false,
+      chooseImgDialog: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -1455,6 +1482,18 @@ export default {
     },
     deg2rad (deg) {
       return deg * (Math.PI / 180)
+    },
+    /**
+    called when user selects arrival departure features
+     */
+    updateArrivalDeparture (event) {
+      this.currentRoundtrip.TransportProfile = event.transportProfile
+      this.currentRoundtrip.Origin = event.origin
+      this.currentRoundtrip.Destination = event.destination
+      this.currentRoundtrip.DepatureDate = event.depatureDate
+      this.currentRoundtrip.ReturnDate = event.returnDate
+      this.currentRoundtrip.TravelClass = event.travelClass
+      this.currentRoundtrip.NonStop = event.nonStop
     },
     /**
      *  removes the stop with the given index
