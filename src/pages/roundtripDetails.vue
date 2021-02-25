@@ -170,7 +170,10 @@
                 label="Stopps ausklappen"
               ></q-toggle>
             </div>
-            <div class="legal-description">
+            <div
+              class="legal-description"
+              v-if="!isUserCreator"
+            >
               <p v-if="!creator.companyProfile">Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creator.UserName ? creator.UserName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
               <p v-if="!creator.companyProfile">Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
               <span v-if="creator.UserName">Diese Rundreise wurde von </span>

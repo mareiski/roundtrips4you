@@ -263,16 +263,25 @@ export default {
             })
         })
     },
+    /**
+     * checks if string is a url
+     */
+    validURL (str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+        return !!pattern.test(str)
+    },
     getGooglePlacesData (lat, lng) {
         return new Promise((resolve, reject) => {
             const loader = new Loader({
-                apiKey: 'AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE',
+                apiKey: this.$store.getters['api/getGooglePlacesKey'],
                 version: 'weekly',
                 libraries: ['places']
             })
-
-            // personal AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc
-            // AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE
 
             // google is available here
             loader.load().then(() => {

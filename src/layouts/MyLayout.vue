@@ -658,6 +658,14 @@ export default {
     window.addEventListener('online', this.updateOnlineStatus)
     window.addEventListener('offline', this.updateOnlineStatus)
     window.addEventListener('scroll', this.onScroll)
+
+    // check for messages
+    this.getNotifications()
+
+    // do this again every 5min
+    window.setInterval(() => {
+      this.getNotifications()
+    }, 300000)
   },
   beforeDestroy () {
     window.removeEventListener('online', this.updateOnlineStatus)
@@ -665,10 +673,12 @@ export default {
     window.removeEventListener('scroll', this.onScroll)
   },
   created () {
+    if (!this.$storyblok.isInitialized()) {
+      this.$storyblok.init({
+        accessToken: this.$store.getters['api/getStoryblokKey']
+      })
+    }
     this.leaving()
-    this.$storyblok.init({
-      accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
-    })
 
     this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.app' || this.getHost() === 'www.roundtrips4you.netlify.app')
 
@@ -678,10 +688,9 @@ export default {
       window.location.replace('https://roundtrips4you.de')
     }
 
-    auth.authRef().onAuthStateChanged((user) => {
+    auth.authRef().onAuthStateChanged(() => {
       this.$router.beforeEach((to, from, next) => {
         let loggedIn = auth.user() !== null
-        // let verified = auth.user() ? auth.user().emailVerified : false
         forEachCalled = true
         let requireAuth = to.matched.some(record => record.meta.requireAuth)
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
@@ -709,12 +718,8 @@ export default {
         redirected = true
       }
 
-      this.getNotifications()
-
       if (redirected) {
-        redirected = false
-        this.showPreload = false
-        Loading.hide()
+        this.hideLoading()
       }
     })
   }

@@ -12,6 +12,7 @@ export default {
             id: null,
             secret: null
         },
+        StoryblokKey: null,
         GooglePlacesKey: null
     },
     getters: {
@@ -20,7 +21,8 @@ export default {
         getGeoDBKey: state => state.GeoDBKey,
         getPixabayKey: state => state.PixabayKey,
         getAmadeusKeys: state => state.AmadeusKeys,
-        getGooglePlacesKey: state => state.GooglePlacesKey
+        getGooglePlacesKey: state => state.GooglePlacesKey,
+        getStoryblokKey: state => state.StoryblokKey
     },
     actions: {
         getAllKeys ({ state }) {
@@ -46,6 +48,9 @@ export default {
                                 case 'Amadeus':
                                     state.AmadeusKeys.id = data.client_id
                                     state.AmadeusKeys.secret = data.client_secret
+                                    break
+                                case 'StoryblokKey':
+                                    state.StoryblokKey = data.accessToken
                                     break
                                 case 'GooglePlaces':
                                     state.GooglePlacesKey = data.apiKey

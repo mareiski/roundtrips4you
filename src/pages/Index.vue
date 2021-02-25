@@ -33,12 +33,12 @@
           id="OfferContainer"
         >
           <div>
-            <p>Plane deine Reise jetzt kostenlos und ohne Registrierung</p>
+            <p class="font-medium">Plane deine Reise jetzt kostenlos und ohne Registrierung</p>
             <!-- @click="$router.push('/registrieren')" -->
-            <q-btn
+            <!-- <q-btn
               @click="sharedMethods.scrollToRef($refs['registerContainer'])"
               color="primary"
-            >Los geht's</q-btn>
+            >Los geht's</q-btn> -->
           </div>
           <!-- <div>
             <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
