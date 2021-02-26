@@ -33,7 +33,7 @@
     "@turf/bbox": "^6.3.0",
     "@turf/turf": "^5.1.6",
     "airport-data": "^1.0.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "create-file": "^1.0.1",
     "cwait": "^1.1.2",
     "express-throttle-bandwidth": "^1.0.1",
