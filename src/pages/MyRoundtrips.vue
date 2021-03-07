@@ -56,7 +56,7 @@
               >
                 {{ getCreatedAtDate(roundtrip.createdAt) }}
                 <q-tooltip>
-                  Diese Rundreise wurde am {{ getCreatedAtDate(roundtrip.createdAt) }} erstellt
+                  erstellt am {{ getCreatedAtDate(roundtrip.createdAt) }}
                 </q-tooltip>
               </q-item-label>
             </q-item-section>

@@ -1539,16 +1539,10 @@ export default {
       let parentStops = this.getParent('EditRoundtrips').stops
       parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
 
-      let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
       }).catch(function (error) {
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Der Eintrag konnte nicht gelöscht werden'
-        })
+        sharedMethods.showErrorNotification('Das Bild konnte nicht hinzugefügt werden')
         console.log(error)
       })
     },
@@ -1559,16 +1553,10 @@ export default {
       let parentStops = this.getParent('EditRoundtrips').stops
       parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
 
-      let context = this
       db.collection('RoundtripDetails').doc(this.docId).update({
         'StopImages': this.stopImages
       }).catch(function (error) {
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Der Eintrag konnte nicht gelöscht werden'
-        })
+        sharedMethods.showErrorNotification('Der Eintrag konnte nicht gelöscht werden')
         console.log(error)
       })
     },
