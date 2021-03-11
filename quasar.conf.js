@@ -91,7 +91,8 @@ module.exports = function (ctx) {
         'QToolbar',
         'QToolbarTitle',
         'QScrollArea',
-        'QIntersection'
+        'QIntersection',
+        'QCircularProgress'
       ],
 
       directives: [

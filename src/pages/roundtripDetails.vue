@@ -433,7 +433,7 @@
 </style>
 <script>
 import { date } from 'quasar'
-import { db, storage, auth } from '../firebaseInit.js'
+import { db, auth } from '../firebaseInit.js'
 const getAxios = () => import('axios')
 import { TaskQueue } from 'cwait'
 import sharedMethods from '../sharedMethods'
@@ -456,7 +456,6 @@ export default {
       stops: [],
       roundtrip: [],
       slide: null,
-      galeryImgUrls: [],
       tab: 'overview',
       durations: [],
       days: [],
@@ -499,6 +498,9 @@ export default {
     },
     getContext () {
       return context
+    },
+    galeryImgUrls () {
+      return this.$store.getters['images/getGaleryImgUrls'](this.RTId)
     }
   },
   meta () {
@@ -533,7 +535,8 @@ export default {
         this.profile = this.getProfile(roundtrip.Profile)
         this.tripWebsite = roundtrip.tripWebsite
 
-        this.loadGaleryImgs()
+        this.$store.dispatch('images/loadAllImgs', RTId)
+
         this.getUserRatings(RTId)
       }).catch(err => {
         console.log('Error getting Roundtrip', err)
@@ -913,22 +916,6 @@ export default {
       }
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.docId), 0, { days: days, docId: stop.DocId })
       if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
-    },
-    loadGaleryImgs () {
-      const context = this
-      let fileRef = storage.ref().child('Images/Roundtrips/' + context.roundtrip.docId + '/Galery')
-      fileRef.listAll().then(function (res) {
-        res.items.forEach(function (itemRef) {
-          fileRef = storage.ref().child(itemRef.fullPath)
-          context.galeryImgUrls = []
-          fileRef.getDownloadURL().then(function (url) {
-            context.galeryImgUrls.push(url)
-            if (context.galeryImgUrls.length === 1) context.slide = url
-          })
-        })
-      }).catch(function (error) {
-        console.log(error)
-      })
     }
   },
   mounted () {

@@ -478,7 +478,7 @@
 </style>
 <script>
 import { date } from 'quasar'
-import { db, auth, storage } from '../firebaseInit.js'
+import { db, auth } from '../firebaseInit.js'
 import sharedMethods from '../sharedMethods.js'
 import axios from 'axios'
 
@@ -515,7 +515,6 @@ export default {
       deleting: false,
       visible: false,
       titleImgUrl: null,
-      galeryImgUrls: [],
       titleUploadDisabled: false,
       shareLink: null,
       shareCode: null,
@@ -538,6 +537,9 @@ export default {
     },
     sharedMethods () {
       return sharedMethods
+    },
+    galeryImgUrls () {
+      return this.$store.getters['images/getGaleryImgUrls'](this.RTId)
     }
   },
   methods: {
@@ -563,6 +565,9 @@ export default {
       // unselect the range
       testingCodeToCopy.setAttribute('type', 'hidden')
       window.getSelection().removeAllRanges()
+    },
+    fileAdded (event, kind) {
+      sharedMethods.fileAdded(event, kind, this, this.RTId)
     },
     /**
        * get the average hotel rating
@@ -786,109 +791,7 @@ export default {
       // get the default profile of the roundtrip
       this.getGeneralProfile()
 
-      this.loadInitImgs()
-    },
-    loadInitImgs () {
-      var fileRef = storage
-        .ref()
-        .child('Images/Roundtrips/' + this.RTId + '/Title/titleImg')
-      fileRef
-        .getDownloadURL()
-        .then(function (url) {
-          context.titleImgUrl = url
-        })
-        .catch((e) => { })
-
-      fileRef = storage
-        .ref()
-        .child('Images/Roundtrips/' + this.RTId + '/Galery')
-      fileRef
-        .listAll()
-        .then(function (res) {
-          res.items.forEach(function (itemRef) {
-            fileRef = storage.ref().child(itemRef.fullPath)
-            context.galeryImgUrls = []
-            fileRef.getDownloadURL().then(function (url, index) {
-              context.galeryImgUrls.push(url)
-            })
-          })
-        })
-        .catch(function () { })
-    },
-    fileAdded (event, kind) {
-      let files = event
-      let uploadIndex = 0
-
-      // disable another upload
-      if (kind === 'galery') this.visible = true
-      else this.titleUploadDisabled = true
-      this.uploadNext(files, kind, uploadIndex)
-
-      this.$refs.titleUpload.reset()
-      this.$refs.galeryUpload.reset()
-    },
-    uploadNext (files, kind, uploadIndex) {
-      if (!this.uploading) {
-        this.upload(
-          files[uploadIndex],
-          kind,
-          uploadIndex + this.galeryImgUrls.length,
-          uploadIndex === files.length - 1,
-          files.length,
-          uploadIndex
-        ).then(function (success) {
-          context.uploading = false
-          uploadIndex++
-          if (uploadIndex < files.length) { context.uploadNext(files, kind, uploadIndex) }
-        })
-      }
-    },
-    upload (file, kind, count, lastItem, absoluteFiles, uploadIndex) {
-      this.uploading = true
-
-      return new Promise((resolve, reject) => {
-        let kindPath = 'Title/titleImg'
-        if (kind === 'galery') {
-          kindPath = 'Galery/galeryImg' + count
-        }
-        const fileRef = storage
-          .ref()
-          .child('Images/Roundtrips/' + this.RTId + '/' + kindPath)
-
-        fileRef
-          .put(file)
-          .then(function (snapshot) {
-            sharedMethods.showSuccessNotification(
-              'Bild ' +
-              (uploadIndex + 1) +
-              ' von ' +
-              absoluteFiles +
-              ' wurde erfolgreich hochgeladen'
-            )
-            if (lastItem) {
-              context.visible = false
-              context.titleUploadDisabled = false
-            }
-            fileRef.getDownloadURL().then(function (url) {
-              if (kind === 'galery') {
-                context.galeryImgUrls.push(url)
-              } else if (kind === 'title') {
-                context.titleImgUrl = url
-              }
-            })
-            resolve(true)
-          })
-          .catch(function (error) {
-            console.log(error)
-            sharedMethods.showErrorNotification(
-              'Das Bild konnte nicht hochgeladen werden'
-            )
-
-            context.visible = false
-            context.titleUploadDisabled = false
-            resolve(false)
-          })
-      })
+      this.$store.dispatch('images/loadAllImgs', this.RTId)
     },
     /**
        * delete the current roundtrip

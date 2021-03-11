@@ -6,6 +6,7 @@ import user from './user'
 import roundtrips from './roundtrips'
 import demoSession from './demoSession'
 import api from './api'
+import images from './images'
 
 Vue.use(Vuex)
 
@@ -28,7 +29,8 @@ export default function (/* { ssrContext } */) {
       user,
       roundtrips,
       demoSession,
-      api
+      api,
+      images
     }
 
     // enable strict mode (adds overhead!)

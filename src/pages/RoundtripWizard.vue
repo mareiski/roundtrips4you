@@ -131,7 +131,7 @@
                     :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
                     class="q-ml-sm"
                     :loading="saving"
-                    @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
+                    @click="unsavedChanges ? createTrip(false) : $router.push('/rundreise-ansehen/' + $route.params.id)"
                   />
                 </div>
               </div>
@@ -482,7 +482,7 @@
           :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
           class="q-ml-sm"
           :loading="saving"
-          @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
+          @click="unsavedChanges ? createTrip(false) : $router.push('/rundreise-ansehen/' + $route.params.id)"
         />
       </div>
     </div>
@@ -550,7 +550,7 @@
           <q-btn
             color="primary"
             :disable="!currentStop.Title && currentStop.DayDuration <= 0"
-            @click="() => { addStop() }"
+            @click="() => { addStop(true) }"
             v-close-popup
             label="hinzufügen"
           />
@@ -559,7 +559,7 @@
     </q-dialog>
 
     <q-dialog v-model="showEditStopDialog">
-      <q-card>
+      <q-card id="editStopDialogCard">
         <q-card-section>
           <q-input
             v-model="currentStop.Title"
@@ -979,164 +979,6 @@
 
           <span>Klicke auf diesen Stopp auf der Karte um dir Orte vorschlagen zu lassen<br></span>
 
-          <!-- Images here -->
-          <div>
-            <div
-              class="flex"
-              v-if="currentStop.Images && currentStop.Images.lenght > 0"
-            >
-              <div
-                class="uploader"
-                v-for="(stopImage, index) in currentStop.Images"
-                :key="index"
-                style="margin-right:8px;"
-              >
-                <q-img
-                  style="height:100%;"
-                  :src="stopImage"
-                ></q-img>
-                <q-btn
-                  round
-                  color="primary"
-                  icon="filter"
-                  style="position: absolute; margin-top:-113px; margin-left:120px;"
-                  @click="showImgDialog(stopImage)"
-                >
-                </q-btn>
-              </div>
-            </div>
-            <div class="uploader">
-              <q-btn
-                round
-                color="primary"
-                icon="add"
-                :disable="visible"
-                @click="() => $refs.galeryUpload.pickFiles()"
-                style="position:relative;"
-              >
-                <q-inner-loading
-                  :showing="visible"
-                  style="border-radius:50%"
-                >
-                  <q-spinner
-                    size="42px"
-                    color="primary"
-                  >
-                  </q-spinner>
-                </q-inner-loading>
-              </q-btn>
-            </div>
-            <q-dialog v-model="imgDialogVisible">
-              <q-card style="width:100%; max-width:100vh; overflow:hidden;">
-                <q-card-section
-                  class="row flex justify-end q-pb-none"
-                  style="z-index:100; width:100%; position:absolute; color:white;"
-                >
-                  <q-btn
-                    icon="close"
-                    flat
-                    round
-                    dense
-                    v-close-popup
-                  />
-                </q-card-section>
-                <q-card-section>
-                  <q-img
-                    style="width:100%;"
-                    :src="dialogImgSrc"
-                  ></q-img>
-                </q-card-section>
-              </q-card>
-
-            </q-dialog>
-            <q-dialog
-              keep-alive
-              v-model="chooseImgDialog"
-            >
-              <q-card>
-                <!-- <q-card-section class="row items-center galeryImgUploaderContainer flex justify-between">
-                  <div
-                    class="uploader"
-                    v-for="(url, index) in galeryImgUrls"
-                    :key="index"
-                  >
-                    <img
-                      style="width:100%;"
-                      v-lazy="url"
-                    />
-                    <q-btn
-                      round
-                      color="primary"
-                      icon="add"
-                      style="position: absolute;"
-                      @click="addImageToStop(url)"
-                    >
-                    </q-btn>
-                  </div> -->
-                <!-- <div
-                    v-if="galeryImgUrls.length === 0"
-                    class="flex"
-                  >
-                    <div>
-                      <q-img
-                        src="../statics/dummy-image-landscape-1.jpg"
-                        style="height:148px; width:148px;"
-                      ></q-img>
-                    </div>
-                    <div
-                      class="flex justify-center"
-                      style="max-width:300px; padding-left:10px; flex-direction:column;"
-                    >Wenn du ein Bild in den Einstellungen hochlädst kannst du es hier hinzufügen.</div>
-                  </div> -->
-                <!-- </q-card-section> -->
-                <q-card-section class="row items-center flex">
-                  <span>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind. <br> Ansonsten kann dein Account gesperrt werden. <br>
-                    <br>
-                    <a
-                      style="text-decoration:underline;"
-                      @click="openInNewTab('https://www.google.com/search?q=' + location.label  + '&tbm=isch&hl=de&hl=de&tbs=sur%3Af&rlz=1C1CHBF_deDE828DE828&ved=0CAQQpwVqFwoTCLCZ05jd2-cCFQAAAAAdAAAAABAD&biw=1903&bih=969')"
-                    >Bildvorschläge auf Google</a>
-                    <br>
-                    <br>
-                  </span>
-                  <div
-                    class="flex"
-                    style="width:100%;"
-                  >
-                    <q-input
-                      filled
-                      ref="tempImgLinkInput"
-                      label="Bild per Link einfügen"
-                      v-model="tempImgLink"
-                      :rules="[val => sharedMethods.validURL(val) || 'Bitte gib einen richtigen Link ein']"
-                      lazy-rules
-                      bottom-slots
-                      outlined
-                      style="padding:0; width:80%; margin-bottom:10px;"
-                    ></q-input>
-                    <q-btn
-                      round
-                      color="primary"
-                      icon="add"
-                      style="margin-left:10px; margin-top:5px; height:45px;"
-                      :disable="() => !sharedMethods.validURL(tempImgLink)"
-                      @click="addImageToStop(tempImgLink)"
-                    />
-                  </div>
-                </q-card-section>
-
-                <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="Fertig"
-                    color="primary"
-                    v-close-popup
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </div>
-          <!-- end images -->
           <q-editor
             v-model="currentStop.Description"
             min-height="5rem"
@@ -1156,6 +998,12 @@
         }
         }"
           />
+          <Uploader
+            :RTId="currentRoundtrip.RTId"
+            :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
+            @imageAdded="addImageToStop($event)"
+            @imageDeleted="removeImageFromStop($event)"
+          />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn
@@ -1168,7 +1016,7 @@
             label="Speichern"
             color="primary"
             :disable="!currentStop.DayDuration || currentStop.DayDuration <= 0"
-            @click="() => { addStop() }"
+            @click="() => { addStop(true) }"
             v-close-popup
           />
         </q-card-actions>
@@ -1199,7 +1047,8 @@ export default {
   components: {
     HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
     ArrivalDeparture: () => import('../pages/EditRoundtripComponents/arrivalDeparture.vue'),
-    TripOverview: () => import('../pages/TripOverview/TripOverview.vue')
+    TripOverview: () => import('../pages/TripOverview/TripOverview.vue'),
+    Uploader: () => import('../pages/Uploader/Uploader.vue')
   },
   computed: {
     isMobile () {
@@ -1209,6 +1058,7 @@ export default {
       return auth.user()
     }
   },
+  name: 'RoundtripWizard',
   data () {
     return {
       step: 1,
@@ -1239,8 +1089,7 @@ export default {
         Sights: [],
         InitDate: formattedScheduleDate + ' 10:00',
         Profile: 'driving',
-        DayDuration: 1,
-        Images: []
+        DayDuration: 1
       },
 
       // leave this outside of current stop to avoid to much fields in db (will only be added to current stop if need to)
@@ -1273,9 +1122,6 @@ export default {
 
       showAddStopDialog: false,
       showEditStopDialog: false,
-
-      imgDialogVisible: false,
-      chooseImgDialog: false,
 
       editorFonts: {
         arial: 'Arial',
@@ -1345,8 +1191,10 @@ export default {
   methods: {
     /**
      * adds the current stop to the stops array
+     @param reset if current stop should be resetted
      */
-    addStop () {
+    addStop (reset) {
+      console.log('stopToEdit ' + this.stopToEdit)
       this.unsavedChanges = true
 
       // remove placeholder if not changed
@@ -1377,19 +1225,22 @@ export default {
         currentDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
         currentDate.setDate(currentDate.getDate() + this.addedStops[this.addedStops.length - 1].DayDuration)
 
-        this.stopToEdit = -1
+        // stay in edit mode if reset is false
+        if (reset) this.stopToEdit = -1
       } else {
         this.addedStops.push(this.currentStop)
       }
 
-      this.currentStop = {
-        Title: 'neuer Stopp',
-        Description: 'Raum für Notizen, Beschreibungen...',
-        Location: null,
-        Sights: [],
-        InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
-        Profile: 'driving',
-        DayDuration: 1
+      if (reset) {
+        this.currentStop = {
+          Title: 'neuer Stopp',
+          Description: 'Raum für Notizen, Beschreibungen...',
+          Location: null,
+          Sights: [],
+          InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
+          Profile: 'driving',
+          DayDuration: 1
+        }
       }
 
       // reload map
@@ -1539,8 +1390,8 @@ export default {
     /**
      * creates the roundtrip (write the temp data into db)
      */
-    createTrip () {
-      if (!this.unsavedChanges) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+    createTrip (stay) {
+      if (!this.unsavedChanges && !stay) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
 
       // need this json stringify to prevent update of location when the click location changes
       let stops = JSON.parse(JSON.stringify(this.addedStops))
@@ -1597,9 +1448,11 @@ export default {
             context.saving = false
             sharedMethods.showSuccessNotification('Reise wurde gespeichert')
 
-            setTimeout(function () {
-              context.$router.push('/rundreise-ansehen/' + context.$route.params.id)
-            }, 1000)
+            if (!stay) {
+              setTimeout(function () {
+                context.$router.push('/rundreise-ansehen/' + context.$route.params.id)
+              }, 1000)
+            }
           })
         } else {
           // add roundtrip normally
@@ -1610,12 +1463,14 @@ export default {
               .then(docId => {
                 if (docId && docId !== null) {
                   let context = this
-                  // wait to ensure roundtrip is fully added
-                  setTimeout(function () {
-                    this.saving = false
-                    console.log(docId)
-                    context.$router.push('/rundreise-ansehen/' + docId)
-                  }, 500)
+
+                  if (!stay) {
+                    // wait to ensure roundtrip is fully added
+                    setTimeout(function () {
+                      this.saving = false
+                      context.$router.push('/rundreise-ansehen/' + docId)
+                    }, 500)
+                  }
                 } else {
                   this.saving = false
                   sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
@@ -2010,6 +1865,24 @@ export default {
 
       this.currentRoundtrip.ReturnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
     },
+    /**
+     * adds a new url to stop (called from uploader)
+     */
+    addImageToStop (imageUrl) {
+      if (!this.currentStop.StopImages) this.currentStop.StopImages = []
+      this.currentStop.StopImages.push(imageUrl)
+
+      // save stop
+      this.addStop(false)
+    },
+    removeImageFromStop (imageUrl) {
+      if (this.currentStop.StopImages) {
+        this.currentStop.StopImages.splice(this.currentStop.StopImages.indexOf(imageUrl), 1)
+
+        // save stop
+        this.addStop(false)
+      }
+    },
     handleAddStopFromMap (event) {
       this.unsavedChanges = true
       let lastDate = this.currentStop.InitDate
@@ -2044,7 +1917,7 @@ export default {
     }
   },
   created () {
-    auth.authRef().onAuthStateChanged((user) => {
+    auth.authRef().onAuthStateChanged(() => {
       if (!this.$store.getters['demoSession/isInDemoSession'] && !auth.user()) {
         this.$store.commit('demoSession/setAsDemoSession')
       } else {
@@ -2058,6 +1931,8 @@ export default {
           this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
             this.currentRoundtrip = roundtrip
           })
+
+          this.$store.dispatch('images/loadAllImgs', RTId)
 
           // get stops
           let roundtripsRef = db.collection('RoundtripDetails')

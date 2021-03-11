@@ -9,7 +9,7 @@ let getAirportData = () => import('airport-data')
 var querystring = require('querystring')
 import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
-import { db } from './firebaseInit.js'
+import { db, storage } from './firebaseInit.js'
 import { Loader } from '@googlemaps/js-api-loader'
 
 export default {
@@ -57,6 +57,78 @@ export default {
         }
     },
     /**
+     * call this from @added event from q-uploader
+     * @param kind if its a galery or title upload
+     */
+    fileAdded (event, kind, context, roundtripDocId) {
+        let files = event
+        let uploadIndex = 0
+
+        // disable another upload
+        if (kind === 'galery') context.visible = true
+        else context.titleUploadDisabled = true
+        this.uploadNext(files, kind, uploadIndex, context, roundtripDocId)
+
+        if (context.$refs.titleUpload) context.$refs.titleUpload.reset()
+        if (context.$refs.galeryUpload) context.$refs.galeryUpload.reset()
+    },
+    uploadNext (files, kind, uploadIndex, context, roundtripDocId) {
+        if (!context.uploading) {
+            let length = context.$store.getters['images/getGaleryImgUrls'](roundtripDocId).length
+            this.upload(files[uploadIndex], kind, uploadIndex + length, uploadIndex === files.length - 1, files.length, uploadIndex, context, roundtripDocId).then(() => {
+                context.uploading = false
+                uploadIndex++
+                if (uploadIndex < files.length) this.uploadNext(files, kind, uploadIndex)
+            })
+        }
+    },
+    upload (file, kind, count, lastItem, absoluteFiles, uploadIndex, context, roundtripDocId) {
+        context.uploading = true
+        let localContext = this
+
+        return new Promise((resolve) => {
+            let kindPath = 'Title/titleImg'
+            if (kind === 'galery') {
+                kindPath = 'Galery/galeryImg' + count
+            }
+            const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/' + kindPath)
+
+            let uploadTask = fileRef.put(file)
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                    console.log('Upload is ' + (snapshot.bytesTransferred / snapshot.totalBytes) * 100 + '% done')
+                    context.$store.commit('images/setUploadProgress', progress)
+                },
+                (error) => {
+                    console.log(error)
+
+                    localContext.showErrorNotification('Das Bild konnte nicht hochgeladen werden')
+                    context.visible = false
+                    context.titleUploadDisabled = false
+                    resolve(false)
+                },
+                () => {
+                    // upload succesful
+                    localContext.showSuccessNotification('Bild ' + (uploadIndex + 1) + ' von ' + absoluteFiles + ' wurde erfolgreich hochgeladen')
+                    if (lastItem) {
+                        context.visible = false
+                        context.titleUploadDisabled = false
+                    }
+                    fileRef.getDownloadURL().then(function (url) {
+                        if (kind === 'galery') {
+                            context.$store.commit('images/addGaleryImg', { newUrl: url, RTId: roundtripDocId })
+                            context.$emit('imageAdded', url)
+                        } else if (kind === 'title') {
+                            context.$store.commit('images/setTitleImg', { newUrl: url, RTId: roundtripDocId })
+                        }
+                    })
+                    resolve(true)
+                }
+            )
+        })
+    },
+    /**
      * Sets all expansion states of all stops to true (expanded)
      * @param {*} context context of file
      * @param {array} stops list of all stops
@@ -77,46 +149,13 @@ export default {
         context.allStopsExpanded = false
         context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
-    // filterAirports (val, update, abort, originSearch, context) {
-    //     if (val.length < 3) {
-    //         abort()
-    //         return
-    //     }
-    //     if (val.length >= 3) {
-    //         this.fetchAirports(val).then((results) => {
-    //             update(() => {
-    //                 if (!results) return false
-
-    //                 if (originSearch) {
-    //                     context.originOptions = []
-    //                     context.originCodes = []
-    //                 } else {
-    //                     context.destinationOptions = []
-    //                     context.destinationCodes = []
-    //                 }
-
-    //                 results.data.data.forEach(city => {
-    //                     if (originSearch) {
-    //                         context.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-    //                         context.originCodes.push(city.iataCode)
-    //                     } else {
-    //                         context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-    //                         context.destinationCodes.push(city.iataCode)
-    //                     }
-    //                 })
-    //             }).catch(e => {
-    //                 return false
-    //             })
-    //         })
-    //     }
-    // },
     /**
-    * Filter airport suggestions for select element
-    * @param {String} val search term
-    * @param {boolean} originSearch search for origin or depature
-    * @param {*} context context of file
-    * @param {String} arrayName name for array to push elements to
-    */
+   * Filter airport suggestions for select element
+   * @param {String} val search term
+   * @param {boolean} originSearch search for origin or depature
+   * @param {*} context context of file
+   * @param {String} arrayName name for array to push elements to
+   */
     filterAirports (searchTerm, update, abort, context, arrayName) {
         if (!searchTerm || searchTerm.length < 3) {
             abort()
