@@ -21,9 +21,15 @@
     </div>
   </div>
 </template>
+<style lang="less">
+.q-page-container {
+  margin-top: 0 !important;
+}
+</style>
 <script>
 import { db } from '../firebaseInit.js'
 import { Loading } from 'quasar'
+import sharedMethods from '../sharedMethods.js'
 
 let roundtrip = []
 let details = []
@@ -49,18 +55,18 @@ export default {
   },
   methods: {
     loadSingleRoundtrip (RTId) {
+      let roundtrip
       let roundtripsRef = db.collection('Roundtrips')
         .where('RTId', '==', RTId)
         .limit(1)
       roundtripsRef.get()
         .then(snapshot => {
-          roundtrip = []
           snapshot.forEach(doc => {
-            roundtrip.push(doc.data())
+            roundtrip = doc.data()
           })
 
           if (roundtrip.Public) {
-            this.inputProfile = roundtrip[0].Profile
+            this.inputProfile = roundtrip.Profile
 
             // set default values to ensure privacy
             this.childrenAges = []
@@ -81,12 +87,7 @@ export default {
                 this.mapLoaded = true
               })
           } else {
-            this.$q.notify({
-              color: 'red-5',
-              textColor: 'white',
-              icon: 'error',
-              message: 'Uuups, diese Karte ist leider privat'
-            })
+            sharedMethods.showErrorNotification('Uuups, diese Karte ist leider privat')
             this.$router.push('/')
           }
         })

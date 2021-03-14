@@ -30,8 +30,9 @@
           >reisen</router-link>
           <router-link
             class="header-page-link"
-            to="/blog"
-          >blog</router-link>
+            v-if="user"
+            to="/meine-rundreisen"
+          >meine Reisen</router-link>
           <router-link
             v-if="!user && !this.$store.getters['demoSession/isInDemoSession']"
             class="header-page-link"
@@ -83,15 +84,6 @@
                 >
                   <q-item-section>
                     Profil
-                  </q-item-section>
-                </q-item>
-                <q-item
-                  clickable
-                  v-close-popup
-                  @click="$router.push('/meine-rundreisen')"
-                >
-                  <q-item-section>
-                    Meine Reisen
                   </q-item-section>
                 </q-item>
                 <q-item
@@ -156,11 +148,14 @@
             to="/rundreisen-uebersicht"
           >reisen</router-link>
         </div>
-        <div @click="hideMenu()">
+        <div
+          @click="hideMenu()"
+          v-if="user"
+        >
           <router-link
             class="mobile-header-page-link"
-            to="/blog"
-          >blog</router-link>
+            to="/meine-rundreisen"
+          >meine Reisen</router-link>
         </div>
         <div
           @click="hideMenu()"

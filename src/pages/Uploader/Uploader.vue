@@ -18,6 +18,7 @@
           style="position:relative; margin: 10px; width:42px;"
         >
         </q-btn>
+        <p v-if="!stopImages || stopImages.length < 1">Bild hochladen</p>
         <q-circular-progress
           :value="uploadProgress"
           v-show="visible"

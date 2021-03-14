@@ -314,49 +314,51 @@
         :currentRoundtrip="roundtrip"
         @updateArrivalDeparture="updateArrivalDeparture($event)"
       ></ArrivalDeparture>
-      <h4>Bilder</h4>
-      <q-list
+      <h4>Titelbild</h4>
+      <div>
+        <div class="uploader">
+          <q-img
+            v-if="titleImgUrl"
+            style="height:100%;"
+            :src="titleImgUrl"
+          ></q-img>
+          <q-btn
+            round
+            color="primary"
+            icon="add"
+            style="position: absolute;"
+            :disable="titleUploadDisabled"
+            @click="() => $refs.titleUpload.pickFiles()"
+          >
+            <q-inner-loading
+              :showing="titleUploadDisabled"
+              style="border-radius:50%"
+            >
+              <q-spinner
+                size="42px"
+                color="primary"
+              ></q-spinner>
+            </q-inner-loading>
+          </q-btn>
+        </div>
+        <q-uploader
+          url
+          label="Titelbild hochladen"
+          accept=".jpg, image/*"
+          style="max-width: 300px; display:none;"
+          hide-upload-btn
+          ref="titleUpload"
+          @added="fileAdded($event, 'title')"
+        />
+      </div>
+      <p>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind.</p>
+
+      <!-- <q-list
         bordered
         class="rounded-borders"
         style="padding:10px"
       >
-        <div>
-          <p>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind.</p>
-          <span>Titelbild</span>
-          <div class="uploader">
-            <q-img
-              style="height:100%;"
-              :src="titleImgUrl"
-            ></q-img>
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              style="position: absolute;"
-              :disable="titleUploadDisabled"
-              @click="() => $refs.titleUpload.pickFiles()"
-            >
-              <q-inner-loading
-                :showing="titleUploadDisabled"
-                style="border-radius:50%"
-              >
-                <q-spinner
-                  size="42px"
-                  color="primary"
-                ></q-spinner>
-              </q-inner-loading>
-            </q-btn>
-          </div>
-          <q-uploader
-            url
-            label="Titelbild hochladen"
-            accept=".jpg, image/*"
-            style="max-width: 300px; display:none;"
-            hide-upload-btn
-            ref="titleUpload"
-            @added="fileAdded($event, 'title')"
-          />
-        </div>
+
         <q-uploader
           url
           label="Weitere Bilder hochladen"
@@ -382,7 +384,7 @@
               color="primary"
               icon="add"
               style="transform:rotate(45deg); position: absolute;"
-              @click="removeFile(index)"
+              @click="deleteImage(url)"
             ></q-btn>
           </div>
           <div class="uploader">
@@ -406,7 +408,7 @@
             </q-btn>
           </div>
         </div>
-      </q-list>
+      </q-list> -->
     </q-form>
     <h4 v-if="companyProfile">Unternehmenseinstellungen</h4>
     <q-list
@@ -514,7 +516,6 @@ export default {
       tripWebsite: null,
       deleting: false,
       visible: false,
-      titleImgUrl: null,
       titleUploadDisabled: false,
       shareLink: null,
       shareCode: null,
@@ -538,8 +539,8 @@ export default {
     sharedMethods () {
       return sharedMethods
     },
-    galeryImgUrls () {
-      return this.$store.getters['images/getGaleryImgUrls'](this.RTId)
+    titleImgUrl () {
+      return this.$store.getters['images/getTitleImg'](this.RTId)
     }
   },
   methods: {
@@ -568,6 +569,9 @@ export default {
     },
     fileAdded (event, kind) {
       sharedMethods.fileAdded(event, kind, this, this.RTId)
+    },
+    deleteImage (url) {
+      this.$store.dispatch('images/deleteImage', { RTId: this.RTId, url: url })
     },
     /**
        * get the average hotel rating

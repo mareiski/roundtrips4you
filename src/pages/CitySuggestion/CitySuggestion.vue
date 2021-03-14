@@ -325,7 +325,7 @@ export default {
      */
     switchToPOIMode (city) {
       if (this.lastPOICity !== city) {
-        sharedMethods.getGooglePlacesData(city.latitude, city.longitude).then((POIArr) => {
+        sharedMethods.getGooglePlacesData(city.latitude, city.longitude, this).then((POIArr) => {
           this.POIs = POIArr
           sharedMethods.getParent('Map', this).showPOIsOnMap(this.POIs)
         }).catch((e) => {

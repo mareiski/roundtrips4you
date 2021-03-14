@@ -143,6 +143,7 @@
               :src="stop.StopImages[0]"
             ></q-img>
             <q-img
+              v-else
               width="240px"
               height="135px"
               :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
@@ -587,6 +588,7 @@ import { date } from 'quasar'
 import sharedMethods from '../../sharedMethods.js'
 import MapLayerPlugin from './MapLayerPlugin.vue'
 import { countries } from '../../countries.js'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 let hoveredStateId = null
 
@@ -855,7 +857,7 @@ export default {
     },
     showSightDetails (lat, lng) {
       if (lat !== this.lastSightDetailsLat || lng !== this.lastSightDetailsLng) {
-        sharedMethods.getGooglePlacesData(lat, lng).then(POIArr => {
+        sharedMethods.getGooglePlacesData(lat, lng, this).then(POIArr => {
           this.suggestedPOIs = POIArr
           this.showDetailsDialog = true
         }).catch((e) => {
@@ -1134,7 +1136,7 @@ export default {
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
       // get id for route
-      let id = (dailyTrip ? 1 : '') + 5 + index
+      let id = (dailyTrip ? '1' : '0') + index
 
       // get random color for route
       let color = this.getRandomColor(index, this.stops.length)
@@ -1216,7 +1218,12 @@ export default {
                 map.on('click', id, function (_e) {
                   // close all popups
                   context.closeAllPopups()
-                  if (!context.markerClicked) context.$refs[id][0].togglePopup()
+
+                  let speedMarker = context.$refs['route' + id][0]
+                  console.log(speedMarker)
+
+                  // and show clicked route popup
+                  if (!context.markerClicked) speedMarker.togglePopup()
                 })
                 map.getSource(id).setData(geojson)
               }

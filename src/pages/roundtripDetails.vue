@@ -6,32 +6,32 @@
       style="position:fixed; z-index:1; right:0; padding: 10px"
     >
       <q-btn
-        round
         color="primary"
         icon="edit"
         v-if="isUserCreator"
         @click="$router.push('/rundreisen-wizard/' + RTId)"
+        label="Bearbeiten"
       >
         <q-tooltip>Reise bearbeiten</q-tooltip>
       </q-btn>
 
       <q-btn
-        round
         color="primary"
         icon="content_copy"
         v-else
         @click="copyRTDialog = true"
+        label="Kopieren"
       >
-        <q-tooltip>Reise bearbeiten</q-tooltip>
+        <q-tooltip>Reise kopieren</q-tooltip>
       </q-btn>
 
       <q-btn
-        round
         color="primary"
         icon="settings"
         style="margin-left:10px;"
         v-if="isUserCreator"
         @click="$router.push('/rundreisen-einstellungen/' + RTId)"
+        round
       >
         <q-tooltip>Reiseeinstellungen</q-tooltip>
       </q-btn>
@@ -162,7 +162,19 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>{{roundtrip ? roundtrip.Title : 'Reiseverlauf'}}</span>
+              <div class="flex">
+                <span>{{roundtrip ? roundtrip.Title : 'Reiseverlauf'}}</span>
+                <q-btn
+                  color="primary"
+                  icon="edit"
+                  v-if="isUserCreator"
+                  @click="$router.push('/rundreisen-wizard/' + RTId)"
+                  label="Bearbeiten"
+                  style="height:36px; margin:auto; margin-left:20px;"
+                >
+                  <q-tooltip>Reise bearbeiten</q-tooltip>
+                </q-btn>
+              </div>
               <q-toggle
                 style="font-size:18px"
                 @input="sharedMethods.expandAllStops(getContext, stops)"

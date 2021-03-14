@@ -66,7 +66,13 @@ export default {
 
         // disable another upload
         if (kind === 'galery') context.visible = true
-        else context.titleUploadDisabled = true
+        else {
+            context.titleUploadDisabled = true
+
+            // delete current title img
+            context.$store.dispatch('images/deleteTitleImg', roundtripDocId)
+        }
+
         this.uploadNext(files, kind, uploadIndex, context, roundtripDocId)
 
         if (context.$refs.titleUpload) context.$refs.titleUpload.reset()
@@ -314,10 +320,11 @@ export default {
             '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
         return !!pattern.test(str)
     },
-    getGooglePlacesData (lat, lng) {
-        return new Promise((resolve, reject) => {
+    getGooglePlacesData (lat, lng, context) {
+        let key = context.$store.getters['api/getGooglePlacesKey']
+        return new Promise((resolve) => {
             const loader = new Loader({
-                apiKey: this.$store.getters['api/getGooglePlacesKey'],
+                apiKey: key,
                 version: 'weekly',
                 libraries: ['places']
             })
@@ -343,7 +350,7 @@ export default {
                     response.forEach(poi => {
                         let returnData = {}
                         returnData.name = poi.name
-                        returnData.photoUrl = poi.photos[0].getUrl()
+                        returnData.photoUrl = poi.photos ? poi.photos[0].getUrl() : '/statics/dummy-image-landscape-1-150x150.jpg'
                         returnData.placeId = poi.place_id
                         returnData.rating = poi.rating
                         returnData.totalRatings = poi.user_ratings_total

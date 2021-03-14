@@ -37,14 +37,15 @@ export default {
         },
         setTitleImg: (state, payload) => {
             let currentImageObject = state.images[state.images.findIndex(x => x.RTId === payload.RTId)]
+            console.log(currentImageObject)
 
             if (currentImageObject) {
-                currentImageObject.titleImgUrl = payload.titleImgUrl
+                currentImageObject.titleImgUrl = payload.newUrl
             } else {
                 state.images.push({
                     RTId: payload.RTId,
                     galeryImgUrls: [],
-                    titleImgUrl: payload.titleImgUrl
+                    titleImgUrl: payload.newUrl
                 })
             }
         },
@@ -80,7 +81,7 @@ export default {
                 fileRef
                     .getDownloadURL()
                     .then(function (url) {
-                        commit('setTitleImg', { RTId: RTId, titleImgUrl: url })
+                        commit('setTitleImg', { RTId: RTId, newUrl: url })
                         resolve(url)
                     })
                     .catch(e => {
@@ -117,6 +118,14 @@ export default {
                         resolve(galeryImgUrls)
                     })
             })
+        },
+        // let commit stay there (only works so, dont know why)
+        deleteTitleImg ({ commit }, RTId) {
+            const fileRef = storage.ref().child('Images/Roundtrips/' + RTId + '/Title/titleImg')
+
+            fileRef.delete()
+
+            // we dont need to remove title img from list because it always has to be replaced by another one
         },
         deleteImage ({ getters, commit }, payload) {
             let galeryImgs = getters.getGaleryImgUrls(payload.RTId)

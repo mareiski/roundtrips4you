@@ -558,7 +558,10 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="showEditStopDialog">
+    <q-dialog
+      v-model="showEditStopDialog"
+      persistent
+    >
       <q-card id="editStopDialogCard">
         <q-card-section>
           <q-input
@@ -998,14 +1001,39 @@
         }
         }"
           />
+          <div class="flex">
+            <q-input
+              filled
+              ref="tempImgLinkInput"
+              label="Bild per Link einfügen"
+              v-model="tempImgLink"
+              :rules="[val => sharedMethods.validURL(val) || 'Bitte gib einen richtigen Link ein']"
+              lazy-rules
+              bottom-slots
+              outlined
+              style="padding:0; width:80%; margin-bottom:10px;"
+            ></q-input>
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              :disable="!sharedMethods.validURL(tempImgLink)"
+              style="margin-left:10px; margin-top:5px; height:45px;"
+              @click="addImageToStop(tempImgLink)"
+            />
+          </div>
           <Uploader
             :RTId="currentRoundtrip.RTId"
             :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
             @imageAdded="addImageToStop($event)"
             @imageDeleted="removeImageFromStop($event)"
           />
+          <p>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind.</p>
         </q-card-section>
-        <q-card-actions align="right">
+        <q-card-actions
+          align="right"
+          class="sticky-navigation"
+        >
           <q-btn
             flat
             label="Abbrechen"
@@ -1056,6 +1084,9 @@ export default {
     },
     user () {
       return auth.user()
+    },
+    sharedMethods () {
+      return sharedMethods
     }
   },
   name: 'RoundtripWizard',
@@ -1122,6 +1153,8 @@ export default {
 
       showAddStopDialog: false,
       showEditStopDialog: false,
+
+      tempImgLink: '',
 
       editorFonts: {
         arial: 'Arial',

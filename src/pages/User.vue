@@ -14,14 +14,14 @@
       style="padding-top:40px;"
     >
       <q-tab
+        name="settings"
+        label="Einstellungen"
+      />
+      <q-tab
         name="publicProfile"
         label="Öffentliches Profil"
       >
       </q-tab>
-      <q-tab
-        name="settings"
-        label="Einstellungen"
-      />
     </q-tabs>
     <q-separator />
 
@@ -271,7 +271,7 @@ export default {
       CompanyWebsite: null,
       companyProfile: false,
       companyDescription: null,
-      tab: 'publicProfile',
+      tab: 'settings',
       addExpanded: false
     }
   },
