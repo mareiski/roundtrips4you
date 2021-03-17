@@ -509,7 +509,7 @@
             type="number"
             filled
             label="Dauer in Tagen"
-            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            :rules="[val => val !== '' && val >= 0 || 'Bitte gib eine Anzahl von Tagen ein']"
             lazy-rules
           />
           <div style="margin-bottom:20px;">
@@ -580,7 +580,7 @@
             type="number"
             filled
             label="Dauer in Tagen"
-            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            :rules="[val => val !== null &&  val !== '' && val >= 0 || 'Bitte gib eine Anzahl von Tagen ein']"
             lazy-rules
           />
           <div style="margin-bottom:20px;">
@@ -1025,6 +1025,7 @@
           <Uploader
             :RTId="currentRoundtrip.RTId"
             :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
+            :uploadDisabled="false"
             @imageAdded="addImageToStop($event)"
             @imageDeleted="removeImageFromStop($event)"
           />
@@ -1043,7 +1044,7 @@
           <q-btn
             label="Speichern"
             color="primary"
-            :disable="!currentStop.DayDuration || currentStop.DayDuration <= 0"
+            :disable="currentStop.DayDuration < 0"
             @click="() => { addStop(true) }"
             v-close-popup
           />

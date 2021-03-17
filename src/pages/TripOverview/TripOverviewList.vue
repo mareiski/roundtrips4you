@@ -71,9 +71,9 @@
                 flat
                 round
                 size="13px"
-                icon="edit"
+                icon="settings"
               >
-                <q-tooltip>Stopp bearbeiten</q-tooltip>
+                <q-tooltip>Optionen</q-tooltip>
               </q-btn>
             </div>
           </q-item-section>

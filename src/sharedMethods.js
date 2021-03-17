@@ -265,7 +265,7 @@ export default {
         if (days === 0 && hours === 0 && minutes === 0) returnVal = 0
         else if (days < 0 || hours < 0 || minutes < 0) returnVal = null
 
-        if (days && days > 0) returnVal += days + ' Tag '
+        if (days && days > 0) returnVal += days + ' Tag(e) '
         if (hours && hours > 0) returnVal += hours + 'h '
         if (minutes && minutes > 0) returnVal += minutes + 'min '
 

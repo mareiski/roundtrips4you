@@ -1,24 +1,25 @@
  <template>
   <div>
     <div
-      style="padding:20px 0;"
-      @mouseenter="stopImages ? disablePageScrolling() : null"
+      :style="stopImages ? 'padding:20px 0;' : ''"
+      @mouseenter="stopImages && stopImages.length >= 2 ? disablePageScrolling() : null"
       @mouseleave="enablePageScrolling()"
     >
       <horizontal-scroll
-        :style="(!stopImages || stopImages.length < 1 ? 'overflow-x:auto;' : '') + ' white-space:nowrap;'"
+        :style="(!stopImages || stopImages.length <= 1 ? 'overflow-x:auto;' : '') + ' white-space:nowrap;'"
         class="full-width"
       >
         <q-btn
           round
           color="primary"
           icon="upload"
+          v-if="!uploadDisabled"
           v-show="!visible"
           @click="() => $refs.galeryUpload.pickFiles()"
           style="position:relative; margin: 10px; width:42px;"
         >
         </q-btn>
-        <p v-if="!stopImages || stopImages.length < 1">Bild hochladen</p>
+        <p v-if="!uploadDisabled && (!stopImages || stopImages.length < 1)">Bild hochladen</p>
         <q-circular-progress
           :value="uploadProgress"
           v-show="visible"
@@ -46,13 +47,24 @@
               style="height:200px; width:55%; margin:10px; margin-right:-20px;"
               class="rounded-borders"
               :src="stopImage"
+              @click="showImgDialog(stopImage)"
             ></q-img>
             <q-btn
               round
+              v-if="!uploadDisabled"
               color="primary"
               icon="delete"
               style="right: 10px; top: -88px;"
               @click="deleteImage(stopImage)"
+            >
+            </q-btn>
+            <q-btn
+              v-else
+              round
+              color="primary"
+              icon="filter"
+              style="right: 10px; top: -88px;"
+              @click="showImgDialog(stopImage)"
             >
             </q-btn>
           </span>
@@ -192,7 +204,8 @@ export default {
   },
   props: {
     RTId: String,
-    stopImages: Array
+    stopImages: Array,
+    uploadDisabled: Boolean
   },
   components: {
     HorizontalScroll: () => import('vue-horizontal-scroll')
@@ -215,12 +228,20 @@ export default {
       sharedMethods.fileAdded(event, kind, this, this.RTId)
     },
     enablePageScrolling () {
-      document.documentElement.style.overflow = 'auto'
-      document.getElementById('editStopDialogCard').style.overflow = 'auto'
+      try {
+        document.documentElement.style.overflow = 'auto'
+        document.getElementById('editStopDialogCard').style.overflow = 'auto'
+      } catch (e) {
+        console.log(e)
+      }
     },
     deleteImage (imageUrl) {
       this.$store.dispatch('images/deleteImage', { RTId: this.RTId, url: imageUrl })
       this.$emit('imageDeleted', imageUrl)
+    },
+    showImgDialog (src) {
+      this.dialogImgSrc = src
+      this.imgDialogVisible = true
     }
   }
 }
