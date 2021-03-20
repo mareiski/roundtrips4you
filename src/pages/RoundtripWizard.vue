@@ -890,7 +890,7 @@
             </q-card>
           </q-dialog>
 
-          <div v-if="suggestedSights && suggestedSights !== 'error'">
+          <!-- <div v-if="suggestedSights && suggestedSights !== 'error'">
             <span
               v-for="(sight, index) in suggestedSights"
               :key="index"
@@ -900,7 +900,7 @@
             >
               <q-chip
                 clickable
-                @click="openSightDialog(sight)"
+                @click="$refs.sightDialog.openSightDialog(addedSight)"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>
@@ -911,53 +911,11 @@
               v-if="currentStop.Location"
               :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' Sehenswürdigkeiten'"
             >weitere auf Google</a>
-            <q-dialog v-model="sightDialog.showed">
-              <q-card>
-                <q-card-section
-                  class="row flex justify-end q-pb-none"
-                  style="z-index:100; width:100%; position:absolute; color:white;"
-                >
-                  <q-btn
-                    icon="close"
-                    flat
-                    round
-                    dense
-                    v-close-popup
-                  />
-                </q-card-section>
-                <q-img
-                  :src="sightDialog.imgSrc"
-                  style="max-height:75vh;"
-                >
-                  <div class="absolute-bottom">
-                    <div class="text-h6">{{sightDialog.title}}</div>
-                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
-                  </div>
-                </q-img>
-
-                <q-card-section>
-                  {{sightDialog.description}}
-                </q-card-section>
-
-                <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="hinzufügen"
-                    color="primary"
-                    v-close-popup
-                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </div>
-          <!-- <q-chip
-            v-else
-            clickable
-            @click="searchSights()"
-          >{{suggestedSights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
-            <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
-          </q-chip> -->
+            <SightDialog
+              :addAble="true"
+              ref="sightDialog"
+            ></SightDialog>
+          </div> -->
 
           <q-select
             label="gemerkte Orte"
@@ -1136,7 +1094,6 @@ export default {
       showCancelDialog: false,
 
       addedStops: [],
-      suggestedSights: null,
       sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
       addHotel: false,
       addHotelDisabled: true,
@@ -1751,42 +1708,6 @@ export default {
           }
           onPasteStripFormattingIEPaste = false
         }
-      }
-    },
-    /**
-     * open sight dialog to show data from wikivoyage about sight
-     */
-    openSightDialog (sight) {
-      // get sight dialog content from wikivoyage
-      const context = this
-      sharedMethods.getWikivoyageData(sight.name).then(result => {
-        if (result !== null) {
-          context.sightDialog.title = result.title || sight.name
-          context.sightDialog.description = result.description || 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = result.shortDescription
-          context.sightDialog.imgSrc = result.imgSrc
-          context.sightDialog.showed = true
-        } else {
-          context.sightDialog.title = sight.name
-          context.sightDialog.description = 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = ''
-          context.sightDialog.imgSrc = ''
-          context.sightDialog.showed = true
-        }
-      })
-    },
-    /**
-     * search the sights for current location
-     */
-    searchSights () {
-      if (this.currentStop.Location.lng && this.currentStop.Location.lat) {
-        sharedMethods.getSights(this.currentStop.Location.lng, this.currentStop.Location.lat).then((results) => {
-          if (results !== null) {
-            this.suggestedSights = results.data.data
-          } else {
-            this.suggestedSights = 'error'
-          }
-        })
       }
     },
     updateHotelData (event) {

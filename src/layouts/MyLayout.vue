@@ -657,9 +657,11 @@ export default {
     // check for messages
     this.getNotifications()
 
+    let context = this
+
     // do this again every 5min
     window.setInterval(() => {
-      this.getNotifications()
+      context.getNotifications()
     }, 300000)
   },
   beforeDestroy () {

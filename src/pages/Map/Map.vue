@@ -146,7 +146,7 @@
               v-else
               width="240px"
               height="135px"
-              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+              :src="lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : (lastPOICityData.img ? lastPOICityData.img : null)"
             ></q-img>
             <q-card-section>
               <div
@@ -226,7 +226,7 @@
           <q-card>
             <q-img
               v-show="lastPOICityData.img"
-              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+              :src="lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : (lastPOICityData.img ? lastPOICityData.img : null)"
             />
             <q-card-section style="padding-left:10px; padding-top:10px;">
               <span
@@ -258,8 +258,23 @@
       <q-dialog v-model="showDetailsDialog">
         <div v-if="lastPOICityData">
           <q-card>
-            <!-- todo change to slideshow -->
-            <q-img :src="lastPOICityData.img" />
+            <q-carousel
+              animated
+              v-model="slide"
+              arrows
+              infinite
+              swipeable
+              autoplay
+            >
+              <q-carousel-slide
+                :name="index"
+                class="column no-wrap"
+                v-for="(img, index) in lastPOICityData.imgSrcs"
+                :key="index"
+                style="padding: 0;"
+                :img-src="img"
+              ></q-carousel-slide>
+            </q-carousel>
             <q-card-section>
               <div style="padding-left:10px; padding-top:10px;">
                 <span class="font-large">{{lastPOICityData.title}}</span>
@@ -343,30 +358,6 @@
             </q-card-section>
           </q-card>
         </div>
-        <!-- <q-card>
-          <q-img
-            :src="sightDialog.src"
-            style="max-height:75vh;"
-          >
-            <div class="absolute-bottom">
-              <div class="text-h6">{{sightDialog.title}}</div>
-              <div class="text-subtitle2">{{sightDialog.description}}</div>
-            </div>
-          </q-img>
-
-          <q-card-section>
-            {{sightDialog.extract}}
-          </q-card-section>
-
-          <q-card-actions align="right">
-            <q-btn
-              flat
-              label="zurück"
-              color="primary"
-              v-close-popup
-            />
-          </q-card-actions>
-        </q-card> -->
       </q-dialog>
       <div
         v-for="(stop, index) in stops"
@@ -415,7 +406,7 @@
             <q-card>
               <q-img
                 v-show="lastPOICityData.img"
-                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrcs[0]"
               />
               <q-card-section style="padding-left:10px; padding-top:10px;">
                 <span
@@ -659,7 +650,8 @@ export default {
       suggestionCountry: null,
       showSuggestionCountryDialog: false,
       countryOptions: countries,
-      loading: true
+      loading: true,
+      slide: 0
     }
   },
   watch: {
@@ -847,7 +839,7 @@ export default {
         description: '',
         shortDescription: '',
         img: '',
-        imgSrc: ''
+        imgSrcs: []
       }
 
       this.loadMarkerInfos(title)
@@ -1032,7 +1024,7 @@ export default {
                 description: '',
                 shortDescription: '',
                 img: '',
-                imgSrc: ''
+                imgSrcs: []
               }
 
               var features = map.queryRenderedFeatures(e.point)

@@ -23,7 +23,28 @@
         :stopImages="stopImages ? stopImages : null"
         :uploadDisabled="true"
       />
+      <div
+        v-if="addedSights && addedSights.length > 0"
+        class="flex"
+        style="margin-bottom:10px;"
+      >
+        <b
+          class="flex justify-center"
+          style="flex-direction:column;"
+        >gemerkte Orte:</b>
+        <q-chip
+          v-for="(addedSight, index) in addedSights"
+          :key="index"
+          clickable
+          @click="$refs.sightDialog.openSightDialog(addedSight)"
+        >{{addedSight}}</q-chip>
+      </div>
     </div>
+    <SightDialog
+      :addAble="false"
+      ref="sightDialog"
+    >
+    </SightDialog>
     <q-list
       bordered
       class="rounded-borders"
@@ -49,85 +70,7 @@
             /> -->
           </q-chip>
         </div>
-        <div
-          v-if="addedSights && addedSights.length > 0"
-          class="flex"
-          style="margin-bottom:10px;"
-        >
-          <b
-            class="flex justify-center"
-            style="flex-direction:column;"
-          >gemerkte Orte:</b>
-          <q-chip
-            v-for="(addedSight, index) in addedSights"
-            :key="index"
-            clickable
-            @click="openInNewTab('https://www.google.com/search?q=' + addedSight + ' ' + location.label.split(',')[0])"
-          >{{addedSight}}</q-chip>
-        </div>
         <div>
-          <div v-if="sights && sights !== 'error'">
-            <span
-              v-for="(sight, index) in sights"
-              :key="index"
-              :href="'https://www.google.com/search?q=' + sight.name + ' ' + location.label.split(',')[0]"
-              target="_blank"
-              style="text-decoration:none;"
-            >
-              <!-- <q-chip
-                v-if="editor"
-                clickable
-                @click="openSightDialog(sight)"
-                :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
-              >{{sight.name}}
-              </q-chip> -->
-
-            </span>
-            <a
-              target="_blank"
-              :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
-            >weitere auf Google</a>
-            oder auf der Karte
-            <q-dialog v-model="sightDialog.showed">
-              <q-card>
-                <q-card-section
-                  class="row flex justify-end q-pb-none"
-                  style="z-index:100; width:100%; position:absolute; color:white;"
-                >
-                  <q-btn
-                    icon="close"
-                    flat
-                    round
-                    dense
-                    v-close-popup
-                  />
-                </q-card-section>
-                <q-img
-                  :src="sightDialog.imgSrc"
-                  style="max-height:75vh;"
-                >
-                  <div class="absolute-bottom">
-                    <div class="text-h6">{{sightDialog.title}}</div>
-                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
-                  </div>
-                </q-img>
-
-                <q-card-section>
-                  {{sightDialog.description}}
-                </q-card-section>
-
-                <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="hinzufügen"
-                    color="primary"
-                    v-close-popup
-                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </div>
           <!-- <q-chip
             v-else-if="editor"
             clickable
@@ -711,7 +654,8 @@ export default {
     CitySearch: () => import('../Map/CitySearch'),
     // HotelSearch: () => import('../Map/HotelSearch'),
     DailyTrip: () => import('./dailyTrip'),
-    Uploader: () => import('../Uploader/Uploader.vue')
+    Uploader: () => import('../Uploader/Uploader.vue'),
+    SightDialog: () => import('../CitySuggestion/SightDialog.vue')
   },
   computed: {
     sharedMethods () {
@@ -773,7 +717,6 @@ export default {
       expanded: false,
       changeAllDatesActive: false,
       oldDate: null,
-      sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
       showTransportDialog: false,
       addHotelDisabled: true,
 
@@ -1378,25 +1321,6 @@ export default {
         }
       }
       return false
-    },
-    openSightDialog (sight) {
-      // get sight dialog content from wikivoyage
-      const context = this
-      sharedMethods.getWikivoyageData(sight.name).then(result => {
-        if (result !== null) {
-          context.sightDialog.title = result.title || sight.name
-          context.sightDialog.description = result.description || 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = result.shortDescription
-          context.sightDialog.imgSrc = result.imgSrc
-          context.sightDialog.showed = true
-        } else {
-          context.sightDialog.title = sight.name
-          context.sightDialog.description = 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = ''
-          context.sightDialog.imgSrc = ''
-          context.sightDialog.showed = true
-        }
-      })
     },
     searchSights () {
       if (this.location.lng && this.location.lat) {

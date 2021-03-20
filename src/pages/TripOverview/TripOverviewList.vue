@@ -102,9 +102,16 @@
     </q-list>
     <div
       style="padding: 10px 10px 0 10px;"
-      v-if="addedStops.length === 0"
+      v-if="addedStops.length <= 1"
     >
-      <span class="font-medium">Klicke auf einen Ort auf der Karte um ihn hinzuzufügen oder benutze die Suche oben rechts.</span>
+      <span
+        v-if="addedStop.length === 0"
+        class="font-medium"
+      >Klicke auf einen Ort auf der Karte um ihn hinzuzufügen oder benutze die Suche oben rechts.</span>
+      <span
+        v-else
+        class="font-medium"
+      >Füge einen weiteren Stopp hinzu, um danach deine Reise rechts unten zu speichern.</span>
     </div>
   </div>
 </template>

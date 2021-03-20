@@ -11,6 +11,7 @@ import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
 import { db, storage } from './firebaseInit.js'
 import { Loader } from '@googlemaps/js-api-loader'
+import wiki from 'wikijs'
 
 export default {
 
@@ -272,39 +273,43 @@ export default {
         return returnVal
     },
     /**
-     * gets data from wikivoyage for a given page name
+     * gets data from wikivoyage/wikipedia for a given page name
      * @param {string} pageName the page name to get data from
-     * @returns {object} object that contains title, shortDescription, description and imgSrc for the given page
+     * @returns {object} object that contains title, shortDescription, description and imgSrcs for the given page
      */
     getWikivoyageData (pageName) {
+        let returnData = {}
+        let promiseList = []
+
         return new Promise((resolve, reject) => {
-            const headers = {
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
+            wiki({ apiUrl: 'https://de.wikipedia.org/w/api.php' }).find(pageName).then(page => {
+                promiseList.push(
+                    page.info().then(info => {
+                        returnData.title = info.name
+                    }),
+                    page.categories().then(categories => {
+                        let category = categories[1].split('Kategorie:')[1]
+                        returnData.shortDescription = category
+                    }),
+                    page.summary().then(summary => {
+                        returnData.description = summary
+                    }),
+                    page.images().then(images => {
+                        images.forEach(image => {
+                            // remove all svg images
+                            if (image.includes('.svg')) images.splice(images.indexOf(image), 1)
+                        })
 
-            let returnData = {}
-
-            getAxios().then(axios => {
-                axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&exsentences=2&prop=description%7Cextracts%7Cpageimages&titles=' + pageName + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-                    { headers: headers })
-                    .then(function (response) {
-                        const pages = response.data.query.pages
-                        const firstPageName = Object.keys(pages)[0]
-
-                        returnData.title = pages[firstPageName].title
-                        returnData.shortDescription = pages[firstPageName].description
-                        returnData.description = pages[firstPageName].extract
-                        returnData.imgSrc = pages[firstPageName].original ? pages[firstPageName].original.source : ''
-
-                        resolve(returnData)
-                    }).catch(function (error) {
-                        console.log('Error' + error)
-
-                        resolve(null)
+                        returnData.imgSrcs = images
                     })
-            }).catch(function (error) {
-                console.log('Error ' + error)
-                resolve(null)
+                )
+
+                Promise.all(promiseList).then(() => {
+                    resolve(returnData)
+                }).catch(function (error) {
+                    console.log('Error ' + error)
+                    resolve(null)
+                })
             })
         })
     },

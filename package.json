@@ -66,7 +66,8 @@
     "vue2-leaflet": "^2.6.0",
     "vue2-leaflet-geosearch": "^1.0.6",
     "vuedraggable": "^2.24.3",
-    "vuefire": "^2.2.5"
+    "vuefire": "^2.2.5",
+    "wikijs": "^6.0.1"
   },
   "devDependencies": {
     "@quasar/app": "^1.5.8",

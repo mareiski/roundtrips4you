@@ -303,6 +303,7 @@
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :days="days[days.findIndex(x => x.docId === stop.DocId)] ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
+                :checkOutDate="stop.CheckOutDate ? stop.CheckOutDate : getDefaultCheckOutDate(stop)"
                 @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
                 :class="'stop' + stop.DocId"
                 :ref="stop.DocId"
