@@ -1,9 +1,42 @@
 <template>
-  <div
+
+  <q-dialog
+    v-model="showCookieDialog"
+    persistent
+  >
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-avatar
+          icon="admin_panel_settings"
+          color="primary"
+          text-color="white"
+        />
+        <div style="max-width:90%; padding-left:20px;">
+          <span>Wir verwenden Cookies um Dienste, wie den Login bereitzustellen und zu verbessern.
+            Mit einem Klick auf "Akzeptieren" akzeptierst du die Cookies und das wir Analyetools einsetzen um Roundtrips4you zu verbessern.<br>Mehr dazu findest du unter Datenschutz.<br>
+            <a
+              style="text-decoration:underline;"
+              @click="showCookieDialog = false"
+            >Hier</a> geht es nur mit den essentiellen Cookies weiter.</span>
+        </div>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          label="Akzeptieren"
+          color="primary"
+          @click="allowCookies()"
+          v-close-popup
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <!-- <div
     class="cookie-banner"
     v-if="!cookiesAllowed"
   >
-    <span>Wir benutzen Cookies und Analyse tools. Mit der Benutzung dieser Seite erklärst du dich damit einverstanden.</span>
+    <span>Wir benutzen funktionale Cookies und Analyse tools. Mit der Benutzung dieser Seite erklärst du dich damit einverstanden.</span>
     <q-btn
       label="Ok"
       class="q-mt-md"
@@ -11,27 +44,44 @@
       @click="[cookiesAllowed = true, setAllowedCookie()]"
       text-color="white"
     ></q-btn>
-  </div>
+  </div> -->
 </template>
 <style lang="less">
 @import url("../../css/cookie.less");
 </style>
 <script>
+
+function enableCookieFunctions () {
+  // enable analytics
+  // eslint-disable-next-line no-undef
+  onOptIn()
+}
+
 export default {
   data () {
     return {
-      cookiesAllowed: false
+      showCookieDialog: false
     }
   },
   methods: {
-    setAllowedCookie () {
+    allowCookies () {
+      // eslint-disable-next-line no-undef
+      cookiesAllowed = true
       this.$q.cookies.set('cookies_allowed', true, { expires: 10 })
+      enableCookieFunctions()
+    }
+  },
+  mounted () {
+    let cookiesAllowedCookie = this.$q.cookies.get('cookies_allowed')
+    if (cookiesAllowedCookie) {
+      // eslint-disable-next-line no-undef
+      cookiesAllowed = true
     }
   },
   created () {
     let cookiesAllowedCookie = this.$q.cookies.get('cookies_allowed')
-    if (cookiesAllowedCookie) {
-      this.cookiesAllowed = true
+    if (!cookiesAllowedCookie) {
+      this.showCookieDialog = true
     }
   }
 }
