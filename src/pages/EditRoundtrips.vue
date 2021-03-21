@@ -1209,13 +1209,13 @@ import Map from '../pages/Map/Map'
 export default {
   name: 'EditRoundtrips',
   components: {
-    Stop: () => import('../pages/EditRoundtripComponents/stop'),
-    CitySearch: () => import('../pages/Map/CitySearch'),
+    Stop: () => import('../components/EditRoundtripComponents/stop'),
+    CitySearch: () => import('../components/Map/CitySearch'),
     Map,
-    Duration: () => import('../pages/EditRoundtripComponents/duration'),
+    Duration: () => import('../components/EditRoundtripComponents/duration'),
     // HotelSearch: () => import('../pages/Map/HotelSearch'),
-    RegionSearch: () => import('../pages/Map/RegionSearch'),
-    CitySuggestion: () => import('../pages/CitySuggestion/CitySuggestion.vue')
+    RegionSearch: () => import('../components/Map/RegionSearch'),
+    CitySuggestion: () => import('../components/CitySuggestion/CitySuggestion.vue')
   },
   data () {
     return {

@@ -70,7 +70,7 @@
   </q-page>
 </template>
 <style lang="less">
-@import url("../css/blog.less");
+@import url("../../css/blog.less");
 </style>
 <script>
 export default {

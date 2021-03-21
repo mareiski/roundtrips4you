@@ -36,7 +36,7 @@ let details = []
 
 export default {
   components: {
-    Map: () => import('../pages/Map/Map')
+    Map: () => import('../components/Map/Map.vue')
   },
   data () {
     return {

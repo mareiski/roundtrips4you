@@ -63,22 +63,22 @@ const routes = [
       },
       {
         path: 'blog',
-        component: () => import(/* webpackChunkName: "blog" */ 'pages/BlogOverview.vue')
+        component: () => import(/* webpackChunkName: "blog" */ 'pages/Blog/BlogOverview.vue')
       },
       {
         path: 'blog/:name',
-        component: () => import(/* webpackChunkName: "blog" */ 'pages/Blog.vue')
+        component: () => import(/* webpackChunkName: "blog" */ 'pages/Blog/Blog.vue')
       },
       {
         path: 'impressum',
-        component: () => import(/* webpackChunkName: "legal" */ 'pages/Impressum.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Legal/Impressum.vue')
       }, {
         path: 'datenschutz',
-        component: () => import(/* webpackChunkName: "legal" */ 'pages/Datenschutz.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Legal/Datenschutz.vue')
       },
       {
         path: 'haftungsausschluss',
-        component: () => import(/* webpackChunkName: "legal" */ 'pages/Haftungsausschluss.vue')
+        component: () => import(/* webpackChunkName: "legal" */ 'pages/Legal/Haftungsausschluss.vue')
       },
       {
         path: 'rundreisen-einstellungen/:id',

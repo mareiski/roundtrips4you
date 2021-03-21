@@ -1032,10 +1032,10 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
   components: {
-    HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
-    ArrivalDeparture: () => import('../pages/EditRoundtripComponents/arrivalDeparture.vue'),
-    TripOverview: () => import('../pages/TripOverview/TripOverview.vue'),
-    Uploader: () => import('../pages/Uploader/Uploader.vue')
+    HotelSearch: () => import('../components/Map/HotelSearch.vue'),
+    ArrivalDeparture: () => import('../components/EditRoundtripComponents/arrivalDeparture.vue'),
+    TripOverview: () => import('../components/TripOverview/TripOverview.vue'),
+    Uploader: () => import('../components/Uploader/Uploader.vue')
   },
   computed: {
     isMobile () {

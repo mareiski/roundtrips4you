@@ -457,7 +457,7 @@ let messages = []
 export default {
   name: 'MyLayout',
   components: {
-    CookieBanner: () => import('../pages/CookieBanner/CookieBanner'),
+    CookieBanner: () => import('../components/CookieBanner/CookieBanner'),
     BackToTop: () => import('vue-backtotop')
   },
   data () {

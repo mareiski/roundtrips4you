@@ -496,7 +496,7 @@ export default {
   name: 'RoundtripSettings',
   components: {
     // RegionSearch: () => import('../pages/Map/RegionSearch.vue'),
-    ArrivalDeparture: () => import('../pages/EditRoundtripComponents/arrivalDeparture.vue')
+    ArrivalDeparture: () => import('../components/EditRoundtripComponents/arrivalDeparture.vue')
   },
   data () {
     return {

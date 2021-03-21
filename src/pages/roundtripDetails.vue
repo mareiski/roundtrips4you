@@ -449,9 +449,9 @@ let context
 
 export default {
   components: {
-    Stop: () => import('../pages/EditRoundtripComponents/stop'),
-    Map: () => import('../pages/Map/Map'),
-    Duration: () => import('../pages/EditRoundtripComponents/duration')
+    Stop: () => import('../components/EditRoundtripComponents/stop'),
+    Map: () => import('../components/Map/Map'),
+    Duration: () => import('../components/EditRoundtripComponents/duration')
   },
   data () {
     return {
