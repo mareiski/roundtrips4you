@@ -35,7 +35,7 @@
         :accessToken="accTo"
         @result="handleSearch"
         placeholder="Ort suchen"
-        v-if="editor"
+        v-if="editor && !isDemo"
       />
       <MglNavigationControl position="top-right" />
       <MapLayerPlugin
@@ -250,6 +250,7 @@
                 label="Ort hinzufügen"
                 @click="addStop"
                 color="primary"
+                v-if="!isDemo"
               />
             </q-card-actions>
           </q-card>
@@ -429,13 +430,13 @@
                 />
                 <q-btn
                   flat
-                  v-if="!isStopAlreadyAdded(city.name)"
+                  v-if="!isStopAlreadyAdded(city.name) && !isDemo"
                   label="Ort hinzufügen"
                   @click="addStop"
                   color="primary"
                 />
                 <q-btn
-                  v-else
+                  v-else-if="!isDemo"
                   label="Ort ansehen"
                   @click="$refs['stopMarker' + isStopAlreadyAdded(city.name).DocId][0].marker._popup.addTo(map); $refs['cityMarker' + index][0].marker._popup.remove()"
                   color="primary"
@@ -609,7 +610,8 @@ export default {
     rooms: Number,
     editor: Boolean,
     defaultInitDate: String,
-    height: String
+    height: String,
+    isDemo: Boolean
   },
   computed: {
     isMobile () {

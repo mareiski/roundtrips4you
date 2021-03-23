@@ -105,7 +105,7 @@
       v-if="addedStops.length <= 1"
     >
       <span
-        v-if="addedStop.length === 0"
+        v-if="addedStops.length === 0"
         class="font-medium"
       >Klicke auf einen Ort auf der Karte um ihn hinzuzufügen oder benutze die Suche oben rechts.</span>
       <span

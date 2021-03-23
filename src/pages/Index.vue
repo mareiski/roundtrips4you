@@ -1,5 +1,5 @@
 <template>
-  <q-page style="overflow: hidden;">
+  <q-page>
     <div class="home q-px-xl q-pb-xl">
       <!-- <div
         id="flyingPlane"
@@ -21,26 +21,35 @@
         />
       </div> -->
       <div id="MainImg"></div>
-      <div id="MainImgOverlay">
-      </div>
+      <div id="MainImgOverlay"></div>
       <div id="MainImgPlacholder">
-        <h2 class="main-qoute">Damit deine Reise perfekt geplant und trotzdem individuell bleibt</h2>
-        <span class="quote-subtext">
-          Mit dem kostenlosen Reiseplaner Roundtrips4you kannst du deine eigene Reise selbst zusammenstellen
-        </span>
-        <div
-          class="flex justify-around"
-          id="OfferContainer"
-        >
-          <div>
-            <p class="font-medium">Plane deine Reise jetzt kostenlos und starte ohne Registrierung</p>
-            <!-- @click="$router.push('/registrieren')" -->
-            <!-- <q-btn
-              @click="sharedMethods.scrollToRef($refs['registerContainer'])"
-              color="primary"
-            >Los geht's</q-btn> -->
-          </div>
-          <!-- <div>
+        <div>
+          <h2 class="main-qoute">Plane deine eigene Reise</h2>
+          <h3 class="quote-subtext">
+            Mit unserem Reiseplaner kannst du deine eigene Reise individuell zusammenstellen.
+            Ganz einfach, perfekt geplant und ohne Einschränkungen.
+          </h3>
+          <q-btn
+            @click="$router.push('/rundreisen-wizard')"
+            color="primary"
+            style="margin-top:40px;"
+          >kostenlos starten</q-btn>
+        </div>
+        <div class="flex justify-center">
+          <!-- <div
+            class="flex justify-around"
+            id="OfferContainer"
+          >
+            <div>
+               <p class="font-medium">Erstelle jetzt deine erste Reise kostenlos und ohne Registrierung</p>
+         @click="$router.push('/registrieren')"
+        <q-btn
+                @click="$router.push('/rundreisen-wizard')"
+                color="primary"
+                dense
+              >kostenlos starten</q-btn>
+            </div>
+         <div>
             <p>Lasse dich durch bereits erstellte Reisen anderer User inspirieren!</p>
             <q-select
               filled
@@ -67,19 +76,43 @@
                 <q-icon name="search" />
               </template>
             </q-select>
-          </div> -->
+          </div>
+      </div>-->
+          <q-icon
+            class="scroll-down-icon cursor-pointer"
+            name="keyboard_arrow_down"
+            @click="sharedMethods.scrollToRef($refs['sndSection'])"
+          />
         </div>
-        <q-icon
-          class="scroll-down-icon cursor-pointer"
-          name="keyboard_arrow_down"
-          @click="sharedMethods.scrollToRef($refs['sndSection'])"
+      </div>
+      <div
+        class="clouds"
+        v-if="!isMobile"
+      >
+        <img
+          v-for="index in 4"
+          :key="index"
+          :src="'../statics/cloud' + (index + 1) + '.png'"
+          :style="'--i:' + (index + 1) + '; max-height: 350px;'"
+        />
+        <img
+          v-for="index in 3"
+          :key="index"
+          :src="'../statics/cloud' + (index + 1) + '.png'"
+          :style="'--i:' + (index + 6)+ '; max-height: 400px; left:100px;'"
+        />
+        <img
+          v-for="index in 2"
+          :key="index"
+          :src="'../statics/cloud' + (index + 1) + '.png'"
+          :style="'--i:' + (index + 9)+ '; max-height: 350px; left:100px;'"
         />
       </div>
       <div
         ref="sndSection"
         class="box-seperator"
       >
-        <h1>Plane deine eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
+        <h1 style="z-index:2;">Plane deine eigene Reise kostenlos & perfekt auf dich zugeschnitten</h1>
       </div>
       <div class="box-seperator-placholder"></div>
       <div class="card-container">
@@ -123,7 +156,7 @@
           </div>
         </div>
       </div>
-      <div
+      <!-- <div
         ref="registerContainer"
         class="register-container"
       >
@@ -133,7 +166,7 @@
           color="primary"
           style="font-size:18px;"
         >Reise selbst Planen</q-btn>
-      </div>
+      </div> -->
       <!-- <div
         class="description-container"
         v-in-viewport.once
@@ -146,114 +179,206 @@
         <p><b>Roundtrips4you</b> - deine Reiseplanungs App für deinen nächsten Urlaub.</p>
       </div> -->
       <h4 style="text-align:center; padding-top: 30px;">In diesen Schritten planst du deine Reise in kürzester Zeit</h4>
-      <q-timeline
-        color="secondary"
-        id="HomeTimeLine"
+      <div
+        class="flex"
+        id="scroll-container"
       >
-        <q-timeline-entry
-          title="An-/Abreise"
-          side="left"
-          icon="commute"
-        >
-          <div>
-            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug bzw. ein Hotel zu suchen.</p>
-            <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
-            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen.</p>
-          </div>
-        </q-timeline-entry>
+        <div class="scroll-col left-scroll-col flex justify-center">
+          <Map
+            profile="driving"
+            :stops="demoStops"
+            :childrenAges="[]"
+            :rooms="1"
+            :adults="2"
+            :editor="true"
+            height="70vh;"
+            :isDemo="true"
+            width="100%"
+            v-show="scrollSectionVisibleIndex === 0"
+          ></Map>
+          <div v-show="scrollSectionVisibleIndex === 1">
+            <q-list
+              bordered
+              padding
+              dense
+              class="rounded-borders"
+            >
+              <q-item class="hotel-list">
+                <q-item-section
+                  avatar
+                  top
+                >
+                  <q-avatar
+                    color="secondary"
+                    text-color="white"
+                    font-size="20px"
+                    icon="hotel"
+                  >
+                  </q-avatar>
+                </q-item-section>
 
-        <q-timeline-entry
-          title="Reiseziele wählen"
-          side="right"
-          icon="add"
-        >
-          <div>
+                <q-item-section>
+                  <q-item-label
+                    lines="2"
+                    class="flex"
+                    style="flex-wrap:wrap; white-space:normal;"
+                  >
+                    <span style="padding-right:5px;">Hotel Lutetia</span>
+                    <q-rating
+                      class="stars"
+                      v-model="demoStars"
+                      readonly
+                      size="15px"
+                      color="gold"
+                      style="margin-right:10px; padding-right:5px;"
+                    />
+                    <div
+                      class="flex"
+                      style="flex-wrap:wrap; white-space:normal;"
+                    >
+                      <span class="raleway">
+                        8.9,&nbsp;
+                      </span>
+                      <span>
+                        <span class="raleway">ca. € </span>
+                        <span class="raleway">602</span>
+                        <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
+                      </span>
+                    </div>
+                  </q-item-label>
+                  <q-item-label
+                    caption
+                    style="overflow:hidden;"
+                  >
+                    <a
+                      class="ellipsis"
+                      @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=Hotel Lutetia, Paris')"
+                    >06. Arrondissement</a>
+                  </q-item-label>
+                </q-item-section>
+
+                <q-item-section side>
+                  <div>
+                    <q-chip
+                      icon="link"
+                      dense
+                      class="linkChip"
+                      clickable
+                      @click="openInNewTab('https://www.hotellutetia.com/')"
+                    >Hotelwebsite</q-chip>
+                  </div>
+                  <q-chip
+                    icon="launch"
+                    dense
+                    style="width:117px;"
+                    class="linkChip"
+                    clickable
+                    @click="openInNewTab('https://www.booking.com/hotel/fr/lutetia-paris12.de.html')"
+                  > booking.com
+                    <q-tooltip>Hotel auf booking.com</q-tooltip>
+                  </q-chip>
+                </q-item-section>
+
+                <q-item-section side>
+                  <q-icon
+                    name="clear"
+                    color="primary"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+          <TripOverviewList
+            v-show="scrollSectionVisibleIndex === 2"
+            :addedStops="demoStops"
+            :currentRoundtrip="demoRoundtrip"
+          ></TripOverviewList>
+        </div>
+        <div class="scroll-col right-scroll-col">
+          <div class="section-1">
+            <h5>Reiseziele wählen</h5>
             <p>Mit dem Klick auf eine Stadt auf der Karte kannst du diese sofort hinzufügen</p>
-            <p>Außerdem werden dir automatisch die beliebtesten Städte vorgeschlagen, solltest du ein wenig inspiration brauchen.</p>
+            <p>Außerdem kannst du dir automatisch die beliebtesten Städte vorgeschlagen lassen, solltest du ein wenig inspiration brauchen.</p>
             <p>Zu jeder Stadt werden dir Bilder und die besten Sehenswürdigkeiten angezeigt, damit du alles auf einen Blick vergleichen kannst.</p>
+            <div
+              class="flex"
+              style="padding-top:20px;"
+            >
+              <a
+                @click="$router.push('/rundreisen-wizard')"
+                class="font-medium"
+              >Zum Reiseplaner</a>
+              <div
+                class="flex justify-center"
+                style="flex-direction:column;"
+              >
+                <q-icon
+                  name="arrow_right_alt"
+                  color="primary"
+                  size="30px"
+                />
+              </div>
+            </div>
           </div>
-        </q-timeline-entry>
-
-        <q-timeline-entry
-          title="Details eingeben"
-          side="left"
-          icon="create"
-        >
-          <div>
+          <div class="section-2">
+            <h5>Details eingeben</h5>
             <p>Wenn du einen Stopp hinzufügst kannst du ganz individuell alles rund um das Ziel anpassen.</p>
             <p>Natürlich kannst du hier auch ein Hotel hinzufügen, welches du bei den bekanntesten Anbietern buchen kannst.</p>
             <p>Die Daten für die Hotelsuche musst du nur einmal eingeben, so sparst du dir eine Menge Zeit!</p>
+            <div
+              class="flex"
+              style="padding-top:20px;"
+            >
+              <a
+                @click="$router.push('/rundreisen-wizard')"
+                class="font-medium"
+              >Zum Reiseplaner</a>
+              <div
+                class="flex justify-center"
+                style="flex-direction:column;"
+              >
+                <q-icon
+                  name="arrow_right_alt"
+                  color="primary"
+                  size="30px"
+                />
+              </div>
+            </div>
           </div>
-        </q-timeline-entry>
-
-        <q-timeline-entry
-          title="Reiseübersicht"
-          side="right"
-          icon="format_list_bulleted"
-        >
-          <div>
+          <div class="section-3">
+            <TripOverviewList
+              style="margin-top:50px;"
+              v-show="isMobile"
+              :addedStops="demoStops"
+              :currentRoundtrip="demoRoundtrip"
+            ></TripOverviewList>
+            <h5>Reiseübersicht</h5>
             <p>Am Schluss deiner Reiseplanung erhältst du eine übersichtliche Zusammenfassung deiner Reise mit all deinen Stopps und Routen.</p>
             <p>Du kannst dir auch automatisch die kürzeste Route errechnen lassen.</p>
             <p>Wenn du möchtest kannst du auch deine Reise auf Roundtrips4you veröffentlichen um sie der ganzen Welt zu zeigen.</p>
+            <div
+              class="flex"
+              style="padding-top:20px;"
+            >
+              <a
+                @click="$router.push('/rundreisen-wizard')"
+                class="font-medium"
+              >Zum Reiseplaner</a>
+              <div
+                class="flex justify-center"
+                style="flex-direction:column;"
+              >
+                <q-icon
+                  name="arrow_right_alt"
+                  color="primary"
+                  size="30px"
+                />
+              </div>
+            </div>
           </div>
-        </q-timeline-entry>
+        </div>
+      </div>
 
-      </q-timeline>
-
-      <!-- <ol class="create-roundtrip-ol">
-        <li v-in-viewport.once>
-          <div>
-            <h2>An-/Abreise</h2>
-            <p>Wir bieten dir die Möglichkeit, mit deinen Daten bei verschiedenen Fluganbietern einen Flug bzw. ein Hotel zu suchen.</p>
-            <p>Du musst dafür nur einmal deine Präferenzen eingeben und kannst dir dafür die Angebote der verschieden Anbieter ansehen.</p>
-            <p>Anschließend kannst du deinen Flug direkt auf der Seite des Anbieters buchen.</p>
-          </div>
-          <div>
-          </div>
-        </li>
-        <li v-in-viewport.once>
-          <div>
-            <h2>Reiseziele wählen</h2>
-            <p>Mit dem Klick auf eine Stadt auf der Karte kannst du diese sofort hinzufügen</p>
-            <p>Außerdem werden dir automatisch die beliebtesten Städte vorgeschlagen, solltest du ein wenig inspiration brauchen.</p>
-            <p>Zu jeder Stadt werden dir Bilder und die besten Sehenswürdigkeiten angezeigt, damit du alles auf einen Blick vergleichen kannst.</p>
-          </div>
-           <div>
-            <q-img
-              style="width:1000px;"
-              alt="Städtevorschläge"
-              @click="createDemoRTClicked()"
-              src="https://roundtrips4you.de/statics/cities.jpeg"
-            />
-          </div>
-      </li>
-      <li v-in-viewport.once>
-        <div>
-          <h2>Details eingeben</h2>
-          <p>Wenn du einen Stopp hinzufügst kannst du ganz individuell alles rund um das Ziel anpassen.</p>
-          <p>Natürlich kannst du hier auch ein Hotel hinzufügen, welches du bei den bekanntesten Anbietern buchen kannst.</p>
-          <p>Die Daten für die Hotelsuche musst du nur einmal eingeben, so sparst du dir eine Menge Zeit!</p>
-        </div>
-        <div>
-        </div>
-      </li>
-      <li v-in-viewport.once>
-        <div>
-          <h2>Reiseübersicht</h2>
-          <p>Am Schluss deiner Reiseplanung erhältst du eine übersichtliche Zusammenfassung deiner Reise mit all deinen Stopps und Routen.</p>
-          <p>Du kannst dir auch automatisch die kürzeste Route errechnen lassen.</p>
-          <p>Wenn du möchtest kannst du auch deine Reise auf Roundtrips4you veröffentlichen um sie der ganzen Welt zu zeigen.</p>
-        </div>
-         <div>
-            <q-img
-              style="width:1000px;"
-              alt="Vorschlag von Sehenswürdigkeiten"
-              @click="createDemoRTClicked()"
-              src="https://roundtrips4you.de/statics/pois.jpeg"
-            />
-          </div>
-      </li>
-      </ol> -->
       <div class="section-img"></div>
       <div class="section-img-placeholder">
         <h3>Plane jetzt gleich und ohne Anmeldung mit der deine ganz eigenen Reise</h3>
@@ -342,13 +467,57 @@ export default {
       date: '2019/02/01',
       searchLocation: '',
       imgLoaded: false,
-      title: 'Meine Reise'
+      title: 'Meine Reise',
+      scrollSectionVisibleIndex: 0,
+      demoStops: [
+        {
+          Title: 'Stopp in Paris',
+          Description: 'Raum für Notizen, Beschreibungen...',
+          Location: { lat: 48.856613, lng: 2.352222, label: 'Paris, Frankreich' },
+          Sights: [],
+          InitDate: '23.03.2021',
+          Profile: 'driving',
+          DayDuration: 1
+        },
+        {
+          Title: 'Stopp in Straßburg',
+          Description: 'Raum für Notizen, Beschreibungen...',
+          Location: { lat: 48.582951, lng: 7.743750, label: 'Straßburg, Frankreich' },
+          Sights: [],
+          InitDate: '24.03.2021',
+          Profile: 'driving',
+          DayDuration: 1
+        },
+        {
+          Title: 'Stopp in Lyon',
+          Description: 'Raum für Notizen, Beschreibungen...',
+          Location: { lat: 45.764042, lng: 4.835659, label: 'Lyon, Frankreich' },
+          Sights: [],
+          InitDate: '24.03.2021',
+          Profile: 'driving',
+          DayDuration: 1
+        }],
+      demoRoundtrip: { Title: 'Meine Reise' },
+      demoStars: 5
     }
+  },
+  components: {
+    Map: () => import('../components/Map/Map.vue'),
+    TripOverviewList: () => import('../components/TripOverview/TripOverviewList.vue')
   },
   computed: {
     sharedMethods () {
       return sharedMethods
+    },
+    isMobile () {
+      return window.matchMedia('(max-width: 550px)').matches
     }
+  },
+  created () {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  destroyed () {
+    window.removeEventListener('scroll', this.handleScroll)
   },
   methods: {
     scrollTo (refName) {
@@ -357,6 +526,29 @@ export default {
       const offset = el.offsetTop
       const duration = 400
       setScrollPosition(target, offset, duration)
+    },
+    openInNewTab (link) {
+      window.open(link, '_blank')
+    },
+    /**
+     * method checks which scroll section should be shown in scroll container
+     * @returns the index of the section
+     */
+    handleScroll () {
+      let leftScrollCol = document.getElementsByClassName('left-scroll-col')[0]
+      let rightScrollCol = document.getElementsByClassName('right-scroll-col')[0]
+      if (!rightScrollCol) return false
+
+      let sections = rightScrollCol.children
+
+      let offsets = []
+      sections.forEach(section => {
+        offsets.push(Math.abs(section.offsetTop - leftScrollCol.offsetTop))
+      })
+
+      let minOffset = Math.min.apply(null, offsets)
+
+      this.scrollSectionVisibleIndex = offsets.indexOf(minOffset)
     },
     createDemoRTClicked () {
       if (!auth.user()) this.$store.commit('demoSession/setAsDemoSession')
