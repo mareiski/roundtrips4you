@@ -65,9 +65,10 @@ export default {
   },
   methods: {
     allowCookies () {
+      this.$q.cookies.set('cookies_allowed', true, { expires: 10 })
+
       // eslint-disable-next-line no-undef
       cookiesAllowed = true
-      this.$q.cookies.set('cookies_allowed', true, { expires: 10 })
       enableCookieFunctions()
     }
   },
