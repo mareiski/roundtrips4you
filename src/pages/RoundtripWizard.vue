@@ -14,7 +14,6 @@
         round
         color="primary"
         icon="visibility"
-        @click="unsavedChanges ? showCancelDialog = true : $router.push('/rundreise-ansehen/' + $route.params.id)"
       >
         <q-tooltip>Reise ansehen</q-tooltip>
       </q-btn>
@@ -37,7 +36,7 @@
             label="Änderungen verwerfen"
             v-close-popup
             flat
-            @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
+            @click="cancelDialogNext(); $store.commit('demoSession/resetRoundtrip')"
           />
           <q-btn
             type="submit"
@@ -86,7 +85,7 @@
               <q-btn
                 color="primary"
                 :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults"
-                @click="step = 2"
+                @click="step = 2; unsavedChanges = true"
                 label="weiter"
               />
             </template>
@@ -100,7 +99,7 @@
                 class="q-ml-sm"
               />
               <q-btn
-                @click="step = 3"
+                @click="step = 3; unsavedChanges = true"
                 color="primary"
                 :disable="currentRoundtrip.TransportProfile === 'Reisemittel wählen' || (currentRoundtrip.TransportProfile === 'Flugzeug' && (!currentRoundtrip.TransportProfile || !currentRoundtrip.Origin || !currentRoundtrip.Destination || !currentRoundtrip.DepatureDate || !currentRoundtrip.ReturnDate || !currentRoundtrip.TravelClass || !currentRoundtrip.NonStop))"
                 label="Weiter"
@@ -1093,6 +1092,7 @@ export default {
       guestRating: 0,
       transportLocations: [],
       showCancelDialog: false,
+      cancelDialogNext: null,
 
       addedStops: [],
       sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
@@ -1416,6 +1416,7 @@ export default {
       this.getRoundtripCountries().then(countries => {
         if (this.$store.getters['demoSession/isInDemoSession'] && auth.user() === null) {
           this.$store.dispatch({ type: 'demoSession/addRoundtrip', roundtripObject: this.currentRoundtrip, tempLocation: countries, originCode: null, destinationCode: null, stops: stops }).then(() => {
+            this.unsavedChanges = false
             this.$router.push('/registrieren')
           })
         } else if (this.isRTEditMode) {
@@ -1438,6 +1439,7 @@ export default {
 
           Promise.all(promiseList).then(() => {
             context.saving = false
+            context.unsavedChanges = false
             sharedMethods.showSuccessNotification('Reise wurde gespeichert')
 
             if (!stay) {
@@ -1460,6 +1462,7 @@ export default {
                     // wait to ensure roundtrip is fully added
                     setTimeout(function () {
                       this.saving = false
+                      context.unsavedChanges = false
                       context.$router.push('/rundreise-ansehen/' + docId)
                     }, 500)
                   }
@@ -1871,6 +1874,14 @@ export default {
       if (initDateB > initDateA) return -1
 
       return 0
+    }
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.$store.getters['demoSession/isInDemoSession'] && this.unsavedChanges) {
+      this.showCancelDialog = true
+      this.cancelDialogNext = next
+    } else {
+      next()
     }
   },
   created () {

@@ -39,12 +39,12 @@
             to="/login"
           >anmelden</router-link>
           <router-link
-            v-if="!user && getActionButtonText()"
-            :to="getActionButtonLink()"
+            v-if="!user && !this.$store.getters['demoSession/isInDemoSession']"
+            to="/registrieren"
             class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
           >
-            <q-btn color="primary">{{getActionButtonText()}}</q-btn>
+            <q-btn color="primary">Registrieren</q-btn>
           </router-link>
           <q-avatar
             v-else-if="user"
@@ -525,22 +525,6 @@ export default {
       }
 
       this.lastScrollPosition = currentScrollPosition
-    },
-    getActionButtonText () {
-      if (this.$store.getters['demoSession/isInDemoSession']) {
-        let currentRoute = this.$router.currentRoute
-        let isOnWizardPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-wizard'
-
-        if (!isOnWizardPage) return 'reise bearbeiten'
-      } else return 'registrieren'
-    },
-    getActionButtonLink () {
-      let currentRoute = this.$router.currentRoute
-      let isOnWizardPage = currentRoute.fullPath === 'rundreisen-wizard'
-
-      if (this.$store.getters['demoSession/isInDemoSession'] && !isOnWizardPage) {
-        return '/rundreisen-wizard'
-      } else return '/registrieren'
     },
     hideLoading () {
       redirected = false
