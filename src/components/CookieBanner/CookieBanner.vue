@@ -66,17 +66,24 @@ export default {
   methods: {
     allowCookies () {
       this.$q.cookies.set('cookies_allowed', true, { expires: 10 })
-
-      // eslint-disable-next-line no-undef
-      cookiesAllowed = true
+      try {
+        // eslint-disable-next-line no-undef
+        cookiesAllowed = true
+      } catch (e) {
+        console.log(e)
+      }
       enableCookieFunctions()
     }
   },
   mounted () {
     let cookiesAllowedCookie = this.$q.cookies.get('cookies_allowed')
     if (cookiesAllowedCookie) {
-      // eslint-disable-next-line no-undef
-      cookiesAllowed = true
+      try {
+        // eslint-disable-next-line no-undef
+        cookiesAllowed = true
+      } catch (e) {
+        console.log(e)
+      }
     }
   },
   created () {

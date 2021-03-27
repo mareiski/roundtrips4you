@@ -630,7 +630,7 @@
 
           <div
             style="margin-bottom:30px"
-            v-if="!hotelName"
+            v-if="!currentStop.HotelName"
           >
             <q-btn
               size="20"
@@ -646,7 +646,7 @@
               padding
               dense
               class="rounded-borders"
-              v-if="hotelName"
+              v-if="currentStop.HotelName"
             >
               <q-item class="hotel-list">
                 <q-item-section
@@ -668,9 +668,9 @@
                     class="flex"
                     style="flex-wrap:wrap; white-space:normal;"
                   >
-                    <span style="padding-right:5px;">{{capitalize(hotelName)}}</span>
+                    <span style="padding-right:5px;">{{capitalize(currentStop.HotelName)}}</span>
                     <q-rating
-                      v-if="hotelStars && !isNaN(hotelStars)"
+                      v-if="currentStop.HotelStars && !isNaN(currentStop.HotelStars)"
                       class="stars"
                       v-model="hotelStars"
                       readonly
@@ -683,14 +683,14 @@
                       style="flex-wrap:wrap; white-space:normal;"
                     >
                       <span
-                        v-if="guestRating"
+                        v-if="currentStop.GuestRating"
                         class="raleway"
                       >
-                        {{guestRating}},&nbsp;
+                        {{currentStop.GuestRating}},&nbsp;
                       </span>
-                      <span v-if="hotelPrice">
+                      <span v-if="currentStop.HotelPrice">
                         <span class="raleway">ca. € </span>
-                        <span class="raleway">{{hotelPrice}}</span>
+                        <span class="raleway">{{currentStop.HotelPrice}}</span>
                         <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
                       </span>
                     </div>
@@ -702,12 +702,12 @@
                     <a
                       class="ellipsis"
                       @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
-                    >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+                    >{{currentStop.HotelLocation && typeof currentStop.HotelLocation !== 'undefined' && currentStop.HotelLocation.label && typeof currentStop.HotelLocation.label !== 'undefined' ? capitalize(currentStop.HotelLocation.label) :  'kein Ort angegeben'}}</a>
                   </q-item-label>
                 </q-item-section>
                 <q-item-section>
                   <q-btn
-                    v-if="transportLocations && transportLocations.lenght > 0"
+                    v-if="currentStop.TransportLocations && currentStop.TransportLocations.lenght > 0"
                     style="width:150px;"
                     @click="showTransportDialog = true"
                   >Transport
@@ -723,7 +723,7 @@
                         <div
                           class="flex"
                           style="flex-direction:column;"
-                          v-for="location in transportLocations"
+                          v-for="location in currentStop.TransportLocations"
                           :key="location"
                         >
                           <q-item
@@ -755,61 +755,61 @@
                   </q-card>
                 </q-dialog>
                 <q-item-section side>
-                  <div v-if="generalTempLink && generalTempLink.length > 0">
+                  <div v-if="currentStop.GeneralTempLink && currentStop.GeneralTempLink.length > 0">
                     <q-chip
                       icon="link"
                       dense
                       class="linkChip"
                       clickable
-                      @click="openInNewTab(generalTempLink)"
+                      @click="openInNewTab(currentStop.GeneralTempLink)"
                     >Hotelwebsite</q-chip>
                   </div>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'
+                    v-if="currentStop.HotelName && typeof currentStop.HotelName !== 'undefined'
                      "
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(currentStop.HotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + currentStop.CheckOutDate.split('.')[2] + '&checkout_month=' + currentStop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + currentStop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
                   > booking.com
                     <q-tooltip>Hotel auf booking.com</q-tooltip>
                   </q-chip>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'
+                    v-if="currentStop.HotelName && typeof currentStop.HotelName !== 'undefined'
                     "
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
+                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(currentStop.HotelName) + '&endDate=' + currentStop.CheckOutDate.split(' ')[0].split('.')[2] + '-' + currentStop.CheckOutDate.split('.')[1] + '-' + currentStop.CheckOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
                   > expedia
                     <q-tooltip>Hotel auf expedia</q-tooltip>
                   </q-chip>
                 </q-item-section>
                 <q-item-section
                   side
-                  v-if="hotelContact && typeof hotelContact !== 'undefined'
+                  v-if="currentStop.HotelContact && typeof currentStop.HotelContact !== 'undefined'
                   "
                 >
                   <div class="hotel-contact">
                     <q-chip
-                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'
+                      v-if="currentStop.HotelContact.email && typeof currentStop.HotelContact.email !== 'undefined'
                       "
                       icon="email"
                       clickable
-                      @click="openInNewTab('mailto:' + hotelContact.email)"
-                    >{{ hotelContact.email}}
+                      @click="openInNewTab('mailto:' + currentStop.HotelContact.email)"
+                    >{{ currentStop.HotelContact.email}}
                     </q-chip>
                     <q-chip
                       icon="phone"
-                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'
+                      v-if="currentStop.HotelContact.phone && typeof currentStop.HotelContact.phone !== 'undefined'
                       "
                       clickable
-                      @click="openInNewTab('tel:' + hotelContact.phone)"
-                    >{{hotelContact.phone}}
+                      @click="openInNewTab('tel:' + currentStop.HotelContact.phone)"
+                    >{{currentStop.HotelContact.phone}}
                     </q-chip>
                   </div>
                 </q-item-section>
@@ -980,6 +980,7 @@
               @click="addImageToStop(tempImgLink)"
             />
           </div>
+          {{currentStop.StopImages}}
           <Uploader
             :RTId="currentRoundtrip.RTId"
             :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
@@ -1747,7 +1748,7 @@ export default {
               console.log(error)
             })
         } else {
-          this.writeHotelData(event.label, hotelLat, hotelLng, null, null, null, null)
+          this.writeHotelData(event.address, hotelLat, hotelLng, null, null, null, null)
         }
       }
     },
@@ -1829,6 +1830,7 @@ export default {
 
       // save stop
       this.addStop(false)
+      this.tempImgLink = ''
     },
     removeImageFromStop (imageUrl) {
       if (this.currentStop.StopImages) {
