@@ -84,7 +84,7 @@
             <template v-if="step === 1">
               <q-btn
                 color="primary"
-                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults"
+                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults || isTitleInUse"
                 @click="step = 2; unsavedChanges = true"
                 label="weiter"
               />
@@ -275,155 +275,6 @@
         :header-nav="step > 2"
         v-if="!isRTEditMode"
       >
-        <!-- <q-select
-          outlined
-          v-model="currentRoundtrip.TransportProfile"
-          input-debounce="0"
-          :options="['Flugzeug', 'Andere']"
-          label="Reisemittel"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
-          style="padding-bottom: 32px"
-        >
-          <template v-slot:prepend>
-            <q-icon name="commute" />
-          </template>
-        </q-select>
-        <div
-          v-if="currentRoundtrip.TransportProfile === 'Flugzeug'"
-          class="flight-container"
-        >
-          <q-select
-            outlined=""
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            clearable
-            ref="select"
-            v-model="currentRoundtrip.Origin"
-            hide-dropdown-icon
-            label="Abflugsort"
-            :options="originOptions"
-            @filter="getOrigins"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-          >
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  zu viele/keine Ergebnisse, bitte weitertippen
-                </q-item-section>
-              </q-item>
-            </template>
-            <template v-slot:prepend>
-              <q-icon name="flight_takeoff" />
-            </template>
-          </q-select>
-          <q-select
-            outlined=""
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            clearable
-            ref="select"
-            v-model="currentRoundtrip.Destination"
-            hide-dropdown-icon
-            label="Ankunftsort"
-            :options="destinationOptions"
-            @filter="getDestinations"
-            @input="destinationChanged($event)"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-          >
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  zu viele/keine Ergebnisse, bitte weitertippen
-                </q-item-section>
-              </q-item>
-            </template>
-            <template v-slot:prepend>
-              <q-icon name="flight_land" />
-            </template>
-          </q-select>
-          <q-input
-            outlined
-            v-model="currentRoundtrip.DepatureDate"
-            label="Abflugsdatum"
-            class="input-item rounded-borders q-field--with-bottom"
-          >
-            <q-popup-proxy
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-date
-                v-model="currentRoundtrip.DepatureDate"
-                today-btn
-                mask="DD.MM.YYYY"
-                @input="updateReturnDate()"
-              />
-            </q-popup-proxy>
-            <template v-slot:prepend>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-              </q-icon>
-            </template>
-          </q-input>
-          <q-input
-            outlined
-            v-model="currentRoundtrip.ReturnDate"
-            label="Rückflugsdatum"
-            class="input-item rounded-borders q-field--with-bottom"
-          >
-            <q-popup-proxy
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-date
-                v-model="currentRoundtrip.ReturnDate"
-                today-btn
-                mask="DD.MM.YYYY"
-              />
-            </q-popup-proxy>
-            <template v-slot:prepend>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-              </q-icon>
-            </template>
-          </q-input>
-          <q-select
-            outlined
-            v-model="currentRoundtrip.TravelClass"
-            input-debounce="0"
-            :options="['Economy', 'Premium Economy', 'Business', 'First']"
-            label="Reiseklasse auswählen"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="star" />
-            </template>
-          </q-select>
-          <q-select
-            outlined
-            v-model="currentRoundtrip.NonStop"
-            input-debounce="0"
-            :options="['Ja', 'Nein']"
-            label="Non Stop"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="flight" />
-            </template>
-          </q-select>
-        </div>
-        <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
-          <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
-          <p style="text-align:left;">Du kannst dafür sofort mit der Reiseplanung beginnen!</p>
-        </div> -->
-
         <ArrivalDeparture
           v-if="currentRoundtrip.DepatureDate"
           :currentRoundtrip="currentRoundtrip"
@@ -1115,6 +966,8 @@ export default {
 
       tempImgLink: '',
 
+      isTitleInUse: true,
+
       editorFonts: {
         arial: 'Arial',
         arial_black: 'Arial Black',
@@ -1587,12 +1440,19 @@ export default {
      */
     editStop (index) {
       this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
-      console.log(this.currentStop)
       this.stopToEdit = index
       this.showEditStopDialog = true
     },
+    titleInUse (promise) {
+      promise.then(val => {
+        console.log(val === 'Dieser Titel ist bereits vergeben')
+        this.isTitleInUse = val === 'Dieser Titel ist bereits vergeben'
+      })
+    },
     isUniqueTitle (val) {
-      return sharedMethods.isUniqueTitle(val)
+      let promise = sharedMethods.isUniqueTitle(val)
+      this.titleInUse(promise)
+      return promise
     },
     getChildrenText () {
       let text = '&group_children=' + this.currentRoundtrip.ChildrenAges.length
@@ -1785,23 +1645,6 @@ export default {
         default:
           return 'cummute'
       }
-    },
-    destinationChanged (val) {
-      // todo destination codes are not defined
-      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
-    },
-    getLocationFromIataCode (code, countryName) {
-      let context = this
-      axios.get('http://iatageo.com/getLatLng/' + code
-      ).then(function (response) {
-        context.tempLocation = {
-          lat: response.data.latitude,
-          lng: response.data.longitude,
-          label: countryName
-        }
-      }).catch(function (error) {
-        console.log('Error' + error)
-      })
     },
     getOrigins (val, update, abort) {
       sharedMethods.filterAirports(val, update, abort, this, 'originOptions')

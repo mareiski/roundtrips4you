@@ -108,6 +108,15 @@
           <q-icon name="flight" />
         </template>
       </q-select>
+      <q-btn
+        @click="openFluegeDeFlights()"
+        class="q-mt-md"
+        color="primary"
+        text-color="white"
+        :disable="!currentRoundtrip.Destination"
+        label="Flüge auf fluege.de"
+        style="width:220px"
+      ></q-btn>
     </div>
     <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
       <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
@@ -158,6 +167,62 @@ export default {
         nonStop: this.currentRoundtrip.NonStop
       }
       this.$emit('updateArrivalDeparture', data)
+    },
+    /**
+ * Open fluege.de flights in a new tab
+ * @requires childrenAges, originCode, destinationCode, adults, travelClass, depatureDate, returnDate
+ */
+    openFluegeDeFlights () {
+      let babies = 0
+      let children = 0
+
+      this.currentRoundtrip.ChildrenAges.forEach((childAge) => {
+        if (parseInt(childAge) < 2) babies++
+      })
+      children = this.currentRoundtrip.ChildrenAges.length - babies
+
+      let cabinClass = this.getFluegeDeClass(this.currentRoundtrip.TravelClass)
+
+      let originIata = this.getIataOutOfName(this.currentRoundtrip.Origin)
+      let destinationIata = this.getIataOutOfName(this.currentRoundtrip.Destination)
+
+      let fromDate = this.getFormattedDepatureReturnDate(this.datesModel.from)
+
+      let url = 'https://www.fluege.de/flight/wait/?sFlightInput%5BflightType%5D=RT&sFlightInput%5BstoreSearch%5D=true&sFlightInput%5Bf0%5D%5BdepLocation%5D=' + originIata +
+        '&sFlightInput%5Bf0%5D%5BaccMultiAirportDep%5D=&sFlightInput%5Bf0%5D%5BdepAirport%5D=' + originIata +
+        '&sFlightInput%5Bf0%5D%5BarrLocation%5D=' + destinationIata + ' &sFlightInput%5Bf0%5D%5BaccMultiAirportArr%5D=' + destinationIata +
+        '&sFlightInput%5Bf0%5D%5BarrAirport%5D=' + destinationIata + '&sFlightInput%5Bf0%5D%5Bdate%5D=' + fromDate +
+        '&sFlightInput%5Bf1%5D%5Bdate%5D=' + this.getFormattedDepatureReturnDate(this.datesModel.to) + '&sFlightInput%5BpaxAdt%5D=' + this.currentRoundtrip.Adults + '&sFlightInput%5BpaxChd%5D=' + children +
+        '&sFlightInput%5BpaxInf%5D=' + babies + '&sFlightInput%5BcabinClass%5D=' + cabinClass + '&sFlightInput%5BdepAirline%5D=&sFlightInput%5BareaSearch%5D=TRUE&pop%5Bf24%5D=on&sFlightInput%5Bf0%5D%5BtimeRange%5D=2&sFlightInput%5Bf1%5D%5BtimeRange%5D=2'
+      window.open(url, '_blank')
+    },
+    /**
+     * @returns iata for given airport name
+     */
+    getIataOutOfName (airportName) {
+      let iataString = airportName.split('(')[1]
+
+      if (iataString) {
+        let result = iataString.split(')')[0]
+        return result
+      }
+    },
+    /**
+    * Get class abbreviation from travel class string
+    * @param {String} travelClass travel class string
+    */
+    getFluegeDeClass (travelClass) {
+      if (travelClass === 'Economy' || travelClass === 'Premium Economy') return 'y'
+      else if (travelClass === 'Business') return 'C'
+      else return 'F'
+    },
+    /* Reformat date for third parties (eg. booking.com)
+    * @returns string date in format jjjj-mm-dd
+    */
+    getFormattedDepatureReturnDate (dateString) {
+      let timeParts = dateString.split(' ')
+      let dateParts = timeParts[0].split('.')
+      return dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0]
     }
   },
   created () {
