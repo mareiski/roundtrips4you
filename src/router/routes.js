@@ -6,7 +6,10 @@ const routes = [
     children: [
       {
         path: '/',
-        component: () => import('pages/Index.vue')
+        component: () => import('pages/Index.vue'),
+        meta: {
+          guestOnly: true
+        }
       },
       {
         path: 'rundreisen-uebersicht',
@@ -27,13 +30,6 @@ const routes = [
           guestOnly: true
         }
       },
-      // {
-      //   path: 'email-bestaetigen',
-      //   component: () => import('pages/Verify.vue'),
-      //   meta: {
-      //     requireAuth: true
-      //   }
-      // },
       {
         path: 'registrieren',
         component: () => import('pages/Register.vue'),

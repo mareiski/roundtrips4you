@@ -147,7 +147,6 @@ export default {
     title: '404',
     meta: {
       robot: { name: 'robot', content: 'noIndex' }
-
     }
   }
 }

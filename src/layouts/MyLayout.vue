@@ -7,12 +7,16 @@
     >
       <div class="top-row">
         <div class="left-col">
-          <a href="/">
+          <router-link
+            class="header-page-link"
+            to="/"
+            style="margin:0;"
+          >
             <img
               alt="logo"
               src="~assets/submark.svg"
             />
-          </a>
+          </router-link>
           <span class="beta-span cursor-pointer">[beta]
             <q-tooltip @click="$event.show()">
               Wir befinden uns derzeit in der Beta Phase, deshalb kann es leider noch zu bugs kommen

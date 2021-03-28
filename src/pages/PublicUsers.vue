@@ -94,7 +94,7 @@ export default {
   meta: {
     title: 'Users',
     meta: {
-      description: { name: 'description', content: 'Reise selbst planen & zusammenstellen, Reise planen kostenlos & online. Routenplaner und Reiseplaner online mit vielen Tools für deinen Roadtrip' }
+      robot: { name: 'robot', content: 'noIndex' }
     }
   },
   data () {

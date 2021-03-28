@@ -143,8 +143,6 @@ import { db, auth } from '../firebaseInit.js'
 import { date } from 'quasar'
 import sharedMethods from '../sharedMethods'
 
-import axios from 'axios'
-
 let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
@@ -206,37 +204,18 @@ export default {
   },
   methods: {
     verifyMail () {
-      let context = this
       if (!auth.user().emailVerified) {
         auth.user().sendEmailVerification(actionCodeSettings).then(function () {
-          context.$q.notify({
-            color: 'green-4',
-            textColor: 'white',
-            icon: 'check_circle',
-            message: 'Wir haben dir eine Bestätigungsmail gesendet'
-
-          })
+          sharedMethods.showSuccessNotification('Wir haben dir eine Bestätigungsmail gesendet')
         }).catch(function (error) {
           console.log(error)
-          context.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Oh nein, wir konnten dir leider keine email senden, bitte Kontaktiere uns unter hello@roundtrips4you.de'
-          })
+          sharedMethods.showErrorNotification('Oh nein, wir konnten dir leider keine email senden, bitte Kontaktiere uns unter hello@roundtrips4you.de')
         })
       } else {
-        context.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'check_circle',
-          message: 'Deine Email wurde bestätigt'
-        })
+        sharedMethods.showSuccessNotification('Deine Email wurde bestätigt')
       }
     },
-    destinationChanged (val) {
-      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
-    },
+
     scrollOnAddButtonClicked () {
       if (this.addExpanded) sharedMethods.scrollToRef(this.$refs['AddRoundtripExpansionItem'])
     },
@@ -246,19 +225,6 @@ export default {
         lng: event.x,
         label: event.label
       }
-    },
-    getLocationFromIataCode (code, countryName) {
-      let context = this
-      axios.get('http://iatageo.com/getLatLng/' + code
-      ).then(function (response) {
-        context.tempLocation = {
-          lat: response.data.latitude,
-          lng: response.data.longitude,
-          label: countryName
-        }
-      }).catch(function (error) {
-        console.log('Error' + error)
-      })
     },
     updateReturnDate () {
       let dateParts = this.depatureDate.split('.')
