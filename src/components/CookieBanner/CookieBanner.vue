@@ -81,6 +81,7 @@ export default {
       try {
         // eslint-disable-next-line no-undef
         cookiesAllowed = true
+        this.allowCookies()
       } catch (e) {
         console.log(e)
       }

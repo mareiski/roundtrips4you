@@ -8,7 +8,6 @@
       <div class="top-row">
         <div class="left-col">
           <router-link
-            class="header-page-link"
             to="/"
             style="margin:0;"
           >
