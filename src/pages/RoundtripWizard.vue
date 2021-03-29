@@ -14,6 +14,7 @@
         round
         color="primary"
         icon="visibility"
+        @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
       >
         <q-tooltip>Reise ansehen</q-tooltip>
       </q-btn>
@@ -1720,7 +1721,7 @@ export default {
     }
   },
   beforeRouteLeave (to, from, next) {
-    if (this.$store.getters['demoSession/isInDemoSession'] && this.unsavedChanges) {
+    if (this.unsavedChanges) {
       this.showCancelDialog = true
       this.cancelDialogNext = next
     } else {
