@@ -360,7 +360,7 @@ export default {
 
       this.cityDialog.showed = false
 
-      CitySuggestionMethods.getCities(this.country).then(response => {
+      CitySuggestionMethods.getCities(this.country, this).then(response => {
         if (response) context.handleFetchedSuggestions(response)
       })
     },

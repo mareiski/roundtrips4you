@@ -900,6 +900,11 @@ export default {
       return sharedMethods
     }
   },
+  watch: {
+    step: function () {
+      sharedMethods.scrollToOffset(0)
+    }
+  },
   name: 'RoundtripWizard',
   data () {
     return {

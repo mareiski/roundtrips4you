@@ -407,7 +407,7 @@
             <q-card>
               <q-img
                 v-show="lastPOICityData.img"
-                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrcs[0]"
+                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : (lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : '')"
               />
               <q-card-section style="padding-left:10px; padding-top:10px;">
                 <span
@@ -756,7 +756,7 @@ export default {
      * gets suggested cities and shows markers
      */
     showCitiesOnMap () {
-      CitySuggestionMethods.getCities(this.suggestionCountry).then(response => {
+      CitySuggestionMethods.getCities(this.suggestionCountry, this).then(response => {
         if (!response) return
 
         this.suggestedCities = response
@@ -781,9 +781,11 @@ export default {
 
       const el = document.getElementById('CitySuggestion' + name)
 
-      const offset = el.offsetTop
+      if (el) {
+        const offset = el.offsetTop
 
-      drawerScrollArea.setScrollPosition(offset - 20, 400)
+        drawerScrollArea.setScrollPosition(offset - 20, 400)
+      }
     },
     /**
      * shows the given pois on map
@@ -1316,6 +1318,7 @@ export default {
     }
     this.mapbox = Mapbox
     this.map = null
+    this.loadMap()
   }
 }
 

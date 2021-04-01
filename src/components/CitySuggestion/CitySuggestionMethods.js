@@ -2,20 +2,20 @@
 
 import axios from 'axios'
 import { db } from '../../firebaseInit.js'
+import sharedMethods from '../../sharedMethods.js'
 
 export default {
     /**
       * @returns an array of cities
       */
-    getCities (country) {
+    getCities (country, context) {
         return new Promise((resolve, reject) => {
-            const context = this
-
-            context.fetchDBSuggestions(country).then(function (response) {
+            let fileContext = this
+            fileContext.fetchDBSuggestions(country).then(function (response) {
                 if (response.length > 0) {
                     resolve(response)
                 } else {
-                    context.fetchAPISuggestions(country).then(function (apiResponse) {
+                    fileContext.fetchAPISuggestions(country, context).then(function (apiResponse) {
                         resolve(apiResponse)
                     }).catch(function (error) {
                         console.log('Error' + error)
@@ -65,14 +65,15 @@ export default {
     /**
       * fetch city suggestions from geo db api
       */
-    fetchAPISuggestions (country) {
-        let context = this
+    fetchAPISuggestions (country, context) {
         return new Promise((resolve, reject) => {
+            let fileContext = this
             axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
                 headers: {
                     'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
                 }
             }).then(function (response) {
+                if (!response.data.data[0]) sharedMethods.showErrorNotification('Für diesen Ort wurde nichts gefunden')
                 // wait 2 secs because only 1 request per sec is allowed
                 setTimeout(function () {
                     axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
@@ -80,7 +81,7 @@ export default {
                             'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
                         }
                     }).then(function (response) {
-                        context.writeInDB(response.data.data)
+                        fileContext.writeInDB(response.data.data)
                         resolve(response.data.data)
                     }).catch(function (error) {
                         console.log(error)
