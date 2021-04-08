@@ -68,27 +68,28 @@
   <!-- Google Analytics -->
   <script>
     if (window.location.hostname !== 'localhost') {
+      let cookiesAllowed = false
+      var acc = 'UA-160605825-1'
 
-      var gaProperty = 'UA-160605825-1';
-      var disableStr = 'ga-disable-' + gaProperty;
-      if (document.cookie.indexOf(disableStr + '=true') > -1) {
-        window[disableStr] = true;
+      if (!cookiesAllowed) { //functions you've defined elsewhere
+        window['ga-disable-' + acc] = true;
       }
-      function gaOptout() {
-        document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-        window[disableStr] = true;
-        alert('Das Tracking ist jetzt deaktiviert');
-      }
-      (function (i, s, o, g, r, a, m) {
-        i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-          (i[r].q = i[r].q || []).push(arguments)
-        }, i[r].l = 1 * new Date(); a = s.createElement(o),
-          m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-      })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-      ga('create', 'UA-160605825-1', 'auto');
-      ga('set', 'anonymizeIp', true);
-      ga('send', 'pageview');
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', acc]);
+      _gaq.push(['_trackPageview']);
+
+      (function () {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+      function onOptIn() { // have this run when/if they opt-in.
+        window['ga-disable-UA-160605825-1'] = false
+        // set a cookie to express that the user has opted-in to tracking, for future pageviews
+        _gaq.push(['_trackPageview']) // now run the pageview that you 'missed'
+      }
     }
   </script>
   <!-- End Google Analytics -->
@@ -179,23 +180,17 @@
     }
   </style>
   <!-- mailchimp implementation -->
-  <script
-    id="mcjs">!function (c, h, i, m, p) { m = c.createElement(h), p = c.getElementsByTagName(h)[0], m.async = 1, m.src = i, p.parentNode.insertBefore(m, p) }(document, "script", "https://chimpstatic.com/mcjs-connected/js/users/ca8f607f808c8e5a9812aec8f/ecba2162272573ace645ba1ee.js");</script>
+  <!-- <script
+    id="mcjs">!function (c, h, i, m, p) { m = c.createElement(h), p = c.getElementsByTagName(h)[0], m.async = 1, m.src = i, p.parentNode.insertBefore(m, p) }(document, "script", "https://chimpstatic.com/mcjs-connected/js/users/ca8f607f808c8e5a9812aec8f/ecba2162272573ace645ba1ee.js");</script> -->
 </head>
 
 <body class="preload">
-  <!-- facebook like button plugin -->
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/de_DE/sdk.js#xfbml=1&version=v6.0"></script>
   <noscript>
     <strong>Leider funktioniert Roundtrips4you ohne javascript nicht. Bitte aktiviere es in deinem Browser.</strong>
   </noscript>
   <span style="display:none;" id="notSupportedBrowserSpan">Dein Browser wird leider nicht unterstützt. Bitte füre ein
     Update durch.</span>
   <div id="q-app"></div>
-  <!-- <script type="text/javascript"
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLLtLLmn-E0oFSSLYcbMLDCzzEnw6Itwk&amp;libraries=places"></script> -->
   <script type="application/ld+json">
     {
       "@context" : "http://schema.org",

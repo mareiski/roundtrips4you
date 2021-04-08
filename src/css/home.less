@@ -6,37 +6,6 @@ top of page > end of page
 
 @import (reference) "./imports.less";
 
-#flyingPlane {
-    display: flex;
-    position: absolute;
-    z-index: 110;
-    -webkit-animation: fly 20s infinite linear;
-    -moz-animation: fly 20s infinite linear;
-    -ms-animation: fly 20s infinite linear;
-    animation: fly 20s infinite linear;
-
-    .plane {
-        width: 100px;
-        height: 52.1px
-    }
-
-    .banner {
-        background-color: white;
-        white-space: nowrap;
-        padding: 0 10px;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    }
-
-    .line {
-        width: 50px;
-        height: 0;
-        margin-top: 14px;
-        margin-right: -5px;
-        border: 1.5px solid @primary-gray;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    }
-}
-
 #HomeTimeLine {
     .q-timeline__subtitle {
         margin: 0;
@@ -47,7 +16,7 @@ top of page > end of page
 
 #MainImg,
 #MainImgOverlay {
-    background: url('../statics/bagan-1137015_1280.jpg') center fixed;
+    background: url('../statics/switserland.jpg') top fixed;
     width: 100%;
     height: 90vh;
     background-size: cover;
@@ -57,7 +26,8 @@ top of page > end of page
 }
 
 #MainImgOverlay {
-    background: #b5ac88;
+    // #b5ac88
+    background: #333333;
     opacity: 0.3;
     position: absolute;
     width: 100%;
@@ -69,25 +39,24 @@ top of page > end of page
     height: 89vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    align-items: center;
+    justify-content: space-around;
 
     .main-qoute {
         font-size: @size-very-large;
         z-index: 100;
         color: white;
-        padding: 0 10% 0 10%;
         margin-top: 0;
+        margin-bottom: 10px;
         font-weight: bold;
     }
 
     .quote-subtext {
-        font-size: @size-large;
+        font-size: 20px;
         z-index: 100;
         color: #fff;
-        font-weight: 400;
-
+        margin: 0;
+        max-width: 54%;
+        line-height: 1.3;
     }
 
     .main-search-bar {
@@ -104,7 +73,10 @@ top of page > end of page
 
     .scroll-down-icon {
         height: 100px;
-        color: white;
+        position: absolute;
+        top: 65vh;
+        color: @primary-orange;
+        z-index: 2;
 
         -webkit-animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
         -moz-animation: jump 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
@@ -143,25 +115,84 @@ top of page > end of page
     }
 }
 
+#scroll-container {
+    flex-wrap: nowrap;
+    height: calc(3.1*70vh);
+    margin-bottom: 60px;
+
+    .left-scroll-col {
+        flex-direction: column;
+        padding-right: 20px;
+        position: sticky;
+        top: calc(50% - 250px);
+        height: 70vh;
+    }
+
+    .right-scroll-col>div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 70vh;
+    }
+
+    .scroll-col {
+        width: 50%
+    }
+}
+
+.clouds {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+
+    img {
+        position: absolute;
+        bottom: 0;
+        max-width: 100%;
+        animation: animate calc(3s * var(--i)) linear infinite;
+    }
+
+    @keyframes animate {
+        0% {
+            opacity: 0;
+            transform: scale(1);
+        }
+
+        25%,
+        75% {
+            opacity: 0.8;
+        }
+
+        100% {
+            opacity: 0;
+            transform: scale(2);
+        }
+    }
+}
+
 #OfferContainer {
     width: 100%;
     color: white;
-    margin-top: 100px;
+    margin-top: 80px;
+    margin-bottom: 70px;
 
     &>div {
         display: flex;
         justify-content: space-between;
         flex-direction: column;
         font-size: @size-medium;
-        width: 50%;
-        align-items: center;
         padding: 10px;
 
         button {
             max-width: 522px;
             padding-left: 20px;
             padding-right: 20px;
-            font-size: @size-medium;
+            font-size: 20px;
 
             margin-top: 10px;
             opacity: 0;
@@ -383,6 +414,23 @@ top of page > end of page
         }
     }
 
+    #scroll-container {
+        flex-wrap: wrap;
+        height: auto;
+
+        .scroll-col {
+            width: 100%;
+        }
+
+        .left-scroll-col {
+            position: inherit;
+        }
+
+        .right-scroll-col>div {
+            height: auto;
+        }
+    }
+
     #MainImgPlacholder {
         .main-qoute {
             font-size: 24px;
@@ -390,7 +438,7 @@ top of page > end of page
         }
 
         .quote-subtext {
-            display: none;
+            font-size: @size-medium;
         }
 
         button {

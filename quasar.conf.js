@@ -12,7 +12,6 @@ module.exports = function (ctx) {
     ],
 
     css: [
-      'app.styl',
       'site.less'
     ],
 
@@ -92,7 +91,8 @@ module.exports = function (ctx) {
         'QToolbar',
         'QToolbarTitle',
         'QScrollArea',
-        'QIntersection'
+        'QIntersection',
+        'QCircularProgress'
       ],
 
       directives: [

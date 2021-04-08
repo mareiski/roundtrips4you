@@ -5,11 +5,13 @@
  *  (mostly used for EditRoundtrips and RoundtripDetails & their components)
  */
 let getAxios = () => import('axios')
+let getAirportData = () => import('airport-data')
 var querystring = require('querystring')
 import { Notify, scroll, date } from 'quasar'
 const { setScrollPosition, getScrollTarget } = scroll
-import { db } from './firebaseInit.js'
+import { db, storage } from './firebaseInit.js'
 import { Loader } from '@googlemaps/js-api-loader'
+import wiki from 'wikijs'
 
 export default {
 
@@ -56,6 +58,84 @@ export default {
         }
     },
     /**
+     * call this from @added event from q-uploader
+     * @param kind if its a galery or title upload
+     */
+    fileAdded (event, kind, context, roundtripDocId) {
+        let files = event
+        let uploadIndex = 0
+
+        // disable another upload
+        if (kind === 'galery') context.visible = true
+        else {
+            context.titleUploadDisabled = true
+
+            // delete current title img
+            context.$store.dispatch('images/deleteTitleImg', roundtripDocId)
+        }
+
+        this.uploadNext(files, kind, uploadIndex, context, roundtripDocId)
+
+        if (context.$refs.titleUpload) context.$refs.titleUpload.reset()
+        if (context.$refs.galeryUpload) context.$refs.galeryUpload.reset()
+    },
+    uploadNext (files, kind, uploadIndex, context, roundtripDocId) {
+        if (!context.uploading) {
+            let length = context.$store.getters['images/getGaleryImgUrls'](roundtripDocId).length
+            this.upload(files[uploadIndex], kind, uploadIndex + length, uploadIndex === files.length - 1, files.length, uploadIndex, context, roundtripDocId).then(() => {
+                context.uploading = false
+                uploadIndex++
+                if (uploadIndex < files.length) this.uploadNext(files, kind, uploadIndex)
+            })
+        }
+    },
+    upload (file, kind, count, lastItem, absoluteFiles, uploadIndex, context, roundtripDocId) {
+        context.uploading = true
+        let localContext = this
+
+        return new Promise((resolve) => {
+            let kindPath = 'Title/titleImg'
+            if (kind === 'galery') {
+                kindPath = 'Galery/galeryImg' + count
+            }
+            const fileRef = storage.ref().child('Images/Roundtrips/' + roundtripDocId + '/' + kindPath)
+
+            let uploadTask = fileRef.put(file)
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                    console.log('Upload is ' + (snapshot.bytesTransferred / snapshot.totalBytes) * 100 + '% done')
+                    context.$store.commit('images/setUploadProgress', progress)
+                },
+                (error) => {
+                    console.log(error)
+
+                    localContext.showErrorNotification('Das Bild konnte nicht hochgeladen werden')
+                    context.visible = false
+                    context.titleUploadDisabled = false
+                    resolve(false)
+                },
+                () => {
+                    // upload succesful
+                    localContext.showSuccessNotification('Bild ' + (uploadIndex + 1) + ' von ' + absoluteFiles + ' wurde erfolgreich hochgeladen')
+                    if (lastItem) {
+                        context.visible = false
+                        context.titleUploadDisabled = false
+                    }
+                    fileRef.getDownloadURL().then(function (url) {
+                        if (kind === 'galery') {
+                            context.$store.commit('images/addGaleryImg', { newUrl: url, RTId: roundtripDocId })
+                            context.$emit('imageAdded', url)
+                        } else if (kind === 'title') {
+                            context.$store.commit('images/setTitleImg', { newUrl: url, RTId: roundtripDocId })
+                        }
+                    })
+                    resolve(true)
+                }
+            )
+        })
+    },
+    /**
      * Sets all expansion states of all stops to true (expanded)
      * @param {*} context context of file
      * @param {array} stops list of all stops
@@ -77,93 +157,38 @@ export default {
         context.currentExpansionStates[context.currentExpansionStates.findIndex(x => x.docId === event.docId)].expanded = event.expanded
     },
     /**
-     * Filter airport suggestions for select element
-     * @param {String} val search term
-     * @param {boolean} originSearch search for origin or depature
-     * @param {*} context context of file
-     */
-    filterAirports (val, update, abort, originSearch, context) {
-        if (val.length < 3) {
+   * Filter airport suggestions for select element
+   * @param {String} val search term
+   * @param {boolean} originSearch search for origin or depature
+   * @param {*} context context of file
+   * @param {String} arrayName name for array to push elements to
+   */
+    filterAirports (searchTerm, update, abort, context, arrayName) {
+        if (!searchTerm || searchTerm.length < 3) {
             abort()
             return
         }
-        if (val.length >= 3) {
-            this.fetchAirports(val).then((results) => {
-                update(() => {
-                    if (!results) return false
 
-                    if (originSearch) {
-                        context.originOptions = []
-                        context.originCodes = []
-                    } else {
-                        context.destinationOptions = []
-                        context.destinationCodes = []
-                    }
-
-                    results.data.data.forEach(city => {
-                        if (originSearch) {
-                            context.originOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                            context.originCodes.push(city.iataCode)
-                        } else {
-                            context.destinationOptions.push(this.capitalize(city.address.cityName) + ' (' + city.iataCode + ')')
-                            context.destinationCodes.push(city.iataCode)
-                        }
-                    })
-                }).catch(e => {
-                    return false
-                })
-            })
-        }
-    },
-    /**
-     * Fetch ariport suggestions for a search term
-     * @param {*} val search term
-     */
-    fetchAirports (val) {
-        return new Promise((resolve, reject) => {
-            getAxios().then(axios => {
-                const url = 'https://api.amadeus.com/v1/security/oauth2/token'
-
-                const headers = {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-
-                const data = querystring.stringify({
-                    grant_type: 'client_credentials',
-                    client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                    client_secret: 'lHQlUheyyAZtGQDA'
+        getAirportData().then(airportData => {
+            update(() => {
+                let results = Object.values(airportData).filter(airport => {
+                    return this.startsWith(airport.city, searchTerm) ||
+                        this.startsWith(airport.iata, searchTerm) ||
+                        this.startsWith(airport.name, searchTerm)
                 })
 
-                axios.post(url, data, {
-                    headers: headers,
-                    form: {
-                        'grant_type': 'client_credentials',
-                        'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                        'client_secret': 'lHQlUheyyAZtGQDA'
-                    }
-                }).then(function (response) {
-                    let token = response.data.access_token
-                    const tokenString = 'Bearer ' + token
-
-                    axios.get('https://api.amadeus.com/v1/reference-data/locations?subType=AIRPORT,CITY&view=LIGHT&keyword=' + val, {
-                        headers: {
-                            'Authorization': tokenString
-                        }
-                    }).then(function (response) {
-                        resolve(response)
-                    }).catch(function (error) {
-                        console.log('Error' + error)
-                        resolve(null)
-                    })
-                }).catch(function (error) {
-                    console.log('Error on Authentication' + error)
-                    resolve(null)
+                context[arrayName] = []
+                results.forEach(result => {
+                    context[arrayName].push(result.iata ? (result.name + ' (' + result.iata + ')') : result.name)
                 })
-            }).catch(function (error) {
-                console.log('Error ' + error)
-                resolve(null)
             })
         })
+    },
+    /**
+     * checks if string to check starts with val
+     */
+    startsWith (stringToCheck, val) {
+        return stringToCheck ? stringToCheck.substr(0, val.length).toUpperCase() === val.toUpperCase() : false
     },
     /**
      * @return a string date from given timestamp
@@ -241,53 +266,70 @@ export default {
         if (days === 0 && hours === 0 && minutes === 0) returnVal = 0
         else if (days < 0 || hours < 0 || minutes < 0) returnVal = null
 
-        if (days && days > 0) returnVal += days + ' Tag '
+        if (days && days > 0) returnVal += days + ' Tag(e) '
         if (hours && hours > 0) returnVal += hours + 'h '
         if (minutes && minutes > 0) returnVal += minutes + 'min '
 
         return returnVal
     },
     /**
-     * gets data from wikivoyage for a given page name
+     * gets data from wikivoyage/wikipedia for a given page name
      * @param {string} pageName the page name to get data from
-     * @returns {object} object that contains title, shortDescription, description and imgSrc for the given page
+     * @returns {object} object that contains title, shortDescription, description and imgSrcs for the given page
      */
     getWikivoyageData (pageName) {
+        let returnData = {}
+        let promiseList = []
+
         return new Promise((resolve, reject) => {
-            const headers = {
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
+            wiki({ apiUrl: 'https://de.wikipedia.org/w/api.php' }).find(pageName).then(page => {
+                promiseList.push(
+                    page.info().then(info => {
+                        returnData.title = info.name
+                    }),
+                    page.categories().then(categories => {
+                        let category = categories[1].split('Kategorie:')[1]
+                        returnData.shortDescription = category
+                    }),
+                    page.summary().then(summary => {
+                        returnData.description = summary
+                    }),
+                    page.images().then(images => {
+                        images.forEach(image => {
+                            // remove all svg images
+                            if (image.includes('.svg')) images.splice(images.indexOf(image), 1)
+                        })
 
-            let returnData = {}
-
-            getAxios().then(axios => {
-                axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&exsentences=2&prop=description%7Cextracts%7Cpageimages&titles=' + pageName + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-                    { headers: headers })
-                    .then(function (response) {
-                        const pages = response.data.query.pages
-                        const firstPageName = Object.keys(pages)[0]
-
-                        returnData.title = pages[firstPageName].title
-                        returnData.shortDescription = pages[firstPageName].description
-                        returnData.description = pages[firstPageName].extract
-                        returnData.imgSrc = pages[firstPageName].original ? pages[firstPageName].original.source : ''
-
-                        resolve(returnData)
-                    }).catch(function (error) {
-                        console.log('Error' + error)
-
-                        resolve(null)
+                        returnData.imgSrcs = images
                     })
-            }).catch(function (error) {
-                console.log('Error ' + error)
-                resolve(null)
+                )
+
+                Promise.all(promiseList).then(() => {
+                    resolve(returnData)
+                }).catch(function (error) {
+                    console.log('Error ' + error)
+                    resolve(null)
+                })
             })
         })
     },
-    getGooglePlacesData (lat, lng) {
-        return new Promise((resolve, reject) => {
+    /**
+     * checks if string is a url
+     */
+    validURL (str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+            '(\\#[-a-z\\d_]*)?$', 'i') // fragment locator
+        return !!pattern.test(str)
+    },
+    getGooglePlacesData (lat, lng, context) {
+        let key = context.$store.getters['api/getGooglePlacesKey']
+        return new Promise((resolve) => {
             const loader = new Loader({
-                apiKey: 'AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
+                apiKey: key,
                 version: 'weekly',
                 libraries: ['places']
             })
@@ -313,7 +355,7 @@ export default {
                     response.forEach(poi => {
                         let returnData = {}
                         returnData.name = poi.name
-                        returnData.photoUrl = poi.photos[0].getUrl()
+                        returnData.photoUrl = poi.photos ? poi.photos[0].getUrl() : '/statics/dummy-image-landscape-1-150x150.jpg'
                         returnData.placeId = poi.place_id
                         returnData.rating = poi.rating
                         returnData.totalRatings = poi.user_ratings_total
@@ -331,45 +373,6 @@ export default {
                     resolve(returnDataArr)
                 })
             })
-
-            //     const headers = {
-            //         'Content-Type': 'application/json; charset=UTF-8'
-            //     }
-
-            //     getAxios().then(axios => {
-            //         axios.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lng + '&radius=5000&language=de&type=tourist_attraction&key=AIzaSyBVkBCl3dY49g3lyX8ns1SYsErNdkCO8sc',
-            //             { headers: headers })
-            //             .then(function (response) {
-            //                 console.log(response)
-
-            //                 let returnDataArr = []
-
-            //                 const results = response.data.results
-
-            //                 results.forEach(poi => {
-            //                     let returnData = {}
-            //                     returnData.name = poi.name
-            //                     returnData.photoReference = poi.photos[0].photo_reference
-            //                     returnData.placeId = poi.place_id
-            //                     returnData.rating = poi.rating
-            //                     returnData.totalRatings = poi.user_ratings_total
-            //                     returnData.location = poi.geometry.location
-            //                     returnData.location.label = poi.vicinity
-            //                     returnData.tags = poi.types
-
-            //                     returnDataArr.push(returnData)
-            //                 })
-
-            //                 resolve(returnDataArr)
-            //             }).catch(function (error) {
-            //                 console.log('Error' + error)
-
-            //                 resolve(null)
-            //             })
-            //     }).catch(function (error) {
-            //         console.log('Error ' + error)
-            //         resolve(null)
-            //     })
         })
     },
     /**
@@ -414,14 +417,16 @@ export default {
         return new Promise((resolve, reject) => {
             const url = 'https://api.amadeus.com/v1/security/oauth2/token'
 
+            let amadeusKeys = this.$store.getters['api/getAmadeusKeys']
+
             const headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
 
             const data = querystring.stringify({
-                grant_type: 'client_credentials', // gave the values directly for testing
-                client_id: 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                client_secret: 'lHQlUheyyAZtGQDA'
+                grant_type: 'client_credentials',
+                client_id: amadeusKeys.id,
+                client_secret: amadeusKeys.secret
             })
 
             getAxios().then(axios => {
@@ -429,8 +434,8 @@ export default {
                     headers: headers,
                     form: {
                         'grant_type': 'client_credentials',
-                        'client_id': 'SEW3oULNfsxB4xOMAwY291ilj9bwWekH',
-                        'client_secret': 'lHQlUheyyAZtGQDA'
+                        'client_id': amadeusKeys.id,
+                        'client_secret': amadeusKeys.secret
                     }
                 }).then(function (response) {
                     let token = response.data.access_token

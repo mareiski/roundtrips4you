@@ -105,9 +105,10 @@
     </div>
   </q-page>
 </template>
-
+<style lang="less">
+@import url("../../css/blog.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/blog.less')
 export default {
   data () {
     return {

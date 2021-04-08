@@ -77,17 +77,18 @@ export default {
     },
     getRegions (country, regionPref) {
       return new Promise((resolve, reject) => {
+        let context = this
         getAxios().then(axios => {
           axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
             headers: {
-              'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+              'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
             }
           }).then(function (response) {
             // wait 2 secs because only 1 request per sec is allowed
             setTimeout(function () {
               axios.get('https://wft-geo-db.p.mashape.com/v1/geo/countries/' + response.data.data[0].code + '/regions?limit=5&offset=0&languageCode=de&namePrefix=' + regionPref, {
                 headers: {
-                  'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+                  'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
                 }
               }).then(function (response) {
                 resolve(response)

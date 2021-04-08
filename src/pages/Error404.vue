@@ -1,12 +1,13 @@
 <template>
-  <div class="fixed-center text-center page-404">
+  <div class="fixed-center text-center page-404 full-height">
     <!-- <img
         src="~assets/sad.svg"
         style="width:30vw;max-width:150px;"
       > -->
     <div
       @mousemove="mouseMove($event)"
-      class="island-img"
+      id="IslandImg"
+      @mousedown="clicked($event)"
     >
     </div>
     <div
@@ -36,12 +37,12 @@
         </filter>
       </svg>
     </div>
-    <p class="text-faded">Oh nein, dieser Ort konnte nicht gefunden werden... <strong>(404)</strong></p>
+    <p class="text-404">Dieser Ort konnte nicht entdeckt werden...</p>
     <q-btn
       color="secondary"
-      style="width:200px;"
+      class="back-btn"
       @click="$router.push('/')"
-    >Zurück zum Start</q-btn>
+    >Zurück zum Festland</q-btn>
   </div>
 </template>
 <style lang="less" scoped>
@@ -59,16 +60,34 @@
   position: absolute;
 }
 
-.island-img {
-  height: 72vh;
-  width: 80%;
-  background: center url("../statics/island.jpeg");
+#IslandImg {
+  height: 90vh;
+  width: 90%;
+  position: absolute;
+  background: center url("../statics/404.svg");
   box-shadow: inset 0px 0px 40px 40px #fff;
   background-size: cover;
+}
+
+.back-btn {
+  width: 200px;
+  position: absolute;
+  bottom: 20px;
+}
+
+.text-404 {
+  position: absolute;
+  font-size: 30px;
+  font-family: "Raleway";
+  color: white;
+  bottom: 80px;
 }
 </style>
 <script>
 import { Loading } from 'quasar'
+import fireworks from 'fireworks'
+
+let clickedTimes = 1
 
 export default {
   name: 'Error404',
@@ -88,10 +107,39 @@ export default {
       let offsetY = 0.5 - event.clientY / height
 
       let cloudCircles = Array.from(document.getElementsByClassName('cloud-circle'))
-      cloudCircles.forEach(function (el, index) {
+      cloudCircles.forEach(function (el) {
         var offset = parseInt(el.offsetTop)
         let translate = 'translate3d(' + Math.round(offsetX * offset) + 'px,' + Math.round(offsetY * offset) + 'px,0px)'
         el.style.transform = translate
+      })
+    },
+    getRandomColor (step, numOfSteps) {
+      var r, g, b
+      var h = step / numOfSteps
+      var i = ~~(h * 6)
+      var f = h * 6 - i
+      var q = 1 - f
+      switch (i % 6) {
+        case 0: r = 1; g = f; b = 0; break
+        case 1: r = q; g = 1; b = 0; break
+        case 2: r = 0; g = 1; b = f; break
+        case 3: r = 0; g = q; b = 1; break
+        case 4: r = f; g = 0; b = 1; break
+        case 5: r = 1; g = 0; b = q; break
+      }
+      var c = '#' + ('00' + (~~(r * 255)).toString(16)).slice(-2) + ('00' + (~~(g * 255)).toString(16)).slice(-2) + ('00' + (~~(b * 255)).toString(16)).slice(-2)
+      return (c)
+    },
+    clicked (event) {
+      if (clickedTimes > 10) clickedTimes = 1
+      clickedTimes++
+      fireworks({
+        x: event.clientX,
+        y: event.clientY,
+        colors: [this.getRandomColor(clickedTimes - 2, clickedTimes), this.getRandomColor(clickedTimes - 1, clickedTimes), '#D56026'],
+        count: 90,
+        bubbleSizeMaximum: 6,
+        bubbleSizeMinimum: 1
       })
     }
   },
@@ -99,7 +147,6 @@ export default {
     title: '404',
     meta: {
       robot: { name: 'robot', content: 'noIndex' }
-
     }
   }
 }

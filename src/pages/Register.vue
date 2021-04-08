@@ -7,8 +7,6 @@
       bordered
       class="q-gutter-md rounded-borders flex column"
       style="align-items:center;"
-      method="post"
-      target="_blank"
     >
       <!-- add this above for auto mailchimp subcribtion action="https://roundtrips4you.us18.list-manage.com/subscribe/post?u=ca8f607f808c8e5a9812aec8f&id=c64c971288&gdpr[71542]=true" -->
       <q-input
@@ -103,11 +101,40 @@
     <br>
     <div style="font-size:18px; text-align:center;">Du hast bereits einen Account? <router-link to="/login">Jetzt Anmelden</router-link>
     </div>
+    <q-dialog
+      v-model="showCancelDialog"
+      persistent
+    >
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">Ungesicherte Änderungen</div>
+          <span>Wenn du jetzt zurück gehst werden deine Änderungen verworfen! <br /> Möchtest du trotzdem zurück?</span>
+        </q-card-section>
+        <q-card-actions
+          align="right"
+          class="text-primary"
+        >
+          <q-btn
+            label="Änderungen verwerfen"
+            v-close-popup
+            flat
+            @click="cancelDialogNext(); $store.commit('demoSession/resetRoundtrip')"
+          />
+          <q-btn
+            type="submit"
+            label="Abbrechen"
+            flat
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
-
+<style lang="less">
+@import url("../css/login.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth, db } from '../firebaseInit.js'
 const getFirebase = () => import('firebase')
 import sharedMethods from '../sharedMethods.js'
@@ -136,6 +163,9 @@ export default {
       isPwdRepeat: true,
       submitting: false,
       googleLoading: false,
+      showCancelDialog: false,
+      cancelDialogNext: null,
+      disableLeave: true,
       reg: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
     }
   },
@@ -152,11 +182,12 @@ export default {
       auth.authRef().createUserWithEmailAndPassword(mail, this.password).then(
         (user) => {
           context.createUserEntry(user)
+          context.disableLeave = false
 
           sharedMethods.showSuccessNotification('Juhuuu dein Konto wurde erfolgreich erstellt')
           if (context.isInDemoSession) {
             context.$store.dispatch('demoSession/saveRoundtrip', user.user.uid).then((newRTId) => {
-              evt.target.submit()
+              // evt.target.submit()
               context.$router.replace('rundreise-ansehen/' + newRTId)
             })
           } else {
@@ -183,6 +214,7 @@ export default {
 
           // Sign in with credential from the Google user.
           auth.signInWithCredential(credential).then(function () {
+            context.disableLeave = false
             context.$router.replace('meine-rundreisen')
           }).catch(function (error) {
             console.log(error)
@@ -212,6 +244,14 @@ export default {
       })
 
       this.verifyMail(user.user)
+    }
+  },
+  beforeRouteLeave (to, from, next) {
+    if (this.$store.getters['demoSession/isInDemoSession'] && this.disableLeave) {
+      this.showCancelDialog = true
+      this.cancelDialogNext = next
+    } else {
+      next()
     }
   }
 }

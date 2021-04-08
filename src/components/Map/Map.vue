@@ -18,6 +18,7 @@
       >Karte wird geladen</p>
     </q-inner-loading>
     <MglMap
+      v-if="accTo"
       :accessToken="accTo"
       :mapStyle.sync="mapStyle"
       :style="'height:' + (height ? height : '500px;')"
@@ -34,7 +35,7 @@
         :accessToken="accTo"
         @result="handleSearch"
         placeholder="Ort suchen"
-        v-if="editor"
+        v-if="editor && !isDemo"
       />
       <MglNavigationControl position="top-right" />
       <MapLayerPlugin
@@ -134,7 +135,6 @@
         @click="onMarkerClicked($event, stop.HotelLocation ? stop.HotelLocation.label : stop.Location.label )"
       >
         <MglPopup>
-
           <q-card>
             <q-img
               v-if="stop.StopImages"
@@ -143,9 +143,10 @@
               :src="stop.StopImages[0]"
             ></q-img>
             <q-img
+              v-else
               width="240px"
               height="135px"
-              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+              :src="lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : (lastPOICityData.img ? lastPOICityData.img : null)"
             ></q-img>
             <q-card-section>
               <div
@@ -225,7 +226,7 @@
           <q-card>
             <q-img
               v-show="lastPOICityData.img"
-              :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+              :src="lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : (lastPOICityData.img ? lastPOICityData.img : null)"
             />
             <q-card-section style="padding-left:10px; padding-top:10px;">
               <span
@@ -249,6 +250,7 @@
                 label="Ort hinzufügen"
                 @click="addStop"
                 color="primary"
+                v-if="!isDemo"
               />
             </q-card-actions>
           </q-card>
@@ -257,8 +259,23 @@
       <q-dialog v-model="showDetailsDialog">
         <div v-if="lastPOICityData">
           <q-card>
-            <!-- todo change to slideshow -->
-            <q-img :src="lastPOICityData.img" />
+            <q-carousel
+              animated
+              v-model="slide"
+              arrows
+              infinite
+              swipeable
+              autoplay
+            >
+              <q-carousel-slide
+                :name="index"
+                class="column no-wrap"
+                v-for="(img, index) in lastPOICityData.imgSrcs"
+                :key="index"
+                style="padding: 0;"
+                :img-src="img"
+              ></q-carousel-slide>
+            </q-carousel>
             <q-card-section>
               <div style="padding-left:10px; padding-top:10px;">
                 <span class="font-large">{{lastPOICityData.title}}</span>
@@ -296,7 +313,7 @@
 
                   <template v-if="isStopAlreadyAdded(lastPOICityData.title)">
                     <q-btn
-                      class="add-button"
+                      class="sight-add-button"
                       v-show="!sightAlreadyAdded(poi.name, lastPOICityData.title)"
                       icon="bookmark"
                       color="primary"
@@ -306,7 +323,7 @@
                       <q-tooltip>Ort merken</q-tooltip>
                     </q-btn>
                     <q-btn
-                      class="add-button"
+                      class="sight-add-button"
                       v-show="sightAlreadyAdded(poi.name, lastPOICityData.title)"
                       icon="done"
                       color="primary"
@@ -333,7 +350,7 @@
                     target="_blank"
                   >
                     <q-card-section style="color:#707070;">
-                      <q-icon name="location_on" />.marker._popup.remove()
+                      <q-icon name="location_on" />
                       {{poi.location.label}}
                     </q-card-section>
                   </a>
@@ -342,37 +359,13 @@
             </q-card-section>
           </q-card>
         </div>
-        <!-- <q-card>
-          <q-img
-            :src="sightDialog.src"
-            style="max-height:75vh;"
-          >
-            <div class="absolute-bottom">
-              <div class="text-h6">{{sightDialog.title}}</div>
-              <div class="text-subtitle2">{{sightDialog.description}}</div>
-            </div>
-          </q-img>
-
-          <q-card-section>
-            {{sightDialog.extract}}
-          </q-card-section>
-
-          <q-card-actions align="right">
-            <q-btn
-              flat
-              label="zurück"
-              color="primary"
-              v-close-popup
-            />
-          </q-card-actions>
-        </q-card> -->
       </q-dialog>
       <div
         v-for="(stop, index) in stops"
         :key="'StopContainer' + stop.DocId + index"
       >
         <MglMarker
-          v-if="stop.Parking && typeof stop.Parking !== 'undefined' && !isNaN(stop.Parking.lng)"
+          v-if="stop.Parking && !isNaN(stop.Parking.lng)"
           :key="'Stop' + stop.DocId"
           :coordinates="[stop.Parking.lng, stop.Parking.lat]"
           color="#D56026"
@@ -387,7 +380,7 @@
                 />
               </div>
               <q-card-section>
-                <p>{{ stop.parkingPlace && typeof stop.parkingPlace !== 'undefined' &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
+                <p>{{ stop.parkingPlace &&  stop.parkingPlace.label && typeof stop.parkingPlace.label !== 'undefined' ? stop.Parking.label.split(',')[0] : 'Parkplatz für ' + stop.Title}}</p>
               </q-card-section>
             </q-card>
           </MglPopup>
@@ -414,7 +407,7 @@
             <q-card>
               <q-img
                 v-show="lastPOICityData.img"
-                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : lastPOICityData.imgSrc"
+                :src="lastPOICityData.img && lastPOICityData.img.split('/')[0] === 'https:' ? lastPOICityData.img : (lastPOICityData.imgSrcs ? lastPOICityData.imgSrcs[0] : '')"
               />
               <q-card-section style="padding-left:10px; padding-top:10px;">
                 <span
@@ -437,13 +430,13 @@
                 />
                 <q-btn
                   flat
-                  v-if="!isStopAlreadyAdded(city.name)"
+                  v-if="!isStopAlreadyAdded(city.name) && !isDemo"
                   label="Ort hinzufügen"
                   @click="addStop"
                   color="primary"
                 />
                 <q-btn
-                  v-else
+                  v-else-if="!isDemo"
                   label="Ort ansehen"
                   @click="$refs['stopMarker' + isStopAlreadyAdded(city.name).DocId][0].marker._popup.addTo(map); $refs['cityMarker' + index][0].marker._popup.remove()"
                   color="primary"
@@ -557,6 +550,9 @@
     </q-dialog>
   </div>
 </template>
+<style lang="less">
+@import url("../../css/map.less");
+</style>
 <style lang="less" scoped>
 .mapboxgl-marker-anchor-center {
   font-size: 40px;
@@ -579,13 +575,12 @@ import {
   MglFullscreenControl
 } from 'vue-mapbox'
 
-import(/* webpackPrefetch: true */ '../../css/map.less')
-
 const getAxios = () => import('axios')
 import { date } from 'quasar'
 import sharedMethods from '../../sharedMethods.js'
 import MapLayerPlugin from './MapLayerPlugin.vue'
 import { countries } from '../../countries.js'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 let hoveredStateId = null
 
@@ -615,11 +610,15 @@ export default {
     rooms: Number,
     editor: Boolean,
     defaultInitDate: String,
-    height: String
+    height: String,
+    isDemo: Boolean
   },
   computed: {
     isMobile () {
       return window.matchMedia('(max-width: 550px)').matches
+    },
+    accTo () {
+      return this.$store.getters['api/getMapboxKey']
     }
     // isTablet () {
     //   return window.matchMedia('(max-width: 958px)').matches
@@ -627,7 +626,6 @@ export default {
   },
   data () {
     return {
-      accTo: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       mapStyle: 'mapbox://styles/mareiski/ck27d9xpx5a9s1co7c2golomn',
       addedRoutes: [],
       showAddStopMarker: false,
@@ -654,7 +652,8 @@ export default {
       suggestionCountry: null,
       showSuggestionCountryDialog: false,
       countryOptions: countries,
-      loading: true
+      loading: true,
+      slide: 0
     }
   },
   watch: {
@@ -757,7 +756,7 @@ export default {
      * gets suggested cities and shows markers
      */
     showCitiesOnMap () {
-      CitySuggestionMethods.getCities(this.suggestionCountry).then(response => {
+      CitySuggestionMethods.getCities(this.suggestionCountry, this).then(response => {
         if (!response) return
 
         this.suggestedCities = response
@@ -782,9 +781,11 @@ export default {
 
       const el = document.getElementById('CitySuggestion' + name)
 
-      const offset = el.offsetTop
+      if (el) {
+        const offset = el.offsetTop
 
-      drawerScrollArea.setScrollPosition(offset - 20, 400)
+        drawerScrollArea.setScrollPosition(offset - 20, 400)
+      }
     },
     /**
      * shows the given pois on map
@@ -842,7 +843,7 @@ export default {
         description: '',
         shortDescription: '',
         img: '',
-        imgSrc: ''
+        imgSrcs: []
       }
 
       this.loadMarkerInfos(title)
@@ -852,7 +853,7 @@ export default {
     },
     showSightDetails (lat, lng) {
       if (lat !== this.lastSightDetailsLat || lng !== this.lastSightDetailsLng) {
-        sharedMethods.getGooglePlacesData(lat, lng).then(POIArr => {
+        sharedMethods.getGooglePlacesData(lat, lng, this).then(POIArr => {
           this.suggestedPOIs = POIArr
           this.showDetailsDialog = true
         }).catch((e) => {
@@ -1027,7 +1028,7 @@ export default {
                 description: '',
                 shortDescription: '',
                 img: '',
-                imgSrc: ''
+                imgSrcs: []
               }
 
               var features = map.queryRenderedFeatures(e.point)
@@ -1105,7 +1106,7 @@ export default {
 
         // load additional infos for marker
         sharedMethods.getWikivoyageData(title).then(result => {
-          CitySuggestionMethods.getCityImage(title, '').then(image => {
+          CitySuggestionMethods.getCityImage(title, '', context).then(image => {
             if (result) {
               result.img = image.url
               context.lastPOICityData = result
@@ -1131,7 +1132,7 @@ export default {
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
       // get id for route
-      let id = (dailyTrip ? 1 : '') + 5 + index
+      let id = (dailyTrip ? '1' : '0') + index
 
       // get random color for route
       let color = this.getRandomColor(index, this.stops.length)
@@ -1213,7 +1214,12 @@ export default {
                 map.on('click', id, function (_e) {
                   // close all popups
                   context.closeAllPopups()
-                  if (!context.markerClicked) context.$refs[id][0].togglePopup()
+
+                  let speedMarker = context.$refs['route' + id][0]
+                  console.log(speedMarker)
+
+                  // and show clicked route popup
+                  if (!context.markerClicked) speedMarker.togglePopup()
                 })
                 map.getSource(id).setData(geojson)
               }
@@ -1312,6 +1318,7 @@ export default {
     }
     this.mapbox = Mapbox
     this.map = null
+    this.loadMap()
   }
 }
 

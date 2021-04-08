@@ -2,20 +2,20 @@
 
 import axios from 'axios'
 import { db } from '../../firebaseInit.js'
+import sharedMethods from '../../sharedMethods.js'
 
 export default {
     /**
       * @returns an array of cities
       */
-    getCities (country) {
+    getCities (country, context) {
         return new Promise((resolve, reject) => {
-            const context = this
-
-            context.fetchDBSuggestions(country).then(function (response) {
+            let fileContext = this
+            fileContext.fetchDBSuggestions(country).then(function (response) {
                 if (response.length > 0) {
                     resolve(response)
                 } else {
-                    context.fetchAPISuggestions(country).then(function (apiResponse) {
+                    fileContext.fetchAPISuggestions(country, context).then(function (apiResponse) {
                         resolve(apiResponse)
                     }).catch(function (error) {
                         console.log('Error' + error)
@@ -65,22 +65,23 @@ export default {
     /**
       * fetch city suggestions from geo db api
       */
-    fetchAPISuggestions (country) {
-        let context = this
+    fetchAPISuggestions (country, context) {
         return new Promise((resolve, reject) => {
+            let fileContext = this
             axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/countries?limit=5&offset=0&namePrefix=' + country + '&languageCode=de', {
                 headers: {
-                    'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+                    'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
                 }
             }).then(function (response) {
+                if (!response.data.data[0]) sharedMethods.showErrorNotification('Für diesen Ort wurde nichts gefunden')
                 // wait 2 secs because only 1 request per sec is allowed
                 setTimeout(function () {
                     axios.get('https://wft-geo-db.p.rapidapi.com/v1/geo/cities?countryIds=' + response.data.data[0].code + '&minPopulation=70000&sort=-population&languageCode=de&types=CITY', {
                         headers: {
-                            'X-RapidAPI-Key': '01861af771mshb4bcca217c978fdp12121ejsnd0c4ce2c275a'
+                            'X-RapidAPI-Key': context.$store.getters['api/getGeoDBKey']
                         }
                     }).then(function (response) {
-                        context.writeInDB(response.data.data)
+                        fileContext.writeInDB(response.data.data)
                         resolve(response.data.data)
                     }).catch(function (error) {
                         console.log(error)
@@ -108,13 +109,14 @@ export default {
     /**
      * gets a image from pixabay for given city name
      */
-    getCityImage (cityName, cityCountry) {
+    getCityImage (cityName, cityCountry, context) {
+        let key = context.$store.getters['api/getPixabayKey']
         return new Promise((resolve, reject) => {
-            axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
+            axios.get('https://pixabay.com/api/?key=' + key + '&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName + ' ' + cityCountry, {}
             ).then(function (response) {
                 if (response.data.hits[0]) resolve({ url: response.data.hits[0].webformatURL, cityName: cityName })
                 else {
-                    axios.get('https://pixabay.com/api/?key=14851178-b5e8b2cd21896ed0fc8b90fa0&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName, {}
+                    axios.get('https://pixabay.com/api/?key=' + key + '&lang=de&category=buildings&image_type=photo&orientation=horizontal&safesearch=true&min_height=40&per_page=3&q=' + cityName, {}
                     ).then(function (response) {
                         if (response.data.hits[0]) resolve({ url: response.data.hits[0].webformatURL, cityName: cityName })
                         else {

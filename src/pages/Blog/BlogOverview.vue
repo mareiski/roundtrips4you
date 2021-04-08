@@ -69,9 +69,10 @@
     </div>
   </q-page>
 </template>
-
+<style lang="less">
+@import url("../../css/blog.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/blog.less')
 export default {
   meta: {
     title: 'Blog',
@@ -86,17 +87,25 @@ export default {
     }
   },
   created: function () {
-    this.fetchAllPosts()
+    this.$storyblok.on('change', () => {
+      this.fetchAllPosts('draft')
+    })
+    this.$storyblok.on('published', () => {
+      this.fetchAllPosts('draft')
+    })
+    this.$storyblok.pingEditor(() => {
+      this.fetchAllPosts(this.$storyblok.inEditor ? 'draft' : 'published')
+    })
   },
   methods: {
     /**
      * Fetch all posts from storyblok
      */
-    fetchAllPosts () {
+    fetchAllPosts (version) {
       this.$storyblok.get({
         slug: '/',
         starts_with: 'blog',
-        version: 'draft'
+        version: version
       }, (data) => {
         this.stories = data.stories
         console.log(this.stories)

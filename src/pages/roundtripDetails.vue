@@ -6,32 +6,32 @@
       style="position:fixed; z-index:1; right:0; padding: 10px"
     >
       <q-btn
-        round
         color="primary"
         icon="edit"
         v-if="isUserCreator"
         @click="$router.push('/rundreisen-wizard/' + RTId)"
+        label="Bearbeiten"
       >
         <q-tooltip>Reise bearbeiten</q-tooltip>
       </q-btn>
 
       <q-btn
-        round
         color="primary"
         icon="content_copy"
         v-else
         @click="copyRTDialog = true"
+        label="Kopieren"
       >
-        <q-tooltip>Reise bearbeiten</q-tooltip>
+        <q-tooltip>Reise kopieren</q-tooltip>
       </q-btn>
 
       <q-btn
-        round
         color="primary"
         icon="settings"
         style="margin-left:10px;"
         v-if="isUserCreator"
         @click="$router.push('/rundreisen-einstellungen/' + RTId)"
+        round
       >
         <q-tooltip>Reiseeinstellungen</q-tooltip>
       </q-btn>
@@ -162,7 +162,19 @@
         <q-timeline color="secondary">
           <q-timeline-entry heading>
             <div class="flex justify-between">
-              <span>{{roundtrip ? roundtrip.Title : 'Reiseverlauf'}}</span>
+              <div class="flex">
+                <span>{{roundtrip ? roundtrip.Title : 'Reiseverlauf'}}</span>
+                <q-btn
+                  color="primary"
+                  icon="edit"
+                  v-if="isUserCreator"
+                  @click="$router.push('/rundreisen-wizard/' + RTId)"
+                  label="Bearbeiten"
+                  style="height:36px; margin:auto; margin-left:20px;"
+                >
+                  <q-tooltip>Reise bearbeiten</q-tooltip>
+                </q-btn>
+              </div>
               <q-toggle
                 style="font-size:18px"
                 @input="sharedMethods.expandAllStops(getContext, stops)"
@@ -170,7 +182,10 @@
                 label="Stopps ausklappen"
               ></q-toggle>
             </div>
-            <div class="legal-description">
+            <div
+              class="legal-description"
+              v-if="!isUserCreator"
+            >
               <p v-if="!creator.companyProfile">Alle Stopps, Hotels, Sehenswürdigkeiten usw. sind von {{ creator.UserName ? creator.UserName : ' dem Ersteller dieser Rundreise ' }} empfohlen.</p>
               <p v-if="!creator.companyProfile">Diese Reise dient nur zur Veranschaulichung und Darstellung eines Reisevorschlags.</p>
               <span v-if="creator.UserName">Diese Rundreise wurde von </span>
@@ -270,23 +285,15 @@
             <template v-for="(stop, index) in stops">
               <Stop
                 :key="stop.DocId"
-                :title="stop.Title"
+                :RTId="RTId"
+                :stopObject="stop"
                 :date="typeof stops[index].InitDate === 'string' ? stop.InitDate : sharedMethods.getStringDateFromTimestamp(stop.InitDate)"
                 :nextStopDate="stops[index + 1] ? (typeof stops[index + 1].InitDate === 'string' ? stops[index + 1].InitDate : sharedMethods.getStringDateFromTimestamp(stops[index + 1].InitDate.seconds)) : null"
-                :editor-placeholder="stop.Description"
                 :editor="false"
-                :docId="stop.DocId"
-                :general-link="stop.GeneralLink"
                 :location="stop.Location && typeof stop.Location !== 'undefined' && stop.Location ? stop.Location : null"
                 :parkingPlace="stop.Parking && typeof stop.Parking !== 'undefined' && stop.Parking ? stop.Parking : null"
                 :lastItem="index === stops.length -1"
                 :hotelStars="parseInt(stop.HotelStars)"
-                :hotelName="stop.HotelName"
-                :hotelPrice="stop.HotelPrice"
-                :guestRating="stop.GuestRating"
-                :transportLocations="stop.TransportLocations"
-                :hotelLocation="stop.HotelLocation"
-                :hotelContact="stop.HotelContact"
                 :adults="parseInt(adults)"
                 :childrenAges="childrenAges"
                 :rooms="parseInt(rooms)"
@@ -296,8 +303,7 @@
                 :addedSights="stop.Sights ? stop.Sights : []"
                 :days="days[days.findIndex(x => x.docId === stop.DocId)] ? days[days.findIndex(x => x.docId === stop.DocId)].days : null"
                 :dailyTrips="stop.DailyTrips ? stop.DailyTrips : []"
-                :expanded="stop.expanded"
-                :profile="stop.Profile"
+                :checkOutDate="stop.CheckOutDate ? stop.CheckOutDate : getDefaultCheckOutDate(stop)"
                 @expansionChanged="sharedMethods.expansionChanged(getContext, $event)"
                 :class="'stop' + stop.DocId"
                 :ref="stop.DocId"
@@ -425,10 +431,12 @@
     </q-tab-panels>
   </div>
 </template>
+<style lang="less">
+@import url("../css/editRoundtrips.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/editRoundtrips.less')
 import { date } from 'quasar'
-import { db, storage, auth } from '../firebaseInit.js'
+import { db, auth } from '../firebaseInit.js'
 const getAxios = () => import('axios')
 import { TaskQueue } from 'cwait'
 import sharedMethods from '../sharedMethods'
@@ -441,9 +449,9 @@ let context
 
 export default {
   components: {
-    Stop: () => import('../pages/EditRoundtripComponents/stop'),
-    Map: () => import('../pages/Map/Map'),
-    Duration: () => import('../pages/EditRoundtripComponents/duration')
+    Stop: () => import('../components/EditRoundtripComponents/stop'),
+    Map: () => import('../components/Map/Map'),
+    Duration: () => import('../components/EditRoundtripComponents/duration')
   },
   data () {
     return {
@@ -451,10 +459,8 @@ export default {
       stops: [],
       roundtrip: [],
       slide: null,
-      galeryImgUrls: [],
       tab: 'overview',
       durations: [],
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       days: [],
       copyRTDialog: false,
       copyRTTitle: null,
@@ -495,6 +501,9 @@ export default {
     },
     getContext () {
       return context
+    },
+    galeryImgUrls () {
+      return this.$store.getters['images/getGaleryImgUrls'](this.RTId)
     }
   },
   meta () {
@@ -529,10 +538,12 @@ export default {
         this.profile = this.getProfile(roundtrip.Profile)
         this.tripWebsite = roundtrip.tripWebsite
 
-        this.loadGaleryImgs()
+        this.$store.dispatch('images/loadAllImgs', RTId)
+
         this.getUserRatings(RTId)
       }).catch(err => {
         console.log('Error getting Roundtrip', err)
+        sharedMethods.showErrorNotification('Rundreise konnte nicht geladen werden')
       })
     },
     getDefaultCheckOutDate (stop) {
@@ -708,6 +719,7 @@ export default {
         })
         .catch(err => {
           console.log('Error getting Roundtripdetails', err)
+          sharedMethods.showErrorNotification('Rundreise konnten nicht geladen werden')
         })
     },
     /**
@@ -830,7 +842,7 @@ export default {
       if (stopProfile !== null && typeof stopProfile !== 'undefined' && stopProfile.length > 0) profile = stopProfile
 
       if (profile !== 'plane') {
-        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+        return 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.$store.getters['api/getMapboxKey']
       } else {
         return null
       }
@@ -907,22 +919,6 @@ export default {
       }
       this.days.splice(this.stops.findIndex(x => x.DocId === stop.docId), 0, { days: days, docId: stop.DocId })
       if (this.stops.indexOf(stop) === this.stops.length - 2) this.stopsLoaded = true
-    },
-    loadGaleryImgs () {
-      const context = this
-      let fileRef = storage.ref().child('Images/Roundtrips/' + context.roundtrip.docId + '/Galery')
-      fileRef.listAll().then(function (res) {
-        res.items.forEach(function (itemRef) {
-          fileRef = storage.ref().child(itemRef.fullPath)
-          context.galeryImgUrls = []
-          fileRef.getDownloadURL().then(function (url) {
-            context.galeryImgUrls.push(url)
-            if (context.galeryImgUrls.length === 1) context.slide = url
-          })
-        })
-      }).catch(function (error) {
-        console.log(error)
-      })
     }
   },
   mounted () {

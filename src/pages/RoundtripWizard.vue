@@ -14,7 +14,7 @@
         round
         color="primary"
         icon="visibility"
-        @click="unsavedChanges ? showCancelDialog = true : $router.push('/rundreise-ansehen/' + $route.params.id)"
+        @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
       >
         <q-tooltip>Reise ansehen</q-tooltip>
       </q-btn>
@@ -37,7 +37,7 @@
             label="Änderungen verwerfen"
             v-close-popup
             flat
-            @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
+            @click="cancelDialogNext(); $store.commit('demoSession/resetRoundtrip')"
           />
           <q-btn
             type="submit"
@@ -85,8 +85,8 @@
             <template v-if="step === 1">
               <q-btn
                 color="primary"
-                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults"
-                @click="step = 2"
+                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults || isTitleInUse"
+                @click="step = 2; unsavedChanges = true"
                 label="weiter"
               />
             </template>
@@ -100,7 +100,7 @@
                 class="q-ml-sm"
               />
               <q-btn
-                @click="step = 3"
+                @click="step = 3; unsavedChanges = true"
                 color="primary"
                 :disable="currentRoundtrip.TransportProfile === 'Reisemittel wählen' || (currentRoundtrip.TransportProfile === 'Flugzeug' && (!currentRoundtrip.TransportProfile || !currentRoundtrip.Origin || !currentRoundtrip.Destination || !currentRoundtrip.DepatureDate || !currentRoundtrip.ReturnDate || !currentRoundtrip.TravelClass || !currentRoundtrip.NonStop))"
                 label="Weiter"
@@ -109,7 +109,10 @@
 
             <template v-else-if="step === 3">
               <div class="flex justfiy-between">
-                <div>
+                <div
+                  class="flex justify-center"
+                  style="flex-direction:column;"
+                >
                   <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
                 </div>
                 <div>
@@ -128,7 +131,7 @@
                     :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
                     class="q-ml-sm"
                     :loading="saving"
-                    @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
+                    @click="unsavedChanges ? createTrip(false) : $router.push('/rundreise-ansehen/' + $route.params.id)"
                   />
                 </div>
               </div>
@@ -273,154 +276,12 @@
         :header-nav="step > 2"
         v-if="!isRTEditMode"
       >
-        <q-select
-          outlined
-          v-model="currentRoundtrip.TransportProfile"
-          input-debounce="0"
-          :options="['Flugzeug', 'Andere']"
-          label="Reisemittel"
-          :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
-          style="padding-bottom: 32px"
-        >
-          <template v-slot:prepend>
-            <q-icon name="commute" />
-          </template>
-        </q-select>
-        <div
-          v-if="currentRoundtrip.TransportProfile === 'Flugzeug'"
-          class="flight-container"
-        >
-          <q-select
-            outlined=""
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            clearable
-            ref="select"
-            v-model="currentRoundtrip.Origin"
-            hide-dropdown-icon
-            label="Abflugsort"
-            :options="originOptions"
-            @filter="getOrigins"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-          >
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  zu viele/keine Ergebnisse, bitte weitertippen
-                </q-item-section>
-              </q-item>
-            </template>
-            <template v-slot:prepend>
-              <q-icon name="flight_takeoff" />
-            </template>
-          </q-select>
-          <q-select
-            outlined=""
-            use-input
-            hide-selected
-            fill-input
-            input-debounce="0"
-            clearable
-            ref="select"
-            v-model="currentRoundtrip.Destination"
-            hide-dropdown-icon
-            label="Ankunftsort"
-            :options="destinationOptions"
-            @filter="getDestinations"
-            @input="destinationChanged($event)"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle einen Ort']"
-          >
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">
-                  zu viele/keine Ergebnisse, bitte weitertippen
-                </q-item-section>
-              </q-item>
-            </template>
-            <template v-slot:prepend>
-              <q-icon name="flight_land" />
-            </template>
-          </q-select>
-          <q-input
-            outlined
-            v-model="currentRoundtrip.DepatureDate"
-            label="Abflugsdatum"
-            class="input-item rounded-borders q-field--with-bottom"
-          >
-            <q-popup-proxy
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-date
-                v-model="currentRoundtrip.DepatureDate"
-                today-btn
-                mask="DD.MM.YYYY"
-                @input="updateReturnDate()"
-              />
-            </q-popup-proxy>
-            <template v-slot:prepend>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-              </q-icon>
-            </template>
-          </q-input>
-          <q-input
-            outlined
-            v-model="currentRoundtrip.ReturnDate"
-            label="Rückflugsdatum"
-            class="input-item rounded-borders q-field--with-bottom"
-          >
-            <q-popup-proxy
-              transition-show="scale"
-              transition-hide="scale"
-            >
-              <q-date
-                v-model="currentRoundtrip.ReturnDate"
-                today-btn
-                mask="DD.MM.YYYY"
-              />
-            </q-popup-proxy>
-            <template v-slot:prepend>
-              <q-icon
-                name="event"
-                class="cursor-pointer"
-              >
-              </q-icon>
-            </template>
-          </q-input>
-          <q-select
-            outlined
-            v-model="currentRoundtrip.TravelClass"
-            input-debounce="0"
-            :options="['Economy', 'Premium Economy', 'Business', 'First']"
-            label="Reiseklasse auswählen"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Klasse']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="star" />
-            </template>
-          </q-select>
-          <q-select
-            outlined
-            v-model="currentRoundtrip.NonStop"
-            input-debounce="0"
-            :options="['Ja', 'Nein']"
-            label="Non Stop"
-            :rules="[val => val !== null && val !== '' || 'Bitte wähle eine Option']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="flight" />
-            </template>
-          </q-select>
-        </div>
-        <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
-          <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
-          <p style="text-align:left;">Du kannst dafür sofort mit der Reiseplanung beginnen!</p>
-        </div>
+        <ArrivalDeparture
+          v-if="currentRoundtrip.DepatureDate"
+          :currentRoundtrip="currentRoundtrip"
+          :startDate="currentStop.InitDate.split(' ')[0]"
+          @updateArrivalDeparture="updateArrivalDeparture($event)"
+        ></ArrivalDeparture>
       </q-step>
 
       <q-step
@@ -472,7 +333,7 @@
           :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
           class="q-ml-sm"
           :loading="saving"
-          @click="unsavedChanges ? createTrip() : $router.push('/rundreise-ansehen/' + $route.params.id)"
+          @click="unsavedChanges ? createTrip(false) : $router.push('/rundreise-ansehen/' + $route.params.id)"
         />
       </div>
     </div>
@@ -499,7 +360,7 @@
             type="number"
             filled
             label="Dauer in Tagen"
-            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            :rules="[val => val !== '' && val >= 0 || 'Bitte gib eine Anzahl von Tagen ein']"
             lazy-rules
           />
           <div style="margin-bottom:20px;">
@@ -540,7 +401,7 @@
           <q-btn
             color="primary"
             :disable="!currentStop.Title && currentStop.DayDuration <= 0"
-            @click="() => { addStop() }"
+            @click="() => { addStop(true) }"
             v-close-popup
             label="hinzufügen"
           />
@@ -548,8 +409,11 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="showEditStopDialog">
-      <q-card>
+    <q-dialog
+      v-model="showEditStopDialog"
+      persistent
+    >
+      <q-card id="editStopDialogCard">
         <q-card-section>
           <q-input
             v-model="currentStop.Title"
@@ -567,7 +431,7 @@
             type="number"
             filled
             label="Dauer in Tagen"
-            :rules="[val => val !== null &&  val !== '' && val > 0 || 'Bitte gib eine Anzahl von Tagen ein']"
+            :rules="[val => val !== null &&  val !== '' && val >= 0 || 'Bitte gib eine Anzahl von Tagen ein']"
             lazy-rules
           />
           <div style="margin-bottom:20px;">
@@ -617,7 +481,7 @@
 
           <div
             style="margin-bottom:30px"
-            v-if="!hotelName"
+            v-if="!currentStop.HotelName"
           >
             <q-btn
               size="20"
@@ -633,7 +497,7 @@
               padding
               dense
               class="rounded-borders"
-              v-if="hotelName"
+              v-if="currentStop.HotelName"
             >
               <q-item class="hotel-list">
                 <q-item-section
@@ -655,9 +519,9 @@
                     class="flex"
                     style="flex-wrap:wrap; white-space:normal;"
                   >
-                    <span style="padding-right:5px;">{{capitalize(hotelName)}}</span>
+                    <span style="padding-right:5px;">{{capitalize(currentStop.HotelName)}}</span>
                     <q-rating
-                      v-if="hotelStars && !isNaN(hotelStars)"
+                      v-if="currentStop.HotelStars && !isNaN(currentStop.HotelStars)"
                       class="stars"
                       v-model="hotelStars"
                       readonly
@@ -670,14 +534,14 @@
                       style="flex-wrap:wrap; white-space:normal;"
                     >
                       <span
-                        v-if="guestRating"
+                        v-if="currentStop.GuestRating"
                         class="raleway"
                       >
-                        {{guestRating}},&nbsp;
+                        {{currentStop.GuestRating}},&nbsp;
                       </span>
-                      <span v-if="hotelPrice">
+                      <span v-if="currentStop.HotelPrice">
                         <span class="raleway">ca. € </span>
-                        <span class="raleway">{{hotelPrice}}</span>
+                        <span class="raleway">{{currentStop.HotelPrice}}</span>
                         <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
                       </span>
                     </div>
@@ -689,12 +553,12 @@
                     <a
                       class="ellipsis"
                       @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
-                    >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+                    >{{currentStop.HotelLocation && typeof currentStop.HotelLocation !== 'undefined' && currentStop.HotelLocation.label && typeof currentStop.HotelLocation.label !== 'undefined' ? capitalize(currentStop.HotelLocation.label) :  'kein Ort angegeben'}}</a>
                   </q-item-label>
                 </q-item-section>
                 <q-item-section>
                   <q-btn
-                    v-if="transportLocations && transportLocations.lenght > 0"
+                    v-if="currentStop.TransportLocations && currentStop.TransportLocations.lenght > 0"
                     style="width:150px;"
                     @click="showTransportDialog = true"
                   >Transport
@@ -710,7 +574,7 @@
                         <div
                           class="flex"
                           style="flex-direction:column;"
-                          v-for="location in transportLocations"
+                          v-for="location in currentStop.TransportLocations"
                           :key="location"
                         >
                           <q-item
@@ -742,61 +606,61 @@
                   </q-card>
                 </q-dialog>
                 <q-item-section side>
-                  <div v-if="generalTempLink && generalTempLink.length > 0">
+                  <div v-if="currentStop.GeneralTempLink && currentStop.GeneralTempLink.length > 0">
                     <q-chip
                       icon="link"
                       dense
                       class="linkChip"
                       clickable
-                      @click="openInNewTab(generalTempLink)"
+                      @click="openInNewTab(currentStop.GeneralTempLink)"
                     >Hotelwebsite</q-chip>
                   </div>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'
+                    v-if="currentStop.HotelName && typeof currentStop.HotelName !== 'undefined'
                      "
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(currentStop.HotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + currentStop.CheckOutDate.split('.')[2] + '&checkout_month=' + currentStop.CheckOutDate.split('.')[1] + '&checkout_monthday=' + currentStop.CheckOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
                   > booking.com
                     <q-tooltip>Hotel auf booking.com</q-tooltip>
                   </q-chip>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName && typeof hotelName !== 'undefined'
+                    v-if="currentStop.HotelName && typeof currentStop.HotelName !== 'undefined'
                     "
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
+                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(currentStop.HotelName) + '&endDate=' + currentStop.CheckOutDate.split(' ')[0].split('.')[2] + '-' + currentStop.CheckOutDate.split('.')[1] + '-' + currentStop.CheckOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
                   > expedia
                     <q-tooltip>Hotel auf expedia</q-tooltip>
                   </q-chip>
                 </q-item-section>
                 <q-item-section
                   side
-                  v-if="hotelContact && typeof hotelContact !== 'undefined'
+                  v-if="currentStop.HotelContact && typeof currentStop.HotelContact !== 'undefined'
                   "
                 >
                   <div class="hotel-contact">
                     <q-chip
-                      v-if="hotelContact.email && typeof hotelContact.email !== 'undefined'
+                      v-if="currentStop.HotelContact.email && typeof currentStop.HotelContact.email !== 'undefined'
                       "
                       icon="email"
                       clickable
-                      @click="openInNewTab('mailto:' + hotelContact.email)"
-                    >{{ hotelContact.email}}
+                      @click="openInNewTab('mailto:' + currentStop.HotelContact.email)"
+                    >{{ currentStop.HotelContact.email}}
                     </q-chip>
                     <q-chip
                       icon="phone"
-                      v-if="hotelContact.phone && typeof hotelContact.phone !== 'undefined'
+                      v-if="currentStop.HotelContact.phone && typeof currentStop.HotelContact.phone !== 'undefined'
                       "
                       clickable
-                      @click="openInNewTab('tel:' + hotelContact.phone)"
-                    >{{hotelContact.phone}}
+                      @click="openInNewTab('tel:' + currentStop.HotelContact.phone)"
+                    >{{currentStop.HotelContact.phone}}
                     </q-chip>
                   </div>
                 </q-item-section>
@@ -877,7 +741,7 @@
             </q-card>
           </q-dialog>
 
-          <div v-if="suggestedSights && suggestedSights !== 'error'">
+          <!-- <div v-if="suggestedSights && suggestedSights !== 'error'">
             <span
               v-for="(sight, index) in suggestedSights"
               :key="index"
@@ -887,7 +751,7 @@
             >
               <q-chip
                 clickable
-                @click="openSightDialog(sight)"
+                @click="$refs.sightDialog.openSightDialog(addedSight)"
                 :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
               >{{sight.name}}
               </q-chip>
@@ -898,53 +762,11 @@
               v-if="currentStop.Location"
               :href="'https://www.google.com/search?q=' +  currentStop.Location.label.split(',')[0] + ' Sehenswürdigkeiten'"
             >weitere auf Google</a>
-            <q-dialog v-model="sightDialog.showed">
-              <q-card>
-                <q-card-section
-                  class="row flex justify-end q-pb-none"
-                  style="z-index:100; width:100%; position:absolute; color:white;"
-                >
-                  <q-btn
-                    icon="close"
-                    flat
-                    round
-                    dense
-                    v-close-popup
-                  />
-                </q-card-section>
-                <q-img
-                  :src="sightDialog.imgSrc"
-                  style="max-height:75vh;"
-                >
-                  <div class="absolute-bottom">
-                    <div class="text-h6">{{sightDialog.title}}</div>
-                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
-                  </div>
-                </q-img>
-
-                <q-card-section>
-                  {{sightDialog.description}}
-                </q-card-section>
-
-                <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="hinzufügen"
-                    color="primary"
-                    v-close-popup
-                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </div>
-          <!-- <q-chip
-            v-else
-            clickable
-            @click="searchSights()"
-          >{{suggestedSights === 'error' ? 'keine POIs gefunden' : 'POIs anzeigen'}}
-            <q-tooltip>Sehenswürdigkeiten anzeigen</q-tooltip>
-          </q-chip> -->
+            <SightDialog
+              :addAble="true"
+              ref="sightDialog"
+            ></SightDialog>
+          </div> -->
 
           <q-select
             label="gemerkte Orte"
@@ -967,7 +789,7 @@
             </template>
           </q-select>
 
-          <span>Klicke auf diesen Stopp auf der Karte um dir vorgeschlagene <br> Orte anzeigen zu lassen</span>
+          <span>Klicke auf diesen Stopp auf der Karte um dir Orte vorschlagen zu lassen<br></span>
 
           <q-editor
             v-model="currentStop.Description"
@@ -988,8 +810,41 @@
         }
         }"
           />
+          <div class="flex">
+            <q-input
+              filled
+              ref="tempImgLinkInput"
+              label="Bild per Link einfügen"
+              v-model="tempImgLink"
+              :rules="[val => sharedMethods.validURL(val) || 'Bitte gib einen richtigen Link ein']"
+              lazy-rules
+              bottom-slots
+              outlined
+              style="padding:0; width:80%; margin-bottom:10px;"
+            ></q-input>
+            <q-btn
+              round
+              color="primary"
+              icon="add"
+              :disable="!sharedMethods.validURL(tempImgLink)"
+              style="margin-left:10px; margin-top:5px; height:45px;"
+              @click="addImageToStop(tempImgLink)"
+            />
+          </div>
+          {{currentStop.StopImages}}
+          <Uploader
+            :RTId="currentRoundtrip.RTId"
+            :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
+            :uploadDisabled="false"
+            @imageAdded="addImageToStop($event)"
+            @imageDeleted="removeImageFromStop($event)"
+          />
+          <p>Bitte verwende nur Bilder die für die Wiederverwendung eindeutig gekennzeichnet sind.</p>
         </q-card-section>
-        <q-card-actions align="right">
+        <q-card-actions
+          align="right"
+          class="sticky-navigation"
+        >
           <q-btn
             flat
             label="Abbrechen"
@@ -999,8 +854,8 @@
           <q-btn
             label="Speichern"
             color="primary"
-            :disable="!currentStop.DayDuration || currentStop.DayDuration <= 0"
-            @click="() => { addStop() }"
+            :disable="currentStop.DayDuration < 0"
+            @click="() => { addStop(true) }"
             v-close-popup
           />
         </q-card-actions>
@@ -1029,9 +884,10 @@ let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
 
 export default {
   components: {
-    HotelSearch: () => import('../pages/Map/HotelSearch.vue'),
-    // draggable,
-    TripOverview: () => import('../pages/TripOverview/TripOverview.vue')
+    HotelSearch: () => import('../components/Map/HotelSearch.vue'),
+    ArrivalDeparture: () => import('../components/EditRoundtripComponents/arrivalDeparture.vue'),
+    TripOverview: () => import('../components/TripOverview/TripOverview.vue'),
+    Uploader: () => import('../components/Uploader/Uploader.vue')
   },
   computed: {
     isMobile () {
@@ -1039,8 +895,17 @@ export default {
     },
     user () {
       return auth.user()
+    },
+    sharedMethods () {
+      return sharedMethods
     }
   },
+  watch: {
+    step: function () {
+      sharedMethods.scrollToOffset(0)
+    }
+  },
+  name: 'RoundtripWizard',
   data () {
     return {
       step: 1,
@@ -1084,9 +949,9 @@ export default {
       guestRating: 0,
       transportLocations: [],
       showCancelDialog: false,
+      cancelDialogNext: null,
 
       addedStops: [],
-      suggestedSights: null,
       sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
       addHotel: false,
       addHotelDisabled: true,
@@ -1104,6 +969,10 @@ export default {
 
       showAddStopDialog: false,
       showEditStopDialog: false,
+
+      tempImgLink: '',
+
+      isTitleInUse: true,
 
       editorFonts: {
         arial: 'Arial',
@@ -1173,8 +1042,10 @@ export default {
   methods: {
     /**
      * adds the current stop to the stops array
+     @param reset if current stop should be resetted
      */
-    addStop () {
+    addStop (reset) {
+      console.log('stopToEdit ' + this.stopToEdit)
       this.unsavedChanges = true
 
       // remove placeholder if not changed
@@ -1205,19 +1076,22 @@ export default {
         currentDate = sharedMethods.getDateFromString(this.addedStops[this.addedStops.length - 1].InitDate)
         currentDate.setDate(currentDate.getDate() + this.addedStops[this.addedStops.length - 1].DayDuration)
 
-        this.stopToEdit = -1
+        // stay in edit mode if reset is false
+        if (reset) this.stopToEdit = -1
       } else {
         this.addedStops.push(this.currentStop)
       }
 
-      this.currentStop = {
-        Title: 'neuer Stopp',
-        Description: 'Raum für Notizen, Beschreibungen...',
-        Location: null,
-        Sights: [],
-        InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
-        Profile: 'driving',
-        DayDuration: 1
+      if (reset) {
+        this.currentStop = {
+          Title: 'neuer Stopp',
+          Description: 'Raum für Notizen, Beschreibungen...',
+          Location: null,
+          Sights: [],
+          InitDate: date.formatDate(currentDate, 'DD.MM.YYYY HH:mm'),
+          Profile: 'driving',
+          DayDuration: 1
+        }
       }
 
       // reload map
@@ -1312,6 +1186,18 @@ export default {
       return deg * (Math.PI / 180)
     },
     /**
+    called when user selects arrival departure features
+     */
+    updateArrivalDeparture (event) {
+      this.currentRoundtrip.TransportProfile = event.transportProfile
+      this.currentRoundtrip.Origin = event.origin
+      this.currentRoundtrip.Destination = event.destination
+      this.currentRoundtrip.DepatureDate = event.depatureDate
+      this.currentRoundtrip.ReturnDate = event.returnDate
+      this.currentRoundtrip.TravelClass = event.travelClass
+      this.currentRoundtrip.NonStop = event.nonStop
+    },
+    /**
      *  removes the stop with the given index
      */
     removeStop (index) {
@@ -1355,8 +1241,8 @@ export default {
     /**
      * creates the roundtrip (write the temp data into db)
      */
-    createTrip () {
-      if (!this.unsavedChanges) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
+    createTrip (stay) {
+      if (!this.unsavedChanges && !stay) this.$router.push('/rundreise-ansehen/' + this.$route.params.id)
 
       // need this json stringify to prevent update of location when the click location changes
       let stops = JSON.parse(JSON.stringify(this.addedStops))
@@ -1389,6 +1275,7 @@ export default {
       this.getRoundtripCountries().then(countries => {
         if (this.$store.getters['demoSession/isInDemoSession'] && auth.user() === null) {
           this.$store.dispatch({ type: 'demoSession/addRoundtrip', roundtripObject: this.currentRoundtrip, tempLocation: countries, originCode: null, destinationCode: null, stops: stops }).then(() => {
+            this.unsavedChanges = false
             this.$router.push('/registrieren')
           })
         } else if (this.isRTEditMode) {
@@ -1411,11 +1298,14 @@ export default {
 
           Promise.all(promiseList).then(() => {
             context.saving = false
+            context.unsavedChanges = false
             sharedMethods.showSuccessNotification('Reise wurde gespeichert')
 
-            setTimeout(function () {
-              context.$router.push('/rundreise-ansehen/' + context.$route.params.id)
-            }, 1000)
+            if (!stay) {
+              setTimeout(function () {
+                context.$router.push('/rundreise-ansehen/' + context.$route.params.id)
+              }, 1000)
+            }
           })
         } else {
           // add roundtrip normally
@@ -1426,12 +1316,15 @@ export default {
               .then(docId => {
                 if (docId && docId !== null) {
                   let context = this
-                  // wait to ensure roundtrip is fully added
-                  setTimeout(function () {
-                    this.saving = false
-                    console.log(docId)
-                    context.$router.push('/rundreise-ansehen/' + docId)
-                  }, 500)
+
+                  if (!stay) {
+                    // wait to ensure roundtrip is fully added
+                    setTimeout(function () {
+                      this.saving = false
+                      context.unsavedChanges = false
+                      context.$router.push('/rundreise-ansehen/' + docId)
+                    }, 500)
+                  }
                 } else {
                   this.saving = false
                   sharedMethods.showErrorNotification('Deine Rundreise konnte nicht erstellt werden, bitte versuche es erneut')
@@ -1553,12 +1446,19 @@ export default {
      */
     editStop (index) {
       this.currentStop = JSON.parse(JSON.stringify(this.addedStops[index]))
-      console.log(this.currentStop)
       this.stopToEdit = index
       this.showEditStopDialog = true
     },
+    titleInUse (promise) {
+      promise.then(val => {
+        console.log(val === 'Dieser Titel ist bereits vergeben')
+        this.isTitleInUse = val === 'Dieser Titel ist bereits vergeben'
+      })
+    },
     isUniqueTitle (val) {
-      return sharedMethods.isUniqueTitle(val)
+      let promise = sharedMethods.isUniqueTitle(val)
+      this.titleInUse(promise)
+      return promise
     },
     getChildrenText () {
       let text = '&group_children=' + this.currentRoundtrip.ChildrenAges.length
@@ -1606,15 +1506,6 @@ export default {
     },
     isDateTimeValid () {
       return sharedMethods.isDateTimeValid(this.currentStop.InitDate)
-    },
-    /**
-     * filter countries method used in filter method of quasar select component
-     */
-    filterCountries (val, update, abort) {
-      update(() => {
-        const needle = val.toLowerCase()
-        this.countryOptions = countries.filter(v => v.toLowerCase().indexOf(needle) > -1)
-      })
     },
     getGeneralProfile () {
       switch (this.inputProfile) {
@@ -1689,42 +1580,6 @@ export default {
         }
       }
     },
-    /**
-     * open sight dialog to show data from wikivoyage about sight
-     */
-    openSightDialog (sight) {
-      // get sight dialog content from wikivoyage
-      const context = this
-      sharedMethods.getWikivoyageData(sight.name).then(result => {
-        if (result !== null) {
-          context.sightDialog.title = result.title || sight.name
-          context.sightDialog.description = result.description || 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = result.shortDescription
-          context.sightDialog.imgSrc = result.imgSrc
-          context.sightDialog.showed = true
-        } else {
-          context.sightDialog.title = sight.name
-          context.sightDialog.description = 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = ''
-          context.sightDialog.imgSrc = ''
-          context.sightDialog.showed = true
-        }
-      })
-    },
-    /**
-     * search the sights for current location
-     */
-    searchSights () {
-      if (this.currentStop.Location.lng && this.currentStop.Location.lat) {
-        sharedMethods.getSights(this.currentStop.Location.lng, this.currentStop.Location.lat).then((results) => {
-          if (results !== null) {
-            this.suggestedSights = results.data.data
-          } else {
-            this.suggestedSights = 'error'
-          }
-        })
-      }
-    },
     updateHotelData (event) {
       if (event !== null) {
         this.addHotelDisabled = true
@@ -1738,7 +1593,7 @@ export default {
             headers: {
               'content-type': 'application/octet-stream',
               'x-rapidapi-host': 'hotels4.p.rapidapi.com',
-              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'x-rapidapi-key': this.$store.getters['api/getHotels4Key'],
               'useQueryString': true
             }
           })
@@ -1762,7 +1617,7 @@ export default {
               console.log(error)
             })
         } else {
-          this.writeHotelData(event.label, hotelLat, hotelLng, null, null, null, null)
+          this.writeHotelData(event.address, hotelLat, hotelLng, null, null, null, null)
         }
       }
     },
@@ -1797,28 +1652,11 @@ export default {
           return 'cummute'
       }
     },
-    destinationChanged (val) {
-      // todo destination codes are not defined
-      this.getLocationFromIataCode(this.destinationCodes[this.destinationOptions.indexOf(val)], this.destinationAddresses[this.destinationOptions.indexOf(val)])
-    },
-    getLocationFromIataCode (code, countryName) {
-      let context = this
-      axios.get('http://iatageo.com/getLatLng/' + code
-      ).then(function (response) {
-        context.tempLocation = {
-          lat: response.data.latitude,
-          lng: response.data.longitude,
-          label: countryName
-        }
-      }).catch(function (error) {
-        console.log('Error' + error)
-      })
-    },
     getOrigins (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, true, this)
+      sharedMethods.filterAirports(val, update, abort, this, 'originOptions')
     },
     getDestinations (val, update, abort) {
-      sharedMethods.filterAirports(val, update, abort, false, this)
+      sharedMethods.filterAirports(val, update, abort, this, 'destinationOptions')
     },
     getLocationString (locations) {
       let locationString = ''
@@ -1834,6 +1672,25 @@ export default {
       returnDate.setDate(depatureDate.getDate() + 1)
 
       this.currentRoundtrip.ReturnDate = date.formatDate(returnDate, 'DD.MM.YYYY')
+    },
+    /**
+     * adds a new url to stop (called from uploader)
+     */
+    addImageToStop (imageUrl) {
+      if (!this.currentStop.StopImages) this.currentStop.StopImages = []
+      this.currentStop.StopImages.push(imageUrl)
+
+      // save stop
+      this.addStop(false)
+      this.tempImgLink = ''
+    },
+    removeImageFromStop (imageUrl) {
+      if (this.currentStop.StopImages) {
+        this.currentStop.StopImages.splice(this.currentStop.StopImages.indexOf(imageUrl), 1)
+
+        // save stop
+        this.addStop(false)
+      }
     },
     handleAddStopFromMap (event) {
       this.unsavedChanges = true
@@ -1868,8 +1725,16 @@ export default {
       return 0
     }
   },
+  beforeRouteLeave (to, from, next) {
+    if (this.unsavedChanges) {
+      this.showCancelDialog = true
+      this.cancelDialogNext = next
+    } else {
+      next()
+    }
+  },
   created () {
-    auth.authRef().onAuthStateChanged((user) => {
+    auth.authRef().onAuthStateChanged(() => {
       if (!this.$store.getters['demoSession/isInDemoSession'] && !auth.user()) {
         this.$store.commit('demoSession/setAsDemoSession')
       } else {
@@ -1883,6 +1748,8 @@ export default {
           this.$store.dispatch('roundtrips/fetchSingleRoundtrip', RTId).then(roundtrip => {
             this.currentRoundtrip = roundtrip
           })
+
+          this.$store.dispatch('images/loadAllImgs', RTId)
 
           // get stops
           let roundtripsRef = db.collection('RoundtripDetails')

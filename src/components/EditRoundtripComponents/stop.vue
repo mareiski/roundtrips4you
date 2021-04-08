@@ -4,132 +4,47 @@
     icon="location_on"
   >
     <div class="stop-container">
-      <div class="flex">
-        <div class="flex">
-          <h6 class="q-timeline__title">{{titleInput}}
-            <!-- <q-popup-edit
-              v-model="titleInput"
-              v-if="editor"
-              @save="saveData('Title', titleInput)"
-              buttons
-              label-set="ok"
-            >
-              <q-input
-                v-model="titleInput"
-                dense
-              />
-            </q-popup-edit>
-            <q-icon
-              v-if="editor"
-              name="edit"
-            /> -->
-          </h6>
-          <!-- <q-chip
-            size="20"
-            clickable
-            icon="add"
-            @click="addHotel = true"
-            v-if="editor && !hotelName"
-          >Hotel
-            <q-tooltip>Hotel hinzufügen</q-tooltip>
-          </q-chip> -->
-        </div>
-        <!-- <q-dialog
-          v-if="editor"
-          v-model="addHotel"
-        >
-          <q-card>
-            <q-card-section class="row items-center">
-              <q-input
-                filled
-                label="Check Out Datum"
-                v-model="checkOutDate"
-                :rules="[date || 'Bitte gib ein richtiges Datum ein']"
-                bottom-slots
-                style="width:300px"
-                class="input-item"
-                outlined
-              >
-                <template v-slot:prepend>
-                  <q-icon name="event">
-                    <q-popup-proxy
-                      transition-show="scale"
-                      transition-hide="scale"
-                    >
-                      <q-date
-                        v-model="checkOutDate"
-                        today-btn
-                        mask="DD.MM.YYYY"
-                      />
-                    </q-popup-proxy>
-                  </q-icon>
-                  <q-tooltip>Datum ändern</q-tooltip>
-
-                </template>
-              </q-input>
-            </q-card-section>
-            <q-card-section>
-              <HotelSearch
-                :disabled="!checkOutDate"
-                :lat="location.lng"
-                :long="location.lat"
-                :checkInDate="date"
-                :checkOutDate="checkOutDate"
-                :roomAmount="rooms"
-                :adults="adults"
-                :childrenAges="childrenAges"
-                @update="updateHotelData($event)"
-                ref="hotelSearch"
-              ></HotelSearch>
-            </q-card-section>
-            <q-card-section>
-              <q-input
-                v-model="generalTempLink"
-                ref="urlInput"
-                type="url"
-                style="width:300px;"
-                :rules="[val => !val || urlReg.test(val) || 'Bitte gib einen richtigen Link an']"
-                label="Hotel link (optional)"
-                outlined
-              >
-                <template v-slot:prepend>
-                  <q-icon name="link" />
-                </template>
-              </q-input>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn
-                flat
-                label="Abbrechen"
-                color="primary"
-                v-close-popup
-              />
-              <q-btn
-                flat
-                :label="addHotelDisabled ? 'Daten laden...' : 'Hotel hinzufügen'"
-                @click="addHotelToStop()"
-                color="primary"
-                :disable="addHotelDisabled"
-                v-close-popup
-              />
-            </q-card-actions>
-          </q-card>
-        </q-dialog> -->
+      <h6
+        class="q-timeline__title"
+        style="margin-bottom:0;"
+      >{{titleInput}}</h6>
+      <div
+        class="flex q-timeline__subtitle"
+        style="padding-top:0;"
+      >
+        <a @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)">
+          <q-icon name="location_on" />
+          {{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
+          <q-tooltip v-if="location && location.label">{{location.label}}</q-tooltip>
+        </a>
       </div>
-      <!-- <div>
-        <q-btn
-          v-if="editor"
-          :disable="firstStop"
-          @click="deleteEntry()"
-          flat
-          round
-          icon="delete"
-        >
-          <q-tooltip>Stopp löschen</q-tooltip>
-        </q-btn>
-        <q-tooltip v-if="firstStop">Der erste Stopp kann nicht gelöscht werden</q-tooltip>
-      </div> -->
+      <Uploader
+        :RTId="RTId"
+        :stopImages="stopImages ? stopImages : null"
+        :uploadDisabled="true"
+      />
+      <div
+        v-if="addedSights && addedSights.length > 0"
+        class="flex"
+        style="margin-bottom:10px;"
+      >
+        <b
+          class="flex justify-center"
+          style="flex-direction:column;"
+        >gemerkte Orte:</b>
+        <q-chip
+          v-for="(addedSight, index) in addedSights"
+          :key="index"
+          clickable
+          @click="$refs.sightDialog.openSightDialog(addedSight)"
+        >{{addedSight}}</q-chip>
+      </div>
     </div>
+    <SightDialog
+      :addAble="false"
+      ref="sightDialog"
+    >
+    </SightDialog>
     <q-list
       bordered
       class="rounded-borders"
@@ -137,57 +52,14 @@
       <q-expansion-item
         expand-separator
         v-model="expanded"
-        @input="$emit('expansionChanged', { expanded: expanded, docId: docId })"
-        :label="addedSights.length + (addedSights.length === 1 ? ' gemerkter Ort' : ' gemerkte Orte') + (hotelName ? ' & 1 Hotel' : '') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
-        :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem || profile === 'plane' ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
-        :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem && profile !== 'plane' ? 'error-color' : '' )"
+        @input="$emit('expansionChanged', { expanded: expanded, docId: stopObject.DocId })"
+        :label="(stopObject.HotelName ? '1 Hotel' : 'Weitere Infos') + (dailyTrips.length ? ' & ' + dailyTrips.length + (dailyTrips.length === 1 ? ' Tagesausflug' : ' Tagesausflüge') : '')"
+        :caption="days !== null ?  'ca. ' + days + ' Aufenthalt' : ( firstStop || lastItem || stopObject.Profile === 'plane' ? '' : 'keine Verbleibende Zeit für den Aufenthalt')"
+        :class="'stop-expansion-item ' + (days === null && !firstStop && !lastItem && stopObject.Profile !== 'plane' ? 'error-color' : '' )"
       >
         <div>
           <q-chip
-            icon="location_on"
-            clickable
-            @click="editor ? editLocation = true : openInNewTab('https://www.google.com/maps/search/?api=1&query=' + location.label)"
-          >{{location && typeof location !== 'undefined' && location.label && typeof location.label !== 'undefined' ? location.label.split(',')[0] : ( editor ? 'Ort hinzufügen' : 'kein Ort angegeben')}}
-            <!-- <q-icon
-              v-if="editor"
-              name="edit"
-            /> -->
-            <q-tooltip v-if="location && location.label">{{location.label}}</q-tooltip>
-          </q-chip>
-          <!-- <q-dialog
             v-if="editor"
-            v-model="editLocation"
-          >
-            <q-card>
-              <q-card-section class="editLocationCard">
-                <CitySearch
-                  ref="citySearch"
-                  :parkingPlaceSearch="false"
-                  :defaultLocation="location"
-                  @update="updateLocation($event)"
-                ></CitySearch>
-                <p>oder</p>
-                <q-btn @click="[getParent('EditRoundtrips').flyToPointOnEditRTMap(location.lat, location.lng), editLocation = false]">auf karte anzeigen</q-btn>
-              </q-card-section>
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  label="Abbrechen"
-                  color="primary"
-                  v-close-popup
-                />
-                <q-btn
-                  flat
-                  label="OK"
-                  color="primary"
-                  @click="location !== tempLocation ? saveData('Location', tempLocation, true) : null"
-                  v-close-popup
-                />
-              </q-card-actions>
-            </q-card>
-          </q-dialog> -->
-          <q-chip
-            v-if="parkingPlace || editor"
             icon="local_parking"
             :clickable="editor"
             @click="editParkingPlace = true"
@@ -198,100 +70,7 @@
             /> -->
           </q-chip>
         </div>
-        <!-- <q-dialog
-          v-if="editor"
-          v-model="editParkingPlace"
-          persistent
-        >
-          <q-card>
-            <q-card-section>
-              <CitySearch
-                ref="parkingPlaceSearch"
-                :parkingPlaceSearch="true"
-                :defaultLocation="parkingPlace"
-                @update="updateParkLocation($event)"
-              ></CitySearch>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn
-                flat
-                label="Abbrechen"
-                color="primary"
-                v-close-popup
-              />
-              <q-btn
-                flat
-                label="OK"
-                color="primary"
-                @click="saveData('Parking', tempParkingPlace)"
-                v-close-popup
-              />
-            </q-card-actions>
-          </q-card>
-        </q-dialog> -->
         <div>
-          <div v-if="sights && sights !== 'error'">
-            <span
-              v-for="(sight, index) in sights"
-              :key="index"
-              :href="'https://www.google.com/search?q=' + sight.name + ' ' + location.label.split(',')[0]"
-              target="_blank"
-              style="text-decoration:none;"
-            >
-              <!-- <q-chip
-                v-if="editor"
-                clickable
-                @click="openSightDialog(sight)"
-                :icon="sight.category === 'SIGHTS' ? 'account_balance' : 'location_on'"
-              >{{sight.name}}
-              </q-chip> -->
-
-            </span>
-            <a
-              target="_blank"
-              :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' sehenswürdigkeiten'"
-            >weitere auf Google</a>
-            oder auf der Karte
-            <q-dialog v-model="sightDialog.showed">
-              <q-card>
-                <q-card-section
-                  class="row flex justify-end q-pb-none"
-                  style="z-index:100; width:100%; position:absolute; color:white;"
-                >
-                  <q-btn
-                    icon="close"
-                    flat
-                    round
-                    dense
-                    v-close-popup
-                  />
-                </q-card-section>
-                <q-img
-                  :src="sightDialog.imgSrc"
-                  style="max-height:75vh;"
-                >
-                  <div class="absolute-bottom">
-                    <div class="text-h6">{{sightDialog.title}}</div>
-                    <div class="text-subtitle2">{{sightDialog.shortDescription}}</div>
-                  </div>
-                </q-img>
-
-                <q-card-section>
-                  {{sightDialog.description}}
-                </q-card-section>
-
-                <q-card-actions align="right">
-                  <q-btn
-                    flat
-                    label="hinzufügen"
-                    color="primary"
-                    v-close-popup
-                    @click="[$refs.sightInput.add(sightDialog.title, true), saveSights()]"
-                  />
-                </q-card-actions>
-              </q-card>
-            </q-dialog>
-          </div>
           <!-- <q-chip
             v-else-if="editor"
             clickable
@@ -326,7 +105,7 @@
               </template>
             </q-select>
           </div> -->
-          <div
+          <!-- <div
             class="flex"
             v-else-if="addedSights && typeof addedSights !== 'undefined' && addedSights.length > 0"
             style="padding-bottom:10px;"
@@ -347,7 +126,7 @@
               target="_blank"
               :href="'https://www.google.com/search?q=' + location.label.split(',')[0] + ' Sehenswürdigkeiten'"
             >weitere anzeigen</a>
-          </div>
+          </div> -->
           <!-- Hotel data here -->
           <div>
             <q-list
@@ -355,7 +134,7 @@
               padding
               dense
               class="rounded-borders"
-              v-if="hotelName"
+              v-if="stopObject.HotelName"
             >
               <q-item class="hotel-list">
                 <q-item-section
@@ -377,7 +156,7 @@
                     class="flex"
                     style="flex-wrap:wrap; white-space:normal;"
                   >
-                    <span style="padding-right:5px;">{{sharedMethods.capitalize(hotelName)}}</span>
+                    <span style="padding-right:5px;">{{sharedMethods.capitalize(stopObject.HotelName)}}</span>
                     <q-rating
                       v-if="hotelStars && !isNaN(hotelStars)"
                       class="stars"
@@ -392,14 +171,14 @@
                       style="flex-wrap:wrap; white-space:normal;"
                     >
                       <span
-                        v-if="guestRating"
+                        v-if="stopObject.GuestRating"
                         class="raleway"
                       >
-                        {{guestRating}},&nbsp;
+                        {{stopObject.GuestRating}},&nbsp;
                       </span>
-                      <span v-if="hotelPrice">
+                      <span v-if="stopObject.HotelPrice">
                         <span class="raleway">ca. € </span>
-                        <span class="raleway">{{hotelPrice}}</span>
+                        <span class="raleway">{{stopObject.HotelPrice}}</span>
                         <q-tooltip>ungefährer Durchschnittspreis pro Person & Nacht</q-tooltip>
                       </span>
                     </div>
@@ -410,13 +189,13 @@
                   >
                     <a
                       class="ellipsis"
-                      @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(hotelName + ', ' + hotelLocation.label))"
-                    >{{hotelLocation && typeof hotelLocation !== 'undefined' && hotelLocation.label && typeof hotelLocation.label !== 'undefined' ? capitalize(hotelLocation.label) :  'kein Ort angegeben'}}</a>
+                      @click="openInNewTab('https://www.google.com/maps/search/?api=1&query=' + capitalize(stopObject.HotelName + ', ' + stopObject.HotelLocation.label))"
+                    >{{stopObject.HotelLocation && typeof stopObject.HotelLocation !== 'undefined' && stopObject.HotelLocation.label && typeof stopObject.HotelLocation.label !== 'undefined' ? capitalize(stopObject.HotelLocation.label) :  'kein Ort angegeben'}}</a>
                   </q-item-label>
                 </q-item-section>
                 <q-item-section>
                   <q-btn
-                    v-if="transportLocations && transportLocations.lenght > 0"
+                    v-if="stopObject.TransportLocations && stopObject.TransportLocations.length > 0"
                     style="width:150px;"
                     @click="showTransportDialog = true"
                   >Transport
@@ -432,7 +211,7 @@
                         <div
                           class="flex"
                           style="flex-direction:column;"
-                          v-for="location in transportLocations"
+                          v-for="location in stopObject.TransportLocations"
                           :key="location"
                         >
                           <q-item
@@ -464,56 +243,56 @@
                   </q-card>
                 </q-dialog>
                 <q-item-section side>
-                  <div v-if="generalLink && generalLink.length > 0">
+                  <div v-if="stopObject.GeneralTempLink && stopObject.GeneralTempLink.length > 0">
                     <q-chip
                       icon="link"
                       dense
                       class="linkChip"
                       clickable
-                      @click="openInNewTab(generalLink)"
+                      @click="openInNewTab(stopObject.GeneralTempLink)"
                     >Hotelwebsite</q-chip>
                   </div>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName"
+                    v-if="stopObject.HotelName"
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(hotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
+                    @click="openInNewTab('https://www.booking.com/searchresults.de.html?ss=' + capitalize(stopObject.HotelName) + '&checkin_year=' + date.split(' ')[0].split('.')[2] + '&checkin_month=' + date.split('.')[1] + '&checkin_monthday=' + date.split('.')[0] + '&checkout_year=' + checkOutDate.split('.')[2] + '&checkout_month=' + checkOutDate.split('.')[1] + '&checkout_monthday=' + checkOutDate.split('.')[0] + '&group_adults=' + adults + getChildrenText() +  '&no_rooms=' + rooms + '&ac_langcode=de')"
                   > booking.com
                     <q-tooltip>Hotel auf booking.com</q-tooltip>
                   </q-chip>
                   <q-chip
                     icon="launch"
-                    v-if="hotelName"
+                    v-if="stopObject.HotelName"
                     dense
                     style="width:117px;"
                     class="linkChip"
                     clickable
-                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(hotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
+                    @click="openInNewTab('https://www.expedia.de/Hotel-Search?adults=' + adults + 'children=' + getExpediaChildrenText() + '%2C1_3&destination=' + capitalize(stopObject.HotelName) + '&endDate=' + checkOutDate.split(' ')[0].split('.')[2] + '-' + checkOutDate.split('.')[1] + '-' + checkOutDate.split('.')[0] + '&rooms=' + rooms + '&sort=RECOMMENDED&startDate=' + date.split(' ')[0].split('.')[2] + '-' + date.split('.')[1] + '-' + date.split('.')[0] + '&theme=&useRewards=true')"
                   > expedia
                     <q-tooltip>Hotel auf expedia</q-tooltip>
                   </q-chip>
                 </q-item-section>
                 <q-item-section
                   side
-                  v-if="hotelContact"
+                  v-if="stopObject.HotelContact"
                 >
                   <div class="hotel-contact">
                     <q-chip
-                      v-if="hotelContact.email"
+                      v-if="stopObject.HotelContact.email"
                       icon="email"
                       clickable
-                      @click="openInNewTab('mailto:' + hotelContact.email)"
-                    >{{ hotelContact.email}}
+                      @click="openInNewTab('mailto:' + stopObject.HotelContact.email)"
+                    >{{ stopObject.HotelContact.email}}
                     </q-chip>
                     <q-chip
                       icon="phone"
-                      v-if="hotelContact.phone"
+                      v-if="stopObject.HotelContact.phone"
                       clickable
-                      @click="openInNewTab('tel:' + hotelContact.phone)"
-                    >{{hotelContact.phone}}
+                      @click="openInNewTab('tel:' + stopObject.HotelContact.phone)"
+                    >{{stopObject.HotelContact.phone}}
                     </q-chip>
                   </div>
                 </q-item-section>
@@ -557,79 +336,8 @@
         }
         }"
           /> -->
-          <div
-            class="flex"
-            v-if="stopImages"
-          >
-            <div
-              class="uploader"
-              v-for="(stopImage, index) in stopImages"
-              :key="index"
-              style="margin-right:8px;"
-            >
-              <q-img
-                style="height:100%;"
-                :src="stopImage"
-              ></q-img>
-              <!-- <q-btn
-                round
-                v-if="editor"
-                color="primary"
-                icon="add"
-                style="position: absolute; transform: rotate(45deg)"
-                @click="removeImg(index)"
-              >
-              </q-btn> -->
-              <q-btn
-                round
-                color="primary"
-                icon="filter"
-                style="position: absolute; margin-top:-113px; margin-left:120px;"
-                @click="showImgDialog(stopImage)"
-              >
-              </q-btn>
-            </div>
-          </div>
-          <q-dialog v-model="imgDialogVisible">
-            <q-card style="width:100%; max-width:100vh; overflow:hidden;">
-              <q-card-section
-                class="row flex justify-end q-pb-none"
-                style="z-index:100; width:100%; position:absolute; color:white;"
-              >
-                <q-btn
-                  icon="close"
-                  flat
-                  round
-                  dense
-                  v-close-popup
-                />
-              </q-card-section>
-              <q-card-section>
-                <q-img
-                  style="width:100%;"
-                  :src="dialogImgSrc"
-                ></q-img>
-              </q-card-section>
-            </q-card>
 
-          </q-dialog>
-          <!-- <div
-            style="margin-top:10px;"
-            class="uploader"
-            v-if="editor"
-          >
-            <q-img style="height:100%;"></q-img>
-            <q-btn
-              round
-              color="primary"
-              icon="add"
-              style="position: absolute;"
-              @click="chooseImgDialog = true"
-            >
-              <q-tooltip>Bilder hinzufügen</q-tooltip>
-            </q-btn>
-          </div> -->
-          <q-dialog
+          <!-- <q-dialog
             keep-alive
             v-model="chooseImgDialog"
           >
@@ -714,7 +422,7 @@
                 />
               </q-card-actions>
             </q-card>
-          </q-dialog>
+          </q-dialog> -->
           <div
             v-if="expanded"
             class="daily-trip-container"
@@ -727,7 +435,7 @@
               :dailyTrip="dailyTrip"
               :editorToolbar="editorToolbar"
               :editorFonts="editorFonts"
-              :stopDocId="docId"
+              :stopDocId="stopObject.DocId"
               :index="index"
               :newDailyTripDate="dailyTrip.newDate ? dailyTrip.newDate : false"
               :duration="dailyTrip.duration"
@@ -945,7 +653,9 @@ export default {
   components: {
     CitySearch: () => import('../Map/CitySearch'),
     // HotelSearch: () => import('../Map/HotelSearch'),
-    DailyTrip: () => import('./dailyTrip')
+    DailyTrip: () => import('./dailyTrip'),
+    Uploader: () => import('../Uploader/Uploader.vue'),
+    SightDialog: () => import('../CitySuggestion/SightDialog.vue')
   },
   computed: {
     sharedMethods () {
@@ -953,23 +663,15 @@ export default {
     }
   },
   props: {
-    title: String,
+    RTId: String,
+    stopObject: Object,
     date: String,
-    editorPlaceholder: String,
     editor: Boolean,
-    docId: String,
-    generalLink: String,
     location: Object,
     days: String,
     parkingPlace: Object,
     lastItem: Boolean,
     hotelStars: Number,
-    hotelName: String,
-    hotelPrice: Number,
-    guestRating: String,
-    transportLocations: Array,
-    hotelLocation: Object,
-    hotelContact: Object,
     checkOutDate: String,
     adults: Number,
     childrenAges: Array,
@@ -989,8 +691,8 @@ export default {
   },
   data () {
     return {
-      titleInput: this.title,
-      descriptionInput: this.editorPlaceholder,
+      titleInput: this.stopObject.Title,
+      descriptionInput: this.stopObject.Description,
       showDateEntry: true,
       showTimeEntry: false,
       preventPasting: false,
@@ -998,7 +700,7 @@ export default {
       tempParkingPlace: {},
       editLocation: false,
       tempLocation: {},
-      savedEditorContent: this.editorPlaceholder,
+      savedEditorContent: this.stopObject.Description,
       sights: null,
       chooseImgDialog: false,
       tempImgLink: null,
@@ -1012,11 +714,9 @@ export default {
       tempDailyTripLocation: null,
       tempDailyTripDate: this.date,
       dailyTripProfile: 'Auto',
-      accessToken: 'pk.eyJ1IjoibWFyZWlza2kiLCJhIjoiY2pkaHBrd2ZnMDIyOTMzcDIyM2lra3M0eSJ9.wcM4BSKxfOmOzo67iW-nNg',
       expanded: false,
       changeAllDatesActive: false,
       oldDate: null,
-      sightDialog: { showed: false, title: '', imgSrc: '', description: '', shortDescription: '' },
       showTransportDialog: false,
       addHotelDisabled: true,
 
@@ -1100,12 +800,12 @@ export default {
       }
 
       let context = this
-      db.collection('RoundtripDetails').doc(this.docId).update({
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
         'InitDate': newInitDate
       }).then(function () {
         if (refresh && !context.changeAllDatesActive) {
           // resort stops and prepare views with new array
-          context.getParent('EditRoundtrips').resortAndPrepareStops(newInitDate, context.docId)
+          context.getParent('EditRoundtrips').resortAndPrepareStops(newInitDate, context.stopObject.DocId)
         }
         setTimeout(function () {
           sharedMethods.scrollToOffset(lastScrollPos)
@@ -1113,7 +813,7 @@ export default {
       })
     },
     getDailyTripDuration (startLocation, endLocation, dailyStopProfile, index, cityFromLabel, defaultCityLabel, trip) {
-      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.accessToken
+      var url = 'https://api.mapbox.com/directions/v5/mapbox/' + dailyStopProfile + '/' + startLocation[0] + ',' + startLocation[1] + ';' + endLocation[0] + ',' + endLocation[1] + '?geometries=geojson&access_token=' + this.$store.getters['api/getMapboxKey']
 
       axios.get(url)
         .then(response => {
@@ -1191,14 +891,14 @@ export default {
         let hotelLat = event.latitude
         let hotelLng = event.longitude
 
-        this.hotelName = event.name
+        this.stopObject.HotelName = event.name
 
         if (event.destinationId) {
           axios.get('https://hotels4.p.rapidapi.com/properties/get-details?locale=de_DE&currency=EUR&id=' + event.destinationId, {
             headers: {
               'content-type': 'application/octet-stream',
               'x-rapidapi-host': 'hotels4.p.rapidapi.com',
-              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'x-rapidapi-key': this.$store.getters['api/getHotels4Key'],
               'useQueryString': true
             }
           })
@@ -1227,17 +927,17 @@ export default {
       }
     },
     writeHotelData (label, lat, lng, rating, price, guestRating, transportLocations) {
-      this.hotelLocation = {
+      this.stopObject.HotelLocation = {
         lng: lat,
         lat: lng,
         label: label
       }
 
-      price && typeof price !== 'undefined' ? this.hotelPrice = price : this.hotelPrice = null
+      price && typeof price !== 'undefined' ? this.stopObject.HotelPrice = price : this.stopObject.HotelPrice = null
 
-      guestRating && typeof guestRating !== 'undefined' ? this.guestRating = guestRating : this.guestRating = null
+      guestRating && typeof guestRating !== 'undefined' ? this.stopObject.GuestRating = guestRating : this.stopObject.GuestRating = null
 
-      typeof transportLocations !== 'undefined' ? this.transportLocations = transportLocations : this.transportLocations = null
+      typeof transportLocations !== 'undefined' ? this.stopObject.TransportLocations = transportLocations : this.stopObject.TransportLocations = null
 
       rating && typeof rating !== 'undefined' ? this.hotelStars = rating : this.hotelStars = null
 
@@ -1261,35 +961,35 @@ export default {
       this.expanded = expanded
     },
     addHotelToStop () {
-      console.log(this.transportLocations)
-      db.collection('RoundtripDetails').doc(this.docId).update({
-        HotelLocation: this.hotelLocation,
+      console.log(this.stopObject.TransportLocations)
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
+        HotelLocation: this.stopObject.HotelLocation,
         HotelStars: this.hotelStars,
-        HotelContact: this.hotelContact,
-        HotelName: this.hotelName,
-        GeneralLink: this.generalTempLink,
+        HotelContact: this.stopObject.HotelContact,
+        HotelName: this.stopObject.HotelName,
+        GeneralLink: this.stopObject.GeneralTempLink,
         CheckOutDate: this.checkOutDate,
-        HotelPrice: this.hotelPrice,
-        GuestRating: this.guestRating,
-        TransportLocations: this.transportLocations
+        HotelPrice: this.stopObject.HotelPrice,
+        GuestRating: this.stopObject.GuestRating,
+        TransportLocations: this.stopObject.TransportLocations
 
       }).then(results => {
-        this.generalLink = this.generalTempLink
+        this.generalLink = this.stopObject.GeneralTempLink
 
         let parentStops = this.getParent('EditRoundtrips').stops
-        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.docId)]
-        parentStop.HotelLocation = this.hotelLocation
+        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)]
+        parentStop.HotelLocation = this.stopObject.HotelLocation
         parentStop.HotelStars = this.hotelStars
-        parentStop.HotelContact = this.hotelContact
-        parentStop.HotelName = this.hotelName
-        parentStop.GeneralLink = this.generalTempLink
+        parentStop.HotelContact = this.stopObject.HotelContact
+        parentStop.HotelName = this.stopObject.HotelName
+        parentStop.GeneralLink = this.stopObject.GeneralTempLink
         parentStop.CheckOutDate = this.checkOutDate
-        parentStop.HotelPrice = this.hotelPrice
-        parentStop.GuestRating = this.guestRating
+        parentStop.HotelPrice = this.stopObject.HotelPrice
+        parentStop.GuestRating = this.stopObject.GuestRating
 
         console.log(parentStops.TransportLocations)
-        console.log(this.transportLocations)
-        parentStops.TransportLocations = this.transportLocations
+        console.log(this.stopObject.TransportLocations)
+        parentStops.TransportLocations = this.stopObject.TransportLocations
 
         this.$q.notify({
           color: 'green-4',
@@ -1300,7 +1000,7 @@ export default {
       })
     },
     removeHotel () {
-      db.collection('RoundtripDetails').doc(this.docId).update({
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
         HotelLocation: null,
         HotelStars: null,
         HotelContact: null,
@@ -1311,10 +1011,10 @@ export default {
         TransportLocations: null
 
       }).then(results => {
-        this.hotelName = null
+        this.stopObject.HotelName = null
 
         let parentStops = this.getParent('EditRoundtrips').stops
-        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.docId)]
+        let parentStop = parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)]
         parentStop.HotelLocation = null
         parentStop.HotelStars = null
         parentStop.HotelContact = null
@@ -1351,7 +1051,7 @@ export default {
           }
         })
 
-        db.collection('RoundtripDetails').doc(this.docId).update({
+        db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
           DailyTrips: this.dailyTrips
 
         }).then(results => {
@@ -1364,13 +1064,13 @@ export default {
     changeAllDates () {
       let millis = sharedMethods.getDateFromString(this.date).valueOf() - sharedMethods.getDateFromString(this.oldDate).valueOf()
       this.oldDate = this.date
-      this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.docId, millis, sharedMethods.getDateFromString(this.date))
+      this.getParent('EditRoundtrips').changeAllFollowingStopDates(this.stopObject.DocId, millis, sharedMethods.getDateFromString(this.date))
     },
     openInNewTab (link) {
       window.open(link, '_blank')
     },
     deleteDailyTrip (index) {
-      if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
+      if (this.stopObject.DocId === null || this.stopObject.DocId === '' || this.stopObject.DocId === 'undefined') {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
@@ -1393,7 +1093,7 @@ export default {
         }
       })
 
-      db.collection('RoundtripDetails').doc(this.docId).update({
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
         DailyTrips: this.dailyTrips
 
       }).then(results => {
@@ -1411,7 +1111,7 @@ export default {
         this.oldAddedSights = this.addedSights
 
         let parentStops = this.getParent('EditRoundtrips').stops
-        parentStops[parentStops.findIndex(x => x.DocId === this.docId)].Sights = this.addedSights
+        parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)].Sights = this.addedSights
 
         this.saveData('Sights', this.addedSights, false)
       }
@@ -1437,7 +1137,7 @@ export default {
     saveData (field, value, updateParent) {
       try {
         let context = this
-        db.collection('RoundtripDetails').doc(this.docId).update({
+        db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
           ['' + field]: value
         }).then(function () {
           if (field === 'Location') context.getParent('EditRoundtrips').fetchAndSaveCountries()
@@ -1457,7 +1157,7 @@ export default {
       this.saveData('Description', this.descriptionInput, false)
 
       let parentStops = this.getParent('EditRoundtrips').stops
-      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].Description = this.descriptionInput
+      parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)].Description = this.descriptionInput
 
       this.savedEditorContent = this.descriptionInput
     },
@@ -1538,18 +1238,12 @@ export default {
       this.$refs.tempImgLinkInput.resetValidation()
 
       let parentStops = this.getParent('EditRoundtrips').stops
-      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
+      parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)].StopImages = this.stopImages
 
-      let context = this
-      db.collection('RoundtripDetails').doc(this.docId).update({
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
         'StopImages': this.stopImages
       }).catch(function (error) {
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Der Eintrag konnte nicht gelöscht werden'
-        })
+        sharedMethods.showErrorNotification('Das Bild konnte nicht hinzugefügt werden')
         console.log(error)
       })
     },
@@ -1558,23 +1252,17 @@ export default {
       this.stopImages.splice(index, 1)
 
       let parentStops = this.getParent('EditRoundtrips').stops
-      parentStops[parentStops.findIndex(x => x.DocId === this.docId)].StopImages = this.stopImages
+      parentStops[parentStops.findIndex(x => x.DocId === this.stopObject.DocId)].StopImages = this.stopImages
 
-      let context = this
-      db.collection('RoundtripDetails').doc(this.docId).update({
+      db.collection('RoundtripDetails').doc(this.stopObject.DocId).update({
         'StopImages': this.stopImages
       }).catch(function (error) {
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Der Eintrag konnte nicht gelöscht werden'
-        })
+        sharedMethods.showErrorNotification('Der Eintrag konnte nicht gelöscht werden')
         console.log(error)
       })
     },
     deleteEntry () {
-      if (this.docId === null || this.docId === '' || this.docId === 'undefined') {
+      if (this.stopObject.DocId === null || this.stopObject.DocId === '' || this.stopObject.DocId === 'undefined') {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
@@ -1584,7 +1272,7 @@ export default {
         return false
       }
 
-      this.getParent('EditRoundtrips').removeStop(this.docId)
+      this.getParent('EditRoundtrips').removeStop(this.stopObject.DocId)
 
       if (!this.$store.getters['demoSession/isInDemoSession']) {
         const context = this
@@ -1595,7 +1283,7 @@ export default {
           sharedMethods.showErrorNotification('Der Eintrag konnte nicht gelöscht werden')
         })
       } else {
-        this.$store.commit('demoSession/removeStop', this.docId)
+        this.$store.commit('demoSession/removeStop', this.stopObject.DocId)
       }
     },
     /**
@@ -1633,25 +1321,6 @@ export default {
         }
       }
       return false
-    },
-    openSightDialog (sight) {
-      // get sight dialog content from wikivoyage
-      const context = this
-      sharedMethods.getWikivoyageData(sight.name).then(result => {
-        if (result !== null) {
-          context.sightDialog.title = result.title || sight.name
-          context.sightDialog.description = result.description || 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = result.shortDescription
-          context.sightDialog.imgSrc = result.imgSrc
-          context.sightDialog.showed = true
-        } else {
-          context.sightDialog.title = sight.name
-          context.sightDialog.description = 'Es konnten leider keine Informationen gefunden werden'
-          context.sightDialog.shortDescription = ''
-          context.sightDialog.imgSrc = ''
-          context.sightDialog.showed = true
-        }
-      })
     },
     searchSights () {
       if (this.location.lng && this.location.lat) {

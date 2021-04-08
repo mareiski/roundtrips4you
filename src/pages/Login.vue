@@ -1,7 +1,7 @@
 <template>
   <div class="login q-px-lg q-pb-md">
     <h1>Anmelden</h1>
-    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um zu deinen Reisen zu kommen</p>
+    <p style="text-align:center; font-size:20px; padding-bottom:10px;">Willkommen zurück, logge dich ein um deine Reisen zu bearbeiten</p>
     <q-form
       @submit="onUserLogin"
       bordered
@@ -106,10 +106,12 @@
     </div>
   </div>
 </template>
-
+<style lang="less">
+@import url("../css/login.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/login.less')
 import { auth } from '../firebaseInit.js'
+import sharedMethods from '../sharedMethods.js'
 const getFirebase = () => import('firebase')
 
 export default {
@@ -142,42 +144,21 @@ export default {
       }).catch(function (error) {
         console.log(error)
         if (error.code === 'auth/user-not-found') {
-          context.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Diesen Benutzer konnten wir nicht finden'
-          })
+          sharedMethods.showErrorNotification('Dieser Benutzer existiert nicht')
         } else {
-          context.$q.notify({
-            color: 'red-5',
-            textColor: 'white',
-            icon: 'error',
-            message: 'Das Passwort oder der Benutzername ist leider falsch'
-          })
+          sharedMethods.showErrorNotification('Das Passwort oder der Benutzername ist leider falsch')
         }
       })
     },
     resetPassword () {
-      let context = this
-      auth.sendPasswordResetEmail(this.userEmail).then(function () {
+      auth.authRef().sendPasswordResetEmail(this.userEmail).then(function () {
         // Email sent.
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Wir haben dir eine Email mit einem Resetlink gesendet'
-        })
+        sharedMethods.showSuccessNotification('Wir haben dir eine Email mit einem Resetlink gesendet')
       }).catch(function (error) {
         console.log(error)
 
         // An error happened.
-        context.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'error',
-          message: 'Ups da ist ein Fehler aufgetreten, versuch es noch einmal'
-        })
+        sharedMethods.showErrorNotification('Es ist ein Fehler aufgetreten, versuch es noch einmal')
       })
     },
     signUpWithGoogle () {

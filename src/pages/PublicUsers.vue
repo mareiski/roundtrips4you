@@ -83,8 +83,10 @@
     </q-list>
   </div>
 </template>
+<style lang="less">
+@import url("../css/public-users.less");
+</style>
 <script>
-import(/* webpackPrefetch: true */ '../css/public-users.less')
 import { db } from '../firebaseInit.js'
 import { date } from 'quasar'
 
@@ -92,7 +94,7 @@ export default {
   meta: {
     title: 'Users',
     meta: {
-      description: { name: 'description', content: 'Reise selbst planen & zusammenstellen, Reise planen kostenlos & online. Routenplaner und Reiseplaner online mit vielen Tools für deinen Roadtrip' }
+      robot: { name: 'robot', content: 'noIndex' }
     }
   },
   data () {

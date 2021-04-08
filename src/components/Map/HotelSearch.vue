@@ -200,13 +200,13 @@ export default {
       this.$refs.select.resetValidation()
     },
     getHotels (hotelName) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         getAxios().then(axios => {
           axios.get('https://hotels4.p.rapidapi.com/locations/search?locale=de_DE&query=' + hotelName, {
             headers: {
               'content-type': 'application/octet-stream',
               'x-rapidapi-host': 'hotels4.p.rapidapi.com',
-              'x-rapidapi-key': '18b409d797msh45b84c0227df18cp1fea51jsne88847e3f3c8',
+              'x-rapidapi-key': this.$store.getters['api/getHotels4Key'],
               'useQueryString': true
             }
           }).then((response) => {

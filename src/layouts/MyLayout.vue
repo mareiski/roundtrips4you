@@ -7,12 +7,15 @@
     >
       <div class="top-row">
         <div class="left-col">
-          <a href="/">
+          <router-link
+            to="/"
+            style="margin:0;"
+          >
             <img
               alt="logo"
               src="~assets/submark.svg"
             />
-          </a>
+          </router-link>
           <span class="beta-span cursor-pointer">[beta]
             <q-tooltip @click="$event.show()">
               Wir befinden uns derzeit in der Beta Phase, deshalb kann es leider noch zu bugs kommen
@@ -30,20 +33,21 @@
           >reisen</router-link>
           <router-link
             class="header-page-link"
-            to="/blog"
-          >blog</router-link>
+            v-if="user"
+            to="/meine-rundreisen"
+          >meine Reisen</router-link>
           <router-link
             v-if="!user && !this.$store.getters['demoSession/isInDemoSession']"
             class="header-page-link"
             to="/login"
           >anmelden</router-link>
           <router-link
-            v-if="!user && getActionButtonText()"
-            :to="getActionButtonLink()"
+            v-if="!user && !this.$store.getters['demoSession/isInDemoSession']"
+            to="/registrieren"
             class="flex justify-center register-header-link"
             style="flex-direction:column; text-decoration:none;"
           >
-            <q-btn color="primary">{{getActionButtonText()}}</q-btn>
+            <q-btn color="primary">Registrieren</q-btn>
           </router-link>
           <q-avatar
             v-else-if="user"
@@ -83,15 +87,6 @@
                 >
                   <q-item-section>
                     Profil
-                  </q-item-section>
-                </q-item>
-                <q-item
-                  clickable
-                  v-close-popup
-                  @click="$router.push('/meine-rundreisen')"
-                >
-                  <q-item-section>
-                    Meine Reisen
                   </q-item-section>
                 </q-item>
                 <q-item
@@ -156,11 +151,14 @@
             to="/rundreisen-uebersicht"
           >reisen</router-link>
         </div>
-        <div @click="hideMenu()">
+        <div
+          @click="hideMenu()"
+          v-if="user"
+        >
           <router-link
             class="mobile-header-page-link"
-            to="/blog"
-          >blog</router-link>
+            to="/meine-rundreisen"
+          >meine Reisen</router-link>
         </div>
         <div
           @click="hideMenu()"
@@ -462,7 +460,7 @@ let messages = []
 export default {
   name: 'MyLayout',
   components: {
-    CookieBanner: () => import('../pages/CookieBanner/CookieBanner'),
+    CookieBanner: () => import('../components/CookieBanner/CookieBanner'),
     BackToTop: () => import('vue-backtotop')
   },
   data () {
@@ -530,22 +528,6 @@ export default {
       }
 
       this.lastScrollPosition = currentScrollPosition
-    },
-    getActionButtonText () {
-      if (this.$store.getters['demoSession/isInDemoSession']) {
-        let currentRoute = this.$router.currentRoute
-        let isOnWizardPage = currentRoute.fullPath.split('/')[1] === 'rundreisen-wizard'
-
-        if (!isOnWizardPage) return 'reise bearbeiten'
-      } else return 'registrieren'
-    },
-    getActionButtonLink () {
-      let currentRoute = this.$router.currentRoute
-      let isOnWizardPage = currentRoute.fullPath === 'rundreisen-wizard'
-
-      if (this.$store.getters['demoSession/isInDemoSession'] && !isOnWizardPage) {
-        return '/rundreisen-wizard'
-      } else return '/registrieren'
     },
     hideLoading () {
       redirected = false
@@ -658,6 +640,16 @@ export default {
     window.addEventListener('online', this.updateOnlineStatus)
     window.addEventListener('offline', this.updateOnlineStatus)
     window.addEventListener('scroll', this.onScroll)
+
+    // check for messages
+    this.getNotifications()
+
+    let context = this
+
+    // do this again every 5min
+    window.setInterval(() => {
+      context.getNotifications()
+    }, 300000)
   },
   beforeDestroy () {
     window.removeEventListener('online', this.updateOnlineStatus)
@@ -665,10 +657,12 @@ export default {
     window.removeEventListener('scroll', this.onScroll)
   },
   created () {
+    if (!this.$storyblok.isInitialized()) {
+      this.$storyblok.init({
+        accessToken: this.$store.getters['api/getStoryblokKey']
+      })
+    }
     this.leaving()
-    this.$storyblok.init({
-      accessToken: 'TQjWhoJBE25KdjlauQ5rYgtt'
-    })
 
     this.isOnNetlifyPage = (this.getHost() === 'roundtrips4you.netlify.app' || this.getHost() === 'www.roundtrips4you.netlify.app')
 
@@ -678,10 +672,9 @@ export default {
       window.location.replace('https://roundtrips4you.de')
     }
 
-    auth.authRef().onAuthStateChanged((user) => {
+    auth.authRef().onAuthStateChanged(() => {
       this.$router.beforeEach((to, from, next) => {
         let loggedIn = auth.user() !== null
-        // let verified = auth.user() ? auth.user().emailVerified : false
         forEachCalled = true
         let requireAuth = to.matched.some(record => record.meta.requireAuth)
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
@@ -709,12 +702,8 @@ export default {
         redirected = true
       }
 
-      this.getNotifications()
-
       if (redirected) {
-        redirected = false
-        this.showPreload = false
-        Loading.hide()
+        this.hideLoading()
       }
     })
   }
