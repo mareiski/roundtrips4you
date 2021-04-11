@@ -6,7 +6,7 @@ const routes = [
     children: [
       {
         path: '/',
-        component: () => import('pages/Index.vue'),
+        component: process.env.MODE !== 'capacitor' ? () => import('pages/Index.vue') : () => import('pages/Login.vue'),
         meta: {
           guestOnly: true
         }

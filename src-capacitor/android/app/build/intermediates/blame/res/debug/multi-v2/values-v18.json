@@ -4,7 +4,7 @@
             "outputFile": "C:\\Users\\Marco\\source\\repos\\roundtrips4you\\src-capacitor\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v18\\values-v18.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Marco\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-1.1.0.aar\\36a25ad9252f77a3285726384092d68e\\res\\values-v18\\values-v18.xml",
+                    "source": "C:\\Users\\Marco\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-1.2.0.aar\\bddb96b4cab688ce4abfc94d3a467b61\\res\\values-v18\\values-v18.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

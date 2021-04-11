@@ -1,11 +1,1 @@
-(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[22],{
-
-/***/ "02fc":
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
-
-/***/ })
-
-}]);
-//# sourceMappingURL=22.js.map
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[22],{2910:function(e,n,t){},5010:function(e,n,t){"use strict";t.r(n);var i=function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("div",{staticClass:"about q-px-lg q-pb-md"},[t("h3",{staticStyle:{"padding-top":"10px"}},[e._v("Hallo, schön dass du hergefunden hast !")]),t("q-img",{staticStyle:{"max-height":"450px","margin-bottom":"20px"},attrs:{alt:"Island",src:"https://images.unsplash.com/photo-1528837516156-0a7225a43641?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1491&q=80"}}),t("span",[e._v("Wir sind ein kleines Startup aus Ingolstadt, welches sich auf die Reisenvermittlung & Erstellung spezialisiert hat.")]),t("br"),t("br"),t("span",[e._v("Wir möchten aber nicht, dass du irgendeine Rundreise buchst, weil sie dir vorgeschlagen wurde.")]),t("br"),t("span",[e._v("Deshalb kannst du über roundrips4you die perfekte Rundreise finden, die zu dir passt.")]),t("br"),t("br"),e._m(0),t("br"),t("br"),e._m(1),t("br"),t("br"),t("span",[e._v("Wir freuen uns über alle Vorschläge !")])],1)},r=[function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("span",[e._v("Solltest du einmal nicht das Richtige finden, kannst du ganz einfach deine Individuelle Reise zusammenstellen. "),t("br"),e._v("\n    Damit hilft du auch anderen Nutzern, ihre eigene Traumreise zu finden !\n  ")])},function(){var e=this,n=e.$createElement,t=e._self._c||n;return t("span",[e._v("Du hast ein Problem oder möchtest uns dein Feedback geben ? "),t("br"),e._v("\n    Dann Kontaktiere uns jetzt unter "),t("a",{attrs:{href:"mailto:hello@roundtrips4you.de"}},[e._v("hello@roundtrips4you.de")]),e._v(".\n  ")])}],s={meta:{title:"Über uns",meta:{robot:{name:"robot",content:"noIndex"}}}},a=s,u=(t("c7c8"),t("2877")),l=Object(u["a"])(a,i,r,!1,null,null,null);n["default"]=l.exports},c7c8:function(e,n,t){"use strict";var i=t("2910"),r=t.n(i);r.a}}]);

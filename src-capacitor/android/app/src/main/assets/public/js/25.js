@@ -1,11 +1,1 @@
-(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[25],{
-
-/***/ "93de":
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
-
-/***/ })
-
-}]);
-//# sourceMappingURL=25.js.map
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[25],{c5df:function(i,t,e){"use strict";e.r(t);var s=function(){var i=this,t=i.$createElement,e=i._self._c||t;return e("q-dialog",{model:{value:i.sightDialog.showed,callback:function(t){i.$set(i.sightDialog,"showed",t)},expression:"sightDialog.showed"}},[e("q-card",[e("q-card-section",{staticClass:"row flex justify-end q-pb-none",staticStyle:{"z-index":"100",width:"100%",position:"absolute",color:"white"}},[e("q-btn",{directives:[{name:"close-popup",rawName:"v-close-popup"}],attrs:{icon:"close",flat:"",round:"",dense:""}})],1),e("q-carousel",{attrs:{animated:"",arrows:"",infinite:"",swipeable:"",autoplay:""},model:{value:i.slide,callback:function(t){i.slide=t},expression:"slide"}},i._l(i.sightDialog.imgSrcs,(function(t,s){return e("q-carousel-slide",{key:s,staticClass:"column no-wrap",staticStyle:{padding:"0"},attrs:{name:s}},[e("q-img",{staticStyle:{"max-height":"75vh"},attrs:{src:t}},[e("div",{staticClass:"absolute-bottom"},[e("div",{staticClass:"text-h6"},[i._v(i._s(i.sightDialog.title))]),e("div",{staticClass:"text-subtitle2"},[i._v(i._s(i.sightDialog.shortDescription))])])])],1)})),1),e("q-card-section",[i._v("\n      "+i._s(i.sightDialog.description)+"\n    ")]),e("q-card-actions",{attrs:{align:"right"}},[i.addAble?e("q-btn",{directives:[{name:"close-popup",rawName:"v-close-popup"}],attrs:{flat:"",label:"hinzufügen",color:"primary"},on:{click:function(t){i.$refs.sightInput.add(i.sightDialog.title,!0),i.saveSights()}}}):i._e()],1)],1)],1)},o=[],a=e("15c8"),n={data(){return{sightDialog:{showed:!1,title:"",imgSrcs:[],description:"",shortDescription:""},slide:0}},props:{addAble:Boolean},methods:{openSightDialog(i){const t=this;a["a"].getWikivoyageData(i).then(e=>{console.log(e),null!==e?(t.sightDialog.title=e.title||i,t.sightDialog.description=e.description||"Es konnten leider keine Informationen gefunden werden",t.sightDialog.shortDescription=e.shortDescription,t.sightDialog.imgSrcs=e.imgSrcs,t.sightDialog.showed=!0):(t.sightDialog.title=i,t.sightDialog.description="Es konnten leider keine Informationen gefunden werden",t.sightDialog.shortDescription="",t.sightDialog.imgSrcs=[],t.sightDialog.showed=!0)})}}},l=n,r=e("2877"),c=Object(r["a"])(l,s,o,!1,null,null,null);t["default"]=c.exports}}]);

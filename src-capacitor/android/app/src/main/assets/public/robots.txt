@@ -3,4 +3,6 @@ Disallow: /impressum/
 Disallow: /haftungsausschluss/
 Disallow: /datenschutz/
 Disallow: /cgi-bin/
+Disallow: /rundreisen-details/*
+Disallow: /benutzer/
 Sitemap: https://roundtrips4you.de/statics/sitemap.xml

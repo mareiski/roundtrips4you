@@ -1,11 +1,1 @@
-(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[26],{
-
-/***/ "5d80":
-/***/ (function(module, exports, __webpack_require__) {
-
-// extracted by mini-css-extract-plugin
-
-/***/ })
-
-}]);
-//# sourceMappingURL=26.js.map
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[26],{"097f":function(t,e,i){"use strict";i.r(e);var r=function(){var t=this,e=t.$createElement,i=t._self._c||e;return i("q-timeline-entry",{attrs:{icon:"speed"},scopedSlots:t._u([{key:"subtitle",fn:function(){return[t.duration||0===t.duration?[t._v(t._s(t.duration)+" "+t._s(t.defaultProfile&&"undefined"!==typeof t.defaultProfile?t.defaultProfile:t.editor?"Reisemittel hinzufügen":t.roundtripProfile))]:[i("q-skeleton",{attrs:{width:"100px",height:"20px",type:"text"}})]]},proxy:!0}])})},n=[],o=i("1261"),l=i("15c8"),a={props:{duration:String,editor:Boolean,defaultProfile:String,roundtripProfile:String,origin:String,destination:String,docId:String},data(){return{editStopProfile:!1,inputProfile:this.defaultProfile,profile:null}},methods:{getProfile(){switch(this.inputProfile){case"zu Fuß":this.profile="walking";break;case"Fahrrad":this.profile="cycling";break;case"Flugzeug":this.profile="plane";break;default:this.profile="driving";break}},saveData(t,e){if(!e)return;let i=this;try{o["b"].collection("RoundtripDetails").doc(this.docId).update({[""+t]:e}).then((function(){i.defaultProfile=i.inputProfile;let t=l["a"].getParent("EditRoundtrips",i);t.getDataOutOfStops(!1)}))}catch(r){console.log(r)}}}},u=a,d=i("2877"),f=Object(d["a"])(u,r,n,!1,null,null,null);e["default"]=f.exports}}]);

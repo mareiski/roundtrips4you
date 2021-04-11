@@ -28,10 +28,10 @@ public final class R {
     public static final class color {
         private color() {}
 
-        public static final int notification_action_color_filter = 0x7f0500b7;
-        public static final int notification_icon_bg_color = 0x7f0500b8;
-        public static final int ripple_material_light = 0x7f0500c2;
-        public static final int secondary_text_default_material_light = 0x7f0500c4;
+        public static final int notification_action_color_filter = 0x7f0500ba;
+        public static final int notification_icon_bg_color = 0x7f0500bb;
+        public static final int ripple_material_light = 0x7f0500c5;
+        public static final int secondary_text_default_material_light = 0x7f0500c7;
     }
     public static final class dimen {
         private dimen() {}
@@ -135,8 +135,8 @@ public final class R {
         public static final int TextAppearance_Compat_Notification_Line2 = 0x7f0f0159;
         public static final int TextAppearance_Compat_Notification_Time = 0x7f0f015a;
         public static final int TextAppearance_Compat_Notification_Title = 0x7f0f015b;
-        public static final int Widget_Compat_NotificationActionContainer = 0x7f0f0238;
-        public static final int Widget_Compat_NotificationActionText = 0x7f0f0239;
+        public static final int Widget_Compat_NotificationActionContainer = 0x7f0f0239;
+        public static final int Widget_Compat_NotificationActionText = 0x7f0f023a;
     }
     public static final class styleable {
         private styleable() {}

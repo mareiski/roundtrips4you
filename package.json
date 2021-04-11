@@ -18,6 +18,7 @@
     "writeJsonFile": "node writeJsonFile.js"
   },
   "dependencies": {
+    "@capacitor/android": "^2.4.7",
     "@capacitor/core": "^2.4.6",
     "@firebase/auth": "^0.16.4",
     "@firebase/database": "^0.9.3",
