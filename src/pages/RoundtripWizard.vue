@@ -1129,7 +1129,7 @@ export default {
      */
     getShortestRoute () {
       let stopsTaken = [this.addedStops[0]]
-      this.addedStops.forEach((stop, index) => {
+      this.addedStops.forEach(index => {
         if (index > 0) {
           let foundStop = this.getShortestDistance(stopsTaken[stopsTaken.length - 1], stopsTaken)
           if (foundStop !== null) {

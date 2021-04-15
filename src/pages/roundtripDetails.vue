@@ -167,7 +167,7 @@
                 <q-btn
                   color="primary"
                   icon="edit"
-                  v-if="isUserCreator"
+                  v-if="isUserCreator && !isMobile"
                   @click="$router.push('/rundreisen-wizard/' + RTId)"
                   label="Bearbeiten"
                   style="height:36px; margin:auto; margin-left:20px;"
@@ -504,6 +504,9 @@ export default {
     },
     galeryImgUrls () {
       return this.$store.getters['images/getGaleryImgUrls'](this.RTId)
+    },
+    isMobile () {
+      return window.matchMedia('(max-width: 550px)').matches
     }
   },
   meta () {
