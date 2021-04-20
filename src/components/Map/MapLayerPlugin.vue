@@ -6,6 +6,7 @@
       icon="layers"
       style="position:absolute; right:9px; top:175px;"
     >
+      <q-tooltip>Kartendesign</q-tooltip>
       <q-menu>
         <q-list style="min-width: 100px">
           <q-item

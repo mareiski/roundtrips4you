@@ -432,7 +432,7 @@
               outlined
               v-model="arrivalDepatureProfile"
               input-debounce="0"
-              :options="['Flugzeug', 'Andere']"
+              :options="['Flugzeug', 'Auto (Bus, ...)']"
               label="Reisemittel"
               :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
               style="padding-bottom: 32px"
@@ -585,8 +585,7 @@
               </q-select>
             </div>
             <div v-else>
-              <p>Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise leider nicht helfen.</p>
-              <p>Wenn du mit dem Auto fährst, kannst du deinen Startort gleich als ersten Ort im Reiseverlauf festlegen.</p>
+              <p style="text-align:left;">Wenn du mit dem Auto, Bus etc. fährst kannst du deine Fahrt direkt im nächsten Schritt planen.</p>
             </div>
             <!-- price -->
             <div

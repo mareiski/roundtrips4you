@@ -6,12 +6,11 @@
       style="position:fixed; z-index:1; right:0; padding: 10px"
     >
       <q-btn
-        round
         color="primary"
         icon="visibility"
         @click="$router.push('/rundreise-ansehen/' + RTId)"
+        label="Reise ansehen"
       >
-        <q-tooltip>Reise ansehen</q-tooltip>
       </q-btn>
     </div>
     <h3 style="padding-top:10px;">Einstellungen</h3>

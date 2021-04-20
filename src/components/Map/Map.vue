@@ -51,6 +51,7 @@
         style="position:absolute; right:9px; top:220px;"
         @click="showSuggestionCountryDialog = true; showDrawerList = false; miniDisabled = true;"
       >
+        <q-tooltip>Vorschläge</q-tooltip>
       </q-btn>
       <MglFullscreenControl position="bottom-right" />
 

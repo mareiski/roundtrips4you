@@ -4,7 +4,7 @@
       outlined
       v-model="currentRoundtrip.TransportProfile"
       input-debounce="0"
-      :options="['Flugzeug', 'Andere']"
+      :options="['Flugzeug', 'Auto (Bus, ...)']"
       label="Reisemittel"
       :rules="[val => val !== null && val !== '' || 'Bitte wähle ein Reisemittel']"
       style="padding-bottom: 32px"
@@ -118,9 +118,8 @@
         style="width:220px"
       ></q-btn>
     </div>
-    <div v-else-if="currentRoundtrip.TransportProfile === 'Andere'">
-      <p style="text-align:left;">Bei einem anderem Reisemittel können wir dir bei der Planung deiner An- und Abreise aktuell leider nicht helfen.</p>
-      <p style="text-align:left;">Du kannst dafür sofort mit der Reiseplanung beginnen!</p>
+    <div v-else-if="currentRoundtrip.TransportProfile === 'Auto (Bus, ...)'">
+      <p style="text-align:left;">Wenn du mit dem Auto, Bus etc. fährst kannst du deine Fahrt direkt im nächsten Schritt planen.</p>
     </div>
   </div>
 </template>
