@@ -64,6 +64,7 @@
             @update="$emit('update', $event)"
             @distanceUpdate="$emit('distanceUpdate', $event)"
             @addSight="$emit('addSight', $event)"
+            @editStop="$emit('editStop', $event)"
             ref="overviewMap"
             height="90vh;"
           ></Map>
@@ -94,6 +95,7 @@
         @update="$emit('update', $event)"
         @distanceUpdate="$emit('distanceUpdate', $event)"
         @addSight="$emit('addSight', $event)"
+        @editStop="$emit('editStop', $event)"
         ref="overviewMap"
         height="90vh;"
       ></Map>

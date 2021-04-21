@@ -4,22 +4,6 @@
     :style="!isRTEditMode ? 'padding-top:20px;' : ''"
     :class="!isRTEditMode ? 'q-px-lg q-pb-md' : ''"
   >
-    <div
-      class="edit-btn-container"
-      v-if="user !== null"
-      style="position:fixed; z-index:101; right:0; padding: 10px"
-    >
-      <q-btn
-        v-if="$route.params.id"
-        round
-        color="primary"
-        icon="visibility"
-        @click="$router.push('/rundreise-ansehen/' + $route.params.id)"
-      >
-        <q-tooltip>Reise ansehen</q-tooltip>
-      </q-btn>
-    </div>
-
     <q-dialog
       v-model="showCancelDialog"
       persistent
@@ -125,7 +109,6 @@
                     v-if="!isRTEditMode"
                   />
                   <q-btn
-                    flat
                     color="primary"
                     :disable="addedStops.length <= 1"
                     :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
@@ -326,9 +309,21 @@
         class="sticky-navigation"
         style="justify-content:space-between;"
       >
-        <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
+        <div class="flex">
+          <span>{{totalTripDistance}} km, {{totalTripDuration}} Tag(e)</span>
+          <q-btn
+            class="q-mt-md"
+            text-color="primary"
+            flat
+            @click="showAutoRoutedialog = true"
+            :disable="addedStops.length <= 2"
+            label="auto Route erstellen"
+            style="margin:0; margin-left:20px;"
+          >
+            <q-tooltip v-if="addedStops.length <= 2">Bitte erstelle mehr als 2 Stopps</q-tooltip>
+          </q-btn>
+        </div>
         <q-btn
-          flat
           color="primary"
           :label="unsavedChanges ? (!isRTEditMode ? 'Reise fertigstellen' : 'Reise speichern') : 'Reise ansehen'"
           class="q-ml-sm"
@@ -831,7 +826,6 @@
               @click="addImageToStop(tempImgLink)"
             />
           </div>
-          {{currentStop.StopImages}}
           <Uploader
             :RTId="currentRoundtrip.RTId"
             :stopImages="currentStop.StopImages ? currentStop.StopImages : null"
@@ -856,6 +850,32 @@
             color="primary"
             :disable="currentStop.DayDuration < 0"
             @click="() => { addStop(true) }"
+            v-close-popup
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog
+      persistent
+      v-model="showAutoRoutedialog"
+    >
+      <q-card>
+        <q-card-section class="row items-center">
+          <span class="q-ml-sm">Wenn du eine automatische Route erstellst wird die aktuelle Reihenfolge deiner Route verändert. Möchtest du Fortfahren?</span>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            label="kürzeste Route setzen"
+            @click="setTripToShortestRoute()"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            label="Abbrechen"
+            color="primary"
             v-close-popup
           />
         </q-card-actions>

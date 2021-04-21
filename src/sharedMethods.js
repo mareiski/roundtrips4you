@@ -295,17 +295,20 @@ export default {
                         returnData.description = summary
                     }),
                     page.images().then(images => {
-                        images.forEach(image => {
-                            // remove all svg images
-                            if (image.includes('.svg')) images.splice(images.indexOf(image), 1)
-                        })
-
                         returnData.imgSrcs = images
                     })
                 )
 
                 Promise.all(promiseList).then(() => {
-                    resolve(returnData)
+                    let returnImgs = []
+                    returnData.imgSrcs.forEach((image, index) => {
+                        // add only if not svg
+                        if (image.match(/\.(jpeg|jpg|png)$/)) returnImgs.push(image)
+                        if (index === returnData.imgSrcs.length - 1) {
+                            returnData.imgSrcs = returnImgs
+                            resolve(returnData)
+                        }
+                    })
                 }).catch(function (error) {
                     console.log('Error ' + error)
                     resolve(null)

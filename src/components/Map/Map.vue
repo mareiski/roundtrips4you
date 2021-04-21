@@ -128,7 +128,7 @@
       </q-dialog> -->
 
       <MglMarker
-        v-for="stop in stops"
+        v-for="(stop, index) in stops"
         :key="stop.DocId"
         :coordinates="stop.HotelName && stop.HotelLocation && !isNaN(stop.HotelLocation.lat) ? [stop.HotelLocation.lat, stop.HotelLocation.lng] : [stop.Location.lng, stop.Location.lat]"
         color="#D56026"
@@ -158,7 +158,7 @@
               </div>
               <div style="font-size:13px;">
                 {{ lastPOICityData.shortDescription }}
-                <p v-if="stop.GeneralLink && stop.GeneralLink.length > 0">
+                <p v-if="stop.GeneralLink && stop.GeneralLink.length > 0 && stop.HotelName">
                   <q-icon name="house" />
                   <a
                     :href="stop.GeneralLink"
@@ -169,6 +169,14 @@
             </q-card-section>
 
             <q-card-actions align="right">
+              <q-btn
+                round
+                flat
+                icon="settings"
+                @click="$emit('editStop', index);"
+                color="secondary"
+                v-show="stop"
+              />
               <q-btn
                 flat
                 label="POIs"
@@ -952,6 +960,7 @@ export default {
       return (c)
     },
     capitalize (s) {
+      console.log(s)
       if (s) {
         s = s.toLowerCase()
         s = s.charAt(0).toUpperCase() + s.slice(1)
