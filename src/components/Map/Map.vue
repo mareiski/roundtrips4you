@@ -873,29 +873,6 @@ export default {
       } else {
         this.showDetailsDialog = true
       }
-      // const headers = {
-      //   'Content-Type': 'application/json; charset=UTF-8'
-      // }
-
-      // let context = this
-      // getAxios().then(axios => {
-      //   axios.get('https://de.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=description%7Cextracts%7Cpageimages&titles=' + name + '&exintro=1&explaintext=1&piprop=name%7Coriginal',
-      //     { headers: headers })
-      //     .then(function (response) {
-      //       const pages = response.data.query.pages
-      //       const firstPageName = Object.keys(pages)[0]
-
-      //       const title = pages[firstPageName].title
-      //       const description = pages[firstPageName].description
-      //       const extract = pages[firstPageName].extract
-      //       const src = pages[firstPageName].original ? pages[firstPageName].original.source : ''
-
-      //       context.sightDialog = { title: title || name, showed: true, description: description, extract: extract || 'Es konnten leider keine Informationen gefunden werden', src: src }
-      //     }).catch(function (error) {
-      //       console.log('Error' + error)
-      //       context.sightDialog = { title: name, showed: true, description: '', extract: 'Es konnten leider keine Informationen gefunden werden', src: '' }
-      //     })
-      // })
     },
     addStop () {
       this.showAddStopMarker = false
@@ -1137,6 +1114,9 @@ export default {
     deg2rad (deg) {
       return deg * (Math.PI / 180)
     },
+    /**
+     * adds a new route for given locations to the map & pushes a new element to added routes
+     */
     getRoute (startLocation, endLocation, map, index, stopProfile, dailyTrip) {
       let profile = this.profile
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
@@ -1150,6 +1130,7 @@ export default {
       if (profile !== 'plane') {
         // create url for the duration request
         var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accTo
+
         let context = this
 
         // retrieve data from mapbox

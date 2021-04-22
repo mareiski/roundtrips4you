@@ -898,6 +898,7 @@ import sharedMethods from '../sharedMethods.js'
 import { date } from 'quasar'
 // import draggable from 'vuedraggable'
 import { auth, db } from '../firebaseInit.js'
+const turf = () => import('@turf/turf')
 
 let timeStamp = Date.now()
 let formattedScheduleDate = date.formatDate(timeStamp, 'DD.MM.YYYY')
@@ -1124,17 +1125,18 @@ export default {
      * @see getShortestRoute()
      */
     setTripToShortestRoute () {
-      let suggestedStops = this.getShortestRoute()
-      let initDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
+      this.getShortestRoute().then(suggestedStops => {
+        let initDate = sharedMethods.getDateFromString(this.addedStops[0].InitDate)
 
-      suggestedStops.forEach((stop, index) => {
-        stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
-        initDate.setDate(initDate.getDate() + 1)
+        suggestedStops.forEach((stop, index) => {
+          stop.InitDate = date.formatDate(initDate, 'DD.MM.YYYY HH:mm')
+          initDate.setDate(initDate.getDate() + 1)
 
-        if (index === suggestedStops.length - 1) this.addedStops = suggestedStops
+          if (index === suggestedStops.length - 1) this.addedStops = suggestedStops
+        })
+
+        this.updateTotalTripDuration()
       })
-
-      this.updateTotalTripDuration()
     },
     /**
      * called when a sight via map poi button was marked (added to stop)
@@ -1147,17 +1149,22 @@ export default {
      * get shortest route in comparing the distances between every stop
      * @see getShortestDistance()
      */
-    getShortestRoute () {
+    async getShortestRoute () {
       let stopsTaken = [this.addedStops[0]]
-      this.addedStops.forEach(index => {
+
+      // get shortest distance between all points and add them to stops taken
+      for (let index = 0; index < this.addedStops.length; index++) {
         if (index > 0) {
-          let foundStop = this.getShortestDistance(stopsTaken[stopsTaken.length - 1], stopsTaken)
-          if (foundStop !== null) {
-            stopsTaken.push(foundStop)
-          }
+          await this.getShortestDistance(stopsTaken[stopsTaken.length - 1], stopsTaken).then(foundStop => {
+            if (foundStop !== null) {
+              stopsTaken.push(foundStop)
+              // tod go here to next stop not before
+            }
+          })
+
+          if (index === this.addedStops.length - 1) return stopsTaken
         }
-      })
-      return stopsTaken
+      }
     },
     /**
      * Get shortest distance between two stops
@@ -1166,41 +1173,57 @@ export default {
      * @see getDinstanceFromLatLonInKm()
      */
     getShortestDistance (originStop, stopsTaken) {
-      let distances = []
-      let stop = null
-      this.addedStops.forEach(stop => {
-        if (!stopsTaken.includes(stop)) {
-          distances.push({ distance: this.getDistanceFromLatLonInKm(originStop.Location.lng, originStop.Location.lat, stop.Location.lng, stop.Location.lat), stop: stop })
-        }
-      })
-      if (distances.length > 0) {
-        let distanceValues = []
+      return new Promise((resolve) => {
+        let distances = []
+        let stop = null
+        let promiseList = []
 
-        distances.forEach(distanceArr => {
-          distanceValues.push(distanceArr.distance)
+        // get distances for all stops
+        this.addedStops.forEach(stop => {
+          if (!stopsTaken.includes(stop)) {
+            promiseList.push(
+              this.getDistanceFromLatLonInKm(originStop.Location.lng, originStop.Location.lat, stop.Location.lng, stop.Location.lat)
+                .then(calcDistance => {
+                  distances.push({ distance: calcDistance, stop: stop })
+                })
+            )
+          }
         })
 
-        let minVal = Math.min.apply(null, distanceValues)
-        stop = distances[distances.findIndex(x => x.distance === minVal)].stop
-      }
-      return stop
+        Promise.all(promiseList).then(vals => {
+          if (distances.length > 0) {
+            let distanceValues = []
+
+            distances.forEach(distanceArr => {
+              distanceValues.push(distanceArr.distance)
+            })
+
+            let minVal = Math.min.apply(null, distanceValues)
+            stop = distances[distances.findIndex(x => x.distance === minVal)].stop
+            console.log(stop)
+            resolve(stop)
+          }
+        })
+      })
     },
     /**
-     * Get the distance between two lat lng positions in km
-     * @example getDistanceFromLatLonInKm(42.2, 11.2, 42.6, 11.6)
+     * get the distance between two lat lng positions in km
      */
     getDistanceFromLatLonInKm (lat1, lon1, lat2, lon2) {
-      var R = 6371 // Radius of the earth in km
-      var dLat = this.deg2rad(lat2 - lat1) // deg2rad below
-      var dLon = this.deg2rad(lon2 - lon1)
-      var a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+      return new Promise((resolve) => {
+        turf().then(turf => {
+          var from = turf.point([lat1, lon1])
+          var to = turf.point([lat2, lon2])
+          var options = { units: 'kilometers' }
 
-      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-      var d = R * c // Distance in km
-      return d
+          var distance = turf.distance(from, to, options)
+
+          resolve(distance)
+        }).catch(e => {
+          console.log(e)
+          return 0
+        })
+      })
     },
     deg2rad (deg) {
       return deg * (Math.PI / 180)
