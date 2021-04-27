@@ -13,7 +13,11 @@ export default {
             secret: null
         },
         StoryblokKey: null,
-        GooglePlacesKey: null
+        GooglePlacesKey: null,
+        UnsplashKeys: {
+            UnsplashKey: null,
+            UnsplashSecret: null
+        }
     },
     getters: {
         getHotels4Key: state => state.Hotels4Key,
@@ -22,7 +26,8 @@ export default {
         getPixabayKey: state => state.PixabayKey,
         getAmadeusKeys: state => state.AmadeusKeys,
         getGooglePlacesKey: state => state.GooglePlacesKey,
-        getStoryblokKey: state => state.StoryblokKey
+        getStoryblokKey: state => state.StoryblokKey,
+        getUnsplashKeys: state => state.UnsplashKeys
     },
     actions: {
         getAllKeys ({ state }) {
@@ -54,6 +59,10 @@ export default {
                                     break
                                 case 'GooglePlaces':
                                     state.GooglePlacesKey = data.apiKey
+                                    break
+                                case 'Unsplash':
+                                    state.UnsplashKey = data.accessKey
+                                    state.UnsplashSecret = data.secretKey
                                     break
                             }
                             resolve(true)

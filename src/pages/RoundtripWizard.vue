@@ -69,7 +69,7 @@
             <template v-if="step === 1">
               <q-btn
                 color="primary"
-                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults || isTitleInUse"
+                :disable="!currentRoundtrip.Title || !currentRoundtrip.Rooms || !currentRoundtrip.Adults"
                 @click="step = 2; unsavedChanges = true"
                 label="weiter"
               />
@@ -133,7 +133,7 @@
       >
         <q-input
           v-model="currentRoundtrip.Title"
-          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => isUniqueTitle(val), val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
           label="Titel"
           outlined
           ref="titleInput"
@@ -992,8 +992,6 @@ export default {
       showEditStopDialog: false,
 
       tempImgLink: '',
-
-      isTitleInUse: true,
 
       editorFonts: {
         arial: 'Arial',

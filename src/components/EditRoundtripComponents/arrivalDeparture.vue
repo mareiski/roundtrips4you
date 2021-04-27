@@ -28,7 +28,7 @@
         ref="select"
         v-model="currentRoundtrip.Origin"
         hide-dropdown-icon
-        label="Abflugsort"
+        label="Abflugsort/-Stadt"
         :options="originOptions"
         @blur="emitArrivalDepartureChange()"
         @filter="getOrigins"
@@ -55,7 +55,7 @@
         ref="select"
         v-model="currentRoundtrip.Destination"
         hide-dropdown-icon
-        label="Ankunftsort"
+        label="Ankunftsort/-Stadt"
         :options="destinationOptions"
         @filter="getDestinations"
         @blur="emitArrivalDepartureChange()"

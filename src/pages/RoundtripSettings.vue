@@ -29,14 +29,28 @@
           v-model="roundtrip.Public"
           label="Rundreise veröffentlichen"
           icon="share"
-          :disable="!user || !user.displayName"
+          :disable="!user || !user.displayName || titleInUse"
           @input="onSaveRoundtrip"
         >
           <q-tooltip v-if="!user || !user.displayName">Bitte erstelle zuerst einen Benutzernamen</q-tooltip>
+          <q-tooltip v-else-if="titleInUse">Der Titel deiner Reise ist leider schon vergeben</q-tooltip>
         </q-toggle>
+        <p>Dieser Titel ist {{titleInUse ? 'bereits vergeben' : 'noch verfügbar'}} du kannst deine Reise {{titleInUse ? 'nicht veröffentlichen' : 'veröffentlichen'}}</p>
+        <q-input
+          v-model="roundtrip.Title"
+          :rules="[val => val !== null &&  val !== ''  || 'Bitte gib einen Titel an', val => val[0] !== ' ' || 'Das erste Zeichen kann kein Leerzeichen sein']"
+          label="Titel"
+          outlined
+          ref="titleInput"
+          @input="getIsTitleInUse(roundtrip.Title)"
+        >
+          <template v-slot:prepend>
+            <q-icon name="title" />
+          </template>
+        </q-input>
         <!-- todo map widget is not working anymore -->
         <!-- <div
-          v-show="publish"
+          v-show="roundtrip.Public"
           style="padding-bottom:20px;"
         >
           <b>Link zur Karte veröffentlichen</b>
@@ -528,7 +542,8 @@ export default {
       destinationOptions: [],
       destinationCode: null,
       depatureDate: null,
-      returnDate: null
+      returnDate: null,
+      titleInUse: false
     }
   },
   computed: {
@@ -565,6 +580,11 @@ export default {
       // unselect the range
       testingCodeToCopy.setAttribute('type', 'hidden')
       window.getSelection().removeAllRanges()
+    },
+    getIsTitleInUse (val) {
+      sharedMethods.isUniqueTitle(val).then(returnString => {
+        this.titleInUse = returnString === 'Dieser Titel ist bereits vergeben'
+      })
     },
     fileAdded (event, kind) {
       sharedMethods.fileAdded(event, kind, this, this.RTId)
