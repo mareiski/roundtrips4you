@@ -243,7 +243,8 @@
                 style="line-height:normal;"
               >{{title ? title : 'gesetzter Punkt'}}</span>
               <div style="font-size:13px;">
-                {{ lastPOICityData.shortDescription }}
+                {{ lastPOICityData.shortDescription }}<br>
+                <span v-show="routeData.distance">{{ routeData.distance }}, {{routeData.duration}} ab {{routeData.from}}</span>
               </div>
             </q-card-section>
 
@@ -662,7 +663,8 @@ export default {
       showSuggestionCountryDialog: false,
       countryOptions: countries,
       loading: true,
-      slide: 0
+      slide: 0,
+      routeData: {}
     }
   },
   watch: {
@@ -1103,6 +1105,13 @@ export default {
           console.log(e)
         })
       }
+
+      // reset and get route data
+      this.routeData = {}
+      let endLocation = { lat: this.lastClickCoordinates[1], lng: this.lastClickCoordinates[0], label: title }
+      this.getRouteData(this.profile, this.stops[this.stops.length - 1].Location, endLocation).then(data => {
+        this.routeData = data
+      })
     },
     flyToPointOnMap (lat, lng) {
       let context = this
@@ -1119,6 +1128,8 @@ export default {
      */
     getRoute (startLocation, endLocation, map, index, stopProfile, dailyTrip) {
       let profile = this.profile
+      let context = this
+
       if (stopProfile && stopProfile !== null && typeof stopProfile !== 'undefined') profile = stopProfile
 
       // get id for route
@@ -1128,95 +1139,80 @@ export default {
       let color = this.getRandomColor(index, this.stops.length)
 
       if (profile !== 'plane') {
-        // create url for the duration request
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accTo
+        this.getRouteData(profile, startLocation, endLocation).then(data => {
+          var geojson = {
+            id: id,
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: data.route
+            }
+          }
 
-        let context = this
+          // calculate coordinates of route marker
+          let geojsonCoords = geojson.geometry.coordinates
+          let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
 
-        // retrieve data from mapbox
-        getAxios().then(axios => {
-          axios.get(url)
-            .then(response => {
-              var data = response.data.routes[0]
-              var route = data.geometry.coordinates
+          let distance = data.rawDistance > 0 ? data.rawDistance + ' km' : null
 
-              var geojson = {
-                id: id,
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'LineString',
-                  coordinates: route
-                }
-              }
+          this.$emit('distanceUpdate', data.rawDistance)
 
-              // calculate coordinates of route marker
-              let geojsonCoords = geojson.geometry.coordinates
-              let centerLocation = geojsonCoords[Math.floor(geojsonCoords.length / 2)]
+          // add route marker
+          if (data.duration !== null) context.addedRoutes.push({ location: centerLocation, duration: data.duration, distance: distance, color: color, origin: startLocation.label.split(',')[0], destination: endLocation.label.split(',')[0], id: id })
 
-              // get duration
-              let duration = sharedMethods.msToTime(data.duration * 1000)
-
-              let rawDistance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : 0
-              let distance = rawDistance > 0 ? rawDistance + ' km' : null
-
-              this.$emit('distanceUpdate', rawDistance)
-
-              // add route marker
-              if (duration !== null) context.addedRoutes.push({ location: centerLocation, duration: duration, distance: distance, color: color, origin: startLocation.label.split(',')[0], destination: endLocation.label.split(',')[0], id: id })
-
-              // if the route already exists on the map, reset it using setData
-              if (map.getSource(id)) {
-                map.getSource(id).setData(geojson)
-                map.setPaintProperty(id, 'line-color', color)
-                map.setLayoutProperty(id, 'visibility', 'visible')
-              } else { // otherwise, make a new request
-                map.addLayer({
-                  'id': id,
-                  'type': 'line',
-                  'source': {
-                    'type': 'geojson',
-                    'data': {
-                      'type': 'Feature',
-                      'properties': {},
-                      'geometry': {
-                        'type': 'LineString',
-                        'coordinates': geojson
-                      }
-                    }
-                  },
-                  'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round',
-                    'visibility': 'visible'
-                  },
-                  'paint': {
-                    'line-color': color,
-                    'line-width': 5,
-                    'line-opacity': [
-                      'case',
-                      ['boolean', ['feature-state', 'hover'], false],
-                      0.75,
-                      0.4
-                    ]
+          // if the route already exists on the map, reset it using setData
+          if (map.getSource(id)) {
+            map.getSource(id).setData(geojson)
+            map.setPaintProperty(id, 'line-color', color)
+            map.setLayoutProperty(id, 'visibility', 'visible')
+          } else {
+            // otherwise, make a new request
+            map.addLayer({
+              'id': id,
+              'type': 'line',
+              'source': {
+                'type': 'geojson',
+                'data': {
+                  'type': 'Feature',
+                  'properties': {},
+                  'geometry': {
+                    'type': 'LineString',
+                    'coordinates': geojson
                   }
-                })
-
-                map.on('click', id, function (_e) {
-                  // close all popups
-                  context.closeAllPopups()
-
-                  let speedMarker = context.$refs['route' + id][0]
-                  console.log(speedMarker)
-
-                  // and show clicked route popup
-                  if (!context.markerClicked) speedMarker.togglePopup()
-                })
-                map.getSource(id).setData(geojson)
+                }
+              },
+              'layout': {
+                'line-join': 'round',
+                'line-cap': 'round',
+                'visibility': 'visible'
+              },
+              'paint': {
+                'line-color': color,
+                'line-width': 5,
+                'line-opacity': [
+                  'case',
+                  ['boolean', ['feature-state', 'hover'], false],
+                  0.75,
+                  0.4
+                ]
               }
-            }).catch(function (error) {
-              console.log(error)
             })
+
+            map.on('click', id, function (_e) {
+              // close all popups
+              context.closeAllPopups()
+
+              let speedMarker = context.$refs['route' + id][0]
+              console.log(speedMarker)
+
+              // and show clicked route popup
+              if (!context.markerClicked) speedMarker.togglePopup()
+            })
+            map.getSource(id).setData(geojson)
+          }
+        }).catch(function (error) {
+          console.log(error)
         })
       } else {
         let coordinates = [[startLocation.lng, startLocation.lat], [endLocation.lng, endLocation.lat]]
@@ -1289,6 +1285,28 @@ export default {
           )
         }
         hoveredStateId = null
+      })
+    },
+    getRouteData (profile, startLocation, endLocation) {
+      return new Promise((resolve) => {
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/' + profile + '/' + startLocation.lng + ',' + startLocation.lat + ';' + endLocation.lng + ',' + endLocation.lat + '?geometries=geojson&access_token=' + this.accTo
+
+        // retrieve data from mapbox
+        getAxios().then(axios => {
+          axios.get(url)
+            .then(response => {
+              var data = response.data.routes[0]
+              var route = data.geometry.coordinates
+
+              // get duration
+              let duration = sharedMethods.msToTime(data.duration * 1000)
+
+              let rawDistance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : 0
+              let distance = rawDistance > 0 ? rawDistance + ' km' : null
+
+              resolve({ route: route, duration: duration, rawDistance: rawDistance, distance: distance, from: startLocation.label, to: endLocation.label })
+            })
+        })
       })
     },
     closeAllPopups () {

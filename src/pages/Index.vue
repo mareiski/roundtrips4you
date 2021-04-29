@@ -450,7 +450,7 @@ export default {
   meta: {
     title: 'Reiseplaner',
     meta: {
-      description: { name: 'description', content: 'Reise selbst planen & zusammenstellen, Reise planen kostenlos & online. Routenplaner und Reiseplaner mit vielen Tools für deinen Roadtrip' }
+      description: { name: 'description', content: 'Orte planen, Hotels finden, Reisen teilen und die beste Route finden. Reise mit unserem Reiseplaner kostenlos erstellen & online planen' }
     }
   },
   name: 'PageIndex',

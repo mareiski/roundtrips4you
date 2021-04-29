@@ -59,8 +59,7 @@ export default {
   meta: {
     title: 'Rundreisen',
     meta: {
-      description: { name: 'description', content: 'Länder auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
-
+      description: { name: 'description', content: 'Reisen auf roundtrips4you ansehen, komplett kostenlos, online und unkompliziert. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag, Hotelsuche...' }
     }
   },
   data () {

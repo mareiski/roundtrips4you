@@ -3,6 +3,7 @@
 import axios from 'axios'
 import { db } from '../../firebaseInit.js'
 import sharedMethods from '../../sharedMethods.js'
+import { createApi } from 'unsplash-js'
 
 export default {
     /**
@@ -106,6 +107,25 @@ export default {
 
         db.collection('SuggestedCities').add(newCityObject)
     },
+    /**
+     * gets a image from unsplash for given city name
+     */
+    getUnsplashImage (cityName, cityCountry, context) {
+        // on your node server
+        const serverApi = createApi({
+            accessKey: context.$store.getters['api/getUnsplashKeys'].accessKey
+        })
+
+        serverApi.search.getPhotos({
+            query: cityName + ' ' + cityCountry,
+            page: 1,
+            perPage: 1,
+            orientation: 'landscape'
+        }).then(res => {
+            console(res)
+        })
+    },
+
     /**
      * gets a image from pixabay for given city name
      */

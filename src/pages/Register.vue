@@ -150,7 +150,7 @@ export default {
   meta: {
     title: 'Registrieren',
     meta: {
-      description: { name: 'description', content: 'Registriere dich jetzt kostenlos bei roundtrips4you und erstelle selbst deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
+      description: { name: 'description', content: 'Registriere dich jetzt kostenlos bei Roundtrips4you und erstelle selbst deine eigenen Reisen. Dein Reiseplaner mit Kartenfunktion, Städtevorschlag...' }
     }
   },
   name: 'Register',

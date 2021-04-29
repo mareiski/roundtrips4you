@@ -156,8 +156,9 @@ export default {
     searchHotel () {
       this.searchingForHotels = true
       this.getHotels(this.hotelName).then((results) => {
+        console.log(results)
         if (results !== null) {
-          this.hotels = results.data.suggestions[3].entities
+          this.hotels = results.data.suggestions[1].entities
           if (this.hotels.length === 0) this.hotels = { hotel: null }
         } else {
           this.hotels = { hotel: null }

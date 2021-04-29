@@ -25,6 +25,7 @@
         <div class="right-col">
           <router-link
             class="header-page-link"
+            v-if="!user"
             to="/"
           >home</router-link>
           <router-link
@@ -142,6 +143,7 @@
         <div @click="hideMenu()">
           <router-link
             class="mobile-header-page-link"
+            v-if="!user"
             to="/"
           >home</router-link>
         </div>
@@ -257,6 +259,7 @@
           <h3 class="footer-title">Menü</h3>
           <router-link
             class="footer-link"
+            v-if="!user"
             to="/"
           >Home</router-link>
           <router-link
