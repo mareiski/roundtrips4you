@@ -482,8 +482,8 @@ export default {
   },
   meta () {
     return {
-      title: 'Reiseplaner',
-      titleTemplate: title => `${title} | Roundtrips4you - Reise kostenlos planen | Route, Reise zusammenstellen`,
+      title: 'Reiseplaner kostenlos',
+      titleTemplate: title => `${title} | Reise, Route online planen | Routenplanner mit Karte`,
       meta: {
         equiv: { 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' }
       }

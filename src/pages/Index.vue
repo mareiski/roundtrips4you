@@ -448,7 +448,7 @@ import sharedMethods from '../sharedMethods'
 
 export default {
   meta: {
-    title: 'Reiseplaner',
+    title: 'Reiseplaner kostenlos',
     meta: {
       description: { name: 'description', content: 'Orte planen, Hotels finden, Reisen teilen und die beste Route finden. Reise mit unserem Reiseplaner kostenlos erstellen & online planen' }
     }
