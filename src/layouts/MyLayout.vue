@@ -253,13 +253,12 @@
     <q-page-container v-if="!isOnNetlifyPage">
       <router-view />
     </q-page-container>
-    <footer>
+    <footer v-show="!user">
       <div class="main-footer">
         <div class="footer-menu">
           <h3 class="footer-title">Menü</h3>
           <router-link
             class="footer-link"
-            v-if="!user"
             to="/"
           >Home</router-link>
           <router-link
@@ -398,8 +397,8 @@
           />
         </div>
       </div>
-      <CookieBanner></CookieBanner>
     </footer>
+    <CookieBanner></CookieBanner>
     <div
       v-if="showPreload"
       class="preloadOverlay"

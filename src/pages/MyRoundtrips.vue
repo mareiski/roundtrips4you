@@ -210,6 +210,7 @@ export default {
         }).catch(function (error) {
           console.log(error)
           sharedMethods.showErrorNotification('Oh nein, wir konnten dir leider keine email senden, bitte Kontaktiere uns unter hello@roundtrips4you.de')
+          sharedMethods.showErrorNotification('Fehler: ' + error)
         })
       } else {
         sharedMethods.showSuccessNotification('Deine Email wurde bestätigt')

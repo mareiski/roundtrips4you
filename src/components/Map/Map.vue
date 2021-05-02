@@ -848,15 +848,6 @@ export default {
       this.markerClicked = false
     },
     onMarkerClicked (event, title) {
-      // reset the marker popup
-      this.lastPOICityData = {
-        title: title,
-        description: '',
-        shortDescription: '',
-        img: '',
-        imgSrcs: []
-      }
-
       this.loadMarkerInfos(title)
 
       event.map.flyTo({ center: event.component.marker._lngLat, speed: 0.5, curve: 1 })
@@ -888,12 +879,16 @@ export default {
         let currentInitDate = sharedMethods.getDateFromString(initDate)
 
         const defaultCheckOutDate = currentInitDate
-        defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
 
-        const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
+        this.getRouteData(this.profile, this.stops[this.stops.length - 1].Location, this.lastClickLocation).then(data => {
+          defaultCheckOutDate.setMilliseconds(currentInitDate.getMilliseconds() + data.rawDuration)
+          defaultCheckOutDate.setDate(currentInitDate.getDate() + 1)
 
-        // need this json stringify to prevent update of location when the click location changes
-        this.$emit('addStop', { date: formattedDate, location: JSON.parse(JSON.stringify(this.lastClickLocation)) })
+          const formattedDate = date.formatDate(defaultCheckOutDate, 'DD.MM.YYYY HH:mm')
+
+          // need this json stringify to prevent update of location when the click location changes
+          this.$emit('addStop', { date: formattedDate, location: JSON.parse(JSON.stringify(this.lastClickLocation)) })
+        })
       } else {
         this.$emit('addStop', { date: null, location: JSON.parse(JSON.stringify(this.lastClickLocation)) })
       }
@@ -901,7 +896,7 @@ export default {
       // reload map and fly to coords
       this.lastClickCoordinates = [0, 0]
       this.loadMap(this.map).then(_success => {
-        this.map.flyTo({ center: this.lastClickLocation, zoom: 6, speed: 0.5, curve: 1 })
+        this.map.flyTo({ center: this.lastClickLocation, speed: 0.5, curve: 1 })
 
         // we only want to hide the popup
         this.$refs.addStopMarker.marker._popup.remove()
@@ -1011,15 +1006,6 @@ export default {
           let context = this
           map.on('click', function (e) {
             if (!context.markerClicked) {
-              // reset the marker popup
-              context.lastPOICityData = {
-                title: 'Laden...',
-                description: '',
-                shortDescription: '',
-                img: '',
-                imgSrcs: []
-              }
-
               var features = map.queryRenderedFeatures(e.point)
               var displayProperties = [
                 'properties',
@@ -1088,6 +1074,16 @@ export default {
       })
     },
     loadMarkerInfos (title) {
+      if (this.lastPOICityData.title === title) return
+      // reset the marker popup
+      this.lastPOICityData = {
+        title: 'Laden...',
+        description: '',
+        shortDescription: '',
+        img: '',
+        imgSrcs: []
+      }
+
       let context = this
 
       if (title) {
@@ -1299,12 +1295,13 @@ export default {
               var route = data.geometry.coordinates
 
               // get duration
-              let duration = sharedMethods.msToTime(data.duration * 1000)
+              let rawDuration = data.duration * 1000
+              let duration = sharedMethods.msToTime(rawDuration)
 
               let rawDistance = Math.floor(data.distance / 1000) > 0 ? Math.floor(data.distance / 1000) : 0
               let distance = rawDistance > 0 ? rawDistance + ' km' : null
 
-              resolve({ route: route, duration: duration, rawDistance: rawDistance, distance: distance, from: startLocation.label, to: endLocation.label })
+              resolve({ route: route, rawDuration: rawDuration, duration: duration, rawDistance: rawDistance, distance: distance, from: startLocation.label, to: endLocation.label })
             })
         })
       })

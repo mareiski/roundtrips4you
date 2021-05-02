@@ -73,6 +73,7 @@
                 @click="step = 2; unsavedChanges = true"
                 label="weiter"
               />
+              <q-tooltip v-if="!currentRoundtrip.Title">Bitte gib einen Titel an</q-tooltip>
             </template>
 
             <template v-else-if="step === 2">
@@ -1735,7 +1736,7 @@ export default {
     },
     handleAddStopFromMap (event) {
       this.unsavedChanges = true
-      let lastDate = this.currentStop.InitDate
+      // let lastDate = this.currentStop.InitDate
 
       // check if we didn't add this stop before
       if (this.currentStop.Location !== event.location) {
@@ -1744,7 +1745,7 @@ export default {
           Description: 'Raum für Notizen, Beschreibungen...',
           Location: event.location,
           Sights: [],
-          InitDate: lastDate,
+          InitDate: event.date,
           Profile: 'driving',
           DayDuration: 1
         }
