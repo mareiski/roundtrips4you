@@ -104,6 +104,7 @@
 </template>
 
 <script>
+import sharedMethods from '../../sharedMethods'
 import Map from '../Map/Map.vue'
 import TripOverviewList from './TripOverviewList.vue'
 
@@ -139,6 +140,26 @@ export default {
     drawerInvisible () {
       return window.matchMedia('(max-width: 550px)').matches
     }
+  },
+  mounted () {
+    // do not use this.currentRoundtrip !
+    this.$store.dispatch('roundtrips/fetchSingleRoundtrip', this.$route.params.id).then(roundtrip => {
+      if (roundtrip.TransportProfile === 'Flugzeug') {
+        if (roundtrip.Origin) {
+          sharedMethods.getAdditionalAirportData(roundtrip.Origin).then(data => {
+            let location = { lat: data.latitude, lng: data.longitude, label: data.name }
+            this.$refs.overviewMap.addArrivalDepartureMarker(location, true)
+          })
+        }
+
+        if (roundtrip.Destination) {
+          sharedMethods.getAdditionalAirportData(roundtrip.Destination).then(data => {
+            let location = { lat: data.latitude, lng: data.longitude, label: data.name }
+            this.$refs.overviewMap.addArrivalDepartureMarker(location, false)
+          })
+        }
+      }
+    })
   }
 }
 </script>

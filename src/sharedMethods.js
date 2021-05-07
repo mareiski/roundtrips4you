@@ -185,10 +185,23 @@ export default {
         })
     },
     /**
-     * checks if string to check starts with val
-     */
+    * checks if string to check starts with val
+    */
     startsWith (stringToCheck, val) {
         return stringToCheck ? stringToCheck.substr(0, val.length).toUpperCase() === val.toUpperCase() : false
+    },
+    getAdditionalAirportData (airportName) {
+        // cut of iata
+        airportName = airportName.substr(0, airportName.length - 6)
+        return new Promise((resolve) => {
+            getAirportData().then(airportData => {
+                let results = Object.values(airportData).filter(airport => {
+                    return this.startsWith(airport.name, airportName)
+                })
+
+                resolve(results[0])
+            })
+        })
     },
     /**
      * @return a string date from given timestamp

@@ -126,7 +126,34 @@
           </q-card>
         </q-swipe-to-close>
       </q-dialog> -->
-
+      <template v-for="num in 2">
+        <MglMarker
+          v-if="arrivalDepartureCoords[num-1]"
+          :key="num"
+          :coordinates="[arrivalDepartureCoords[num-1].lng, arrivalDepartureCoords[num-1].lat]"
+          color="#000"
+        >
+          <MglPopup>
+            <q-card>
+              <div style="width:100%; display:flex; justify-content:center; padding-top:5px;">
+                <q-icon
+                  v-if="num-1 === 0"
+                  name="flight_takeoff"
+                  size="30px"
+                />
+                <q-icon
+                  v-else
+                  name="flight_land"
+                  size="30px"
+                />
+              </div>
+              <q-card-section>
+                <p>{{arrivalDepartureCoords[num-1].label}}: {{num-1 === 0 ? 'Start' : 'Ende'}} deiner Reise</p>
+              </q-card-section>
+            </q-card>
+          </MglPopup>
+        </MglMarker>
+      </template>
       <MglMarker
         v-for="(stop, index) in stops"
         :key="stop.DocId"
@@ -664,7 +691,8 @@ export default {
       countryOptions: countries,
       loading: true,
       slide: 0,
-      routeData: {}
+      routeData: {},
+      arrivalDepartureCoords: []
     }
   },
   watch: {
@@ -941,6 +969,16 @@ export default {
       }
       return s
     },
+    /**
+     * adds a arrival departure marker with its route to map
+     */
+    addArrivalDepartureMarker (location, origin) {
+      if (origin) {
+        this.arrivalDepartureCoords[0] = location
+      } else {
+        this.arrivalDepartureCoords[1] = location
+      }
+    },
     loadMap (map, stops) {
       return new Promise((resolve) => {
         if (map === null) map = this.map
@@ -960,6 +998,8 @@ export default {
 
           // reset total trip count
           this.$emit('distanceUpdate', -1)
+
+          // load stop and daily trip routes
 
           this.stops.forEach((stop, index) => {
             if (index >= 1) {
@@ -1002,6 +1042,13 @@ export default {
               bounds.push([parseFloat(stop.Location.lng), parseFloat(stop.Location.lat)])
             }
           })
+
+          // load arrival departure routes
+          if (this.arrivalDepartureCoords[0] && this.arrivalDepartureCoords[1]) {
+            this.getRoute(this.arrivalDepartureCoords[0], this.arrivalDepartureCoords[1], map, 2000, 'plane', false)
+            this.getRoute(this.stops[this.stops.length - 1].Location, this.arrivalDepartureCoords[0], map, 2001, 'driving', false)
+            this.getRoute(this.arrivalDepartureCoords[0], this.stops[0].Location, map, 2001, 'driving', false)
+          }
 
           let context = this
           map.on('click', function (e) {
@@ -1248,7 +1295,7 @@ export default {
         let centerLocation = [avgLng, avgLat]
 
         // add route marker
-        this.addedRoutes.push({ location: centerLocation, duration: null, distance: null, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })
+        if (index < 2000) this.addedRoutes.push({ location: centerLocation, duration: null, distance: null, color: color, origin: this.stops[index - 1].Location.label.split(',')[0], destination: this.stops[index].Location.label.split(',')[0], id: id })
       }
 
       // When the user moves their mouse over the route, we'll update the
