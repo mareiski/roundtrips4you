@@ -90,7 +90,10 @@ export default {
   created () {
     let cookiesAllowedCookie = this.$q.cookies.get('cookies_allowed')
     if (!cookiesAllowedCookie) {
-      this.showCookieDialog = true
+      let context = this
+      setTimeout(function () {
+        context.showCookieDialog = true
+      }, 1000)
     }
   }
 }
