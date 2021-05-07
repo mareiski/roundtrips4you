@@ -94,7 +94,7 @@
         class="q-mt-md google-btn"
         style="width:300px; text-transform:none; font-family:roboto;"
         icon="fab fa-google"
-        @click="signUpWithGoogle"
+        @click="signUpWithGoogle()"
       >
         <template v-slot:loading>
           <q-spinner />
@@ -162,10 +162,13 @@ export default {
       })
     },
     signUpWithGoogle () {
+      this.googleLoading = true
       getFirebase().then(firebase => {
-        var provider = new firebase.auth.GoogleAuthProvider()
+        console.log(firebase)
+        var provider = new firebase.default.auth.GoogleAuthProvider()
         let context = this
         auth.authRef().signInWithPopup(provider).then(function (result) {
+          context.googleLoading = false
           context.$router.replace('meine-rundreisen')
 
           // This gives you a Google Access Token. You can use it to access the Google API.
@@ -175,9 +178,11 @@ export default {
           // Sign in with credential from the Google user.
           auth.signInWithCredential(credential).then(function () {
           }).catch(function (error) {
+            context.googleLoading = false
             console.log(error)
           })
         }).catch(function (error) {
+          context.googleLoading = false
           console.log(error)
         })
       })

@@ -202,24 +202,29 @@ export default {
       )
     },
     signUpWithGoogle () {
+      this.googleLoading = true
       getFirebase().then(firebase => {
-        var provider = new firebase.auth.GoogleAuthProvider()
+        var provider = new firebase.default.auth.GoogleAuthProvider()
         let context = this
         auth.authRef().signInWithPopup(provider).then(function (result) {
           // This gives you a Google Access Token. You can use it to access the Google API.
           var token = result.credential.accessToken
-          const credential = firebase.auth.GoogleAuthProvider().credential(token)
+          const credential = firebase.default.auth.GoogleAuthProvider().credential(token)
 
           context.createUserEntry(result.user)
+
+          context.googleLoading = false
 
           // Sign in with credential from the Google user.
           auth.signInWithCredential(credential).then(function () {
             context.disableLeave = false
             context.$router.replace('meine-rundreisen')
           }).catch(function (error) {
+            context.googleLoading = false
             console.log(error)
           })
         }).catch(function (error) {
+          context.googleLoading = false
           console.log(error)
         })
       })
