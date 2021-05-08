@@ -21,3 +21,5 @@ yarn-error.log*
 .quasar.env.json
 FirebaseKey
 FirebaseKeyProd
+# Local Netlify folder
+.netlify

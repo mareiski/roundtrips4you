@@ -482,7 +482,7 @@ export default {
   meta () {
     return {
       title: 'Reiseplaner kostenlos',
-      titleTemplate: title => `${title} | Reise, Route online planen | Routenplanner mit Karte`,
+      titleTemplate: title => `${title} | Reise, Route online planen | Routenplaner mit Karte`,
       meta: {
         equiv: { 'http-equiv': 'Content-Type', content: 'text/html; charset=UTF-8' }
       }
@@ -680,8 +680,8 @@ export default {
         forEachCalled = true
         let requireAuth = to.matched.some(record => record.meta.requireAuth)
         let guestOnly = to.matched.some(record => record.meta.guestOnly)
-        let isOnLoginPage = to.path === '/login'
-        let isOnRoundtripsPage = to.path === '/meine-rundreisen'
+        let isOnLoginPage = to.path === 'login'
+        let isOnRoundtripsPage = to.path === 'meine-rundreisen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) next('login')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn) next('meine-rundreisen')
@@ -695,8 +695,8 @@ export default {
         let currentRoute = this.$router.currentRoute
         let requireAuth = currentRoute.matched.some(record => record.meta.requireAuth)
         let guestOnly = currentRoute.matched.some(record => record.meta.guestOnly)
-        let isOnLoginPage = currentRoute.fullPath === '/login'
-        let isOnRoundtripsPage = currentRoute.fullPath === '/meine-rundreisen'
+        let isOnLoginPage = currentRoute.fullPath === 'login'
+        let isOnRoundtripsPage = currentRoute.fullPath === 'meine-rundreisen'
 
         if (!isOnLoginPage && requireAuth && !loggedIn) this.$router.replace('login')
         else if (!isOnRoundtripsPage && guestOnly && loggedIn) this.$router.replace('meine-rundreisen')
