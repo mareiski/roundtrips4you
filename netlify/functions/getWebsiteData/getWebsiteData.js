@@ -1,15 +1,12 @@
 // Docs on event and context https://www.netlify.com/docs/functions/#the-handler-method
-import axios from 'axios'
+const axios = require('axios')
 const handler = async (event) => {
   try {
-    axios.get('https://www.booking.com/hotel/fr/elyseesunion.de.html')
+    axios.get(event.queryStringParameters.name || 'https://www.booking.com/hotel/fr/elyseesunion.de.html')
       .then(page => {
         return {
           statusCode: 200,
-          body: JSON.stringify({ message: `Hello ${page}` })
-          // // more keys you can return:
-          // headers: { "headerName": "headerValue", ... },
-          // isBase64Encoded: true,
+          body: JSON.stringify({ message: page })
         }
       })
   } catch (error) {
