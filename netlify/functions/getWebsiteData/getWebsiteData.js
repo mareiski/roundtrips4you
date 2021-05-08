@@ -1,9 +1,9 @@
 // Docs on event and context https://www.netlify.com/docs/functions/#the-handler-method
-import { get } from 'axios'
+const axios = require('axios')
 const handler = async (event) => {
   let url = event.queryStringParameters.url || 'https://www.booking.com/hotel/fr/elyseesunion.de.html'
   console.log(url)
-  get(url)
+  axios(url)
     .then(page => {
       console.log(page)
       return {
