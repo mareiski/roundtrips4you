@@ -1,6 +1,7 @@
 // Docs on event and context https://www.netlify.com/docs/functions/#the-handler-method
 const axios = require('axios')
-const handler = async (event) => {
+
+exports.handler = async (event) => {
   let url = event.queryStringParameters.url || 'https://www.booking.com/hotel/fr/elyseesunion.de.html'
   console.log(url)
   axios(url)
@@ -18,5 +19,3 @@ const handler = async (event) => {
       return { statusCode: 500, body: error }
     })
 }
-
-export default { handler }
