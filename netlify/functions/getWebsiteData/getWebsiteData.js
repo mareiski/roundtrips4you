@@ -18,7 +18,7 @@ exports.handler = async (event) => {
 
   console.log(response)
   return {
-    statusCode: response ? 200 else 500,
+    statusCode: response ? 200 : 500,
     body: response || 'failed'
   }
 }
