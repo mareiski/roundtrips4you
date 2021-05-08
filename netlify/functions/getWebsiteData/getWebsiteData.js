@@ -4,7 +4,7 @@ const axios = require('axios')
 exports.handler = async (event) => {
   let url = event.queryStringParameters.url || 'https://www.booking.com/hotel/fr/elyseesunion.de.html'
   console.log(url)
-  axios(url)
+  axios.get(url)
     .then(page => {
       console.log(page)
       return {
