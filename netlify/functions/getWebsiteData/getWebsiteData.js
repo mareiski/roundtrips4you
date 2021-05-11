@@ -2,23 +2,24 @@
 const axios = require('axios')
 
 exports.handler = async (event) => {
-  let url = event.queryStringParameters.url || 'https://www.booking.com/hotel/fr/elyseesunion.de.html'
-
   let response = null
 
-  await axios.get(url)
+  await axios.get(event.queryStringParameters.url)
     .then(page => {
-      console.log(page.data)
       response = page.data
     })
     .catch(error => {
-      console.log(error)
-      return { statusCode: 500, body: error }
+      return {
+        statusCode: 500,
+        body: error,
+        headers: {
+          'Access-Control-Allow-Origin': '*'
+        }
+      }
     })
 
-  console.log(response)
   return {
     statusCode: response ? 200 : 500,
-    body: response || 'failed'
+    body: JSON.stringify({ raw: response || null })
   }
 }
