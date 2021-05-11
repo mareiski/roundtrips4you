@@ -13,7 +13,7 @@ exports.handler = async (event) => {
         statusCode: 500,
         body: error,
         headers: {
-          'Access-Control-Allow-Origin': ['*']
+          'Access-Control-Allow-Origin': '*'
         }
       }
     })
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     statusCode: response ? 200 : 500,
     body: JSON.stringify({ raw: response || null }),
     headers: {
-      'Access-Control-Allow-Origin': ['*']
+      'Access-Control-Allow-Origin': '*'
     }
   }
 }
