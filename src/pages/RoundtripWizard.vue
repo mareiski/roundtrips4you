@@ -263,7 +263,7 @@
         <ArrivalDeparture
           v-if="currentRoundtrip.DepatureDate"
           :currentRoundtrip="currentRoundtrip"
-          :startDate="currentStop.InitDate.split(' ')[0]"
+          :startDate="currentStop.InitDate ? currentStop.InitDate.split(' ')[0] : null"
           @updateArrivalDeparture="updateArrivalDeparture($event)"
         ></ArrivalDeparture>
       </q-step>
@@ -361,7 +361,10 @@
           />
           <div style="margin-bottom:20px;">
             <span>Ankunftszeit:</span>
-            <span class="cursor-pointer font-medium">
+            <span
+              class="cursor-pointer font-medium"
+              v-if="currentStop.InitDate"
+            >
               {{ currentStop.InitDate.split(' ')[1] }}
               <q-icon
                 name="access_time"
@@ -432,7 +435,10 @@
           />
           <div style="margin-bottom:20px;">
             <span>Ankunft:</span>
-            <span class="cursor-pointer font-medium">
+            <span
+              class="cursor-pointer font-medium"
+              v-if="currentStop.InitDate"
+            >
               {{ currentStop.InitDate.split(' ')[1] }}
               <q-icon
                 name="access_time"
@@ -560,7 +566,7 @@
                   >Transport
                   </q-btn>
                 </q-item-section>
-                <q-dialog v-model="showTransportDialog">
+                <!-- <q-dialog v-model="showTransportDialog">
                   <q-card>
                     <q-card-section
                       class="row items-center flex"
@@ -600,7 +606,7 @@
                       />
                     </q-card-actions>
                   </q-card>
-                </q-dialog>
+                </q-dialog> -->
                 <q-item-section side>
                   <div v-if="currentStop.GeneralTempLink && currentStop.GeneralTempLink.length > 0">
                     <q-chip
@@ -678,7 +684,7 @@
                 <h6 style="margin:0;">Hotels auf booking.com ansehen:</h6>
                 <q-chip
                   icon="launch"
-                  v-if="currentStop.Location"
+                  v-if="currentStop.Location && currentStop.InitDate"
                   dense
                   style="width:117px;margin-bottom:40px;"
                   class="linkChip"
@@ -690,7 +696,7 @@
                 <h6 style="margin:0;">Hotel hinzufügen:</h6>
 
                 <HotelSearch
-                  v-if="currentStop.Location && currentStop.Location.lat"
+                  v-if="currentStop.Location && currentStop.Location.lat && currentStop.InitDate"
                   :disabled="!getCheckOutDate()"
                   :lat="currentStop.Location.lat.toString()"
                   :long="currentStop.Location.lng.toString()"
@@ -1740,12 +1746,13 @@ export default {
 
       // check if we didn't add this stop before
       if (this.currentStop.Location !== event.location) {
+        let lastInitDate = this.currentStop.InitDate
         this.currentStop = {
           Title: 'Stopp in ' + event.location.label,
           Description: 'Raum für Notizen, Beschreibungen...',
           Location: event.location,
           Sights: [],
-          InitDate: event.date,
+          InitDate: event.date || lastInitDate,
           Profile: 'driving',
           DayDuration: 1
         }

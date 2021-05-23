@@ -20,6 +20,8 @@ export default {
      * @param {String} string date string to get date from
      */
     getDateFromString (string) {
+        if (!string) return new Date()
+
         let dateParts
         let timeParts = ['00', '00']
 
